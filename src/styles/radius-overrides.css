@@ -1,0 +1,7 @@
+/* Panes prototype radius overrides — tighter than shared defaults */
+:root {
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+  --radius-xl: 16px;
+}

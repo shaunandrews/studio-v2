@@ -1,0 +1,142 @@
+:root {
+  /* Chrome (app frame, sidebar, titlebar) */
+  --color-chrome: #1e1e1e;
+  --color-chrome-text: #fff;
+  --color-chrome-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-chrome-text-muted: rgba(255, 255, 255, 0.7);
+  --color-chrome-text-faint: rgba(255, 255, 255, 0.4);
+  --color-chrome-border: rgba(255, 255, 255, 0.1);
+  --color-chrome-hover: rgba(255, 255, 255, 0.05);
+  --color-chrome-active: rgba(255, 255, 255, 0.15);
+  --color-chrome-subtle: rgba(255, 255, 255, 0.2);
+  --color-chrome-theme: #3858e9;
+
+  /* Menu (flyouts, dropdowns, popovers on dark bg) */
+  --color-menu-bg: #111;
+  --color-menu-fg: #fff;
+  --color-menu-border: rgba(255, 255, 255, 0.15);
+
+  /* Traffic lights */
+  --color-light-close: #ff5f57;
+  --color-light-minimize: #ffbd2e;
+  --color-light-maximize: #28c840;
+
+  /* Status */
+  --color-status-running: #1fd15b;
+  --color-status-stopped: #646970;
+  --color-status-stop-hover: #e65054;
+  --color-status-warning: #d97706;
+
+  /* Data type accents */
+  --color-serialized: #8b5cf6;
+
+  /* Elevation */
+  --color-shadow: rgba(0, 0, 0, 0.12);
+  --color-shadow-heavy: rgba(0, 0, 0, 0.15);
+
+  /* Frame (content panels, inputs, cards) */
+  --color-frame-bg: #fff;
+  --color-frame-bg-secondary: #f6f7f7;
+  --color-frame-border: rgba(0, 0, 0, 0.1);
+  --color-frame-fg: #000;
+  --color-frame-fg-secondary: #646970;
+  --color-frame-fg-muted: rgba(0, 0, 0, 0.7);
+  --color-frame-hover: rgba(0, 0, 0, 0.05);
+  --color-frame-theme: #3858e9;
+
+  /* Surface — DEPRECATED in panes-i0, use frame tokens instead */
+  --color-surface: #fff;
+  --color-surface-secondary: #f6f7f7;
+  --color-surface-border: #dcdcde;
+
+  /* Text — DEPRECATED in panes-i0, use frame tokens instead */
+  --color-text: #1d2327;
+  --color-text-secondary: #646970;
+  --color-text-muted: #a7aaad;
+
+  /* Interactive */
+  --color-primary: #3858e9;
+  --color-primary-hover: #2a46ce;
+  --color-primary-text: #fff;
+
+  /* Environment (sync visual) */
+  --color-env-local: #e6e6e6;
+  --color-env-local-fg: #000;
+  --color-env-staging: #f2d76b;
+  --color-env-staging-fg: #4f3500;
+  --color-env-production: #b8e6bf;
+  --color-env-production-fg: #00450c;
+
+  /* Avatar placeholder */
+  --color-avatar: #4a9e4a;
+}
+
+/* Dark tokens — applied by OS preference or manual toggle */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-color-scheme="light"]) {
+    /* Frame (content panels, inputs, cards) */
+    --color-frame-bg: #2c2c2c;
+    --color-frame-bg-secondary: #333;
+    --color-frame-border: rgba(255, 255, 255, 0.1);
+    --color-frame-fg: #fff;
+    --color-frame-fg-secondary: #9ea3a8;
+    --color-frame-fg-muted: rgba(255, 255, 255, 0.7);
+    --color-frame-hover: rgba(255, 255, 255, 0.05);
+    --color-frame-theme: #5b7bf3;
+
+    /* Surface — DEPRECATED in panes-i0, use frame tokens instead */
+    --color-surface: #2c2c2c;
+    --color-surface-secondary: #333;
+    --color-surface-border: #444;
+
+    /* Text — DEPRECATED in panes-i0, use frame tokens instead */
+    --color-text: #e4e6e8;
+    --color-text-secondary: #9ea3a8;
+    --color-text-muted: #6c7177;
+
+    /* Interactive */
+    --color-primary: #5b7bf3;
+    --color-primary-hover: #7b90ff;
+    --color-primary-text: #fff;
+
+    /* Status */
+    --color-status-warning: #e5a00d;
+
+    /* Data type accents */
+    --color-serialized: #a78bfa;
+
+    /* Elevation */
+    --color-shadow: rgba(0, 0, 0, 0.25);
+    --color-shadow-heavy: rgba(0, 0, 0, 0.35);
+  }
+}
+
+/* Force dark when manually selected */
+:root[data-color-scheme="dark"] {
+  --color-frame-bg: #2c2c2c;
+  --color-frame-bg-secondary: #333;
+  --color-frame-border: rgba(255, 255, 255, 0.1);
+  --color-frame-fg: #fff;
+  --color-frame-fg-secondary: #9ea3a8;
+  --color-frame-fg-muted: rgba(255, 255, 255, 0.7);
+  --color-frame-hover: rgba(255, 255, 255, 0.05);
+  --color-frame-theme: #5b7bf3;
+
+  --color-surface: #2c2c2c;
+  --color-surface-secondary: #333;
+  --color-surface-border: #444;
+
+  --color-text: #e4e6e8;
+  --color-text-secondary: #9ea3a8;
+  --color-text-muted: #6c7177;
+
+  --color-primary: #5b7bf3;
+  --color-primary-hover: #7b90ff;
+  --color-primary-text: #fff;
+
+  --color-status-warning: #e5a00d;
+  --color-serialized: #a78bfa;
+
+  --color-shadow: rgba(0, 0, 0, 0.25);
+  --color-shadow-heavy: rgba(0, 0, 0, 0.35);
+}

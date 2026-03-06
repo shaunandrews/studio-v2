@@ -1,0 +1,33 @@
+/* Sidebar slide transitions — projects-i0 specific */
+
+/* Sidebar slides in from left */
+::view-transition-new(sidebar) {
+  animation: vt-slide-in-start 200ms ease-out forwards;
+}
+
+/* Sidebar slides out to left on reverse */
+::view-transition-old(sidebar) {
+  animation: vt-slide-out-start 200ms ease-in forwards;
+}
+
+@keyframes vt-slide-in-start {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes vt-slide-out-start {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}

@@ -1,0 +1,62 @@
+/* Layout utilities — flex stacks and alignment */
+
+/* === Stacks === */
+
+.hstack {
+  display: flex;
+  align-items: center;
+}
+
+.vstack {
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Gap (maps to space tokens) === */
+
+.gap-xxxs { gap: var(--space-xxxs); }
+.gap-xxs  { gap: var(--space-xxs); }
+.gap-xs   { gap: var(--space-xs); }
+.gap-s    { gap: var(--space-s); }
+.gap-m    { gap: var(--space-m); }
+.gap-l    { gap: var(--space-l); }
+.gap-xl   { gap: var(--space-xl); }
+.gap-xxl  { gap: var(--space-xxl); }
+.gap-xxxl { gap: var(--space-xxxl); }
+
+/* === Justify === */
+
+.justify-start   { justify-content: flex-start; }
+.justify-center  { justify-content: center; }
+.justify-end     { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+
+/* === Align === */
+
+.align-start   { align-items: flex-start; }
+.align-center  { align-items: center; }
+.align-end     { align-items: flex-end; }
+.align-stretch { align-items: stretch; }
+
+/* === Wrap === */
+
+.flex-wrap   { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+/* === Sizing === */
+
+.flex-1    { flex: 1; }
+.flex-none { flex: none; }
+.shrink-0  { flex-shrink: 0; }
+.min-w-0   { min-width: 0; }
+.min-h-0   { min-height: 0; }
+
+/* === Overflow === */
+
+.overflow-hidden { overflow: hidden; }
+.overflow-auto   { overflow: auto; }
+
+/* === Full dimensions === */
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }

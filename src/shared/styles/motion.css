@@ -1,0 +1,88 @@
+:root {
+  /* Durations */
+  --duration-instant: 100ms;    /* near-instant feedback */
+  --duration-fast: 150ms;       /* micro-interactions: hover, focus, button states */
+  --duration-moderate: 200ms;   /* UI element transitions: resize, status changes */
+  --duration-slow: 300ms;       /* layout transitions: panel morph, frame slide */
+
+  /* Easing */
+  --ease-default: ease;         /* general purpose */
+  --ease-in-out: ease-in-out;   /* symmetrical transitions */
+  --ease-out: ease-out;         /* elements entering/appearing */
+  --ease-in: ease-in;           /* elements leaving/disappearing */
+
+  /* Composed shortcuts (common patterns) */
+  --transition-hover: var(--duration-fast) var(--ease-default);
+  --transition-focus: var(--duration-fast) var(--ease-default);
+  --transition-layout: var(--duration-moderate) var(--ease-default);
+  --transition-fade: var(--duration-moderate) var(--ease-default);
+}
+
+/* ── View Transition: Card ↔ Frame morph ── */
+
+/* The morphing container (card → frame) */
+::view-transition-group(project-frame) {
+  animation-duration: 250ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card content fades out during morph */
+::view-transition-old(project-frame) {
+  animation: vt-fade-out 100ms ease-in forwards;
+}
+
+/* Frame content fades in after morph settles */
+::view-transition-new(project-frame) {
+  animation: vt-fade-in 150ms ease-out 150ms both;
+}
+
+/* Grid (other cards) shrinks away on exit */
+::view-transition-old(project-grid) {
+  animation: vt-shrink-out 200ms ease-in forwards;
+}
+
+/* Grid scales back in on reverse */
+::view-transition-new(project-grid) {
+  animation: vt-grow-in 200ms ease-out forwards;
+}
+
+/* New project button — shared element, stays in place during transition */
+::view-transition-group(new-project-btn) {
+  animation-duration: 250ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Suppress default crossfade on root — let named transitions handle it */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* ── Keyframes ── */
+
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vt-shrink-out {
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes vt-grow-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

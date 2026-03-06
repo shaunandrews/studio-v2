@@ -1,0 +1,6 @@
+:root {
+  --radius-s: 5px;     /* 1 unit — subtle rounding */
+  --radius-m: 10px;    /* 2 units — cards, panels */
+  --radius-l: 15px;    /* 3 units — modals, large containers */
+  --radius-full: 9999px; /* pill shape — badges, avatars */
+}

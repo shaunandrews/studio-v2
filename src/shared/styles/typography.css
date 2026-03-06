@@ -1,0 +1,23 @@
+/* Typography tokens */
+
+:root {
+  /* Font stack */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'SF Mono', 'Fira Code', monospace;
+
+  /* Font sizes */
+  --font-size-xs: 11px;    /* labels, shortcut hints */
+  --font-size-s: 12px;     /* captions, small controls */
+  --font-size-m: 13px;     /* default UI text, buttons */
+  --font-size-l: 14px;     /* body text, inputs */
+  --font-size-xl: 16px;    /* body-large, chat messages */
+
+  /* Font weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Line heights */
+  --line-height-tight: 1.2;   /* labels, single-line */
+  --line-height-normal: 1.4;  /* body text, multi-line */
+}
