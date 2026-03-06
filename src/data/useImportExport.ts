@@ -1,6 +1,6 @@
 import { ref, computed, type Ref } from 'vue'
 
-export type ImportPhase = 'idle' | 'importing' | 'done' | 'error'
+export type ImportPhase = 'idle' | 'confirm' | 'importing' | 'done' | 'error'
 export type ExportPhase = 'idle' | 'exporting' | 'done' | 'error'
 
 interface ImportState {
@@ -8,6 +8,8 @@ interface ImportState {
   progress: number
   statusMessage: string
   fileName: string
+  fileSize: number
+  currentStage: number
 }
 
 interface ExportState {
@@ -15,9 +17,35 @@ interface ExportState {
   progress: number
   statusMessage: string
   exportType: 'full' | 'database'
+  currentStage: number
 }
 
 const ACCEPTED_FILE_TYPES = ['.zip', '.gz', '.gzip', '.tar', '.tar.gz', '.wpress', '.sql']
+
+const IMPORT_STAGES = [
+  { label: 'Extracting', key: 'extract' },
+  { label: 'Database', key: 'database' },
+  { label: 'Content', key: 'content' },
+  { label: 'Finishing', key: 'finish' },
+] as const
+
+const EXPORT_STAGES_FULL = [
+  { label: 'Files', key: 'files' },
+  { label: 'Database', key: 'database' },
+  { label: 'Compressing', key: 'compress' },
+] as const
+
+const EXPORT_STAGES_DB = [
+  { label: 'Exporting', key: 'export' },
+  { label: 'Writing', key: 'write' },
+] as const
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
+}
 
 // Module-level singleton state
 const importStates = ref<Record<string, ImportState>>({})
@@ -52,7 +80,8 @@ const exportDbMessages = [
 
 function simulateProgress(
   steps: { progress: number; message: string }[],
-  onStep: (progress: number, message: string) => void,
+  numStages: number,
+  onStep: (progress: number, message: string, stage: number) => void,
   onDone: () => void,
 ) {
   let i = 0
@@ -62,7 +91,11 @@ function simulateProgress(
       return
     }
     const step = steps[i]
-    onStep(step.progress, step.message)
+    const stage = Math.min(
+      Math.floor((step.progress / 100) * numStages),
+      numStages - 1,
+    )
+    onStep(step.progress, step.message, stage)
     i++
     setTimeout(tick, 400 + Math.random() * 600)
   }
@@ -77,6 +110,7 @@ export function useImportExport(siteId: Ref<string | null>) {
     siteId.value ? exportStates.value[siteId.value] ?? null : null
   )
 
+  const isConfirming = computed(() => importState.value?.phase === 'confirm')
   const isImporting = computed(() => importState.value?.phase === 'importing')
   const isExporting = computed(() => exportState.value?.phase === 'exporting')
   const isImportDone = computed(() => importState.value?.phase === 'done')
@@ -87,23 +121,35 @@ export function useImportExport(siteId: Ref<string | null>) {
     return ACCEPTED_FILE_TYPES.some(ext => lower.endsWith(ext))
   }
 
-  function startImport(fileName: string) {
+  function startImport(fileName: string, fileSize: number) {
     const id = siteId.value
     if (!id || isImporting.value || isExporting.value) return
 
     importStates.value[id] = {
-      phase: 'importing',
+      phase: 'confirm',
       progress: 0,
-      statusMessage: 'Preparing import...',
+      statusMessage: '',
       fileName,
+      fileSize,
+      currentStage: 0,
     }
+  }
+
+  function confirmImport() {
+    const id = siteId.value
+    if (!id || importStates.value[id]?.phase !== 'confirm') return
+
+    importStates.value[id].phase = 'importing'
+    importStates.value[id].statusMessage = 'Preparing import...'
 
     simulateProgress(
       importMessages,
-      (progress, message) => {
+      IMPORT_STAGES.length,
+      (progress, message, stage) => {
         if (importStates.value[id]) {
           importStates.value[id].progress = progress
           importStates.value[id].statusMessage = message
+          importStates.value[id].currentStage = stage
         }
       },
       () => {
@@ -112,6 +158,11 @@ export function useImportExport(siteId: Ref<string | null>) {
         }
       },
     )
+  }
+
+  function cancelImport() {
+    const id = siteId.value
+    if (id) delete importStates.value[id]
   }
 
   function startExport(type: 'full' | 'database') {
@@ -123,16 +174,20 @@ export function useImportExport(siteId: Ref<string | null>) {
       progress: 0,
       statusMessage: 'Preparing export...',
       exportType: type,
+      currentStage: 0,
     }
 
     const steps = type === 'full' ? exportFullMessages : exportDbMessages
+    const stages = type === 'full' ? EXPORT_STAGES_FULL : EXPORT_STAGES_DB
 
     simulateProgress(
       steps,
-      (progress, message) => {
+      stages.length,
+      (progress, message, stage) => {
         if (exportStates.value[id]) {
           exportStates.value[id].progress = progress
           exportStates.value[id].statusMessage = message
+          exportStates.value[id].currentStage = stage
         }
       },
       () => {
@@ -156,15 +211,22 @@ export function useImportExport(siteId: Ref<string | null>) {
   return {
     importState,
     exportState,
+    isConfirming,
     isImporting,
     isExporting,
     isImportDone,
     isExportDone,
     isValidFile,
     startImport,
+    confirmImport,
+    cancelImport,
     startExport,
     clearImport,
     clearExport,
+    formatFileSize,
     ACCEPTED_FILE_TYPES,
+    IMPORT_STAGES,
+    EXPORT_STAGES_FULL,
+    EXPORT_STAGES_DB,
   }
 }
