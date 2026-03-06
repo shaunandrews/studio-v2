@@ -24,8 +24,8 @@ withDefaults(defineProps<{
 }
 
 .badge--default {
-  background: var(--color-surface-secondary);
-  color: var(--color-text-secondary);
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg-muted);
 }
 
 .badge--success {

@@ -3,16 +3,16 @@ import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { plus, category } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
-import ProjectItem from '@/components/composites/ProjectItem.vue'
-import { useProjects } from '@/data/useProjects'
-import { useProjectTransition } from '@/data/useProjectTransition'
+import SiteItem from '@/components/composites/SiteItem.vue'
+import { useSites } from '@/data/useSites'
+import { useSiteTransition } from '@/data/useSiteTransition'
 
 const emit = defineEmits<{
-  'new-project': []
+  'new-site': []
 }>()
 
-const { projects, activeProjectId } = useProjects()
-const { navigateToProject } = useProjectTransition('project')
+const { sites, activeSiteId } = useSites()
+const { navigateToSite } = useSiteTransition('site')
 
 const router = useRouter()
 const route = useRoute()
@@ -24,7 +24,7 @@ function goToAllSites() {
 </script>
 
 <template>
-  <div class="project-list vstack">
+  <div class="site-list vstack">
     <div
       class="all-sites-item"
       :class="{ active: isAllSitesActive }"
@@ -39,16 +39,16 @@ function goToAllSites() {
     <div class="sidebar-divider" />
 
     <div class="items-stack">
-      <ProjectItem
-        v-for="project in projects"
-        :key="project.id"
-        :project="project"
-        :active="project.id === activeProjectId"
-        @select="navigateToProject"
+      <SiteItem
+        v-for="site in sites"
+        :key="site.id"
+        :site="site"
+        :active="site.id === activeSiteId"
+        @select="navigateToSite"
       />
     </div>
 
-    <div class="add-site-item" @click="emit('new-project')">
+    <div class="add-site-item" @click="emit('new-site')">
       <div class="add-site-icon">
         <WPIcon :icon="plus" :size="16" />
       </div>
@@ -58,7 +58,7 @@ function goToAllSites() {
 </template>
 
 <style scoped>
-.project-list {
+.site-list {
   width: 100%;
   height: 100%;
   overflow: auto;
@@ -78,13 +78,13 @@ function goToAllSites() {
   padding: 4px 2px 4px 4px;
   border-radius: 6px;
   cursor: pointer;
-  color: var(--color-chrome-text-secondary);
+  color: var(--color-chrome-fg-muted);
   transition: background var(--duration-instant) var(--ease-default);
 }
 
 .add-site-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .add-site-icon {
@@ -108,18 +108,18 @@ function goToAllSites() {
   padding: 4px 2px 4px 4px;
   border-radius: 6px;
   cursor: pointer;
-  color: var(--color-chrome-text-secondary);
+  color: var(--color-chrome-fg-muted);
   transition: background var(--duration-instant) var(--ease-default);
 }
 
 .all-sites-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .all-sites-item.active {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .all-sites-icon {

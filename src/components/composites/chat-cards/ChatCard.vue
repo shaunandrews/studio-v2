@@ -31,9 +31,9 @@ withDefaults(defineProps<{
 .chat-card {
   width: calc(100% + var(--space-s) * 2);
   min-width: 360px;
-  border: 1px solid var(--color-surface-border);
+  border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
-  background: var(--color-surface);
+  background: var(--color-frame-bg);
   margin-block: var(--space-xs);
   margin-inline-start: calc(-1 * var(--space-s));
   overflow: hidden;
@@ -41,7 +41,7 @@ withDefaults(defineProps<{
 
 .chat-card__header {
   padding: var(--space-xs) var(--space-s);
-  border-block-end: 1px solid var(--color-surface-border);
+  border-block-end: 1px solid var(--color-frame-border);
 }
 
 .chat-card__body {
@@ -58,7 +58,7 @@ withDefaults(defineProps<{
 
 .chat-card__footer {
   padding: var(--space-xs) var(--space-s);
-  border-block-start: 1px solid var(--color-surface-border);
+  border-block-start: 1px solid var(--color-frame-border);
 }
 
 .chat-card--compact .chat-card__footer {
@@ -74,6 +74,6 @@ withDefaults(defineProps<{
 }
 
 .chat-card--loading {
-  border-color: var(--color-primary);
+  border-color: var(--color-frame-theme);
 }
 </style>

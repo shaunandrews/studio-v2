@@ -60,7 +60,7 @@ defineEmits<{
 }
 
 .btn-split__primary:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 .btn-split__icon {
@@ -70,7 +70,7 @@ defineEmits<{
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 .btn-split__icon-img {
@@ -98,7 +98,7 @@ defineEmits<{
 }
 
 .btn-split__secondary:hover {
-  background: var(--color-frame-bg-secondary);
-  color: var(--color-frame-fg-secondary);
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg-muted);
 }
 </style>

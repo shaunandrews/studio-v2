@@ -120,15 +120,15 @@ async function sendToAIWithIndicator(conversationId: string, text: string, agent
 }
 
 export function useConversations() {
-  function getConversations(projectId: Ref<string | null> | string | null) {
+  function getConversations(siteId: Ref<string | null> | string | null) {
     return computed(() =>
-      conversations.value.filter(c => c.projectId === unref(projectId))
+      conversations.value.filter(c => c.siteId === unref(siteId))
     )
   }
 
-  function getConversation(projectId: Ref<string | null> | string | null, agentId: Ref<AgentId> | AgentId) {
+  function getConversation(siteId: Ref<string | null> | string | null, agentId: Ref<AgentId> | AgentId) {
     return computed(() =>
-      conversations.value.find(c => c.projectId === unref(projectId) && c.agentId === unref(agentId)) ?? null
+      conversations.value.find(c => c.siteId === unref(siteId) && c.agentId === unref(agentId)) ?? null
     )
   }
 
@@ -142,12 +142,12 @@ export function useConversations() {
     })
   }
 
-  function ensureConversation(projectId: string | null, agentId: AgentId): Conversation {
-    const existing = conversations.value.find(c => c.projectId === projectId && c.agentId === agentId)
+  function ensureConversation(siteId: string | null, agentId: AgentId): Conversation {
+    const existing = conversations.value.find(c => c.siteId === siteId && c.agentId === agentId)
     if (existing) return existing
     const conv: Conversation = {
       id: `conv-${Date.now()}`,
-      projectId,
+      siteId,
       agentId,
       createdAt: new Date().toISOString(),
     }

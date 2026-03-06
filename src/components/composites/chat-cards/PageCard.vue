@@ -58,18 +58,18 @@ const statusLabel = computed(() => {
 }
 
 .page-slug {
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
   font-size: var(--font-size-s);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
 .page-meta {
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
   font-size: var(--font-size-xs);
 }
 
 .page-excerpt {
-  color: var(--color-text-secondary);
+  color: var(--color-frame-fg-muted);
   font-size: var(--font-size-s);
   line-height: var(--line-height-normal);
 }

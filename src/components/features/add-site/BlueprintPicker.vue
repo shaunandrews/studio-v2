@@ -95,8 +95,8 @@ function select(bp: Blueprint) {
 }
 
 .search-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border-color: var(--color-frame-theme);
+  box-shadow: 0 0 0 1px var(--color-frame-theme);
 }
 
 .search-input::placeholder {
@@ -130,13 +130,13 @@ function select(bp: Blueprint) {
 }
 
 .blueprint-card.is-selected {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border-color: var(--color-frame-theme);
+  box-shadow: 0 0 0 1px var(--color-frame-theme);
 }
 
 .blueprint-thumb {
   aspect-ratio: 16 / 10;
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   overflow: hidden;
 }
 
@@ -149,7 +149,7 @@ function select(bp: Blueprint) {
 .blueprint-thumb-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--color-frame-bg-secondary) 0%, var(--color-frame-border) 100%);
+  background: linear-gradient(135deg, var(--color-frame-hover) 0%, var(--color-frame-border) 100%);
 }
 
 .blueprint-info {
@@ -164,7 +164,7 @@ function select(bp: Blueprint) {
 
 .blueprint-desc {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

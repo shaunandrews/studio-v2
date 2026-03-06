@@ -6,7 +6,7 @@ import Tooltip from '@/components/primitives/Tooltip.vue'
 import ButtonSplit from '@/components/primitives/ButtonSplit.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
-import { useProjects } from '@/data/useProjects'
+import { useSites } from '@/data/useSites'
 
 const openLabel = ref('Browser')
 const openIconUrl = ref('/icons/chrome.svg')
@@ -18,7 +18,7 @@ function onOpenSelect(label: string, iconUrl: string) {
 
 const props = defineProps<{
   title: string
-  projectId?: string
+  siteId?: string
   favicon?: string
   status?: 'running' | 'stopped' | 'loading'
   loadingTarget?: 'running' | 'stopped'
@@ -28,20 +28,20 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'toggle-status': []
-  'switch-project': [id: string]
+  'switch-site': [id: string]
   'duplicate': []
   'delete': []
 }>()
 
-const { projects } = useProjects()
+const { sites } = useSites()
 
 const sitePickerGroups = computed<FlyoutMenuGroup[]>(() => {
   return [{
-    items: projects.value.map(p => ({
+    items: sites.value.map(p => ({
       label: p.name,
       iconUrl: p.favicon,
       checked: p.name === props.title,
-      action: () => emit('switch-project', p.id),
+      action: () => emit('switch-site', p.id),
     })),
   }]
 })
@@ -88,12 +88,12 @@ const openMenuGroups = computed<FlyoutMenuGroup[]>(() => [
   },
 ])
 
-const currentProject = computed(() =>
-  props.projectId ? projects.value.find(p => p.id === props.projectId) : undefined
+const currentSite = computed(() =>
+  props.siteId ? sites.value.find(p => p.id === props.siteId) : undefined
 )
 
-const siteUrl = computed(() => currentProject.value?.url || 'localhost:8882')
-const localPath = computed(() => `/Users/shaun/Studio/${currentProject.value?.id ?? 'site'}`)
+const siteUrl = computed(() => currentSite.value?.url || 'localhost:8882')
+const localPath = computed(() => `/Users/shaun/Studio/${currentSite.value?.id ?? 'site'}`)
 const adminUrl = computed(() => siteUrl.value.replace(/^https?:\/\//, '') + '/wp-admin/')
 
 const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
@@ -299,7 +299,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 }
 
 .pill:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 .pill-icon-start,
@@ -360,7 +360,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 .status-spinner {
   width: 14px;
   height: 14px;
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
   animation: toolbar-spin 0.8s linear infinite;
 }
 
@@ -406,7 +406,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 .kebab:hover,
 .kebab.is-active {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 </style>

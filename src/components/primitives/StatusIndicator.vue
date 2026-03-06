@@ -74,7 +74,7 @@ const tooltipText = computed(() => {
 }
 
 .status:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-frame-theme);
   outline-offset: 2px;
 }
 
@@ -133,7 +133,7 @@ const tooltipText = computed(() => {
 
 /* Loading spinner */
 .status--loading {
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
 }
 
 .status__spinner {

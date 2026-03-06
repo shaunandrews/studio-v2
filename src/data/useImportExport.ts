@@ -69,12 +69,12 @@ function simulateProgress(
   setTimeout(tick, 300)
 }
 
-export function useImportExport(projectId: Ref<string | null>) {
+export function useImportExport(siteId: Ref<string | null>) {
   const importState = computed(() =>
-    projectId.value ? importStates.value[projectId.value] ?? null : null
+    siteId.value ? importStates.value[siteId.value] ?? null : null
   )
   const exportState = computed(() =>
-    projectId.value ? exportStates.value[projectId.value] ?? null : null
+    siteId.value ? exportStates.value[siteId.value] ?? null : null
   )
 
   const isImporting = computed(() => importState.value?.phase === 'importing')
@@ -88,7 +88,7 @@ export function useImportExport(projectId: Ref<string | null>) {
   }
 
   function startImport(fileName: string) {
-    const id = projectId.value
+    const id = siteId.value
     if (!id || isImporting.value || isExporting.value) return
 
     importStates.value[id] = {
@@ -115,7 +115,7 @@ export function useImportExport(projectId: Ref<string | null>) {
   }
 
   function startExport(type: 'full' | 'database') {
-    const id = projectId.value
+    const id = siteId.value
     if (!id || isImporting.value || isExporting.value) return
 
     exportStates.value[id] = {
@@ -144,12 +144,12 @@ export function useImportExport(projectId: Ref<string | null>) {
   }
 
   function clearImport() {
-    const id = projectId.value
+    const id = siteId.value
     if (id) delete importStates.value[id]
   }
 
   function clearExport() {
-    const id = projectId.value
+    const id = siteId.value
     if (id) delete exportStates.value[id]
   }
 

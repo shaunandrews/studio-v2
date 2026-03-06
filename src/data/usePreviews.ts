@@ -46,13 +46,25 @@ function generatePreviewUrl(siteSlug: string): string {
 const seedPreviews: PreviewSite[] = [
   {
     id: 'prev-cafe-1',
-    projectId: 'downstreet-cafe',
+    siteId: 'downstreet-cafe',
     name: 'Preview',
     url: 'downstreet-cafe-warm-heron.wp.build',
     createdAt: daysAgo(5),
-    updatedAt: daysAgo(2),
+    updatedAt: daysAgo(3),
     status: 'active',
-    note: 'Menu redesign for Sarah to review',
+    views: 0,
+    uniqueVisitors: 0,
+    invites: [],
+  },
+  {
+    id: 'prev-cafe-2',
+    siteId: 'downstreet-cafe',
+    name: 'Preview',
+    url: 'downstreet-cafe-bold-finch.wp.build',
+    createdAt: daysAgo(8),
+    updatedAt: daysAgo(6),
+    status: 'active',
+    note: 'Updated menu for Sarah to review',
     views: 14,
     uniqueVisitors: 3,
     lastVisitedAt: daysAgo(0),
@@ -62,15 +74,16 @@ const seedPreviews: PreviewSite[] = [
     ],
   },
   {
-    id: 'prev-cafe-2',
-    projectId: 'downstreet-cafe',
+    id: 'prev-cafe-3',
+    siteId: 'downstreet-cafe',
     name: 'Preview',
-    url: 'downstreet-cafe-bold-finch.wp.build',
-    createdAt: daysAgo(14),
-    updatedAt: daysAgo(8),
-    status: 'deleted',
-    views: 0,
-    uniqueVisitors: 0,
+    url: 'downstreet-cafe-keen-crane.wp.build',
+    createdAt: daysAgo(21),
+    updatedAt: daysAgo(10),
+    status: 'active',
+    views: 10293,
+    uniqueVisitors: 3339,
+    lastVisitedAt: daysAgo(7),
     invites: [],
   },
 ]
@@ -89,10 +102,10 @@ interface StageConfig {
 }
 
 const CREATE_STAGES: StageConfig[] = [
-  { label: 'Creating archive...', start: 0, end: 20 },
-  { label: 'Uploading archive...', start: 20, end: 50 },
-  { label: 'Creating preview site...', start: 50, end: 80 },
-  { label: 'Saving preview site...', start: 80, end: 100 },
+  { label: 'Packing your site...', start: 0, end: 20 },
+  { label: 'Uploading to the cloud...', start: 20, end: 50 },
+  { label: 'Setting up your preview...', start: 50, end: 80 },
+  { label: 'Almost there...', start: 80, end: 100 },
 ]
 
 const UPDATE_STAGES: StageConfig[] = [
@@ -201,15 +214,15 @@ function relativeTime(iso: string): string {
 // --- Composable ---
 
 export function usePreviews() {
-  function getPreviews(projectId: string) {
+  function getPreviews(siteId: string) {
     return computed(() =>
-      previews.value.filter(p => p.projectId === projectId)
+      previews.value.filter(p => p.siteId === siteId)
     )
   }
 
-  function activeOperation(projectId: string) {
+  function activeOperation(siteId: string) {
     return computed(() =>
-      operations.value.find(o => o.projectId === projectId && o.status === 'pending') ?? null
+      operations.value.find(o => o.siteId === siteId && o.status === 'pending') ?? null
     )
   }
 
@@ -219,7 +232,7 @@ export function usePreviews() {
     )
   }
 
-  function createPreview(projectId: string, name: string) {
+  function createPreview(siteId: string, name: string) {
     const opId = `op-${randomId()}`
     const previewId = `prev-${randomId()}`
 
@@ -227,7 +240,7 @@ export function usePreviews() {
       id: opId,
       type: 'create',
       previewId,
-      projectId,
+      siteId,
       progress: 0,
       detail: CREATE_STAGES[0].label,
       status: 'pending',
@@ -236,10 +249,10 @@ export function usePreviews() {
     operations.value.push(op)
 
     simulateProgress(op, () => {
-      const slug = projectId.replace(/[^a-z0-9-]/g, '')
+      const slug = siteId.replace(/[^a-z0-9-]/g, '')
       const preview: PreviewSite = {
         id: previewId,
-        projectId,
+        siteId,
         name,
         url: generatePreviewUrl(slug),
         createdAt: new Date().toISOString(),
@@ -264,7 +277,7 @@ export function usePreviews() {
       id: opId,
       type: 'update',
       previewId,
-      projectId: preview.projectId,
+      siteId: preview.siteId,
       progress: 0,
       detail: UPDATE_STAGES[0].label,
       status: 'pending',
@@ -291,7 +304,7 @@ export function usePreviews() {
       id: opId,
       type: 'delete',
       previewId,
-      projectId: preview.projectId,
+      siteId: preview.siteId,
       progress: 0,
       detail: DELETE_STAGES[0].label,
       status: 'pending',

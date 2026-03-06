@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick, toRef } from 'vue'
-import { useProjects } from '@/data/useProjects'
+import { useSites } from '@/data/useSites'
 import { usePipeline } from '@/data/usePipeline'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
 import StageCard from './StageCard.vue'
 import PipelineConnector from './PipelineConnector.vue'
 
 const props = defineProps<{
-  projectId: string
-  projectStatus: 'running' | 'stopped' | 'loading'
-  projectUrl: string
+  siteId: string
+  siteStatus: 'running' | 'stopped' | 'loading'
+  siteUrl: string
 }>()
 
-const { projects } = useProjects()
-const { pipeline, setupPhase, skipSetupStep, openSyncModal, openConnectModal, syncAction, syncProgress } = usePipeline(toRef(props, 'projectId'))
+const { sites } = useSites()
+const { pipeline, setupPhase, skipSetupStep, openSyncModal, openConnectModal, syncAction, syncProgress } = usePipeline(toRef(props, 'siteId'))
 
-const project = computed(() => projects.value.find(p => p.id === props.projectId))
+const site = computed(() => sites.value.find(p => p.id === props.siteId))
 
 const isSetup = computed(() => setupPhase.value !== null)
 
@@ -104,9 +104,9 @@ function onSync(stageId: string) {
 }
 
 function envColor(environment?: string): string {
-  if (environment === 'production') return 'var(--color-env-production)'
-  if (environment === 'staging') return 'var(--color-env-staging)'
-  return 'var(--color-env-local)'
+  if (environment === 'production') return 'var(--color-env-production-bg)'
+  if (environment === 'staging') return 'var(--color-env-staging-bg)'
+  return 'var(--color-env-local-bg)'
 }
 </script>
 
@@ -120,8 +120,8 @@ function envColor(environment?: string): string {
         <StageCard
           data-setup-index="-1"
           label="Local"
-          :url="projectUrl"
-          :favicon="project?.favicon"
+          :url="siteUrl"
+          :favicon="site?.favicon"
           :connected="true"
           :env-color="envColor('local')"
           :sync-phase="getProgress('local').phase"
@@ -144,7 +144,7 @@ function envColor(environment?: string): string {
             :data-setup-index="index"
             :label="stage.label"
             :url="stage.site?.url"
-            :favicon="project?.favicon"
+            :favicon="site?.favicon"
             :connected="!!stage.site"
             :env-color="envColor(stage.environment)"
             :dimmed="isSetup && index > setupPhase!"
@@ -220,7 +220,7 @@ function envColor(environment?: string): string {
 
 .setup-guide__subtitle {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   margin: 0;
 }
 
@@ -245,7 +245,7 @@ function envColor(environment?: string): string {
 }
 
 .setup-guide__action:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   border-color: var(--color-frame-fg-muted);
 }
 

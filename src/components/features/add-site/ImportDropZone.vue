@@ -114,7 +114,7 @@ function clear() {
   padding: var(--space-xxxl) var(--space-m);
   border: 2px dashed var(--color-frame-border);
   border-radius: var(--radius-m);
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   cursor: pointer;
   transition:
     border-color var(--transition-hover),
@@ -123,8 +123,8 @@ function clear() {
 
 .drop-area:hover,
 .drop-area.is-dragging {
-  border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-frame-bg));
+  border-color: var(--color-frame-theme);
+  background: color-mix(in srgb, var(--color-frame-theme) 5%, var(--color-frame-bg));
 }
 
 .drop-icon {
@@ -139,7 +139,7 @@ function clear() {
 
 .drop-hint {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 .drop-formats {
@@ -152,7 +152,7 @@ function clear() {
   padding: var(--space-s);
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   align-items: center;
   justify-content: space-between;
 }
@@ -165,7 +165,7 @@ function clear() {
 
 .file-size {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 .drop-error {

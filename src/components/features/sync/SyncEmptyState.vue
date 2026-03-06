@@ -76,20 +76,20 @@ defineEmits<{
 .sync-empty__env--local {
   inset-block-start: 15px;
   inset-inline-start: 15px;
-  background: var(--color-env-local);
+  background: var(--color-env-local-bg);
 }
 
 .sync-empty__env--staging {
   inset-block-start: 50%;
   inset-inline-start: 105px;
   translate: 0 -50%;
-  background: var(--color-env-staging);
+  background: var(--color-env-staging-bg);
 }
 
 .sync-empty__env--production {
   inset-block-end: 15px;
   inset-inline-start: 195px;
-  background: var(--color-env-production);
+  background: var(--color-env-production-bg);
 }
 
 .sync-empty__illustration:hover .sync-empty__env--local {
@@ -131,7 +131,7 @@ defineEmits<{
 
 .sync-empty__subtext {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   margin: 0;
 }
 </style>

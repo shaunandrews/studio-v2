@@ -99,7 +99,7 @@ onUnmounted(() => {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-frame-theme);
   outline-offset: 2px;
 }
 
@@ -172,12 +172,12 @@ onUnmounted(() => {
    ============================================ */
 .btn--primary.btn--on-light {
   background: var(--color-frame-theme);
-  color: var(--color-primary-text);
+  color: #fff;
   border-color: rgba(0, 0, 0, 0.1);
 }
 
 .btn--primary.btn--on-light:hover {
-  background: var(--color-primary-hover);
+  background: var(--color-frame-theme);
 }
 
 /* ============================================
@@ -185,12 +185,12 @@ onUnmounted(() => {
    ============================================ */
 .btn--primary.btn--on-dark {
   background: var(--color-chrome-theme);
-  color: var(--color-primary-text);
+  color: #fff;
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .btn--primary.btn--on-dark:hover {
-  background: var(--color-primary-hover);
+  background: var(--color-frame-theme);
 }
 
 /* ============================================
@@ -203,7 +203,7 @@ onUnmounted(() => {
 }
 
 .btn--secondary.btn--on-light:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
@@ -211,18 +211,18 @@ onUnmounted(() => {
    SECONDARY — chrome (dark) surface
    ============================================ */
 .btn--secondary.btn--on-dark {
-  background: var(--color-chrome);
-  color: var(--color-chrome-text-secondary);
+  background: var(--color-chrome-bg);
+  color: var(--color-chrome-fg-muted);
   border-color: rgba(255, 255, 255, 0.1);
 }
 
 .btn--secondary.btn--on-dark:hover {
   background: var(--color-chrome-hover);
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .btn--secondary.btn--on-dark:focus-visible {
-  outline-color: var(--color-chrome-subtle);
+  outline-color: var(--color-chrome-border);
 }
 
 /* ============================================
@@ -235,7 +235,7 @@ onUnmounted(() => {
 }
 
 .btn--tertiary.btn--on-light:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
@@ -245,7 +245,7 @@ onUnmounted(() => {
 }
 
 .btn--tertiary.btn--on-light.btn--active:hover {
-  background: var(--color-frame-fg-secondary);
+  background: var(--color-frame-fg-muted);
 }
 
 /* ============================================
@@ -253,26 +253,26 @@ onUnmounted(() => {
    ============================================ */
 .btn--tertiary.btn--on-dark {
   background: transparent;
-  color: var(--color-chrome-text-muted);
+  color: var(--color-chrome-fg-muted);
   border-color: transparent;
 }
 
 .btn--tertiary.btn--on-dark:hover {
   background: var(--color-chrome-hover);
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .btn--tertiary.btn--on-dark.btn--active {
-  background: var(--color-chrome-text);
-  color: var(--color-chrome);
+  background: var(--color-chrome-fg);
+  color: var(--color-chrome-bg);
 }
 
 .btn--tertiary.btn--on-dark.btn--active:hover {
-  background: var(--color-chrome-text-secondary);
+  background: var(--color-chrome-fg-muted);
 }
 
 .btn--tertiary.btn--on-dark:focus-visible {
-  outline-color: var(--color-chrome-subtle);
+  outline-color: var(--color-chrome-border);
 }
 
 /* ── Icon rotation for active state ── */

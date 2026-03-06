@@ -142,7 +142,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 }
 
 .plugin-description {
-  color: var(--color-text-secondary);
+  color: var(--color-frame-fg-muted);
   font-size: var(--font-size-s);
   line-height: var(--line-height-normal);
 }
@@ -162,12 +162,12 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
   border: none;
   border-radius: var(--radius-s);
   cursor: pointer;
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
   transition: background var(--duration-instant) var(--ease-default), color var(--duration-instant) var(--ease-default);
 }
 
 .plugin-menu-trigger:hover {
-  background: var(--color-surface-secondary);
-  color: var(--color-text);
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
 }
 </style>

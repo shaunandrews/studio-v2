@@ -109,11 +109,11 @@ function toggle() {
 
 .progress-count {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
 }
 
 .progress-chevron {
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
   transition: transform 0.15s ease;
 }
 
@@ -168,11 +168,11 @@ function toggle() {
 }
 
 .progress-check--running {
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
 }
 
 .progress-check--pending {
-  border: 1px solid var(--color-surface-border);
+  border: 1px solid var(--color-frame-border);
 }
 
 .progress-check--error {
@@ -182,7 +182,7 @@ function toggle() {
 
 .progress-label {
   font-size: var(--font-size-s);
-  color: var(--color-text);
+  color: var(--color-frame-fg);
 }
 
 .progress-spinner {

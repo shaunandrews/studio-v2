@@ -53,7 +53,7 @@ defineProps<{
 
 .screen-header__subtitle {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   margin: 0;
 }
 </style>

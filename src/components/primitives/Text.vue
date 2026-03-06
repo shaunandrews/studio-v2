@@ -49,9 +49,9 @@ defineProps<{
 }
 
 /* Colors */
-.text--default { color: var(--color-text); }
-.text--secondary { color: var(--color-text-secondary); }
-.text--muted { color: var(--color-text-muted); }
+.text--default { color: var(--color-frame-fg); }
+.text--secondary { color: var(--color-frame-fg-muted); }
+.text--muted { color: var(--color-frame-fg-muted); }
 .text--inherit { color: inherit; }
 
 /* Weights */

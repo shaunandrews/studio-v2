@@ -34,7 +34,7 @@ withDefaults(defineProps<{
 
 .setting-row {
   padding: var(--space-xxxs) 0;
-  border-block-end: 1px solid var(--color-surface-border);
+  border-block-end: 1px solid var(--color-frame-border);
 }
 
 .setting-row:last-child {
@@ -44,7 +44,7 @@ withDefaults(defineProps<{
 .setting-key {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 .setting-arrow {

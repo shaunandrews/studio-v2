@@ -1,32 +1,38 @@
 <script setup lang="ts">
 import Text from '@/components/primitives/Text.vue'
+import '@/pages/dev-docs.css'
 
 const dsNav = [
   { id: 'typography', label: 'Typography' },
   { id: 'space', label: 'Space' },
   { id: 'border-radius', label: 'Border Radius' },
   { id: 'chrome', label: 'Chrome' },
-  { id: 'traffic-lights', label: 'Traffic Lights' },
+  { id: 'frame', label: 'Frame' },
+  { id: 'menu', label: 'Menu' },
+  { id: 'macos', label: 'macOS Controls' },
   { id: 'status', label: 'Status' },
-  { id: 'surface', label: 'Surface' },
-  { id: 'text-colors', label: 'Text Colors' },
-  { id: 'interactive', label: 'Interactive' },
   { id: 'layout-utilities', label: 'Layout Utilities' },
   { id: 'motion', label: 'Motion' },
 ]
+
+function scrollTo(e: Event, id: string) {
+  e.preventDefault()
+  const el = document.getElementById(id)
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 </script>
 
 <template>
-  <div class="ds-layout hstack">
-    <nav class="ds-nav">
+  <div class="dev-layout hstack">
+    <nav class="dev-nav">
       <h2 class="nav-heading">Design System</h2>
       <ul class="vstack gap-xxxs">
         <li v-for="item in dsNav" :key="item.id">
-          <a :href="'#' + item.id" class="nav-link">{{ item.label }}</a>
+          <a :href="'#' + item.id" class="nav-link" @click="scrollTo($event, item.id)">{{ item.label }}</a>
         </li>
       </ul>
     </nav>
-    <div class="ds flex-1 min-w-0">
+    <div class="dev-main flex-1 min-w-0">
 
     <!-- Typography -->
     <section id="typography">
@@ -49,20 +55,25 @@ const dsNav = [
 
       <div class="subsection">
         <h3>Font Sizes</h3>
-        <div class="type-scale vstack gap-xxs mt-xs">
-          <div class="type-scale-item hstack gap-m" v-for="t in [
-            { token: '--font-size-xs', val: '11px', use: 'Labels, shortcut hints' },
-            { token: '--font-size-s', val: '12px', use: 'Captions, small controls' },
-            { token: '--font-size-m', val: '13px', use: 'Default UI text, buttons' },
-            { token: '--font-size-l', val: '14px', use: 'Body text, inputs' },
-            { token: '--font-size-xl', val: '16px', use: 'Body-large, chat messages' },
-          ]" :key="t.token">
-            <code class="type-scale-token">{{ t.token }}</code>
-            <span class="type-scale-sample" :style="{ fontSize: `var(${t.token})` }">The quick brown fox</span>
-            <span class="type-scale-val">{{ t.val }}</span>
-            <Text variant="caption" color="muted">{{ t.use }}</Text>
-          </div>
-        </div>
+        <table class="token-table mt-xs">
+          <thead>
+            <tr><th>Token</th><th>Value</th><th>Use for</th><th>Sample</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="t in [
+              { token: '--font-size-xs', val: '11px', use: 'Labels, shortcut hints' },
+              { token: '--font-size-s', val: '12px', use: 'Captions, small controls' },
+              { token: '--font-size-m', val: '13px', use: 'Default UI text, buttons' },
+              { token: '--font-size-l', val: '14px', use: 'Body text, inputs' },
+              { token: '--font-size-xl', val: '16px', use: 'Body-large, chat messages' },
+            ]" :key="t.token">
+              <td><code>{{ t.token }}</code></td>
+              <td class="token-val">{{ t.val }}</td>
+              <td><Text variant="caption" color="secondary">{{ t.use }}</Text></td>
+              <td :style="{ fontSize: `var(${t.token})` }">The quick brown fox</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="subsection">
@@ -131,42 +142,25 @@ const dsNav = [
         </div>
       </div>
 
-      <div class="subsection">
-        <h3>Text Colors</h3>
-        <div class="hstack gap-l mt-xs">
-          <div class="vstack align-center gap-xxxs">
-            <Text color="default">Default</Text>
-            <Text variant="caption" color="muted">--color-text</Text>
-          </div>
-          <div class="vstack align-center gap-xxxs">
-            <Text color="secondary">Secondary</Text>
-            <Text variant="caption" color="muted">--color-text-secondary</Text>
-          </div>
-          <div class="vstack align-center gap-xxxs">
-            <Text color="muted">Muted</Text>
-            <Text variant="caption" color="muted">--color-text-muted</Text>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- Space -->
     <section id="space">
       <h2>Space</h2>
-      <p class="section-desc">5px grid. All spacing must use these tokens. No magic numbers.</p>
+      <p class="section-desc">4px grid. All spacing must use these tokens. No magic numbers.</p>
       <div class="space-list">
         <div class="space-item" v-for="t in [
-          { name: 'xxxs', val: '2.5px', units: 0.5 },
-          { name: 'xxs', val: '5px', units: 1 },
-          { name: 'xs', val: '10px', units: 2 },
-          { name: 's', val: '15px', units: 3 },
-          { name: 'm', val: '20px', units: 4 },
-          { name: 'l', val: '25px', units: 5 },
-          { name: 'xl', val: '30px', units: 6 },
-          { name: 'xxl', val: '40px', units: 8 },
-          { name: 'xxxl', val: '50px', units: 10 },
+          { name: 'xxxs', val: '2px', units: 0.5 },
+          { name: 'xxs', val: '4px', units: 1 },
+          { name: 'xs', val: '8px', units: 2 },
+          { name: 's', val: '12px', units: 3 },
+          { name: 'm', val: '16px', units: 4 },
+          { name: 'l', val: '20px', units: 5 },
+          { name: 'xl', val: '24px', units: 6 },
+          { name: 'xxl', val: '32px', units: 8 },
+          { name: 'xxxl', val: '48px', units: 12 },
         ]" :key="t.name">
-          <code class="space-token">--space-{{ t.name }}</code>
+          <code class="space-token">{{ t.name }}</code>
           <div class="space-bar" :style="{ width: `var(--space-${t.name})` }"></div>
           <span class="space-value">{{ t.val }}</span>
           <span class="space-units">{{ t.units }} {{ t.units === 1 ? 'unit' : 'units' }}</span>
@@ -177,12 +171,12 @@ const dsNav = [
     <!-- Border Radius -->
     <section id="border-radius">
       <h2>Border Radius</h2>
-      <p class="section-desc">On the 5px grid. Use for consistent rounding across components.</p>
+      <p class="section-desc">On the 4px grid. Use for consistent rounding across components.</p>
       <div class="radius-list">
         <div class="radius-item" v-for="r in [
-          { name: 's', val: '5px', desc: 'Buttons, inputs, tags' },
-          { name: 'm', val: '10px', desc: 'Cards, panels, dropdowns' },
-          { name: 'l', val: '15px', desc: 'Modals, large containers' },
+          { name: 's', val: '4px', desc: 'Buttons, inputs, tags' },
+          { name: 'm', val: '8px', desc: 'Cards, panels, dropdowns' },
+          { name: 'l', val: '12px', desc: 'Modals, large containers' },
         ]" :key="r.name">
           <div class="radius-preview" :style="{ borderRadius: `var(--radius-${r.name})` }"></div>
           <div class="radius-info">
@@ -200,71 +194,122 @@ const dsNav = [
       <p class="section-desc">App frame, sidebar, and titlebar colors.</p>
       <div class="swatches">
         <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-chrome)"></div>
-          <span class="swatch-name">chrome</span>
+          <div class="swatch-color" style="background: var(--color-chrome-bg)"></div>
+          <span class="swatch-name">chrome-bg</span>
           <code class="swatch-value">#1e1e1e</code>
         </div>
         <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-chrome-text)"></div>
-          <span class="swatch-name">chrome-text</span>
+          <div class="swatch-color" style="background: var(--color-chrome-theme)"></div>
+          <span class="swatch-name">chrome-theme</span>
+          <code class="swatch-value">#3858e9</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-chrome-fg)"></div>
+          <span class="swatch-name">chrome-fg</span>
           <code class="swatch-value">#fff</code>
         </div>
         <div class="swatch">
-          <div class="swatch-color border" style="background: var(--color-chrome-text-secondary)"></div>
-          <span class="swatch-name">chrome-text-secondary</span>
+          <div class="swatch-color" style="background: var(--color-chrome-fg-muted)"></div>
+          <span class="swatch-name">chrome-fg-muted</span>
           <code class="swatch-value">rgba(255,255,255,0.7)</code>
         </div>
         <div class="swatch">
-          <div class="swatch-color border" style="background: var(--color-chrome-text-muted)"></div>
-          <span class="swatch-name">chrome-text-muted</span>
-          <code class="swatch-value">rgba(255,255,255,0.5)</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color border" style="background: var(--color-chrome-text-faint)"></div>
-          <span class="swatch-name">chrome-text-faint</span>
-          <code class="swatch-value">rgba(255,255,255,0.4)</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-chrome); outline: 2px solid var(--color-chrome-border); outline-offset: -2px;"></div>
+          <div class="swatch-color" style="background: var(--color-chrome-border)"></div>
           <span class="swatch-name">chrome-border</span>
           <code class="swatch-value">rgba(255,255,255,0.1)</code>
         </div>
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-chrome-hover)"></div>
           <span class="swatch-name">chrome-hover</span>
-          <code class="swatch-value">rgba(255,255,255,0.1)</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-chrome-active)"></div>
-          <span class="swatch-name">chrome-active</span>
-          <code class="swatch-value">rgba(255,255,255,0.15)</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-chrome-subtle)"></div>
-          <span class="swatch-name">chrome-subtle</span>
-          <code class="swatch-value">rgba(255,255,255,0.2)</code>
+          <code class="swatch-value">rgba(255,255,255,0.05)</code>
         </div>
       </div>
     </section>
 
-    <!-- Traffic Lights -->
-    <section id="traffic-lights">
-      <h2>Traffic Lights</h2>
-      <p class="section-desc">macOS window controls.</p>
+    <!-- Frame -->
+    <section id="frame">
+      <h2>Frame</h2>
+      <p class="section-desc">Content panels, inputs, cards — the light-surface content area.</p>
       <div class="swatches">
         <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-light-close)"></div>
-          <span class="swatch-name">light-close</span>
+          <div class="swatch-color" style="background: var(--color-frame-bg)"></div>
+          <span class="swatch-name">frame-bg</span>
+          <code class="swatch-value">#fff</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-frame-theme)"></div>
+          <span class="swatch-name">frame-theme</span>
+          <code class="swatch-value">#3858e9</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-frame-fg)"></div>
+          <span class="swatch-name">frame-fg</span>
+          <code class="swatch-value">#000</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-frame-fg-muted)"></div>
+          <span class="swatch-name">frame-fg-muted</span>
+          <code class="swatch-value">rgba(0,0,0,0.7)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-frame-border)"></div>
+          <span class="swatch-name">frame-border</span>
+          <code class="swatch-value">rgba(0,0,0,0.1)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-frame-hover)"></div>
+          <span class="swatch-name">frame-hover</span>
+          <code class="swatch-value">rgba(0,0,0,0.05)</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- Menu -->
+    <section id="menu">
+      <h2>Menu</h2>
+      <p class="section-desc">Flyout menus, dropdowns — dark surface context.</p>
+      <div class="swatches">
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-menu-bg)"></div>
+          <span class="swatch-name">menu-bg</span>
+          <code class="swatch-value">#111</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-menu-fg)"></div>
+          <span class="swatch-name">menu-fg</span>
+          <code class="swatch-value">#fff</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-menu-fg-muted)"></div>
+          <span class="swatch-name">menu-fg-muted</span>
+          <code class="swatch-value">rgba(255,255,255,0.7)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-menu-border)"></div>
+          <span class="swatch-name">menu-border</span>
+          <code class="swatch-value">rgba(255,255,255,0.15)</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- macOS Window Controls -->
+    <section id="macos">
+      <h2>macOS Window Controls</h2>
+      <p class="section-desc">Native window control colors.</p>
+      <div class="swatches">
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-macos-close)"></div>
+          <span class="swatch-name">macos-close</span>
           <code class="swatch-value">#ff5f57</code>
         </div>
         <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-light-minimize)"></div>
-          <span class="swatch-name">light-minimize</span>
+          <div class="swatch-color" style="background: var(--color-macos-minimize)"></div>
+          <span class="swatch-name">macos-minimize</span>
           <code class="swatch-value">#ffbd2e</code>
         </div>
         <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-light-maximize)"></div>
-          <span class="swatch-name">light-maximize</span>
+          <div class="swatch-color" style="background: var(--color-macos-maximize)"></div>
+          <span class="swatch-name">macos-maximize</span>
           <code class="swatch-value">#28c840</code>
         </div>
       </div>
@@ -278,81 +323,17 @@ const dsNav = [
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-status-running)"></div>
           <span class="swatch-name">status-running</span>
-          <code class="swatch-value">#069e08</code>
+          <code class="swatch-value">#1fd15b</code>
         </div>
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-status-stopped)"></div>
           <span class="swatch-name">status-stopped</span>
           <code class="swatch-value">#646970</code>
         </div>
-      </div>
-    </section>
-
-    <!-- Surface -->
-    <section id="surface">
-      <h2>Surface</h2>
-      <p class="section-desc">Main content area backgrounds and borders.</p>
-      <div class="swatches">
         <div class="swatch">
-          <div class="swatch-color border" style="background: var(--color-surface)"></div>
-          <span class="swatch-name">surface</span>
-          <code class="swatch-value">#fff</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color border" style="background: var(--color-surface-secondary)"></div>
-          <span class="swatch-name">surface-secondary</span>
-          <code class="swatch-value">#f6f7f7</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color border" style="background: var(--color-surface-border)"></div>
-          <span class="swatch-name">surface-border</span>
-          <code class="swatch-value">#dcdcde</code>
-        </div>
-      </div>
-    </section>
-
-    <!-- Text Colors -->
-    <section id="text-colors">
-      <h2>Text Colors</h2>
-      <p class="section-desc">Content typography colors.</p>
-      <div class="swatches">
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-text)"></div>
-          <span class="swatch-name">text</span>
-          <code class="swatch-value">#1d2327</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-text-secondary)"></div>
-          <span class="swatch-name">text-secondary</span>
-          <code class="swatch-value">#646970</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-text-muted)"></div>
-          <span class="swatch-name">text-muted</span>
-          <code class="swatch-value">#a7aaad</code>
-        </div>
-      </div>
-    </section>
-
-    <!-- Interactive -->
-    <section id="interactive">
-      <h2>Interactive</h2>
-      <p class="section-desc">Primary actions and links.</p>
-      <div class="swatches">
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-primary)"></div>
-          <span class="swatch-name">primary</span>
-          <code class="swatch-value">#3858e9</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color" style="background: var(--color-primary-hover)"></div>
-          <span class="swatch-name">primary-hover</span>
-          <code class="swatch-value">#2a46ce</code>
-        </div>
-        <div class="swatch">
-          <div class="swatch-color border" style="background: var(--color-primary-text)"></div>
-          <span class="swatch-name">primary-text</span>
-          <code class="swatch-value">#fff</code>
+          <div class="swatch-color" style="background: var(--color-status-stop-hover)"></div>
+          <span class="swatch-name">status-stop-hover</span>
+          <code class="swatch-value">#e65054</code>
         </div>
       </div>
     </section>
@@ -503,18 +484,6 @@ const dsNav = [
             <code>--transition-hover</code>
             <Text variant="caption" color="secondary">150ms ease — hover &amp; active states</Text>
           </div>
-          <div class="utility-item">
-            <code>--transition-focus</code>
-            <Text variant="caption" color="secondary">150ms ease — focus rings, input borders</Text>
-          </div>
-          <div class="utility-item">
-            <code>--transition-fade</code>
-            <Text variant="caption" color="secondary">200ms ease — opacity, resize, status</Text>
-          </div>
-          <div class="utility-item">
-            <code>--transition-layout</code>
-            <Text variant="caption" color="secondary">300ms ease — panel morph, frame slide</Text>
-          </div>
         </div>
       </div>
     </section>
@@ -523,95 +492,6 @@ const dsNav = [
 </template>
 
 <style scoped>
-/* Two-column layout matching Components.vue */
-.ds-layout {
-  min-height: 100vh;
-  scroll-behavior: smooth;
-  font-family: var(--font-family);
-  color: var(--color-text);
-}
-
-.ds-nav {
-  position: sticky;
-  top: 0;
-  align-self: flex-start;
-  width: 200px;
-  padding: var(--space-xxxl) var(--space-m);
-  border-inline-end: 1px solid var(--color-surface-border);
-}
-
-.nav-heading {
-  /* 11px — intentional, matches Components.vue nav heading outside type scale */
-  font-size: 11px;
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-secondary);
-  margin: 0 0 var(--space-xs);
-}
-
-.ds-nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  display: block;
-  padding: var(--space-xxs) var(--space-xs);
-  border-radius: var(--radius-s);
-  font-size: var(--font-size-m);
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: background var(--duration-instant) var(--ease-default), color var(--duration-instant) var(--ease-default);
-}
-
-.nav-link:hover {
-  background: var(--color-surface-secondary);
-  color: var(--color-text);
-}
-
-/* Main content area */
-.ds {
-  max-width: 960px;
-  padding: var(--space-xxxl) var(--space-xl);
-}
-
-section {
-  margin-block-end: var(--space-xxxl);
-}
-
-h2 {
-  /* 20px — intentional, section heading outside type scale */
-  font-size: 20px;
-  font-weight: var(--font-weight-semibold);
-  margin-block-end: var(--space-xxxs);
-  padding-block-end: var(--space-xs);
-  border-block-end: 1px solid var(--color-surface-border);
-}
-
-h3 {
-  font-size: var(--font-size-l);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-  margin: var(--space-m) 0 var(--space-xxs);
-}
-
-.section-desc {
-  font-size: var(--font-size-m);
-  color: var(--color-text-secondary);
-  margin-block-end: var(--space-m);
-}
-
-.section-desc code {
-  font-size: var(--font-size-s);
-  background: var(--color-surface-secondary);
-  padding: var(--space-xxxs) var(--space-xxs);
-  border-radius: var(--radius-s);
-  font-family: var(--font-family-mono);
-}
-
-/* Typography subsections — extra breathing room */
 .subsection {
   margin-block-end: var(--space-xl);
 }
@@ -633,23 +513,20 @@ h3 {
   width: 100%;
   height: 64px;
   border-radius: var(--radius-m);
-}
-
-.swatch-color.border {
-  border: 1px solid var(--color-surface-border);
+  border: 1px solid var(--color-frame-border);
 }
 
 .swatch-name {
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text);
+  color: var(--color-frame-fg);
 }
 
 .swatch-value {
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--color-frame-fg-muted);
   font-family: var(--font-family-mono);
-  background: var(--color-surface-secondary);
+  background: var(--color-frame-hover);
   padding: var(--space-xxxs) var(--space-xxs);
   border-radius: var(--radius-s);
   width: fit-content;
@@ -671,14 +548,14 @@ h3 {
 .space-token {
   font-size: var(--font-size-s);
   font-family: var(--font-family-mono);
-  color: var(--color-text);
+  color: var(--color-frame-fg);
   width: 120px;
   flex-shrink: 0;
 }
 
 .space-bar {
-  height: 20px;
-  background: var(--color-primary);
+  height: var(--space-m);
+  background: var(--color-frame-theme);
   border-radius: var(--radius-s);
   opacity: 0.2;
 }
@@ -686,14 +563,14 @@ h3 {
 .space-value {
   font-size: var(--font-size-s);
   font-family: var(--font-family-mono);
-  color: var(--color-text-secondary);
+  color: var(--color-frame-fg-muted);
   width: 40px;
   flex-shrink: 0;
 }
 
 .space-units {
   font-size: var(--font-size-s);
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
 }
 
 /* Radius */
@@ -712,15 +589,15 @@ h3 {
 .radius-preview {
   width: 80px;
   height: 80px;
-  background: var(--color-surface-secondary);
-  border: 1px solid var(--color-surface-border);
+  background: var(--color-frame-hover);
+  border: 1px solid var(--color-frame-border);
 }
 
 .radius-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-xxxs);
 }
 
 .radius-info code {
@@ -731,18 +608,18 @@ h3 {
 .radius-val {
   font-size: var(--font-size-s);
   font-family: var(--font-family-mono);
-  color: var(--color-text-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 .radius-desc {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
 }
 
 /* Typography */
 .type-sample {
   padding-block-end: var(--space-m);
-  border-block-end: 1px solid var(--color-surface-secondary);
+  border-block-end: 1px solid var(--color-frame-hover);
 }
 
 .type-meta {
@@ -756,35 +633,12 @@ h3 {
 .type-meta code {
   font-size: var(--font-size-s);
   font-family: var(--font-family-mono);
-  color: var(--color-text);
+  color: var(--color-frame-fg);
 }
 
 .type-spec {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
-
-/* Type scale demo */
-.type-scale-token {
-  font-size: var(--font-size-s);
-  font-family: var(--font-family-mono);
-  color: var(--color-text);
-  width: 140px;
-  flex-shrink: 0;
-}
-
-.type-scale-sample {
-  flex: 1;
-  min-width: 0;
-  color: var(--color-text);
-}
-
-.type-scale-val {
-  font-size: var(--font-size-s);
-  font-family: var(--font-family-mono);
-  color: var(--color-text-secondary);
-  width: 40px;
-  flex-shrink: 0;
+  color: var(--color-frame-fg-muted);
 }
 
 /* Layout utilities */
@@ -799,20 +653,20 @@ h3 {
   flex-direction: column;
   gap: var(--space-xxxs);
   padding: var(--space-xs);
-  background: var(--color-surface-secondary);
+  background: var(--color-frame-hover);
   border-radius: var(--radius-m);
 }
 
 .utility-item code {
   font-size: var(--font-size-s);
   font-family: var(--font-family-mono);
-  color: var(--color-text);
+  color: var(--color-frame-fg);
 }
 
 .gap-label {
   font-size: var(--font-size-s);
   font-family: var(--font-family-mono);
-  color: var(--color-text-secondary);
+  color: var(--color-frame-fg-muted);
   width: 80px;
   flex-shrink: 0;
 }
@@ -821,7 +675,7 @@ h3 {
   width: var(--space-xxs);
   height: var(--space-xxs);
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-frame-theme);
   opacity: 0.4;
 }
 
@@ -829,15 +683,15 @@ h3 {
 .motion-token {
   font-size: var(--font-size-s);
   font-family: var(--font-family-mono);
-  color: var(--color-text);
+  color: var(--color-frame-fg);
   width: 160px;
   flex-shrink: 0;
 }
 
 .motion-demo-track {
   width: 120px;
-  height: 20px;
-  background: var(--color-surface-secondary);
+  height: var(--space-m);
+  background: var(--color-frame-hover);
   border-radius: var(--radius-s);
   overflow: hidden;
   flex-shrink: 0;
@@ -846,7 +700,7 @@ h3 {
 .motion-demo-bar {
   width: 30%;
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-frame-theme);
   opacity: 0.3;
   border-radius: var(--radius-s);
   transition-property: width;
@@ -861,7 +715,7 @@ h3 {
 .motion-val {
   font-size: var(--font-size-s);
   font-family: var(--font-family-mono);
-  color: var(--color-text-secondary);
+  color: var(--color-frame-fg-muted);
   width: 50px;
   flex-shrink: 0;
 }

@@ -29,6 +29,7 @@ const props = withDefaults(defineProps<{
   menuSurface?: 'light' | 'dark'
   size?: 'small' | 'default'
   tooltip?: string
+  maxHeight?: string
 }>(), {
   showChevron: true,
   surface: 'light',
@@ -74,6 +75,7 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
     :surface="menuSurface ?? surface"
     :placement="placement"
     :align="align ?? 'start'"
+    :max-height="maxHeight"
   >
     <template #trigger="{ toggle, open }">
       <div class="dropdown" :class="{ 'surface-dark': surface === 'dark' }">
@@ -121,16 +123,16 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
 
 .dropdown-trigger:hover {
   background: var(--color-frame-bg);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 /* Dark surface trigger */
 .dropdown.surface-dark .dropdown-trigger {
-  color: var(--color-chrome-text-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .dropdown.surface-dark .dropdown-trigger:hover {
   background: var(--color-chrome-hover);
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 </style>

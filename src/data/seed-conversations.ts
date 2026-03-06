@@ -2,40 +2,40 @@ import type { Conversation, Message } from './types'
 
 export const seedConversations: Conversation[] = [
   // All Sites
-  { id: 'all-sites-updates', projectId: '__all-sites__', agentId: 'assistant', title: 'Update WordPress across all sites', createdAt: '2026-02-28T10:00:00Z' },
-  { id: 'all-sites-plugins', projectId: '__all-sites__', agentId: 'assistant', title: 'Plugin compatibility check', createdAt: '2026-03-01T14:00:00Z' },
+  { id: 'all-sites-updates', siteId: '__all-sites__', agentId: 'assistant', title: 'Update WordPress across all sites', createdAt: '2026-02-28T10:00:00Z' },
+  { id: 'all-sites-plugins', siteId: '__all-sites__', agentId: 'assistant', title: 'Plugin compatibility check', createdAt: '2026-03-01T14:00:00Z' },
 
   // Global (home screen)
-  { id: 'global-1', projectId: null, agentId: 'assistant', title: 'Getting started', createdAt: '2026-02-10T08:00:00Z' },
+  { id: 'global-1', siteId: null, agentId: 'assistant', title: 'Getting started', createdAt: '2026-02-10T08:00:00Z' },
 
   // Shaun's Blog
-  { id: 'blog-assistant-1', projectId: 'shauns-blog', agentId: 'assistant', title: 'Hero section redesign', createdAt: '2026-02-12T10:00:00Z' },
-  { id: 'blog-code-1', projectId: 'shauns-blog', agentId: 'code', title: 'Custom block development', createdAt: '2026-02-11T14:00:00Z' },
+  { id: 'blog-assistant-1', siteId: 'shauns-blog', agentId: 'assistant', title: 'Hero section redesign', createdAt: '2026-02-12T10:00:00Z' },
+  { id: 'blog-code-1', siteId: 'shauns-blog', agentId: 'code', title: 'Custom block development', createdAt: '2026-02-11T14:00:00Z' },
 
   // Downstreet Café
-  { id: 'cafe-onboarding', projectId: 'downstreet-cafe', agentId: 'assistant', title: 'Setting up Downstreet Café', createdAt: '2025-11-15T10:00:00Z' },
-  { id: 'cafe-hero-tweak', projectId: 'downstreet-cafe', agentId: 'assistant', title: 'Homepage hero updates', createdAt: '2025-11-18T09:00:00Z' },
-  { id: 'cafe-photos', projectId: 'downstreet-cafe', agentId: 'assistant', title: 'Menu photo updates', createdAt: '2025-11-22T14:00:00Z' },
-  { id: 'cafe-reservations', projectId: 'downstreet-cafe', agentId: 'assistant', title: 'Online reservations', createdAt: '2025-12-03T11:00:00Z' },
-  { id: 'cafe-seo', projectId: 'downstreet-cafe', agentId: 'assistant', title: 'SEO & analytics setup', createdAt: '2025-12-10T10:00:00Z' },
-  { id: 'cafe-events', projectId: 'downstreet-cafe', agentId: 'assistant', title: 'Events page', createdAt: '2026-01-08T13:00:00Z' },
+  { id: 'cafe-onboarding', siteId: 'downstreet-cafe', agentId: 'assistant', title: 'Setting up Downstreet Café', createdAt: '2025-11-15T10:00:00Z' },
+  { id: 'cafe-hero-tweak', siteId: 'downstreet-cafe', agentId: 'assistant', title: 'Homepage hero updates', createdAt: '2025-11-18T09:00:00Z' },
+  { id: 'cafe-photos', siteId: 'downstreet-cafe', agentId: 'assistant', title: 'Menu photo updates', createdAt: '2025-11-22T14:00:00Z' },
+  { id: 'cafe-reservations', siteId: 'downstreet-cafe', agentId: 'assistant', title: 'Online reservations', createdAt: '2025-12-03T11:00:00Z' },
+  { id: 'cafe-seo', siteId: 'downstreet-cafe', agentId: 'assistant', title: 'SEO & analytics setup', createdAt: '2025-12-10T10:00:00Z' },
+  { id: 'cafe-events', siteId: 'downstreet-cafe', agentId: 'assistant', title: 'Events page', createdAt: '2026-01-08T13:00:00Z' },
 
   // Studio Meridian
-  { id: 'portfolio-onboarding', projectId: 'portfolio', agentId: 'assistant', title: 'Setting up Studio Meridian', createdAt: '2026-01-20T09:00:00Z' },
-  { id: 'portfolio-assistant-1', projectId: 'portfolio', agentId: 'assistant', title: 'Adding Meridian × Oura case study', createdAt: '2026-02-15T14:00:00Z' },
+  { id: 'portfolio-onboarding', siteId: 'portfolio', agentId: 'assistant', title: 'Setting up Studio Meridian', createdAt: '2026-01-20T09:00:00Z' },
+  { id: 'portfolio-assistant-1', siteId: 'portfolio', agentId: 'assistant', title: 'Adding Meridian × Oura case study', createdAt: '2026-02-15T14:00:00Z' },
 
   // Flavor Records
-  { id: 'records-design-1', projectId: 'flavor-records', agentId: 'design', title: 'Album grid layout', createdAt: '2026-02-05T13:00:00Z' },
+  { id: 'records-design-1', siteId: 'flavor-records', agentId: 'design', title: 'Album grid layout', createdAt: '2026-02-05T13:00:00Z' },
 
   // Mise en Place
-  { id: 'mise-assistant-1', projectId: 'mise-en-place', agentId: 'assistant', title: 'Recipe card layout', createdAt: '2026-02-08T11:30:00Z' },
+  { id: 'mise-assistant-1', siteId: 'mise-en-place', agentId: 'assistant', title: 'Recipe card layout', createdAt: '2026-02-08T11:30:00Z' },
 
   // Ledger
-  { id: 'ledger-assistant-1', projectId: 'ledger', agentId: 'assistant', title: 'Invoice template', createdAt: '2026-02-10T09:30:00Z' },
-  { id: 'ledger-code-1', projectId: 'ledger', agentId: 'code', title: 'Payment status API', createdAt: '2026-02-11T10:00:00Z' },
+  { id: 'ledger-assistant-1', siteId: 'ledger', agentId: 'assistant', title: 'Invoice template', createdAt: '2026-02-10T09:30:00Z' },
+  { id: 'ledger-code-1', siteId: 'ledger', agentId: 'code', title: 'Payment status API', createdAt: '2026-02-11T10:00:00Z' },
 
   // Fuego Collective
-  { id: 'fuego-assistant-1', projectId: 'fuego-collective', agentId: 'assistant', title: 'Setting up the shop', createdAt: '2026-02-14T12:30:00Z' },
+  { id: 'fuego-assistant-1', siteId: 'fuego-collective', agentId: 'assistant', title: 'Setting up the shop', createdAt: '2026-02-14T12:30:00Z' },
 ]
 
 export const seedMessages: Message[] = [

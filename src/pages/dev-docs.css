@@ -1,0 +1,302 @@
+/* Shared styles for all dev documentation pages */
+
+/* Two-column layout */
+.dev-layout {
+  height: 100%;
+  align-items: stretch;
+  font-family: var(--font-family);
+  color: var(--color-frame-fg);
+}
+
+/* Sidebar nav */
+.dev-nav {
+  width: 200px;
+  padding: var(--space-s) var(--space-m);
+  border-inline-end: 1px solid var(--color-frame-border);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.dev-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dev-nav .nav-heading {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-frame-fg-muted);
+  margin: 0 0 var(--space-xs);
+}
+
+.dev-nav .nav-link {
+  display: block;
+  padding: var(--space-xxs) var(--space-xs);
+  border-radius: var(--radius-s);
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  text-decoration: none;
+  transition: background var(--duration-instant) var(--ease-default), color var(--duration-instant) var(--ease-default);
+}
+
+.dev-nav .nav-link:hover {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+}
+
+/* Components nav extras — category links + indented sub-items */
+.dev-nav .nav-category {
+  margin-block-end: var(--space-s);
+}
+
+.dev-nav .nav-category-link {
+  display: block;
+  padding: var(--space-xxs) var(--space-xs);
+  border-radius: var(--radius-s);
+  font-size: var(--font-size-m);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg-muted);
+  text-decoration: none;
+  transition: background var(--duration-instant) var(--ease-default), color var(--duration-instant) var(--ease-default);
+}
+
+.dev-nav .nav-category-link:hover {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+}
+
+.dev-nav .nav-category-link.router-link-active {
+  color: var(--color-frame-fg);
+  background: var(--color-frame-hover);
+}
+
+.dev-nav .nav-sub-link {
+  display: block;
+  padding: var(--space-xxs) var(--space-xs) var(--space-xxs) var(--space-m);
+  border-radius: var(--radius-s);
+  font-size: var(--font-size-s);
+  color: var(--color-frame-fg-muted);
+  text-decoration: none;
+  transition: background var(--duration-instant) var(--ease-default), color var(--duration-instant) var(--ease-default);
+}
+
+.dev-nav .nav-sub-link:hover {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+}
+
+/* Scrollable content area */
+.dev-main {
+  padding: var(--space-s) var(--space-xl);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* Section rhythm */
+.dev-main section {
+  margin-block-end: var(--space-xxxl);
+}
+
+/* Headings */
+.dev-main h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin-block-end: var(--space-xs);
+}
+
+.dev-main h3 {
+  font-size: var(--font-size-l);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg);
+  margin: var(--space-m) 0 var(--space-xxs);
+}
+
+.dev-main h3 code {
+  font-size: var(--font-size-s);
+  font-family: var(--font-family-mono);
+  background: var(--color-frame-hover);
+  padding: var(--space-xxxs) var(--space-xxs);
+  border-radius: var(--radius-s);
+  font-weight: var(--font-weight-regular);
+  margin-inline-start: var(--space-xxs);
+}
+
+.dev-main h4 {
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg-muted);
+  margin: var(--space-xs) 0 var(--space-xxs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Section descriptions */
+.section-desc {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  margin-block-end: var(--space-m);
+}
+
+.section-desc code {
+  font-size: var(--font-size-s);
+  background: var(--color-frame-hover);
+  padding: var(--space-xxxs) var(--space-xxs);
+  border-radius: var(--radius-s);
+  font-family: var(--font-family-mono);
+}
+
+/* Inline code in content */
+.dev-main code {
+  font-size: var(--font-size-s);
+  font-family: var(--font-family-mono);
+}
+
+/* Props table (component docs) */
+.props-table {
+  margin-block-end: var(--space-m);
+}
+
+.props-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-m);
+}
+
+.props-table th {
+  text-align: start;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg-muted);
+  padding: var(--space-xxs) var(--space-xs);
+  border-block-end: 1px solid var(--color-frame-border);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.props-table td {
+  padding: var(--space-xxs) var(--space-xs);
+  border-block-end: 1px solid var(--color-frame-hover);
+  color: var(--color-frame-fg);
+  vertical-align: top;
+}
+
+.props-table code {
+  background: var(--color-frame-hover);
+  padding: var(--space-xxxs) var(--space-xxs);
+  border-radius: var(--radius-s);
+}
+
+/* Token table (design system docs) */
+.token-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.token-table th {
+  text-align: start;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: var(--space-xxs) var(--space-xs);
+  border-block-end: 1px solid var(--color-frame-border);
+}
+
+.token-table td {
+  padding: var(--space-xxs) var(--space-xs);
+  border-block-end: 1px solid var(--color-frame-hover);
+  vertical-align: baseline;
+}
+
+.token-val {
+  font-family: var(--font-family-mono);
+  color: var(--color-frame-fg-muted);
+}
+
+/* Example sections (dark preview areas) */
+.example-section {
+  margin-block-end: var(--space-l);
+}
+
+.example-section--dark {
+  background: var(--color-chrome-bg);
+  border-radius: var(--radius-m);
+  padding: var(--space-s) var(--space-m) var(--space-m);
+  margin-block-start: var(--space-s);
+}
+
+.example-section--dark h3,
+.example-section--dark h4 {
+  color: var(--color-chrome-fg-muted);
+}
+
+.example-row {
+  margin-block-end: var(--space-xxxs);
+}
+
+/* Code block */
+.code-block {
+  background: var(--color-frame-hover);
+  border-radius: var(--radius-m);
+  padding: var(--space-xs) var(--space-s);
+  font-size: var(--font-size-s);
+  font-family: var(--font-family-mono);
+  color: var(--color-frame-fg);
+  overflow-x: auto;
+  margin-block-end: var(--space-m);
+  line-height: 1.6;
+}
+
+/* Status demo (dark context) */
+.status-demo-row {
+  margin-block-end: var(--space-xs);
+}
+
+.status-demo-label {
+  font-size: var(--font-size-s);
+  color: var(--color-chrome-fg-muted);
+}
+
+.status-demo-hint {
+  font-size: var(--font-size-s);
+  color: var(--color-chrome-fg-muted);
+  font-style: italic;
+}
+
+/* Icon grid */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-xxxs);
+}
+
+.icon-cell {
+  padding: var(--space-s) var(--space-xxs);
+  border-radius: var(--radius-m);
+  cursor: default;
+  transition: background var(--transition-hover);
+  color: var(--color-frame-fg);
+}
+
+.icon-cell:hover {
+  background: var(--color-frame-hover);
+}
+
+.icon-name {
+  font-size: var(--font-size-xs);
+  color: var(--color-frame-fg-muted);
+  text-align: center;
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+/* Card (architecture docs) */
+.card {
+  background: var(--color-frame-hover);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--color-frame-border);
+}

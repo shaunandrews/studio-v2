@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue'
-import { useProjects } from '@/data/useProjects'
+import { useSites } from '@/data/useSites'
 import { usePipeline } from '@/data/usePipeline'
 import SyncEmptyState from './sync/SyncEmptyState.vue'
 import SyncPipeline from './sync/SyncPipeline.vue'
@@ -9,11 +9,11 @@ import ConnectSiteModal from './sync/ConnectSiteModal.vue'
 import type { WpcomSite } from './sync/ConnectSiteModal.vue'
 
 const props = defineProps<{
-  projectId: string
+  siteId: string
 }>()
 
-const projectIdRef = toRef(props, 'projectId')
-const { projects } = useProjects()
+const siteIdRef = toRef(props, 'siteId')
+const { sites } = useSites()
 const {
   hasPipeline,
   syncModalOpen,
@@ -28,9 +28,9 @@ const {
   closeSyncModal,
   startSync,
   pipeline,
-} = usePipeline(projectIdRef)
+} = usePipeline(siteIdRef)
 
-const project = computed(() => projects.value.find(p => p.id === props.projectId))
+const site = computed(() => sites.value.find(p => p.id === props.siteId))
 
 const syncActionLabel = computed(() => {
   if (!syncAction.value) return ''
@@ -53,11 +53,11 @@ const syncSourceLabel = computed(() => {
 })
 
 const syncSourceUrl = computed(() => {
-  if (!syncAction.value) return project.value?.url ?? 'localhost'
+  if (!syncAction.value) return site.value?.url ?? 'localhost'
   if (syncAction.value.verb === 'pull') {
     return pipeline.value.find(s => s.id === syncAction.value!.fromStage)?.site?.url
   }
-  return syncAction.value.fromStage === 'local' ? (project.value?.url ?? 'localhost') : pipeline.value.find(s => s.id === syncAction.value!.fromStage)?.site?.url
+  return syncAction.value.fromStage === 'local' ? (site.value?.url ?? 'localhost') : pipeline.value.find(s => s.id === syncAction.value!.fromStage)?.site?.url
 })
 
 const syncDestLabel = computed(() => {
@@ -68,7 +68,7 @@ const syncDestLabel = computed(() => {
 
 const syncDestUrl = computed(() => {
   if (!syncAction.value) return undefined
-  if (syncAction.value.verb === 'pull') return project.value?.url ?? 'localhost'
+  if (syncAction.value.verb === 'pull') return site.value?.url ?? 'localhost'
   return pipeline.value.find(s => s.id === syncAction.value!.toStage)?.site?.url
 })
 
@@ -113,9 +113,9 @@ function handleSyncFromCard(payload: { verb: 'push' | 'pull'; envId: string }) {
     <SyncEmptyState v-if="!hasPipeline" @setup="setupDefaultPipeline" />
     <SyncPipeline
       v-else
-      :project-id="projectId"
-      :project-status="project?.status ?? 'stopped'"
-      :project-url="project?.url ?? 'localhost'"
+      :site-id="siteId"
+      :site-status="site?.status ?? 'stopped'"
+      :site-url="site?.url ?? 'localhost'"
     />
     <ConnectSiteModal
       :open="connectModalOpen"
@@ -135,7 +135,7 @@ function handleSyncFromCard(payload: { verb: 'push' | 'pull'; envId: string }) {
       :dest-url="syncDestUrl"
       :default-env-id="syncAction?.fromStage"
       :environments="connectedEnvironments"
-      :local-url="project?.url ?? 'localhost'"
+      :local-url="site?.url ?? 'localhost'"
       @close="closeSyncModal"
       @start="handleSync"
       @start-sync="handleSyncFromCard"

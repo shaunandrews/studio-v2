@@ -1,6 +1,6 @@
-import type { Project } from './types'
+import type { Site } from './types'
 
-export const seedProjects: Project[] = [
+export const seedProjects: Site[] = [
   {
     id: 'downstreet-cafe',
     name: 'Downstreet Café',

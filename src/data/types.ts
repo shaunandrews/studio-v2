@@ -1,12 +1,12 @@
-export type ProjectStatus = 'running' | 'stopped' | 'loading'
+export type SiteStatus = 'running' | 'stopped' | 'loading'
 
 export type MockLayout = 'cafe' | 'portfolio' | 'blog'
 
-export interface Project {
+export interface Site {
   id: string
   name: string
   favicon: string
-  status: ProjectStatus
+  status: SiteStatus
   url: string
   createdAt: string
   description?: string
@@ -60,7 +60,7 @@ export interface PipelineStage {
   aheadCount?: number
 }
 
-export type AgentId = 'claude-code' | 'codex' | 'cursor' | 'opencode' | 'assistant' | 'code' | 'design'
+export type AgentId = 'wpcom' | 'claude-code' | 'codex' | 'cursor' | 'opencode' | 'assistant' | 'code' | 'design'
 
 export interface Agent {
   id: AgentId
@@ -68,11 +68,14 @@ export interface Agent {
   description: string
   icon?: string
   avatar?: string
+  installed?: boolean
+  url?: string
+  installHint?: string
 }
 
 export interface Conversation {
   id: string
-  projectId: string | null
+  siteId: string | null
   agentId: AgentId
   title?: string
   createdAt: string
@@ -187,7 +190,7 @@ export interface PreviewInvite {
 
 export interface PreviewSite {
   id: string
-  projectId: string
+  siteId: string
   name: string
   url: string
   createdAt: string
@@ -206,7 +209,7 @@ export interface PreviewOperation {
   id: string
   type: PreviewOperationType
   previewId?: string
-  projectId: string
+  siteId: string
   progress: number
   detail: string
   status: 'pending' | 'fulfilled' | 'rejected'

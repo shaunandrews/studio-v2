@@ -12,7 +12,7 @@ const props = defineProps<{
   role: 'user' | 'agent'
   content: string | ContentBlock[]
   agentId?: AgentId
-  projectId?: string
+  siteId?: string
 }>()
 
 const normalizedContent = computed<ContentBlock[]>(() =>
@@ -96,8 +96,11 @@ const normalizedContent = computed<ContentBlock[]>(() =>
 .chat-message--user .chat-message-body {
   width: fit-content;
   max-width: min(100%, 620px);
-  border-radius: var(--radius-m);
-  background: var(--color-frame-bg-secondary);
+  border-start-start-radius: var(--radius-xl);
+  border-start-end-radius: var(--radius-xl);
+  border-end-start-radius: var(--radius-xl);
+  border-end-end-radius: var(--radius-s);
+  background: var(--color-frame-hover);
   padding: var(--space-xs) var(--space-s);
 }
 

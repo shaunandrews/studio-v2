@@ -305,9 +305,9 @@ const vIndeterminate: Directive<HTMLInputElement, boolean> = {
 
 function envColor(label?: string): string {
   const l = (label ?? '').toLowerCase()
-  if (l === 'production') return 'var(--color-env-production)'
-  if (l === 'staging') return 'var(--color-env-staging)'
-  return 'var(--color-env-local)'
+  if (l === 'production') return 'var(--color-env-production-bg)'
+  if (l === 'staging') return 'var(--color-env-staging-bg)'
+  return 'var(--color-env-local-bg)'
 }
 
 // ── Scroll-aware borders ──
@@ -568,7 +568,7 @@ function onSync() {
 }
 
 .sync-modal__close:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
@@ -585,7 +585,7 @@ function onSync() {
 .sync-modal__description {
   font-size: var(--font-size-s);
   line-height: 16px;
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   margin: 0;
 }
 
@@ -640,7 +640,7 @@ function onSync() {
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   font-family: inherit;
   font-size: var(--font-size-m);
   line-height: 20px;
@@ -663,7 +663,7 @@ function onSync() {
 
 .sync-env-picker__label {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   white-space: nowrap;
 }
 
@@ -800,8 +800,8 @@ function onSync() {
 }
 
 .toggle__input:checked + .toggle__track {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--color-frame-theme);
+  border-color: var(--color-frame-theme);
 }
 
 .toggle__track::before {
@@ -872,7 +872,7 @@ function onSync() {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  accent-color: var(--color-primary);
+  accent-color: var(--color-frame-theme);
 }
 
 .tree-row__icon {
@@ -883,7 +883,7 @@ function onSync() {
 .tree-row__label {
   font-size: var(--font-size-m);
   line-height: 20px;
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -903,7 +903,7 @@ function onSync() {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  accent-color: var(--color-primary);
+  accent-color: var(--color-frame-theme);
 }
 
 .table-row__icon {
@@ -914,6 +914,6 @@ function onSync() {
 .table-row__label {
   font-size: var(--font-size-m);
   line-height: 20px;
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
 }
 </style>

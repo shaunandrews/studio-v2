@@ -105,7 +105,7 @@ function submit() {
 .field-label {
   font-size: var(--font-size-s);
   font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 .field-input,
@@ -124,8 +124,8 @@ function submit() {
 
 .field-input:focus,
 .field-select:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border-color: var(--color-frame-theme);
+  box-shadow: 0 0 0 1px var(--color-frame-theme);
 }
 
 .field-input::placeholder {
@@ -141,7 +141,7 @@ function submit() {
   padding: 0;
   font-family: inherit;
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   cursor: pointer;
   transition: color var(--transition-hover);
 }

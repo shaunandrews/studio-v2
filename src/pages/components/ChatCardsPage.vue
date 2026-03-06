@@ -9,7 +9,7 @@ import PostDraftCard from '@/components/composites/chat-cards/PostDraftCard.vue'
 import MarkdownText from '@/components/composites/renderers/MarkdownText.vue'
 import Text from '@/components/primitives/Text.vue'
 import type { PluginCardData, SettingsCardData, ProgressCardData, PageCardData, PostDraftCardData, CardUiState } from '@/data/types'
-import '@/pages/components/components-docs.css'
+import '@/pages/dev-docs.css'
 
 const pluginAvailable: PluginCardData = {
   name: 'WooCommerce',

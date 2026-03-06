@@ -2,45 +2,45 @@ import { ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 
 // Module-level state (singleton — shared across all components)
-const transitionProjectId = ref<string | null>(null)
+const transitionSiteId = ref<string | null>(null)
 
 /**
- * View Transitions composable for home ↔ project navigation.
- * @param projectRouteName — the route name for project views (e.g. 'project' or 'site')
+ * View Transitions composable for home ↔ site navigation.
+ * @param siteRouteName — the route name for site views (e.g. 'site')
  */
-export function useProjectTransition(projectRouteName = 'project') {
+export function useSiteTransition(siteRouteName = 'site') {
   const router = useRouter()
 
-  async function navigateToProject(projectId: string) {
+  async function navigateToSite(siteId: string) {
     // Already viewing a project — just swap, no transition
     const currentMode = router.currentRoute.value.meta.mode
-    if (currentMode === 'project') {
-      router.push({ name: projectRouteName, params: { id: projectId } })
+    if (currentMode === 'site') {
+      router.push({ name: siteRouteName, params: { id: siteId } })
       return
     }
 
-    transitionProjectId.value = projectId
+    transitionSiteId.value = siteId
 
     if (!(document as any).startViewTransition) {
-      router.push({ name: projectRouteName, params: { id: projectId } })
+      router.push({ name: siteRouteName, params: { id: siteId } })
       return
     }
 
     await nextTick() // card gets view-transition-name before capture
 
     const transition = (document as any).startViewTransition(async () => {
-      await router.push({ name: projectRouteName, params: { id: projectId } })
+      await router.push({ name: siteRouteName, params: { id: siteId } })
       await nextTick()
     })
 
     transition.finished.then(() => {
-      transitionProjectId.value = null
+      transitionSiteId.value = null
     })
   }
 
   async function navigateHome() {
     const currentId = router.currentRoute.value.params.id as string
-    transitionProjectId.value = currentId
+    transitionSiteId.value = currentId
 
     if (!(document as any).startViewTransition) {
       router.push({ name: 'home' })
@@ -53,11 +53,11 @@ export function useProjectTransition(projectRouteName = 'project') {
     })
 
     transition.finished.then(() => {
-      transitionProjectId.value = null
+      transitionSiteId.value = null
     })
   }
 
-  return { transitionProjectId, navigateToProject, navigateHome }
+  return { transitionSiteId, navigateToSite, navigateHome }
 }
 
-export { transitionProjectId }
+export { transitionSiteId }

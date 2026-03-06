@@ -85,9 +85,9 @@ function envLabel(type: WpcomSite['environmentType']): string {
 }
 
 function envColor(type: WpcomSite['environmentType']): string {
-  if (type === 'staging') return 'var(--color-env-staging)'
-  if (type === 'production') return 'var(--color-env-production)'
-  return 'var(--color-env-local)'
+  if (type === 'staging') return 'var(--color-env-staging-bg)'
+  if (type === 'production') return 'var(--color-env-production-bg)'
+  return 'var(--color-env-local-bg)'
 }
 
 function isSelectable(site: WpcomSite): boolean {
@@ -215,7 +215,7 @@ function onConnect() {
 }
 
 .csm__close:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
@@ -289,12 +289,12 @@ function onConnect() {
 }
 
 .csm__site:hover:not(.is-disabled) {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 .csm__site.is-selected {
-  border-color: var(--color-primary);
-  background: var(--color-frame-bg-secondary);
+  border-color: var(--color-frame-theme);
+  background: var(--color-frame-hover);
 }
 
 .csm__site.is-disabled {
@@ -378,7 +378,7 @@ function onConnect() {
   align-items: center;
   gap: 4px;
   font-size: var(--font-size-s);
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
   text-decoration: none;
 }
 

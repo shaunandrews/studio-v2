@@ -56,7 +56,7 @@ const statusLabel = computed(() => {
 }
 
 .post-excerpt {
-  color: var(--color-text-secondary);
+  color: var(--color-frame-fg-muted);
   font-size: var(--font-size-s);
   line-height: var(--line-height-normal);
 }
@@ -69,13 +69,13 @@ const statusLabel = computed(() => {
 }
 
 .taxonomy-pill--category {
-  background: var(--color-surface-secondary);
-  color: var(--color-text-secondary);
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg-muted);
 }
 
 .taxonomy-pill--tag {
   background: transparent;
-  border: 1px solid var(--color-surface-border);
-  color: var(--color-text-muted);
+  border: 1px solid var(--color-frame-border);
+  color: var(--color-frame-fg-muted);
 }
 </style>

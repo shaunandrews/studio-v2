@@ -86,7 +86,7 @@ defineEmits<{
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--color-primary);
+  background: var(--color-frame-theme);
   opacity: 0.6;
   flex-shrink: 0;
 }
@@ -125,7 +125,7 @@ defineEmits<{
 
 .previews-empty__subtext {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   margin: 0;
 }
 </style>

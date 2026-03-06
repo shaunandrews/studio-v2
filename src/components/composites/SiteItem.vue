@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { Project } from '@/data/types'
+import type { Site } from '@/data/types'
 import StatusIndicator from '@/components/primitives/StatusIndicator.vue'
-import { useProjects } from '@/data/useProjects'
+import { useSites } from '@/data/useSites'
 
 const props = defineProps<{
-  project: Project
+  site: Site
   active?: boolean
 }>()
 
@@ -12,12 +12,12 @@ defineEmits<{
   select: [id: string]
 }>()
 
-const { setStatus } = useProjects()
+const { setStatus } = useSites()
 
 function toggleStatus() {
-  const target = props.project.status === 'running' ? 'stopped' : 'running'
-  setStatus(props.project.id, 'loading')
-  setTimeout(() => setStatus(props.project.id, target), 1200)
+  const target = props.site.status === 'running' ? 'stopped' : 'running'
+  setStatus(props.site.id, 'loading')
+  setTimeout(() => setStatus(props.site.id, target), 1200)
 }
 </script>
 
@@ -25,15 +25,15 @@ function toggleStatus() {
   <div
     class="site-list-item"
     :class="{ active }"
-    @click="$emit('select', project.id)"
+    @click="$emit('select', site.id)"
   >
     <div class="site-icon">
-      <img class="site-icon-img" :src="project.favicon" alt="" />
+      <img class="site-icon-img" :src="site.favicon" alt="" />
     </div>
-    <span class="site-name">{{ project.name }}</span>
+    <span class="site-name">{{ site.name }}</span>
     <StatusIndicator
       class="site-status"
-      :status="project.status"
+      :status="site.status"
       @toggle="toggleStatus"
       @click.stop
     />
@@ -48,18 +48,18 @@ function toggleStatus() {
   padding: 4px 2px 4px 4px;
   border-radius: 6px;
   cursor: pointer;
-  color: var(--color-chrome-text-secondary);
+  color: var(--color-chrome-fg-muted);
   transition: background var(--duration-instant) var(--ease-default);
 }
 
 .site-list-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .site-list-item.active {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .site-icon {

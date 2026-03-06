@@ -2,15 +2,15 @@
 import { ref, computed, watch, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SiteToolbar from '@/components/composites/SiteToolbar.vue'
-import ChatList from '@/components/features/ChatList.vue'
+import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import InputChat from '@/components/composites/InputChat.vue'
 import SyncScreen from '@/components/features/SyncScreen.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
-import ProjectSettingsScreen from '@/components/features/ProjectSettingsScreen.vue'
+import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
-import { useProjects, ALL_SITES_ID } from '@/data/useProjects'
+import { useSites, ALL_SITES_ID } from '@/data/useSites'
 import { useConversations } from '@/data/useConversations'
 import { useInputActions } from '@/data/useInputActions'
 import type { ActionButton, Conversation } from '@/data/types'
@@ -21,32 +21,32 @@ defineProps<{
 
 const route = useRoute()
 const router = useRouter()
-const { projects, activeProjectId, setStatus } = useProjects()
+const { sites, activeSiteId, setStatus } = useSites()
 
 const loadingTarget = ref<'running' | 'stopped'>('running')
 
 function toggleStatus() {
-  if (!currentProject.value || currentProject.value.status === 'loading') return
-  const target = currentProject.value.status === 'running' ? 'stopped' : 'running'
+  if (!currentSite.value || currentSite.value.status === 'loading') return
+  const target = currentSite.value.status === 'running' ? 'stopped' : 'running'
   loadingTarget.value = target
-  setStatus(currentProject.value.id, 'loading')
-  setTimeout(() => setStatus(currentProject.value!.id, target), 1200)
+  setStatus(currentSite.value.id, 'loading')
+  setTimeout(() => setStatus(currentSite.value!.id, target), 1200)
 }
 const { conversations, getConversations, getMessages, sendMessage, streamAgentMessage, ensureConversation } = useConversations()
 const { getActions, clearActions } = useInputActions()
 
-const currentProject = computed(() =>
-  projects.value.find(p => p.id === activeProjectId.value)
+const currentSite = computed(() =>
+  sites.value.find(p => p.id === activeSiteId.value)
 )
 
 const isAllSites = computed(() => route.name === 'all-sites')
 
 watch(() => route.name === 'all-sites' ? ALL_SITES_ID : route.params.id as string, (newId) => {
-  activeProjectId.value = newId
+  activeSiteId.value = newId
 }, { immediate: true })
 
 onBeforeUnmount(() => {
-  activeProjectId.value = null
+  activeSiteId.value = null
 })
 
 // -- Screen state (derived from route) --
@@ -54,12 +54,12 @@ onBeforeUnmount(() => {
 type Screen = 'tasks' | 'sync' | 'previews' | 'import-export' | 'settings'
 
 const ROUTE_TO_SCREEN: Record<string, Screen> = {
-  'project-tasks': 'tasks',
-  'project-task': 'tasks',
-  'project-sync': 'sync',
-  'project-previews': 'previews',
-  'project-import-export': 'import-export',
-  'project-settings': 'settings',
+  'site-tasks': 'tasks',
+  'site-task': 'tasks',
+  'site-sync': 'sync',
+  'site-previews': 'previews',
+  'site-import-export': 'import-export',
+  'site-settings': 'settings',
 }
 
 const currentScreen = computed<Screen>(() =>
@@ -74,15 +74,15 @@ const selectedConvoId = computed<string | null>(() =>
 
 // Auto-select first conversation when landing on bare tasks route
 watch(
-  [() => route.name, () => activeProjectId.value],
-  ([routeName, projectId]) => {
-    if (routeName !== 'project-tasks' || !projectId) return
+  [() => route.name, () => activeSiteId.value],
+  ([routeName, siteId]) => {
+    if (routeName !== 'site-tasks' || !siteId) return
     const convos = conversations.value
-      .filter(c => c.projectId === projectId && !c.archived)
+      .filter(c => c.siteId === siteId && !c.archived)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     const firstId = convos[0]?.id
     if (firstId) {
-      router.replace({ name: 'project-task', params: { id: projectId, convoId: firstId } })
+      router.replace({ name: 'site-task', params: { id: siteId, convoId: firstId } })
     }
   },
   { immediate: true },
@@ -113,32 +113,32 @@ watch(inputWrapRef, (el, _, onCleanup) => {
 const draft = ref('')
 
 function onNavigate(screen: string) {
-  const id = activeProjectId.value
+  const id = activeSiteId.value
   if (!id) return
-  const routeName = screen === 'tasks' ? 'project-tasks' : `project-${screen}`
+  const routeName = screen === 'tasks' ? 'site-tasks' : `site-${screen}`
   router.push({ name: routeName, params: { id } })
 }
 
 function onSelectChat(convoId: string) {
-  const id = activeProjectId.value
+  const id = activeSiteId.value
   if (!id) return
   draft.value = ''
-  router.push({ name: 'project-task', params: { id, convoId } })
+  router.push({ name: 'site-task', params: { id, convoId } })
   nextTick(() => inputChatRef.value?.focus())
 }
 
 function onNewChat() {
-  const projectId = activeProjectId.value
-  if (!projectId) return
+  const siteId = activeSiteId.value
+  if (!siteId) return
   const conv: Conversation = {
     id: `conv-${Date.now()}`,
-    projectId,
+    siteId,
     agentId: 'assistant',
     createdAt: new Date().toISOString(),
   }
   conversations.value.push(conv)
   draft.value = ''
-  router.push({ name: 'project-task', params: { id: projectId, convoId: conv.id } })
+  router.push({ name: 'site-task', params: { id: siteId, convoId: conv.id } })
   nextTick(() => inputChatRef.value?.focus())
 }
 
@@ -170,33 +170,33 @@ function onAction(action: ActionButton) {
 </script>
 
 <template>
-  <div class="project-page vstack">
-    <!-- Nested route outlet (children render null — ProjectPage owns the layout) -->
+  <div class="site-page vstack">
+    <!-- Nested route outlet (children render null — SitePage owns the layout) -->
     <router-view />
     <SiteToolbar
-      v-if="currentProject || isAllSites"
-      :title="isAllSites ? 'All Sites' : currentProject!.name"
-      :project-id="isAllSites ? undefined : currentProject!.id"
-      :favicon="isAllSites ? undefined : currentProject!.favicon"
-      :status="isAllSites ? undefined : currentProject!.status"
+      v-if="currentSite || isAllSites"
+      :title="isAllSites ? 'All Sites' : currentSite!.name"
+      :site-id="isAllSites ? undefined : currentSite!.id"
+      :favicon="isAllSites ? undefined : currentSite!.favicon"
+      :status="isAllSites ? undefined : currentSite!.status"
       :sidebar-hidden="sidebarHidden"
       :is-all-sites="isAllSites"
       :loading-target="loadingTarget"
       @toggle-status="toggleStatus"
-      @switch-project="(id) => {
-        const screen = currentScreen === 'tasks' ? 'project-tasks' : `project-${currentScreen}`
+      @switch-site="(id) => {
+        const screen = currentScreen === 'tasks' ? 'site-tasks' : `site-${currentScreen}`
         router.push({ name: screen, params: { id } })
       }"
     />
     <div class="panes">
-      <div class="pane pane-chat">
-        <ChatList
-          v-if="activeProjectId"
-          :project-id="activeProjectId"
+      <div class="pane pane-site-navigation">
+        <SiteNavigation
+          v-if="activeSiteId"
+          :site-id="activeSiteId"
           :selected-id="currentScreen === 'tasks' ? selectedConvoId : null"
           :active-screen="currentScreen"
-          :site-name="isAllSites ? 'All Sites' : currentProject?.name"
-          :site-favicon="isAllSites ? undefined : currentProject?.favicon"
+          :site-name="isAllSites ? 'All Sites' : currentSite?.name"
+          :site-favicon="isAllSites ? undefined : currentSite?.favicon"
           :is-all-sites="isAllSites"
           :sidebar-hidden="sidebarHidden"
           @select="onSelectChat"
@@ -218,12 +218,12 @@ function onAction(action: ActionButton) {
               </ul>
             </div>
           </div>
-          <ChatMessageList v-else :messages="currentMessages" :project-id="activeProjectId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" />
+          <ChatMessageList v-else :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" />
           <div ref="inputWrapRef" class="detail-input" :class="{ 'is-new-task': isNewTask }">
             <InputChat
               ref="inputChatRef"
               v-model="draft"
-              :project-id="activeProjectId"
+              :site-id="activeSiteId"
               :placeholder="isNewTask ? 'Describe what this task should do...' : 'Ask anything...'"
               :actions="inputActions"
               @send="onSend"
@@ -232,10 +232,10 @@ function onAction(action: ActionButton) {
             />
           </div>
         </template>
-        <SyncScreen v-else-if="!isAllSites && currentScreen === 'sync'" :project-id="activeProjectId!" />
-        <PreviewsScreen v-else-if="!isAllSites && currentScreen === 'previews'" :project-id="activeProjectId!" />
-        <ImportExportScreen v-else-if="!isAllSites && currentScreen === 'import-export'" :project-id="activeProjectId!" />
-        <ProjectSettingsScreen v-else-if="!isAllSites && currentScreen === 'settings'" :project-id="activeProjectId!" />
+        <SyncScreen v-else-if="!isAllSites && currentScreen === 'sync'" :site-id="activeSiteId!" />
+        <PreviewsScreen v-else-if="!isAllSites && currentScreen === 'previews'" :site-id="activeSiteId!" />
+        <ImportExportScreen v-else-if="!isAllSites && currentScreen === 'import-export'" :site-id="activeSiteId!" />
+        <SiteSettingsScreen v-else-if="!isAllSites && currentScreen === 'settings'" :site-id="activeSiteId!" />
         <div v-else class="detail-empty">
           <span class="detail-empty__text">Select a task or start a new one</span>
         </div>
@@ -247,7 +247,7 @@ function onAction(action: ActionButton) {
 </template>
 
 <style scoped>
-.project-page {
+.site-page {
   height: 100%;
 }
 
@@ -261,7 +261,7 @@ function onAction(action: ActionButton) {
   overflow: hidden;
 }
 
-.pane-chat {
+.pane-site-navigation {
   flex: 0 0 333px;
   border-inline-end: 1px solid var(--color-frame-border);
 }
@@ -281,7 +281,7 @@ function onAction(action: ActionButton) {
   max-width: 720px;
   width: 100%;
   margin-inline: auto;
-  padding: var(--space-s) 0;
+  padding: var(--space-m) 0;
   z-index: 1;
 }
 
@@ -337,7 +337,7 @@ function onAction(action: ActionButton) {
 
 .new-task-welcome__examples li {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   line-height: 1.4;
 }
 

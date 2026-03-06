@@ -8,7 +8,7 @@ defineProps<{
 
 <template>
   <div class="progress-card">
-    <div class="progress-card__body">
+    <div class="progress-card__main">
       <span class="progress-card__detail">{{ operation.detail }}</span>
       <div class="progress-card__track">
         <div
@@ -17,45 +17,62 @@ defineProps<{
         />
       </div>
     </div>
+    <div class="progress-card__footer">
+      Your preview link will appear shortly
+    </div>
   </div>
 </template>
 
 <style scoped>
 .progress-card {
   display: flex;
-  align-items: center;
-  padding: var(--space-m);
-  background: var(--color-frame-bg);
-  border: 1px dashed var(--color-frame-border);
+  flex-direction: column;
+  background: var(--color-frame-fill);
+  border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
+  overflow: hidden;
 }
 
-.progress-card__body {
-  flex: 1;
+.progress-card__main {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xxs);
-  min-width: 0;
+  gap: var(--space-s);
+  padding-block-start: var(--space-m);
+  padding-block-end: var(--space-s);
+  padding-inline-start: var(--space-xl);
+  padding-inline-end: var(--space-s);
+  background: var(--color-frame-bg);
+  border-end-start-radius: var(--radius-m);
+  border-end-end-radius: var(--radius-m);
+  border-block-end: 1px solid var(--color-frame-border);
 }
 
 .progress-card__detail {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
+  font-size: var(--font-size-l);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg);
 }
 
 .progress-card__track {
   width: 100%;
-  max-width: 200px;
   height: 4px;
   background: var(--color-frame-border);
-  border-radius: var(--radius-s);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .progress-card__fill {
   height: 100%;
-  background: var(--color-primary);
-  border-radius: var(--radius-s);
-  transition: width 150ms ease;
+  background: var(--color-frame-theme);
+  border-radius: var(--radius-full);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+.progress-card__footer {
+  padding-inline: var(--space-xl);
+  padding-block: var(--space-xs);
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  opacity: 0.5;
 }
 </style>

@@ -1,48 +1,62 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import '@/pages/components/components-docs.css'
+import { watch, nextTick } from 'vue'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
+import '@/pages/dev-docs.css'
+
+const route = useRoute()
+const router = useRouter()
 
 const categories = [
   {
     label: 'Primitives',
-    route: '/components/primitives',
+    route: '/dev/components/primitives',
     items: [
-      { id: 'avatar', label: 'Avatar' },
       { id: 'badge', label: 'Badge' },
-      { id: 'browser-bar', label: 'BrowserBar' },
       { id: 'button', label: 'Button' },
+      { id: 'button-split', label: 'ButtonSplit' },
       { id: 'context-ring', label: 'ContextRing' },
       { id: 'dropdown', label: 'Dropdown' },
+      { id: 'flyout-menu', label: 'FlyoutMenu' },
+      { id: 'modal', label: 'Modal' },
       { id: 'status-indicator', label: 'StatusIndicator' },
       { id: 'text', label: 'Text' },
-      { id: 'titlebar', label: 'Titlebar' },
       { id: 'tooltip', label: 'Tooltip' },
       { id: 'wpicon', label: 'WPIcon' },
     ],
   },
   {
     label: 'Composites',
-    route: '/components/composites',
+    route: '/dev/components/composites',
     items: [
       { id: 'chat-message', label: 'ChatMessage' },
+      { id: 'chat-message-list', label: 'ChatMessageList' },
+      { id: 'global-menu', label: 'GlobalMenu' },
       { id: 'input-chat', label: 'InputChat' },
-      { id: 'panel', label: 'Panel' },
       { id: 'panel-toolbar', label: 'PanelToolbar' },
-      { id: 'project-item', label: 'ProjectItem' },
-      { id: 'tab-bar', label: 'TabBar' },
+      { id: 'preferences-modal', label: 'PreferencesModal' },
+      { id: 'site-item', label: 'SiteItem' },
+      { id: 'screen-header', label: 'ScreenHeader' },
+      { id: 'screen-layout', label: 'ScreenLayout' },
+      { id: 'shortcuts-modal', label: 'ShortcutsModal' },
+      { id: 'site-toolbar', label: 'SiteToolbar' },
     ],
   },
   {
     label: 'Features',
-    route: '/components/features',
+    route: '/dev/components/features',
     items: [
-      { id: 'agent-panel', label: 'AgentPanel' },
-      { id: 'project-list', label: 'ProjectList' },
+      { id: 'site-navigation', label: 'SiteNavigation' },
+      { id: 'site-list', label: 'SiteList' },
+      { id: 'site-settings', label: 'SiteSettings' },
+      { id: 'import-export', label: 'ImportExport' },
+      { id: 'previews', label: 'Previews' },
+      { id: 'sync', label: 'Sync' },
+      { id: 'add-site', label: 'Add Site' },
     ],
   },
   {
     label: 'Chat Cards',
-    route: '/components/chat-cards',
+    route: '/dev/components/chat-cards',
     items: [
       { id: 'chat-card', label: 'ChatCard' },
       { id: 'plugin-card', label: 'PluginCard' },
@@ -54,22 +68,41 @@ const categories = [
     ],
   },
 ]
+
+function handleNavClick(e: Event, catRoute: string, itemId: string) {
+  e.preventDefault()
+  const target = `${catRoute}#${itemId}`
+  if (route.path === catRoute) {
+    const el = document.getElementById(itemId)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  } else {
+    router.push(target)
+  }
+}
+
+watch(() => route.hash, async (hash) => {
+  if (hash) {
+    await nextTick()
+    const el = document.querySelector(hash)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+})
 </script>
 
 <template>
-  <div class="components-layout hstack">
-    <nav class="components-nav">
+  <div class="dev-layout hstack">
+    <nav class="dev-nav" style="width: 220px">
       <h2 class="nav-heading">Components</h2>
       <div v-for="cat in categories" :key="cat.label" class="nav-category">
         <RouterLink :to="cat.route" class="nav-category-link">{{ cat.label }}</RouterLink>
         <ul class="vstack gap-xxxs">
           <li v-for="item in cat.items" :key="item.id">
-            <a :href="`${cat.route}#${item.id}`" class="nav-link">{{ item.label }}</a>
+            <a :href="`${cat.route}#${item.id}`" class="nav-sub-link" @click="handleNavClick($event, cat.route, item.id)">{{ item.label }}</a>
           </li>
         </ul>
       </div>
     </nav>
-    <div class="components flex-1 min-w-0">
+    <div class="dev-main flex-1 min-w-0">
       <RouterView />
     </div>
   </div>

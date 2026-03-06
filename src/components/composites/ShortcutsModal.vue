@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { closeSmall } from '@wordpress/icons'
 import Modal from '@/components/primitives/Modal.vue'
-import Button from '@/components/primitives/Button.vue'
 
 defineProps<{
   open: boolean
@@ -47,19 +45,8 @@ const groups = computed<ShortcutGroup[]>(() => [
 </script>
 
 <template>
-  <Modal :open="open" width="420px" @close="emit('close')">
+  <Modal :open="open" width="420px" title="Keyboard Shortcuts" @close="emit('close')">
     <div class="shortcuts vstack">
-      <div class="shortcuts__header hstack">
-        <h2 class="shortcuts__title">Keyboard Shortcuts</h2>
-        <Button
-          :icon="closeSmall"
-          variant="tertiary"
-          size="small"
-          @click="emit('close')"
-        />
-      </div>
-
-      <div class="shortcuts__body vstack">
         <div
           v-for="group in groups"
           :key="group.title"
@@ -78,29 +65,12 @@ const groups = computed<ShortcutGroup[]>(() => [
             </span>
           </div>
         </div>
-      </div>
     </div>
   </Modal>
 </template>
 
 <style scoped>
-.shortcuts__header {
-  align-items: center;
-  justify-content: space-between;
-  padding-block: var(--space-s) var(--space-xs);
-  padding-inline: var(--space-m) var(--space-s);
-}
-
-.shortcuts__title {
-  margin: 0;
-  font-size: var(--font-size-l);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-}
-
-.shortcuts__body {
-  padding-inline: var(--space-m);
-  padding-block-end: var(--space-m);
+.shortcuts {
   gap: var(--space-m);
 }
 
@@ -127,7 +97,7 @@ const groups = computed<ShortcutGroup[]>(() => [
 
 .shortcuts__label {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 .shortcuts__keys {
@@ -142,7 +112,7 @@ const groups = computed<ShortcutGroup[]>(() => [
   min-width: 24px;
   height: 24px;
   padding-inline: var(--space-xxs);
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-s);
   font-family: inherit;

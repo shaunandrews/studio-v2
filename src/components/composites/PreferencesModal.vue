@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { file as fileIcon, check } from '@wordpress/icons'
 import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
+import PrefsNavItem from '@/components/composites/PrefsNavItem.vue'
+import Text from '@/components/primitives/Text.vue'
+import Dropdown from '@/components/primitives/Dropdown.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
-import { codingAgents } from '@/data/agents'
+import { codingAgents, builtInAgent, thirdPartyAgents } from '@/data/agents'
 
 const props = defineProps<{
   open: boolean
@@ -92,15 +95,107 @@ function setModel(model: string) {
   localStorage.setItem(MODEL_KEY, model)
 }
 
+const modelGroups = [
+  {
+    label: 'Models',
+    options: [
+      { value: 'claude-opus-4-6', label: 'Claude Opus 4.6' },
+      { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6' },
+      { value: 'claude-haiku-4-5', label: 'Claude Haiku 4.5' },
+    ],
+  },
+]
+
+// -- Language --
+
+const LANGUAGE_KEY = 'pref-language'
+const language = ref(localStorage.getItem(LANGUAGE_KEY) || 'en')
+
+const languageGroups = [
+  {
+    label: '',
+    options: [
+      { value: 'en', label: 'English' },
+      { value: 'es', label: 'Español' },
+      { value: 'fr', label: 'Français' },
+      { value: 'de', label: 'Deutsch' },
+      { value: 'it', label: 'Italiano' },
+      { value: 'pt-br', label: 'Português (Brasil)' },
+      { value: 'nl', label: 'Nederlands' },
+      { value: 'ru', label: 'Русский' },
+      { value: 'tr', label: 'Türkçe' },
+      { value: 'id', label: 'Bahasa Indonesia' },
+      { value: 'zh-cn', label: '简体中文' },
+      { value: 'zh-tw', label: '繁體中文' },
+      { value: 'ja', label: '日本語' },
+      { value: 'ko', label: '한국어' },
+      { value: 'ar', label: 'العربية' },
+      { value: 'he', label: 'עברית' },
+      { value: 'sv', label: 'Svenska' },
+      { value: 'pl', label: 'Polski' },
+      { value: 'th', label: 'ไทย' },
+      { value: 'ro', label: 'Română' },
+    ],
+  },
+]
+
+// -- Code editor --
+
+const EDITOR_KEY = 'pref-code-editor'
+const codeEditor = ref(localStorage.getItem(EDITOR_KEY) || 'vscode')
+
+const editorGroups = [
+  {
+    label: '',
+    options: [
+      { value: 'vscode', label: 'Visual Studio Code' },
+      { value: 'phpstorm', label: 'PhpStorm' },
+      { value: 'sublime', label: 'Sublime Text' },
+      { value: 'zed', label: 'Zed' },
+    ],
+  },
+]
+
+// -- Terminal --
+
+const TERMINAL_KEY = 'pref-terminal'
+const terminal = ref(localStorage.getItem(TERMINAL_KEY) || 'terminal')
+
+const terminalGroups = [
+  {
+    label: '',
+    options: [
+      { value: 'terminal', label: 'Terminal (macOS)' },
+      { value: 'iterm', label: 'iTerm2' },
+      { value: 'warp', label: 'Warp' },
+      { value: 'hyper', label: 'Hyper' },
+    ],
+  },
+]
+
+// -- CLI toggle --
+
+const CLI_KEY = 'pref-studio-cli'
+const cliEnabled = ref(localStorage.getItem(CLI_KEY) === 'true')
+
 // -- Default Agent --
 
 const AGENT_KEY = 'default-agent'
-const defaultAgent = ref(localStorage.getItem(AGENT_KEY) || 'claude-code')
+const defaultAgent = ref(localStorage.getItem(AGENT_KEY) || 'wpcom')
 
 function setAgent(agentId: string) {
   defaultAgent.value = agentId
   localStorage.setItem(AGENT_KEY, agentId)
 }
+
+const defaultAgentGroups = computed(() => [
+  {
+    label: '',
+    options: codingAgents
+      .filter(a => a.installed)
+      .map(a => ({ value: a.id, label: a.label })),
+  },
+])
 
 // -- Agent instructions --
 
@@ -111,25 +206,18 @@ const instructionFiles = [
 </script>
 
 <template>
-  <Modal :open="open" width="640px" @close="emit('close')">
+  <Modal :open="open" width="640px" title="Preferences" @close="emit('close')">
     <div class="prefs">
-      <div class="prefs__header">
-        <h2 class="prefs__title">Preferences</h2>
-        <button class="prefs__close" @click="emit('close')">&times;</button>
-      </div>
-
       <div class="prefs__body">
         <!-- Nav -->
         <nav class="prefs__nav">
-          <button
+          <PrefsNavItem
             v-for="tab in tabs"
             :key="tab.id"
-            class="prefs__nav-item"
-            :class="{ 'is-active': activeTab === tab.id }"
+            :label="tab.label"
+            :active="activeTab === tab.id"
             @click="activeTab = tab.id"
-          >
-            {{ tab.label }}
-          </button>
+          />
         </nav>
 
         <!-- Content -->
@@ -138,7 +226,7 @@ const instructionFiles = [
           <!-- ═══ General ═══ -->
           <template v-if="activeTab === 'general'">
             <div class="prefs__section">
-              <label class="prefs__label">Appearance</label>
+              <Text variant="caption" weight="semibold" class="prefs__label">Appearance</Text>
               <div class="prefs__appearance">
                 <button
                   v-for="mode in (['system', 'light', 'dark'] as const)"
@@ -148,67 +236,139 @@ const instructionFiles = [
                   @click="setAppearance(mode)"
                 >
                   <div class="prefs__appearance-preview" :class="`preview--${mode}`">
-                    <div class="preview__bar" />
-                    <div class="preview__body">
-                      <div class="preview__sidebar" />
-                      <div class="preview__content">
-                        <div class="preview__line" />
-                        <div class="preview__line preview__line--short" />
-                      </div>
-                    </div>
+                    <svg viewBox="0 0 139 53" fill="none" xmlns="http://www.w3.org/2000/svg" class="preview__svg">
+                      <!-- Dark background -->
+                      <rect width="139" height="53" fill="#131313" />
+                      <!-- Content panel -->
+                      <rect v-if="mode === 'light'" x="26" y="4" width="109" height="96" rx="4" fill="#fff" />
+                      <rect v-if="mode === 'dark'" x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" />
+                      <template v-if="mode === 'system'">
+                        <defs>
+                          <clipPath id="system-clip">
+                            <rect x="26" y="4" width="109" height="96" rx="4" />
+                          </clipPath>
+                        </defs>
+                        <rect x="26" y="4" width="109" height="96" rx="4" fill="#fff" />
+                        <rect x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" clip-path="url(#system-clip)" style="clip-path: polygon(100% 0, 0 100%, 100% 100%)" />
+                      </template>
+                      <!-- Sidebar items -->
+                      <rect x="3" y="6" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                      <rect x="3" y="12" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                      <rect x="3" y="18" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                      <rect x="3" y="24" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                      <!-- Status dots -->
+                      <circle cx="22.5" cy="7.5" r="1.5" fill="#1fd15b" />
+                      <circle cx="22.5" cy="13.5" r="1.5" fill="#1fd15b" />
+                      <circle cx="22.5" cy="19.5" r="1.5" fill="white" opacity="0.2" />
+                      <circle cx="22.5" cy="25.5" r="1.5" fill="#1fd15b" />
+                    </svg>
                   </div>
-                  <span class="prefs__appearance-name">{{ mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark' }}</span>
+                  <Text variant="caption" :color="appearance === mode ? 'default' : 'muted'" weight="medium">{{ mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark' }}</Text>
                 </button>
               </div>
             </div>
 
             <div class="prefs__section">
-              <label class="prefs__label">Default AI model</label>
-              <select
-                class="prefs__select"
-                :value="defaultModel"
-                @change="setModel(($event.target as HTMLSelectElement).value)"
-              >
-                <option value="claude-opus-4-6">Claude Opus 4.6</option>
-                <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
-                <option value="claude-haiku-4-5">Claude Haiku 4.5</option>
-              </select>
+              <Text variant="caption" weight="semibold" class="prefs__label">Language</Text>
+              <Dropdown
+                :model-value="language"
+                :groups="languageGroups"
+                :show-chevron="true"
+                max-height="320px"
+                class="prefs__dropdown-full"
+                @update:model-value="(v: string) => { language = v; localStorage.setItem(LANGUAGE_KEY, v) }"
+              />
+            </div>
+
+            <div class="prefs__section">
+              <div class="prefs__hstack">
+                <div class="prefs__field">
+                  <Text variant="caption" weight="semibold" class="prefs__label">Code editor</Text>
+                  <Dropdown
+                    :model-value="codeEditor"
+                    :groups="editorGroups"
+                    :show-chevron="true"
+                    class="prefs__dropdown-full"
+                    @update:model-value="(v: string) => { codeEditor = v; localStorage.setItem(EDITOR_KEY, v) }"
+                  />
+                </div>
+                <div class="prefs__field">
+                  <Text variant="caption" weight="semibold" class="prefs__label">Terminal application</Text>
+                  <Dropdown
+                    :model-value="terminal"
+                    :groups="terminalGroups"
+                    :show-chevron="true"
+                    class="prefs__dropdown-full"
+                    @update:model-value="(v: string) => { terminal = v; localStorage.setItem(TERMINAL_KEY, v) }"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="prefs__section">
+              <div class="prefs__toggle-row">
+                <button
+                  class="prefs__toggle"
+                  :class="{ 'is-on': cliEnabled }"
+                  role="switch"
+                  :aria-checked="cliEnabled"
+                  @click="cliEnabled = !cliEnabled; localStorage.setItem(CLI_KEY, String(cliEnabled))"
+                >
+                  <span class="prefs__toggle-knob" />
+                </button>
+                <Text variant="caption">Studio CLI for terminal</Text>
+              </div>
+              <div class="prefs__toggle-help">
+                <Text variant="small" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs__learn-more">Learn more</a></Text>
+              </div>
             </div>
           </template>
 
           <!-- ═══ Agents ═══ -->
           <template v-if="activeTab === 'agents'">
             <div class="prefs__section">
-              <label class="prefs__label">Default agent</label>
-              <p class="prefs__hint">The coding agent used for new tasks. Can be changed per-task.</p>
+              <Text variant="caption" weight="semibold" class="prefs__label">Available agents</Text>
+              <Text variant="caption" color="muted" class="prefs__hint">Coding agents connect to Studio via the Agent Communication Protocol (ACP). WordPress.com is built-in — others can be installed separately.</Text>
               <div class="prefs__agent-list">
-                <button
+                <div
                   v-for="agent in codingAgents"
                   :key="agent.id"
                   class="prefs__agent-row"
-                  :class="{ 'is-selected': defaultAgent === agent.id }"
-                  @click="setAgent(agent.id)"
                 >
                   <img :src="agent.icon" :alt="agent.label" class="prefs__agent-icon" />
                   <div class="prefs__agent-info">
-                    <span class="prefs__agent-name">{{ agent.label }}</span>
-                    <span class="prefs__agent-desc">{{ agent.description }}</span>
+                    <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
+                    <Text variant="caption" color="muted">{{ agent.description }}</Text>
+                    <Text v-if="!agent.installed && agent.installHint" variant="small" color="muted" class="prefs__agent-install">{{ agent.installHint }}</Text>
                   </div>
-                  <WPIcon v-if="defaultAgent === agent.id" :icon="check" :size="20" class="prefs__agent-check" />
-                </button>
+                  <Text v-if="agent.installed" variant="small" color="muted">Installed</Text>
+                  <Button v-else variant="secondary" size="small" label="Install" />
+                </div>
               </div>
             </div>
 
             <div class="prefs__section">
-              <label class="prefs__label">Agent instructions</label>
-              <p class="prefs__hint">Markdown files that configure agent behavior and project context.</p>
+              <Text variant="caption" weight="semibold" class="prefs__label">Default agent</Text>
+              <Text variant="caption" color="muted" class="prefs__hint">The agent used for new tasks. Can be changed per-task.</Text>
+              <Dropdown
+                :model-value="defaultAgent"
+                :groups="defaultAgentGroups"
+                :show-chevron="true"
+                class="prefs__dropdown-full"
+                @update:model-value="setAgent"
+              />
+            </div>
+
+            <div class="prefs__section">
+              <Text variant="caption" weight="semibold" class="prefs__label">Agent instructions</Text>
+              <Text variant="caption" color="muted" class="prefs__hint">Markdown files that configure agent behavior and site context.</Text>
               <div class="prefs__instructions">
                 <div v-for="file in instructionFiles" :key="file.name" class="prefs__instruction-row">
                   <div class="prefs__instruction-info">
                     <WPIcon :icon="fileIcon" :size="16" class="prefs__instruction-icon" />
                     <div>
-                      <span class="prefs__instruction-name">{{ file.name }}</span>
-                      <span class="prefs__instruction-desc">{{ file.description }}</span>
+                      <Text variant="caption" weight="medium" class="prefs__instruction-name">{{ file.name }}</Text>
+                      <Text variant="caption" color="muted">{{ file.description }}</Text>
                     </div>
                   </div>
                   <Button variant="tertiary" size="small" label="Open" />
@@ -220,17 +380,17 @@ const instructionFiles = [
           <!-- ═══ Skills ═══ -->
           <template v-if="activeTab === 'skills'">
             <div class="prefs__section">
-              <label class="prefs__label">Agent skills</label>
-              <p class="prefs__hint">Skills extend what agents can do — adding commands, card types, and specialized behavior.</p>
-              <p class="prefs__empty-state">No skills installed</p>
+              <Text variant="caption" weight="semibold" class="prefs__label">Agent skills</Text>
+              <Text variant="caption" color="muted" class="prefs__hint">Skills extend what agents can do — adding commands, card types, and specialized behavior.</Text>
+              <Text variant="caption" color="muted" class="prefs__empty-state">No skills installed</Text>
             </div>
           </template>
 
           <!-- ═══ Account ═══ -->
           <template v-if="activeTab === 'account'">
             <div class="prefs__section">
-              <label class="prefs__label">Anthropic API key</label>
-              <p class="prefs__hint">Required for AI features. Your key is stored locally in the browser.</p>
+              <Text variant="caption" weight="semibold" class="prefs__label">Anthropic API key</Text>
+              <Text variant="caption" color="muted" class="prefs__hint">Required for AI features. Your key is stored locally in the browser.</Text>
               <div class="prefs__key-row">
                 <input
                   v-model="apiKey"
@@ -259,10 +419,10 @@ const instructionFiles = [
             </div>
 
             <div class="prefs__section">
-              <label class="prefs__label">Data</label>
+              <Text variant="caption" weight="semibold" class="prefs__label">Data</Text>
               <div class="prefs__data-row">
                 <Button variant="secondary" size="small" label="Reset all data" @click="() => { localStorage.clear(); location.reload() }" />
-                <span class="prefs__data-hint">Clears all local storage and reloads the prototype.</span>
+                <Text variant="caption" color="muted">Clears all local storage and reloads the prototype.</Text>
               </div>
             </div>
           </template>
@@ -270,96 +430,35 @@ const instructionFiles = [
         </div>
       </div>
     </div>
+    <template #footer>
+      <Button variant="secondary" label="Cancel" @click="emit('close')" />
+      <Button variant="primary" label="Save" @click="emit('close')" />
+    </template>
   </Modal>
 </template>
 
+<style>
+/* Override Modal's scroll — prefs manages its own scrolling */
+.modal-content:has(.prefs) {
+  overflow: hidden;
+  padding: 0;
+}
+</style>
+
 <style scoped>
-.prefs {
-  display: flex;
-  flex-direction: column;
-  max-height: 80vh;
-}
-
-.prefs__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-m) var(--space-m) 0;
-  flex-shrink: 0;
-}
-
-.prefs__title {
-  margin: 0;
-  font-size: var(--font-size-l);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-}
-
-.prefs__close {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: var(--radius-s);
-  background: none;
-  color: var(--color-frame-fg-muted);
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  transition: background var(--duration-instant) var(--ease-default);
-}
-
-.prefs__close:hover {
-  background: var(--color-frame-bg-secondary);
-  color: var(--color-frame-fg);
-}
-
-/* -- Two-column body -- */
-
 .prefs__body {
   display: flex;
-  flex: 1;
-  min-height: 360px;
+  height: 460px;
+  overflow: hidden;
 }
 
 .prefs__nav {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
-  padding: var(--space-s) var(--space-xs);
   flex-shrink: 0;
-  width: 160px;
-}
-
-.prefs__nav-item {
-  display: block;
-  width: 100%;
-  height: 32px;
-  padding: 0 var(--space-xs);
-  border: none;
-  border-radius: var(--radius-s);
-  background: none;
-  color: var(--color-frame-fg-secondary);
-  font-family: inherit;
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-medium);
-  text-align: start;
-  cursor: pointer;
-  transition: background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
-}
-
-.prefs__nav-item:hover {
-  background: var(--color-frame-bg-secondary);
-  color: var(--color-frame-fg);
-}
-
-.prefs__nav-item.is-active {
-  background: var(--color-frame-bg-secondary);
-  color: var(--color-frame-fg);
-  font-weight: var(--font-weight-semibold);
+  width: 184px;
+  padding: 0 var(--space-m) 0 var(--space-s);
 }
 
 .prefs__content {
@@ -367,29 +466,26 @@ const instructionFiles = [
   min-width: 0;
   overflow-y: auto;
   padding-block-end: var(--space-m);
+  padding-inline-end: var(--space-xl);
 }
 
 /* -- Sections -- */
 
 .prefs__section {
-  padding: var(--space-xs) var(--space-m);
+  padding: var(--space-xs) 0;
 }
 
 .prefs__section:first-of-type {
-  padding-block-start: var(--space-s);
+  padding-block-start: 0;
 }
 
 .prefs__label {
   display: block;
-  font-size: var(--font-size-s);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
   margin-block-end: var(--space-xs);
 }
 
 .prefs__hint {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  display: block;
   margin: 0 0 var(--space-xs);
   line-height: 1.5;
 }
@@ -415,144 +511,113 @@ const instructionFiles = [
 
 .prefs__appearance-preview {
   width: 100%;
-  aspect-ratio: 4 / 3;
   border-radius: var(--radius-m);
-  border: 2px solid var(--color-frame-border);
+  border: 1px solid var(--color-frame-border);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: border-color var(--duration-instant) var(--ease-default);
+  transition: border-color var(--duration-instant) var(--ease-default), outline-color var(--duration-instant) var(--ease-default);
 }
 
 .prefs__appearance-btn.is-active .prefs__appearance-preview {
-  border-color: var(--color-primary);
+  border-color: transparent;
+  outline: 2px solid var(--color-frame-theme);
+  outline-offset: 1px;
 }
 
 .prefs__appearance-btn:hover:not(.is-active) .prefs__appearance-preview {
   border-color: var(--color-frame-fg-muted);
 }
 
-.prefs__appearance-name {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
-  font-weight: var(--font-weight-medium);
+.preview__svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.prefs__appearance-btn.is-active .prefs__appearance-name {
-  color: var(--color-primary);
-}
+/* -- Side-by-side fields -- */
 
-/* Mini preview thumbnails */
-.preview__bar {
-  height: 12%;
-  flex-shrink: 0;
-}
-
-.preview__body {
-  flex: 1;
+.prefs__hstack {
   display: flex;
+  gap: var(--space-m);
 }
 
-.preview__sidebar {
-  width: 28%;
-  flex-shrink: 0;
-}
-
-.preview__content {
+.prefs__field {
   flex: 1;
+  min-width: 0;
+}
+
+.prefs__field .prefs__label {
+  margin-block-end: var(--space-xs);
+}
+
+/* -- Toggle control -- */
+
+.prefs__toggle-row {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 8%;
-  justify-content: center;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
-.preview__line {
-  height: 3px;
-  border-radius: 1px;
-  width: 70%;
+.prefs__toggle {
+  position: relative;
+  width: 32px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--color-frame-fg-muted);
+  border-radius: 999px;
+  background: var(--color-frame-bg);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--duration-instant) var(--ease-default), border-color var(--duration-instant) var(--ease-default);
 }
 
-.preview__line--short {
-  width: 45%;
+.prefs__toggle.is-on {
+  background: var(--color-frame-theme);
+  border-color: var(--color-frame-theme);
 }
 
-/* System: split half light / half dark */
-.preview--system .preview__bar {
-  background: linear-gradient(to right, #e5e5e5 50%, #333 50%);
+.prefs__toggle-knob {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 1px;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-l);
+  background: var(--color-frame-fg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: inset-inline-start var(--duration-instant) var(--ease-default);
 }
 
-.preview--system .preview__sidebar {
-  background: linear-gradient(to bottom, #f0f0f0 50%, #1a1a1a 50%);
-}
-
-.preview--system .preview__body {
-  background: linear-gradient(to bottom, #fff 50%, #111 50%);
-}
-
-.preview--system .preview__line {
-  background: linear-gradient(to bottom, #d0d0d0 50%, #444 50%);
-}
-
-/* Light */
-.preview--light .preview__bar {
-  background: #e5e5e5;
-}
-
-.preview--light .preview__sidebar {
-  background: #f0f0f0;
-}
-
-.preview--light .preview__body {
+.prefs__toggle.is-on .prefs__toggle-knob {
+  inset-inline-start: 17px;
   background: #fff;
 }
 
-.preview--light .preview__line {
-  background: #d0d0d0;
+.prefs__toggle-help {
+  padding-inline-start: 40px;
+  margin-block-start: var(--space-xxs);
+  line-height: 1.4;
 }
 
-/* Dark */
-.preview--dark .preview__bar {
-  background: #333;
+.prefs__learn-more {
+  color: inherit;
+  text-decoration: underline;
 }
 
-.preview--dark .preview__sidebar {
-  background: #1a1a1a;
+/* -- Dropdown full-width -- */
+
+.prefs__dropdown-full {
+  width: 100%;
 }
 
-.preview--dark .preview__body {
-  background: #111;
-}
-
-.preview--dark .preview__line {
-  background: #444;
-}
-
-/* -- Select -- */
-
-.prefs__select {
-  display: block;
+.prefs__dropdown-full :deep(.dropdown-trigger) {
   width: 100%;
   height: 32px;
   padding: 0 var(--space-xs);
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-s);
   background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-inline-end: 28px;
-}
-
-.prefs__select:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: -1px;
+  justify-content: space-between;
 }
 
 /* -- API key row -- */
@@ -576,7 +641,7 @@ const instructionFiles = [
 }
 
 .prefs__input:focus {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-frame-theme);
   outline-offset: -1px;
 }
 
@@ -592,12 +657,6 @@ const instructionFiles = [
   gap: var(--space-xs);
 }
 
-.prefs__data-hint {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
-  line-height: 1.4;
-}
-
 /* -- Agent list -- */
 
 .prefs__agent-list {
@@ -610,11 +669,10 @@ const instructionFiles = [
 
 .prefs__agent-row {
   display: flex;
-  align-items: center;
-  gap: var(--space-xs);
+  align-items: flex-start;
+  gap: var(--space-s);
   width: 100%;
-  padding: var(--space-xs);
-  border: none;
+  padding: var(--space-s);
   background: var(--color-frame-bg);
   cursor: pointer;
   text-align: start;
@@ -626,16 +684,16 @@ const instructionFiles = [
 }
 
 .prefs__agent-row:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 .prefs__agent-row.is-selected {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 .prefs__agent-icon {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   object-fit: contain;
 }
@@ -643,33 +701,25 @@ const instructionFiles = [
 .prefs__agent-info {
   display: flex;
   flex-direction: column;
+  gap: var(--space-xxxs);
   flex: 1;
   min-width: 0;
 }
 
-.prefs__agent-name {
-  font-size: var(--font-size-s);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-  line-height: 1.3;
-}
-
-.prefs__agent-desc {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
-  line-height: 1.4;
+.prefs__agent-install {
+  font-family: var(--font-mono);
+  opacity: 0.7;
 }
 
 .prefs__agent-check {
   flex-shrink: 0;
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
+  margin-block-start: var(--space-xxs);
 }
 
 /* -- Empty state -- */
 
 .prefs__empty-state {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
   padding: var(--space-s) 0;
 }
 
@@ -689,7 +739,7 @@ const instructionFiles = [
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-xs) var(--space-xs);
+  padding: var(--space-xs);
   background: var(--color-frame-bg);
 }
 
@@ -706,17 +756,6 @@ const instructionFiles = [
 }
 
 .prefs__instruction-name {
-  display: block;
-  font-size: var(--font-size-s);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg);
   font-family: var(--font-mono);
-}
-
-.prefs__instruction-desc {
-  display: block;
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
-  line-height: 1.4;
 }
 </style>

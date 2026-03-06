@@ -51,7 +51,7 @@ defineEmits<{
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
   background: var(--color-frame-bg);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   font-family: inherit;
   font-size: var(--font-size-xs);
   line-height: 20px;
@@ -65,7 +65,7 @@ defineEmits<{
 }
 
 .connector__push-btn:hover:not(:disabled) {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
   border-color: var(--color-frame-fg-muted);
 }

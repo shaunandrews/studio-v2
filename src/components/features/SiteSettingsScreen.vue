@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useProjects } from '@/data/useProjects'
+import { useSites } from '@/data/useSites'
 import type { GitRepo } from '@/data/types'
 import Button from '@/components/primitives/Button.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
@@ -8,16 +8,16 @@ import { seen as seenIcon, unseen as unseenIcon } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 
 const props = defineProps<{
-  projectId: string
+  siteId: string
 }>()
 
-const { projects, updateProject } = useProjects()
-const project = computed(() => projects.value.find(p => p.id === props.projectId))
+const { sites, updateSite } = useSites()
+const site = computed(() => sites.value.find(p => p.id === props.siteId))
 
 // --- Site settings mock state ---
 const siteName = computed({
-  get: () => project.value?.name ?? '',
-  set: (val: string) => { if (project.value) updateProject(project.value.id, { name: val }) },
+  get: () => site.value?.name ?? '',
+  set: (val: string) => { if (site.value) updateSite(site.value.id, { name: val }) },
 })
 const phpVersion = ref('8.3')
 const wpVersion = ref('latest')
@@ -47,23 +47,23 @@ const showRepoPicker = ref(false)
 const mockBranches = ['main', 'staging', 'develop', 'feature/menu-redesign', 'feature/dark-mode']
 
 function connectRepo(repo: GitRepo) {
-  if (!project.value) return
-  project.value.repo = repo
+  if (!site.value) return
+  site.value.repo = repo
   showRepoPicker.value = false
-  if (project.value.pipeline) {
-    const prod = project.value.pipeline.find(s => s.environment === 'production')
-    const staging = project.value.pipeline.find(s => s.environment === 'staging')
+  if (site.value.pipeline) {
+    const prod = site.value.pipeline.find(s => s.environment === 'production')
+    const staging = site.value.pipeline.find(s => s.environment === 'staging')
     if (prod && !prod.branch) prod.branch = repo.defaultBranch
     if (staging && !staging.branch) staging.branch = 'staging'
   }
 }
 
 function disconnectRepo() {
-  if (!project.value) return
-  project.value.repo = undefined
-  project.value.localGit = undefined
-  if (project.value.pipeline) {
-    project.value.pipeline.forEach(s => {
+  if (!site.value) return
+  site.value.repo = undefined
+  site.value.localGit = undefined
+  if (site.value.pipeline) {
+    site.value.pipeline.forEach(s => {
       s.branch = undefined
       s.deployedCommit = undefined
       s.aheadCount = undefined
@@ -72,7 +72,7 @@ function disconnectRepo() {
 }
 
 function updateStageBranch(stageId: string, branch: string) {
-  const stage = project.value?.pipeline?.find(s => s.id === stageId)
+  const stage = site.value?.pipeline?.find(s => s.id === stageId)
   if (stage) stage.branch = branch
 }
 </script>
@@ -211,27 +211,27 @@ function updateStageBranch(stageId: string, branch: string) {
 
       <!-- Repository -->
       <div class="settings__repo">
-        <div v-if="project?.repo" class="settings__repo-connected">
+        <div v-if="site?.repo" class="settings__repo-connected">
           <div class="settings__repo-row">
             <div class="settings__repo-info">
               <span class="settings__repo-provider">GitHub</span>
-              <a :href="project.repo.url" target="_blank" rel="noopener" class="settings__repo-name">
-                {{ project.repo.owner }}/{{ project.repo.name }} &#8599;
+              <a :href="site.repo.url" target="_blank" rel="noopener" class="settings__repo-name">
+                {{ site.repo.owner }}/{{ site.repo.name }} &#8599;
               </a>
             </div>
             <button class="settings__disconnect" @click="disconnectRepo">Disconnect</button>
           </div>
 
-          <div v-if="project.pipeline?.length" class="settings__branches">
+          <div v-if="site.pipeline?.length" class="settings__branches">
             <div class="settings__branches-title">Branch mapping</div>
             <div class="settings__branch-row">
               <span class="settings__branch-label">Local</span>
               <span class="settings__branch-value settings__branch-value--auto">
-                {{ project.localGit?.branch ?? 'auto-detected' }}
+                {{ site.localGit?.branch ?? 'auto-detected' }}
               </span>
             </div>
             <div
-              v-for="stage in project.pipeline"
+              v-for="stage in site.pipeline"
               :key="stage.id"
               class="settings__branch-row"
             >
@@ -331,8 +331,8 @@ function updateStageBranch(stageId: string, branch: string) {
 }
 
 .settings__input:focus-visible {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border-color: var(--color-frame-theme);
+  box-shadow: 0 0 0 1px var(--color-frame-theme);
 }
 
 .settings__select {
@@ -362,8 +362,8 @@ function updateStageBranch(stageId: string, branch: string) {
 }
 
 .settings__select:focus-visible {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border-color: var(--color-frame-theme);
+  box-shadow: 0 0 0 1px var(--color-frame-theme);
 }
 
 /* ── Checkbox fields ── */
@@ -385,7 +385,7 @@ function updateStageBranch(stageId: string, branch: string) {
   width: 16px;
   height: 16px;
   margin: 0;
-  accent-color: var(--color-primary);
+  accent-color: var(--color-frame-theme);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -402,7 +402,7 @@ function updateStageBranch(stageId: string, branch: string) {
 }
 
 .settings__link {
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
   text-decoration: none;
 }
 
@@ -442,7 +442,7 @@ function updateStageBranch(stageId: string, branch: string) {
 }
 
 .settings__input-action.is-copied {
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
 }
 
 /* ── Toggles ── */
@@ -488,7 +488,7 @@ function updateStageBranch(stageId: string, branch: string) {
 .settings__repo-name {
   font-size: var(--font-size-s);
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
   text-decoration: none;
 }
 
@@ -572,7 +572,7 @@ function updateStageBranch(stageId: string, branch: string) {
 }
 
 .settings__branch-select:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-frame-theme);
   outline-offset: 1px;
 }
 
@@ -621,7 +621,7 @@ function updateStageBranch(stageId: string, branch: string) {
 }
 
 .settings__picker-item:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 .settings__picker-owner {
@@ -654,7 +654,7 @@ function updateStageBranch(stageId: string, branch: string) {
 }
 
 .settings__picker-cancel:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 </style>

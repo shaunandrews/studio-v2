@@ -2,7 +2,7 @@
 
 ## Spacing
 
-- **All spacing uses the 5px grid.** Use `--space-xxxs` through `--space-xxxl` exclusively.
+- **All spacing uses the 4px grid.** Use `--space-xxxs` through `--space-xxxl` exclusively.
 - **No magic numbers.** No `padding: 12px` or `gap: 7px`. If it's not on the grid, it doesn't ship.
 - **Exception:** Only with explicit logic and permission (e.g., optical alignment, icon sizing, border widths). Document the reason in a comment.
 
@@ -22,7 +22,7 @@
 
 ## Border Radius
 
-- **Use `--radius-s`, `--radius-m`, or `--radius-l`** from `styles/radius.css`.
+- **Use `--radius-s` (4px), `--radius-m` (8px), or `--radius-l` (12px)** from `styles/radius.css`.
 - **Exception:** `border-radius: 50%` for circles (avatars, status dots) is fine.
 
 ## Motion
@@ -54,9 +54,6 @@ Pre-composed `duration + easing` pairs. Use after the property name in `transiti
 | Token | Expands to | Use for |
 |-------|-----------|---------|
 | `--transition-hover` | 150ms ease | Hover & active states |
-| `--transition-focus` | 150ms ease | Focus rings, input borders |
-| `--transition-fade` | 200ms ease | Opacity, resize, status |
-| `--transition-layout` | 300ms ease | Panel morph, frame slide |
 
 ### Usage
 

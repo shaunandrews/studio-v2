@@ -1,18 +1,21 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import * as wpIcons from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
+import ButtonSplit from '@/components/primitives/ButtonSplit.vue'
 import StatusIndicator from '@/components/primitives/StatusIndicator.vue'
 import Text from '@/components/primitives/Text.vue'
-import Titlebar from '@/components/primitives/Titlebar.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
-import Avatar from '@/components/primitives/Avatar.vue'
+import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
+import Modal from '@/components/primitives/Modal.vue'
 import Badge from '@/components/primitives/Badge.vue'
-import BrowserBar from '@/components/primitives/BrowserBar.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import ContextRing from '@/components/primitives/ContextRing.vue'
 import { cog, plus, upload, external, trash, pencil, chevronDown } from '@wordpress/icons'
-import '@/pages/components/components-docs.css'
+import '@/pages/dev-docs.css'
+
+const modalOpen = ref(false)
 
 const icons = Object.entries(wpIcons)
   .filter(([key, val]) => key !== 'Icon' && typeof val === 'object' && val !== null && (val as any)?.props)
@@ -21,43 +24,6 @@ const icons = Object.entries(wpIcons)
 </script>
 
 <template>
-  <!-- Avatar -->
-  <section id="avatar">
-    <h2>Avatar</h2>
-    <p class="section-desc">Displays a user or project avatar with image, fallback text, and three size options.</p>
-
-    <div class="props-table">
-      <h3>Props</h3>
-      <table>
-        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>src</code></td><td><code>string</code></td><td>—</td><td>Image URL</td></tr>
-          <tr><td><code>alt</code></td><td><code>string</code></td><td>—</td><td>Alt text for the image</td></tr>
-          <tr><td><code>size</code></td><td><code>'small' | 'default' | 'large'</code></td><td><code>'default'</code></td><td>Avatar size (20px / 32px / 48px)</td></tr>
-          <tr><td><code>fallback</code></td><td><code>string</code></td><td><code>'?'</code></td><td>Text shown when no image is available</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Sizes</h3>
-    <div class="example-section">
-      <div class="hstack gap-s" style="align-items: center;">
-        <Avatar size="small" src="https://api.dicebear.com/9.x/shapes/svg?seed=cafe" alt="Small" />
-        <Avatar size="default" src="https://api.dicebear.com/9.x/shapes/svg?seed=blog" alt="Default" />
-        <Avatar size="large" src="https://api.dicebear.com/9.x/shapes/svg?seed=portfolio" alt="Large" />
-      </div>
-    </div>
-
-    <h3>Fallback</h3>
-    <div class="example-section">
-      <div class="hstack gap-s" style="align-items: center;">
-        <Avatar fallback="S" />
-        <Avatar fallback="DC" size="large" />
-        <Avatar />
-      </div>
-    </div>
-  </section>
-
   <!-- Badge -->
   <section id="badge">
     <h2>Badge</h2>
@@ -82,32 +48,6 @@ const icons = Object.entries(wpIcons)
         <Badge label="Installing" variant="warning" />
         <Badge label="Error" variant="error" />
       </div>
-    </div>
-  </section>
-
-  <!-- BrowserBar -->
-  <section id="browser-bar">
-    <h2>BrowserBar</h2>
-    <p class="section-desc">Minimal browser-style URL bar that displays a truncated URL. Used in the SitePreview toolbar.</p>
-
-    <div class="props-table">
-      <h3>Props</h3>
-      <table>
-        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>url</code></td><td><code>string</code></td><td>—</td><td>URL to display</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Preview</h3>
-    <div class="example-section" style="max-width: 400px;">
-      <BrowserBar url="https://downstreet-cafe.local" />
-    </div>
-
-    <h3>Long URL (truncated)</h3>
-    <div class="example-section" style="max-width: 300px;">
-      <BrowserBar url="https://my-really-long-site-name.wordpress.com/wp-admin/options-general.php" />
     </div>
   </section>
 
@@ -208,6 +148,40 @@ const icons = Object.entries(wpIcons)
     </div>
   </section>
 
+  <!-- ButtonSplit -->
+  <section id="button-split">
+    <h2>ButtonSplit</h2>
+    <p class="section-desc">Split button with primary action and secondary dropdown trigger.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>label</code></td><td><code>string</code></td><td>—</td><td>Button text label</td></tr>
+          <tr><td><code>icon</code></td><td><code>any</code></td><td><code>undefined</code></td><td>WordPress icon component</td></tr>
+          <tr><td><code>iconUrl</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Image URL for custom icon (takes precedence over icon)</td></tr>
+        </tbody>
+      </table>
+      <h3>Events</h3>
+      <table>
+        <thead><tr><th>Event</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>click</code></td><td>Primary button clicked</td></tr>
+          <tr><td><code>secondary-click</code></td><td>Dropdown arrow button clicked</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="example-section">
+      <div class="hstack gap-s">
+        <ButtonSplit label="Create site" />
+        <ButtonSplit label="Add" :icon="plus" />
+      </div>
+    </div>
+  </section>
+
   <!-- ContextRing -->
   <section id="context-ring">
     <h2>ContextRing</h2>
@@ -283,7 +257,7 @@ const icons = Object.entries(wpIcons)
   <!-- Dropdown -->
   <section id="dropdown">
     <h2>Dropdown</h2>
-    <p class="section-desc">Grouped option picker with click-outside dismiss, animated open/close, and above/below placement.</p>
+    <p class="section-desc">Single-value selector built on FlyoutMenu. Adds <code>v-model</code> binding for form-style option picking. Use FlyoutMenu directly for action menus.</p>
 
     <div class="props-table">
       <h3>Props</h3>
@@ -298,12 +272,110 @@ const icons = Object.entries(wpIcons)
     </div>
 
     <h3>Preview</h3>
-    <div class="example-section" style="padding-top: 200px;">
+    <div class="example-section">
       <Dropdown
         model-value="Sonnet 4.5"
         :groups="[{ label: 'Anthropic', options: ['Opus 4.6', 'Sonnet 4.5', 'Haiku 4.5'] }, { label: 'OpenAI', options: ['GPT-4.5', 'GPT-4'] }]"
         placement="below"
       />
+    </div>
+  </section>
+
+  <!-- FlyoutMenu -->
+  <section id="flyout-menu">
+    <h2>FlyoutMenu</h2>
+    <p class="section-desc">Hierarchical dropdown menu with nested submenus, icons, checkmarks, and smart positioning.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>groups</code></td><td><code>FlyoutMenuGroup[]</code></td><td>—</td><td>Array of menu groups with items</td></tr>
+          <tr><td><code>surface</code></td><td><code>'light' | 'dark'</code></td><td><code>'light'</code></td><td>Color scheme</td></tr>
+          <tr><td><code>align</code></td><td><code>'start' | 'center' | 'end'</code></td><td><code>'center'</code></td><td>Horizontal alignment relative to trigger</td></tr>
+          <tr><td><code>placement</code></td><td><code>'above' | 'below'</code></td><td><code>'below'</code></td><td>Preferred vertical placement (auto-flips)</td></tr>
+          <tr><td><code>maxWidth</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Max width constraint</td></tr>
+        </tbody>
+      </table>
+      <h3>Events</h3>
+      <table>
+        <thead><tr><th>Event</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>close</code></td><td>Menu closed</td></tr>
+        </tbody>
+      </table>
+      <h3>Slots</h3>
+      <table>
+        <thead><tr><th>Slot</th><th>Scoped Props</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>trigger</code></td><td><code>{ toggle, open }</code></td><td>Element that toggles the menu</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="example-section">
+      <FlyoutMenu
+        align="start"
+        :groups="[
+          { items: [
+            { label: 'Edit', icon: pencil, action: () => {} },
+            { label: 'Settings', icon: cog, action: () => {} },
+          ]},
+          { items: [
+            { label: 'Delete', icon: trash, destructive: true, action: () => {} },
+          ]},
+        ]"
+      >
+        <template #trigger="{ toggle }">
+          <Button variant="secondary" label="Actions" @click="toggle" />
+        </template>
+      </FlyoutMenu>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <section id="modal">
+    <h2>Modal</h2>
+    <p class="section-desc">Centered dialog overlay with backdrop dismiss and Escape key support.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>open</code></td><td><code>boolean</code></td><td>—</td><td>Controls modal visibility</td></tr>
+          <tr><td><code>width</code></td><td><code>string</code></td><td><code>'480px'</code></td><td>Modal panel width</td></tr>
+        </tbody>
+      </table>
+      <h3>Events</h3>
+      <table>
+        <thead><tr><th>Event</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>close</code></td><td>Backdrop clicked or Escape pressed</td></tr>
+        </tbody>
+      </table>
+      <h3>Slots</h3>
+      <table>
+        <thead><tr><th>Slot</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>default</code></td><td>Modal content</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="example-section">
+      <Button variant="secondary" label="Open modal" @click="modalOpen = true" />
+      <Modal :open="modalOpen" title="Modal title" @close="modalOpen = false">
+        <Text variant="body" color="secondary">This is a modal dialog. Click the backdrop or press Escape to close.</Text>
+        <template #footer>
+          <Text variant="caption" color="muted" class="flex-1">Short helpful text.</Text>
+          <Button variant="secondary" label="Cancel" @click="modalOpen = false" />
+          <Button variant="primary" label="Confirm" @click="modalOpen = false" />
+        </template>
+      </Modal>
     </div>
   </section>
 
@@ -453,29 +525,6 @@ const icons = Object.entries(wpIcons)
 
     <h3>Warm state</h3>
     <p class="section-desc">After dismissing one tooltip, hovering another shows instantly (no delay). Try moving between the buttons above quickly.</p>
-  </section>
-
-  <!-- Titlebar -->
-  <section id="titlebar">
-    <h2>Titlebar</h2>
-    <p class="section-desc">App chrome title bar with traffic lights, sidebar toggle, centered heading, and action buttons.</p>
-
-    <h3>Preview (dark surface)</h3>
-    <div class="example-section example-section--dark" style="padding: 0; overflow: hidden; border-radius: var(--radius-m);">
-      <Titlebar />
-    </div>
-
-    <div class="props-table">
-      <h3>Slots / Structure</h3>
-      <table>
-        <thead><tr><th>Region</th><th>Contents</th></tr></thead>
-        <tbody>
-          <tr><td><code>titlebar-start</code></td><td>Traffic lights + sidebar toggle button</td></tr>
-          <tr><td><code>titlebar-center</code></td><td>Absolutely centered heading: "WordPress Studio • Site Title"</td></tr>
-          <tr><td><code>titlebar-end</code></td><td>Settings + help buttons</td></tr>
-        </tbody>
-      </table>
-    </div>
   </section>
 
   <!-- WPIcon -->

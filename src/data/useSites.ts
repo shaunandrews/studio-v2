@@ -1,48 +1,48 @@
 import { ref, computed } from 'vue'
-import { seedProjects } from './seed-projects'
-import type { Project, ProjectStatus } from './types'
+import { seedProjects } from './seed-sites'
+import type { Site, SiteStatus } from './types'
 
 export const ALL_SITES_ID = '__all-sites__'
 
 // Module-level state (singleton — shared across all components)
-const projects = ref<Project[]>(structuredClone(seedProjects))
-const activeProjectId = ref<string | null>(null)
+const sites = ref<Site[]>(structuredClone(seedProjects))
+const activeSiteId = ref<string | null>(null)
 
 const activeProject = computed(() =>
-  projects.value.find(p => p.id === activeProjectId.value) ?? null
+  sites.value.find(p => p.id === activeSiteId.value) ?? null
 )
 
-export function useProjects() {
-  function setStatus(projectId: string, status: ProjectStatus) {
-    const p = projects.value.find(p => p.id === projectId)
+export function useSites() {
+  function setStatus(siteId: string, status: SiteStatus) {
+    const p = sites.value.find(p => p.id === siteId)
     if (p) p.status = status
   }
 
-  function createUntitledProject(): Project {
-    const id = `project-${Date.now()}`
-    const newProject: Project = {
+  function createUntitledSite(): Project {
+    const id = `site-${Date.now()}`
+    const newSite: Project = {
       id,
-      name: 'Untitled project',
+      name: 'Untitled site',
       favicon: `https://api.dicebear.com/9.x/shapes/svg?seed=${encodeURIComponent(id)}`,
       status: 'stopped',
       url: '',
       createdAt: new Date().toISOString(),
     }
-    projects.value.push(newProject)
+    sites.value.push(newProject)
     return newProject
   }
 
-  function updateProject(id: string, updates: Partial<Pick<Project, 'name' | 'favicon' | 'description'>>) {
-    const p = projects.value.find(p => p.id === id)
+  function updateSite(id: string, updates: Partial<Pick<Site, 'name' | 'favicon' | 'description'>>) {
+    const p = sites.value.find(p => p.id === id)
     if (p) Object.assign(p, updates)
   }
 
   return {
-    projects,
-    activeProjectId,
+    sites,
+    activeSiteId,
     activeProject,
     setStatus,
-    createUntitledProject,
-    updateProject,
+    createUntitledSite,
+    updateSite,
   }
 }

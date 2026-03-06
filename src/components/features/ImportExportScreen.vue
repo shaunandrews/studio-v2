@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, toRef } from 'vue'
-import { useProjects } from '@/data/useProjects'
+import { useSites } from '@/data/useSites'
 import { useImportExport } from '@/data/useImportExport'
 import Button from '@/components/primitives/Button.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
 
 const props = defineProps<{
-  projectId: string
+  siteId: string
 }>()
 
-const { projects } = useProjects()
-const project = computed(() => projects.value.find(p => p.id === props.projectId))
+const { sites } = useSites()
+const site = computed(() => sites.value.find(p => p.id === props.siteId))
 
 const {
   importState,
@@ -25,7 +25,7 @@ const {
   clearImport,
   clearExport,
   ACCEPTED_FILE_TYPES,
-} = useImportExport(toRef(props, 'projectId'))
+} = useImportExport(toRef(props, 'siteId'))
 
 // --- Drag and drop (screen-level overlay) ---
 
@@ -355,7 +355,7 @@ const exportDisabled = computed(() => isImporting.value || isExporting.value)
 
 .ie__illo-arrow {
   position: absolute;
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
   opacity: 0.7;
 }
 
@@ -402,7 +402,7 @@ const exportDisabled = computed(() => isImporting.value || isExporting.value)
 
 .ie__progress-fill {
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-frame-theme);
   border-radius: var(--radius-full);
   transition: width 300ms var(--ease-default);
 }
@@ -423,7 +423,7 @@ const exportDisabled = computed(() => isImporting.value || isExporting.value)
 .ie__link-btn {
   font-family: inherit;
   font-size: var(--font-size-xs);
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
   background: none;
   border: none;
   cursor: pointer;
@@ -443,7 +443,7 @@ const exportDisabled = computed(() => isImporting.value || isExporting.value)
   font-family: inherit;
   font-size: var(--font-size-xs);
   color: var(--color-frame-fg);
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   border: none;
   border-radius: var(--radius-s);
   padding: var(--space-xxs) var(--space-xs);
@@ -481,8 +481,8 @@ const exportDisabled = computed(() => isImporting.value || isExporting.value)
   position: absolute;
   inset: 0;
   border-radius: var(--radius-l);
-  border: 2px dashed var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-frame-bg) 94%);
+  border: 2px dashed var(--color-frame-theme);
+  background: color-mix(in srgb, var(--color-frame-theme) 6%, var(--color-frame-bg) 94%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -494,7 +494,7 @@ const exportDisabled = computed(() => isImporting.value || isExporting.value)
   flex-direction: column;
   align-items: center;
   gap: var(--space-xs);
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-medium);
 }

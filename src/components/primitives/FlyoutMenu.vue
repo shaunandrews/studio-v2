@@ -25,6 +25,7 @@ const props = withDefaults(defineProps<{
   align?: 'start' | 'center' | 'end'
   placement?: 'above' | 'below'
   maxWidth?: string
+  maxHeight?: string
 }>(), {
   surface: 'light',
   align: 'center',
@@ -110,21 +111,22 @@ function positionMenu() {
   }
   if (props.maxWidth) style.maxWidth = props.maxWidth
 
+  // Parse prop maxHeight as a pixel cap (if provided)
+  const propMax = props.maxHeight ? parseInt(props.maxHeight, 10) : Infinity
+
   if (placeAbove) {
     const bottom = vh - rect.top + GAP
-    if (menuRect.height > spaceAbove) {
-      style.maxHeight = `${spaceAbove}px`
-      style.overflowY = 'auto'
-    }
+    const cap = Math.min(spaceAbove, propMax)
+    style.maxHeight = `${cap}px`
+    style.overflowY = 'auto'
     style.bottom = `${bottom}px`
     style.top = 'auto'
   } else {
     style.top = `${rect.bottom + GAP}px`
     style.bottom = 'auto'
-    if (menuRect.height > spaceBelow) {
-      style.maxHeight = `${spaceBelow}px`
-      style.overflowY = 'auto'
-    }
+    const cap = Math.min(spaceBelow, propMax)
+    style.maxHeight = `${cap}px`
+    style.overflowY = 'auto'
   }
 
   // Horizontal alignment
@@ -407,7 +409,7 @@ defineExpose({ toggle, close, open })
 
 .flyout--light .flyout-item:hover,
 .flyout--light .flyout-item--active {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 .flyout--light .flyout-item-icon {
@@ -416,7 +418,7 @@ defineExpose({ toggle, close, open })
 
 .flyout--light .flyout-item:hover .flyout-item-icon,
 .flyout--light .flyout-item--active .flyout-item-icon {
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 .flyout--light .flyout-item-chevron {
@@ -425,8 +427,8 @@ defineExpose({ toggle, close, open })
 
 /* ── Dark surface ── */
 .flyout--dark {
-  background: var(--color-chrome);
-  border: 1px solid var(--color-chrome-subtle);
+  background: var(--color-chrome-bg);
+  border: 1px solid var(--color-chrome-border);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
@@ -435,11 +437,11 @@ defineExpose({ toggle, close, open })
 }
 
 .flyout--dark .flyout-group-label {
-  color: var(--color-chrome-text-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .flyout--dark .flyout-item {
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .flyout--dark .flyout-item:hover,
@@ -448,16 +450,16 @@ defineExpose({ toggle, close, open })
 }
 
 .flyout--dark .flyout-item-icon {
-  color: var(--color-chrome-text-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .flyout--dark .flyout-item:hover .flyout-item-icon,
 .flyout--dark .flyout-item--active .flyout-item-icon {
-  color: var(--color-chrome-text-secondary);
+  color: var(--color-chrome-fg-muted);
 }
 
 .flyout--dark .flyout-item-chevron {
-  color: var(--color-chrome-text-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 /* ── Group label ── */

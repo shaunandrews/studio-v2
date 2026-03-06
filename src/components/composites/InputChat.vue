@@ -5,14 +5,16 @@ import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
+import ContextRing from '@/components/primitives/ContextRing.vue'
 import { codingAgents } from '@/data/agents'
 import type { ActionButton, AgentId } from '@/data/types'
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
-const selectedAgentId = ref<AgentId>('claude-code')
+const selectedAgentId = ref<AgentId>('wpcom')
 
 const selectedAgentLabel = computed(() =>
-  codingAgents.find(a => a.id === selectedAgentId.value)?.label ?? 'Claude Code'
+  codingAgents.find(a => a.id === selectedAgentId.value)?.label ?? 'WordPress.com'
 )
 
 const agentMenuGroups = computed<FlyoutMenuGroup[]>(() => [
@@ -31,7 +33,7 @@ const agentMenuGroups = computed<FlyoutMenuGroup[]>(() => [
 
 const props = withDefaults(defineProps<{
   surface?: 'light' | 'dark'
-  projectId?: string | null
+  siteId?: string | null
   modelValue?: string
   placeholder?: string
   actions?: ActionButton[]
@@ -156,19 +158,31 @@ function actionLabel(idx: number): string {
       />
       <div class="input-toolbar">
         <div class="input-toolbar__start">
-          <button class="input-icon-btn" aria-label="Attach">
-            <WPIcon :icon="plus" :size="24" />
-          </button>
+          <Tooltip text="Attach" placement="bottom">
+            <button class="input-icon-btn" aria-label="Attach">
+              <WPIcon :icon="plus" :size="24" />
+            </button>
+          </Tooltip>
           <FlyoutMenu :groups="agentMenuGroups" surface="dark" placement="above" align="start">
             <template #trigger="{ toggle, open }">
-              <button class="agent-picker" :class="{ 'is-open': open }" @click="toggle">
-                <span class="agent-picker__label">{{ selectedAgentLabel }}</span>
-                <WPIcon :icon="chevronDown" :size="16" class="agent-picker__chevron" />
-              </button>
+              <Tooltip text="Switch agent" placement="bottom" :delay="600">
+                <button class="agent-picker" :class="{ 'is-open': open }" @click="toggle">
+                  <span class="agent-picker__label">{{ selectedAgentLabel }}</span>
+                  <WPIcon :icon="chevronDown" :size="16" class="agent-picker__chevron" />
+                </button>
+              </Tooltip>
             </template>
           </FlyoutMenu>
         </div>
-        <div class="input-toolbar__end">
+        <div class="input-toolbar__end gap-xs">
+          <ContextRing
+            :percent="42"
+            model="Claude Sonnet 4"
+            tokens="12.4k / 200k"
+            cost="$0.03"
+            :messages="8"
+            :surface="props.surface"
+          />
           <button class="input-submit" :class="{ 'is-active': canSend }" :disabled="!canSend" aria-label="Send" @click="send">
             <WPIcon :icon="arrowUp" :size="24" />
           </button>
@@ -189,8 +203,8 @@ function actionLabel(idx: number): string {
 }
 
 .input-chat:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border-color: var(--color-frame-theme);
+  box-shadow: 0 0 0 1px var(--color-frame-theme);
 }
 
 /* ── Input body: textarea + toolbar ── */
@@ -199,7 +213,7 @@ function actionLabel(idx: number): string {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
-  padding: var(--space-xs) var(--space-xs) var(--space-xxs);
+  padding: var(--space-xs) var(--space-s) var(--space-xxs);
 }
 
 .input-textarea {
@@ -303,8 +317,8 @@ function actionLabel(idx: number): string {
 }
 
 .input-submit.is-active {
-  background: var(--color-primary);
-  color: var(--color-primary-text);
+  background: var(--color-frame-theme);
+  color: #fff;
   cursor: pointer;
 }
 
@@ -320,33 +334,33 @@ function actionLabel(idx: number): string {
 }
 
 .input-chat.surface-dark:focus-within {
-  border-color: var(--color-chrome-text-muted);
+  border-color: var(--color-chrome-fg-muted);
 }
 
 .input-chat.surface-dark .input-textarea {
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .input-chat.surface-dark .input-textarea::placeholder {
-  color: var(--color-chrome-text-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .input-chat.surface-dark .input-icon-btn {
-  color: var(--color-chrome-text-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .input-chat.surface-dark .input-icon-btn:hover {
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .input-chat.surface-dark .input-submit {
   background: var(--color-chrome-border);
-  color: var(--color-chrome-text-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .input-chat.surface-dark .input-submit.is-active {
-  background: var(--color-chrome-text);
-  color: var(--color-chrome);
+  background: var(--color-chrome-fg);
+  color: var(--color-chrome-bg);
 }
 
 

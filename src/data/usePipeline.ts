@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import type { Ref } from 'vue'
-import { useProjects } from './useProjects'
+import { useSites } from './useSites'
 import type { PipelineStage } from './types'
 
 // Setup phases: -1 = local intro, 0+ = pipeline stage indices, null = done
@@ -15,20 +15,20 @@ const syncProgress = ref<{ phase: 'idle' | 'syncing' | 'done' | 'error'; percent
   phase: 'idle', percent: 0, label: '',
 })
 
-export function usePipeline(projectId: Ref<string | null>) {
-  const { projects } = useProjects()
+export function usePipeline(siteId: Ref<string | null>) {
+  const { sites } = useSites()
 
-  const project = computed(() =>
-    projects.value.find(p => p.id === projectId.value) ?? null
+  const site = computed(() =>
+    sites.value.find(p => p.id === siteId.value) ?? null
   )
 
-  const pipeline = computed(() => project.value?.pipeline ?? [])
+  const pipeline = computed(() => site.value?.pipeline ?? [])
 
   const hasPipeline = computed(() => pipeline.value.length > 0)
 
   function setupDefaultPipeline() {
-    if (!project.value) return
-    project.value.pipeline = [
+    if (!site.value) return
+    site.value.pipeline = [
       { id: `stage-${Date.now()}-1`, label: 'Staging', environment: 'staging' as EnvironmentType, order: 1 },
       { id: `stage-${Date.now()}-2`, label: 'Production', environment: 'production' as EnvironmentType, order: 2 },
     ]
@@ -60,7 +60,7 @@ export function usePipeline(projectId: Ref<string | null>) {
   }
 
   function connectSite(siteData: { id: string; name: string; url: string; provider: 'wpcom' | 'pressable' }) {
-    const stage = project.value?.pipeline?.find(s => s.id === connectStageId.value)
+    const stage = site.value?.pipeline?.find(s => s.id === connectStageId.value)
     if (stage) {
       stage.site = {
         id: siteData.id,
@@ -77,7 +77,7 @@ export function usePipeline(projectId: Ref<string | null>) {
   }
 
   function disconnectSite(stageId: string) {
-    const stage = project.value?.pipeline?.find(s => s.id === stageId)
+    const stage = site.value?.pipeline?.find(s => s.id === stageId)
     if (stage) stage.site = undefined
   }
 
@@ -123,7 +123,7 @@ export function usePipeline(projectId: Ref<string | null>) {
           const stageId = syncAction.value.verb === 'pull'
             ? syncAction.value.fromStage
             : syncAction.value.toStage
-          const stage = project.value?.pipeline?.find(s => s.id === stageId)
+          const stage = site.value?.pipeline?.find(s => s.id === stageId)
           if (stage?.site) {
             if (syncAction.value.verb === 'pull') {
               stage.site.lastPullAt = new Date().toISOString()

@@ -14,7 +14,7 @@ npm run dev  # http://localhost:3025
 
 Read `DESIGN-SYSTEM.md` before touching any component. Key rules:
 
-- **Spacing:** 5px grid only. Use `--space-xxxs` through `--space-xxxl`. No magic numbers.
+- **Spacing:** 4px grid only. Use `--space-xxxs` through `--space-xxxl`. No magic numbers.
 - **Radius:** `--radius-s`, `--radius-m`, `--radius-l`. No custom values.
 - **Colors:** All from CSS variables in `src/styles/colors.css`. No hardcoded hex/rgb.
 - **Icons:** `@wordpress/icons` via `WPIcon` component. No inline SVGs.
@@ -27,12 +27,12 @@ Read `DESIGN-SYSTEM.md` before touching any component. Key rules:
 src/
   styles/            # CSS tokens (colors, space, radius, typography, layout, motion) + overrides
   components/
-    primitives/      # Avatar, Badge, Button, ContextRing, Dropdown, FlyoutMenu, Modal, StatusIndicator, Text, Titlebar, Tooltip, WPIcon
-    composites/      # AllChatsModal, ChatMessage, ChatMessageList, InputChat, Panel, ProjectItem, TabBar, chat-cards/, renderers/
-    features/        # ProjectList, AgentPanel, SyncScreen, PreviewsScreen, add-site/
+    primitives/      # Badge, Button, ButtonSplit, ContextRing, Dropdown, FlyoutMenu, Modal, StatusIndicator, Text, Tooltip, WPIcon
+    composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, PreferencesModal, ScreenHeader, ScreenLayout, ShortcutsModal, SiteItem, SiteToolbar, chat-cards/, renderers/
+    features/        # SiteNavigation, SiteList, SiteSettingsScreen, SyncScreen, PreviewsScreen, ImportExportScreen, add-site/, sync/
   layouts/           # MainLayout (app shell), BareLayout (standalone pages)
-  pages/             # ProjectPage, DesignSystem, Components, Settings, Architecture
-  data/              # State composables, AI service, seed data, types, site-types, site-renderer, useProjectTransition
+  pages/             # SitePage, AddSitePage, DesignSystem, Components, Settings, Architecture
+  data/              # State composables, AI service, seed data, types, site-types, site-renderer, useSiteTransition
   router.ts
 ```
 
@@ -45,9 +45,9 @@ src/
 - **Titlebar** — App titlebar with traffic lights, sidebar toggle, greeting, settings/help
 - **InputChat** — Chat input with model selector and action strip. Three action rendering modes: brief cards, card actions, text buttons.
 
-## View transitions (home <> project)
+## View transitions (home <> site)
 
-Navigation between home and project uses the View Transitions API via `useProjectTransition.ts`. Project-to-project navigation skips transitions.
+Navigation between home and site uses the View Transitions API via `useSiteTransition.ts`. Site-to-site navigation skips transitions.
 
 ## Collapsible sidebar
 
@@ -67,5 +67,5 @@ npm run deploy  # vercel --prod
 
 - Don't rewrite entire files when Shaun has made edits. Surgical edits only.
 - Don't use `left`/`right`/`top`/`bottom` in CSS. Use `start`/`end`/`block-start`/`block-end`.
-- Don't add spacing values that aren't in the 5px grid system.
+- Don't add spacing values that aren't in the 4px grid system.
 - Don't hardcode colors — add to the system first.

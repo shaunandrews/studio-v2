@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
-import { moreVertical, copy } from '@wordpress/icons'
+import { moreVertical } from '@wordpress/icons'
 import Button from '@/components/primitives/Button.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import type { PreviewSite } from '@/data/types'
@@ -9,7 +10,7 @@ import { usePreviews } from '@/data/usePreviews'
 
 const props = defineProps<{
   preview: PreviewSite
-  projectId: string
+  siteId: string
 }>()
 
 const emit = defineEmits<{
@@ -51,6 +52,12 @@ const expiration = computed(() => getExpiration(props.preview.updatedAt))
 const isInactive = computed(
   () => props.preview.status === 'deleted' || expiration.value.isExpired,
 )
+
+const isExpiringSoon = computed(() => {
+  if (expiration.value.isExpired) return false
+  const countdown = expiration.value.countdown
+  return countdown.includes('hour') || countdown === '1 day' || countdown === 'Less than an hour'
+})
 
 const isDeleting = computed(
   () => operation.value?.type === 'delete' && operation.value.status === 'pending',
@@ -94,30 +101,15 @@ function submitInvite() {
   isInviting.value = false
 }
 
-// --- Status line ---
-
-const statusText = computed(() => {
-  if (isDeleting.value) return operation.value!.detail
-  if (props.preview.status === 'deleted') return 'Deleted'
-  if (expiration.value.isExpired) return 'Expired'
-  if (justUpdated.value) return 'Just updated'
-  return `Updated ${relativeTime(props.preview.updatedAt)}`
-})
-
 const expiresText = computed(() => {
-  if (props.preview.status === 'deleted') return ''
-  if (expiration.value.isExpired) return ''
-  return `Expires in ${expiration.value.countdown}`
-})
-
-const statsText = computed(() => {
-  const parts: string[] = []
-  parts.push(`${props.preview.views} view${props.preview.views !== 1 ? 's' : ''}`)
-  parts.push(`${props.preview.uniqueVisitors} visitor${props.preview.uniqueVisitors !== 1 ? 's' : ''}`)
-  if (props.preview.lastVisitedAt) {
-    parts.push(`Last visited ${relativeTime(props.preview.lastVisitedAt)}`)
+  if (props.preview.status === 'deleted') return 'Deleted'
+  if (expiration.value.isExpired) {
+    const d = new Date(expiration.value.expiresAt)
+    const month = d.toLocaleString('en-US', { month: 'short' })
+    const day = d.getDate()
+    return `Expired ${month} ${day}`
   }
-  return parts.join(' · ')
+  return `Expires in ${expiration.value.countdown}`
 })
 
 // --- Actions ---
@@ -126,20 +118,27 @@ function handleCopy() {
   navigator.clipboard.writeText(`https://${props.preview.url}`)
 }
 
-const menuGroups = computed<FlyoutMenuGroup[]>(() => [
-  {
+function handleView() {
+  window.open(`https://${props.preview.url}`, '_blank')
+}
+
+const menuGroups = computed<FlyoutMenuGroup[]>(() => {
+  if (isInactive.value) {
+    return [{ items: [{ label: 'Clear', action: () => emit('clear') }] }]
+  }
+  return [{
     items: [
       { label: 'Extend deadline', action: () => emit('extend') },
       { label: 'Delete', destructive: true, action: () => emit('delete') },
     ],
-  },
-])
+  }]
+})
 </script>
 
 <template>
   <!-- Deleting state -->
   <div v-if="isDeleting" class="preview-card preview-card--deleting">
-    <div class="preview-card__body">
+    <div class="vstack gap-xxs p-xs">
       <span class="preview-card__detail">{{ operation!.detail }}</span>
       <div class="preview-card__track">
         <div
@@ -152,29 +151,48 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
 
   <!-- Normal / Inactive -->
   <div v-else class="preview-card" :class="{ 'preview-card--inactive': isInactive }">
-    <div class="preview-card__body">
-      <!-- URL -->
-      <div class="preview-card__url-row">
+    <!-- Main section -->
+    <div class="preview-card__main">
+      <!-- Header row: URL + actions -->
+      <div class="hstack gap-xs min-w-0">
         <a class="preview-card__url" :href="`https://${preview.url}`" target="_blank">{{ preview.url }}</a>
-        <Button
-          v-if="!isInactive"
-          variant="tertiary"
-          :icon="copy"
-          icon-only
-          size="small"
-          tooltip="Copy link"
-          @click="handleCopy"
-        />
+        <div class="hstack gap-xxs shrink-0">
+          <template v-if="!isInactive">
+            <Button
+              variant="secondary"
+              label="Copy"
+              size="small"
+              @click="handleCopy"
+            />
+            <Button
+              variant="secondary"
+              label="View"
+              size="small"
+              @click="handleView"
+            />
+          </template>
+          <FlyoutMenu :groups="menuGroups" align="end">
+            <template #trigger="{ toggle }">
+              <Button
+                variant="tertiary"
+                :icon="moreVertical"
+                icon-only
+                size="small"
+                @click="toggle"
+              />
+            </template>
+          </FlyoutMenu>
+        </div>
       </div>
 
-      <!-- Note -->
+      <!-- Note (active only) -->
       <div v-if="!isInactive" class="preview-card__note">
         <input
           v-if="isEditingNote"
           ref="noteInputRef"
           v-model="noteInput"
           class="preview-card__note-input"
-          placeholder="Add a note..."
+          placeholder="Add notes..."
           @blur="saveNote"
           @keydown.enter="saveNote"
           @keydown.escape="isEditingNote = false"
@@ -184,16 +202,11 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
           class="preview-card__note-text"
           :class="{ 'is-placeholder': !preview.note }"
           @click="startEditingNote"
-        >{{ preview.note || 'Add a note...' }}</span>
+        >{{ preview.note || 'Add notes...' }}</span>
       </div>
 
-      <!-- Stats -->
-      <div v-if="!isInactive && preview.views > 0" class="preview-card__stats">
-        {{ statsText }}
-      </div>
-
-      <!-- Invites -->
-      <div v-if="!isInactive" class="preview-card__invites">
+      <!-- Invites (active only) -->
+      <div v-if="!isInactive && (preview.invites.length > 0 || isInviting)" class="hstack flex-wrap gap-xxs">
         <span
           v-for="invite in preview.invites"
           :key="invite.email"
@@ -215,74 +228,66 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
           @keydown.enter="submitInvite"
           @keydown.escape="isInviting = false"
         />
-        <button
-          v-else
-          class="preview-card__invite-btn"
-          @click="startInviting"
-        >Invite</button>
-      </div>
-
-      <!-- Meta -->
-      <div class="preview-card__meta">
-        <span class="preview-card__status">{{ statusText }}</span>
-        <span v-if="expiresText" class="preview-card__expires">{{ expiresText }}</span>
       </div>
     </div>
 
-    <div class="preview-card__actions">
-      <Button
-        v-if="isInactive"
-        variant="tertiary"
-        label="Clear"
-        size="small"
-        @click="emit('clear')"
-      />
-      <FlyoutMenu v-else :groups="menuGroups" align="end">
-        <template #trigger="{ toggle }">
-          <Button
-            variant="tertiary"
-            :icon="moreVertical"
-            icon-only
-            size="small"
-            @click="toggle"
-          />
+    <!-- Footer -->
+    <div class="preview-card__footer">
+      <div class="preview-card__stats">
+        <Tooltip text="Total page loads">
+          <span>{{ preview.views.toLocaleString() }} view{{ preview.views !== 1 ? 's' : '' }}</span>
+        </Tooltip>
+        <span class="preview-card__dot">&middot;</span>
+        <Tooltip text="Unique people who visited">
+          <span>{{ preview.uniqueVisitors.toLocaleString() }} visitor{{ preview.uniqueVisitors !== 1 ? 's' : '' }}</span>
+        </Tooltip>
+        <template v-if="preview.lastVisitedAt">
+          <span class="preview-card__dot">&middot;</span>
+          <span>Last visited {{ relativeTime(preview.lastVisitedAt) }}</span>
         </template>
-      </FlyoutMenu>
+      </div>
+      <span
+        class="preview-card__expires"
+        :class="{ 'is-danger': isExpiringSoon || isInactive }"
+      >{{ expiresText }}</span>
     </div>
   </div>
 </template>
 
 <style scoped>
 .preview-card {
-  position: relative;
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-m);
-  padding: var(--space-m);
-  background: var(--color-frame-bg);
+  flex-direction: column;
+  background: var(--color-frame-fill);
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
   overflow: hidden;
 }
 
-.preview-card__body {
-  flex: 1;
+/* ── Main section ── */
+
+.preview-card__main {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  min-width: 0;
+  gap: var(--space-xxxs);
+  padding-block-start: var(--space-s);
+  padding-block-end: var(--space-s);
+  padding-inline-start: var(--space-xl);
+  padding-inline-end: var(--space-s);
+  background: var(--color-frame-bg);
+  border-end-start-radius: var(--radius-m);
+  border-end-end-radius: var(--radius-m);
+  border-block-end: 1px solid var(--color-frame-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.preview-card__url-row {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  min-width: 0;
-}
+/* ── URL ── */
 
 .preview-card__url {
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-medium);
+  flex: 1;
+  font-size: var(--font-size-l);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
   color: var(--color-frame-fg);
   white-space: nowrap;
   overflow: hidden;
@@ -292,53 +297,31 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
 }
 
 .preview-card__url:hover {
-  color: var(--color-primary);
-}
-
-.preview-card__meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
-}
-
-.preview-card__expires {
-  opacity: 0.7;
-}
-
-.preview-card__expires::before {
-  content: '·';
-  margin-inline-end: var(--space-xs);
+  color: var(--color-frame-theme);
 }
 
 /* ── Note ── */
 
-.preview-card__note {
-  min-height: 24px;
-  display: flex;
-  align-items: center;
-}
-
 .preview-card__note-text {
-  font-size: var(--font-size-s);
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-l);
+  line-height: var(--line-height-normal);
+  color: var(--color-frame-fg-muted);
   cursor: pointer;
 }
 
 .preview-card__note-text:hover {
-  color: var(--color-text);
+  color: var(--color-frame-fg);
 }
 
 .preview-card__note-text.is-placeholder {
-  color: var(--color-text-muted);
-  font-style: italic;
+  opacity: 0.5;
 }
 
 .preview-card__note-input {
   font-family: inherit;
-  font-size: var(--font-size-s);
-  color: var(--color-text);
+  font-size: var(--font-size-l);
+  line-height: var(--line-height-normal);
+  color: var(--color-frame-fg);
   background: none;
   border: none;
   outline: none;
@@ -347,25 +330,11 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
 }
 
 .preview-card__note-input::placeholder {
-  color: var(--color-text-muted);
-  font-style: italic;
-}
-
-/* ── Stats ── */
-
-.preview-card__stats {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
+  opacity: 0.5;
 }
 
 /* ── Invites ── */
-
-.preview-card__invites {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-xxs);
-}
 
 .preview-card__invite-pill {
   display: inline-flex;
@@ -373,8 +342,8 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
   gap: var(--space-xxs);
   padding: 2px var(--space-xs);
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  background: var(--color-surface-secondary);
+  color: var(--color-frame-fg-muted);
+  background: var(--color-frame-hover);
   border-radius: var(--radius-full);
 }
 
@@ -382,18 +351,18 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--color-text-muted);
+  background: var(--color-frame-fg-muted);
   flex-shrink: 0;
 }
 
 .preview-card__invite-pill.is-visited .preview-card__invite-dot {
-  background: var(--color-success, #16a34a);
+  background: var(--color-status-running);
 }
 
 .preview-card__invite-remove {
   font-family: inherit;
   font-size: var(--font-size-s);
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
   background: none;
   border: none;
   cursor: pointer;
@@ -410,7 +379,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
 .preview-card__invite-input {
   font-family: inherit;
   font-size: var(--font-size-xs);
-  color: var(--color-text);
+  color: var(--color-frame-fg);
   background: none;
   border: none;
   outline: none;
@@ -419,38 +388,55 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
 }
 
 .preview-card__invite-input::placeholder {
-  color: var(--color-text-muted);
+  color: var(--color-frame-fg-muted);
 }
 
-.preview-card__invite-btn {
-  font-family: inherit;
-  font-size: var(--font-size-xs);
-  color: var(--color-primary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 2px var(--space-xxs);
-}
+/* ── Footer ── */
 
-.preview-card__invite-btn:hover {
-  text-decoration: underline;
-}
-
-.preview-card__actions {
-  flex-shrink: 0;
+.preview-card__footer {
   display: flex;
   align-items: center;
-  gap: 2px;
+  justify-content: space-between;
+  padding-inline: var(--space-xl);
+  padding-block: var(--space-xs);
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  white-space: nowrap;
+}
+
+.preview-card__stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+}
+
+.preview-card__dot {
+  opacity: 0.4;
+}
+
+.preview-card__expires {
+  opacity: 0.6;
+}
+
+.preview-card__expires.is-danger {
+  opacity: 1;
+  color: var(--color-frame-danger);
 }
 
 /* ── Inactive (deleted / expired) ── */
 
-.preview-card--inactive {
-  opacity: 0.6;
+.preview-card--inactive .preview-card__main {
+  background: none;
 }
 
 .preview-card--inactive .preview-card__url {
   text-decoration: line-through;
+  opacity: 0.6;
+  color: var(--color-frame-fg-muted);
+  font-weight: var(--font-weight-semibold);
+}
+
+.preview-card--inactive .preview-card__url:hover {
   color: var(--color-frame-fg-muted);
 }
 
@@ -460,13 +446,9 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
   border-style: dashed;
 }
 
-.preview-card--deleting .preview-card__body {
-  gap: var(--space-xxs);
-}
-
 .preview-card__detail {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
 }
 
 .preview-card__track {
@@ -480,8 +462,8 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => [
 
 .preview-card__fill {
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-frame-theme);
   border-radius: var(--radius-s);
-  transition: width 150ms ease;
+  transition: width var(--duration-fast) var(--ease-default);
 }
 </style>

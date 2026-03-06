@@ -178,7 +178,7 @@ const timeSince = computed(() => {
 .sync-env__url {
   font-size: 12px;
   line-height: 16px;
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   text-decoration: underline;
   white-space: nowrap;
   overflow: hidden;
@@ -198,7 +198,7 @@ const timeSince = computed(() => {
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
   background: var(--color-frame-bg);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   font-family: inherit;
   font-size: var(--font-size-m);
   line-height: 20px;
@@ -210,7 +210,7 @@ const timeSince = computed(() => {
 }
 
 .sync-env__action:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
@@ -245,7 +245,7 @@ const timeSince = computed(() => {
 .sync-env__bar-fill {
   height: 100%;
   border-radius: var(--radius-full);
-  background: var(--color-primary);
+  background: var(--color-frame-theme);
   transition: width 200ms var(--ease-default);
 }
 

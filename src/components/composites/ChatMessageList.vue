@@ -5,7 +5,7 @@ import type { Message } from '@/data/types'
 
 const props = defineProps<{
   messages: Message[]
-  projectId?: string
+  siteId?: string
 }>()
 
 const scrollerRef = ref<HTMLDivElement | null>(null)
@@ -51,7 +51,7 @@ onBeforeUnmount(() => {
         :role="msg.role"
         :content="msg.content"
         :agent-id="msg.agentId"
-        :project-id="projectId"
+        :site-id="siteId"
       />
     </div>
   </div>

@@ -7,10 +7,10 @@ import Button from '@/components/primitives/Button.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import { useConversations } from '@/data/useConversations'
-import { useProjects } from '@/data/useProjects'
+import { useSites } from '@/data/useSites'
 
 const props = defineProps<{
-  projectId: string
+  siteId: string
   selectedId: string | null
   activeScreen?: string
   siteName?: string
@@ -26,14 +26,14 @@ defineEmits<{
 }>()
 
 const { getConversations, messages, archiveConversation, unarchiveConversation } = useConversations()
-const projectConvos = getConversations(toRef(props, 'projectId'))
+const siteConvos = getConversations(toRef(props, 'siteId'))
 
-const { projects: allProjects } = useProjects()
-const runningCount = computed(() => allProjects.value.filter(p => p.status === 'running').length)
-const stoppedCount = computed(() => allProjects.value.filter(p => p.status === 'stopped').length)
+const { sites: allSites } = useSites()
+const runningCount = computed(() => allSites.value.filter(p => p.status === 'running').length)
+const stoppedCount = computed(() => allSites.value.filter(p => p.status === 'stopped').length)
 
 const sortedConvos = computed(() =>
-  [...projectConvos.value]
+  [...siteConvos.value]
     .filter(c => !c.archived)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 )
@@ -63,8 +63,8 @@ function onArchive(e: Event, convoId: string) {
   archiveConversation(convoId)
 }
 
-const currentProject = computed(() => allProjects.value.find(p => p.id === props.projectId))
-const siteLayout = computed(() => currentProject.value?.mockLayout ?? 'cafe')
+const currentSite = computed(() => allSites.value.find(p => p.id === props.siteId))
+const siteLayout = computed(() => currentSite.value?.mockLayout ?? 'cafe')
 
 const copiedField = ref<string | null>(null)
 let copiedTimeout: ReturnType<typeof setTimeout> | undefined
@@ -115,7 +115,7 @@ function onThumbLeave() {
 const archiveMenuRef = ref<InstanceType<typeof FlyoutMenu> | null>(null)
 
 const archivedConvos = computed(() =>
-  [...projectConvos.value]
+  [...siteConvos.value]
     .filter(c => c.archived)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 )
@@ -141,21 +141,21 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 </script>
 
 <template>
-  <div class="task-list">
+  <div class="site-navigation">
     <!-- All Sites summary -->
-    <div v-if="isAllSites" class="task-list__summary">
+    <div v-if="isAllSites" class="site-overview--all">
       <div class="summary__sites">
         <div class="summary__favicons">
           <img
-            v-for="project in allProjects"
-            :key="project.id"
+            v-for="site in allSites"
+            :key="site.id"
             class="summary__favicon"
-            :src="project.favicon"
-            :alt="project.name"
-            :title="project.name"
+            :src="site.favicon"
+            :alt="site.name"
+            :title="site.name"
           />
         </div>
-        <span class="summary__count">{{ allProjects.length }} sites</span>
+        <span class="summary__count">{{ allSites.length }} sites</span>
       </div>
       <div class="summary__statuses">
         <span v-if="runningCount" class="summary__status">
@@ -170,7 +170,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     </div>
 
     <!-- Single-site overview -->
-    <div v-else class="task-list__overview">
+    <div v-else class="site-overview">
       <Tooltip text="Open site in browser" placement="top">
       <button
         class="overview__thumb"
@@ -255,10 +255,10 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
             </div>
           </div>
           <div class="mock__grid-2">
-            <div class="mock__project">
+            <div class="mock__site">
               <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&h=350&fit=crop&q=80" alt="" />
             </div>
-            <div class="mock__project">
+            <div class="mock__site">
               <img src="https://images.unsplash.com/photo-1545235617-9465d2a55698?w=500&h=350&fit=crop&q=80" alt="" />
             </div>
           </div>
@@ -281,13 +281,13 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
     </div>
 
-    <div class="task-list__section-header">
-      <span class="task-list__title">Tasks</span>
-      <div class="task-list__header-actions">
+    <div class="site-tasks__header">
+      <span class="site-tasks__title">Tasks</span>
+      <div class="site-tasks__actions">
         <FlyoutMenu ref="archiveMenuRef" :groups="archiveMenuGroups" surface="dark" align="end" max-width="260px">
           <template #trigger="{ toggle, open }">
             <Tooltip text="Archived tasks" placement="top" :delay="300">
-              <button class="task-list__icon-btn" :class="{ 'is-active': open }" @click="toggle">
+              <button class="site-tasks__icon-btn" :class="{ 'is-active': open }" @click="toggle">
                 <WPIcon :icon="archive" :size="16" />
               </button>
             </Tooltip>
@@ -297,26 +297,26 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
     </div>
 
-    <!-- Task list -->
-    <div class="task-list__scroll">
+    <!-- Site tasks -->
+    <div class="site-tasks__list">
       <div
         v-for="convo in sortedConvos"
         :key="convo.id"
-        class="task-list__item"
+        class="site-tasks__item"
         :class="{ 'is-selected': convo.id === selectedId }"
         @click="$emit('select', convo.id)"
       >
-        <span class="task-list__item-title">{{ convo.title || 'New task' }}</span>
-        <span class="task-list__item-end">
-          <span class="task-list__time">{{ formatTime(getLastTimestamp(convo.id) || convo.createdAt) }}</span>
+        <span class="site-tasks__item-title">{{ convo.title || 'New task' }}</span>
+        <span class="site-tasks__item-end">
+          <span class="site-tasks__time">{{ formatTime(getLastTimestamp(convo.id) || convo.createdAt) }}</span>
           <Tooltip text="Archive" placement="right" :delay="300">
-            <button class="task-list__archive" @click="onArchive($event, convo.id)">
+            <button class="site-tasks__archive" @click="onArchive($event, convo.id)">
               <WPIcon :icon="archive" :size="16" />
             </button>
           </Tooltip>
         </span>
       </div>
-      <div v-if="sortedConvos.length === 0" class="task-list__empty">
+      <div v-if="sortedConvos.length === 0" class="site-tasks__empty">
         <p class="empty__heading">AI agents that work for you</p>
         <p class="empty__description">Tasks are conversations with AI agents that can edit your site, install plugins, write content, and more.</p>
         <Button label="Create your first task" variant="primary" size="small" @click="$emit('new-task')" />
@@ -324,21 +324,21 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     </div>
 
     <!-- Site nav -->
-    <nav v-if="!isAllSites" class="task-list__nav" :class="{ 'has-toggle': sidebarHidden }">
-      <button class="task-list__nav-item" :class="{ 'is-active': activeScreen === 'sync' }" @click="$emit('navigate', 'sync')">
-        <WPIcon :icon="update" :size="20" class="task-list__nav-icon" />
+    <nav v-if="!isAllSites" class="site-sections" :class="{ 'has-toggle': sidebarHidden }">
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'sync' }" @click="$emit('navigate', 'sync')">
+        <WPIcon :icon="update" :size="20" class="site-sections__icon" />
         Sync
       </button>
-      <button class="task-list__nav-item" :class="{ 'is-active': activeScreen === 'previews' }" @click="$emit('navigate', 'previews')">
-        <WPIcon :icon="customLink" :size="20" class="task-list__nav-icon" />
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'previews' }" @click="$emit('navigate', 'previews')">
+        <WPIcon :icon="customLink" :size="20" class="site-sections__icon" />
         Previews
       </button>
-      <button class="task-list__nav-item" :class="{ 'is-active': activeScreen === 'import-export' }" @click="$emit('navigate', 'import-export')">
-        <WPIcon :icon="login" :size="20" class="task-list__nav-icon" />
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'import-export' }" @click="$emit('navigate', 'import-export')">
+        <WPIcon :icon="login" :size="20" class="site-sections__icon" />
         Import/Export
       </button>
-      <button class="task-list__nav-item" :class="{ 'is-active': activeScreen === 'settings' }" @click="$emit('navigate', 'settings')">
-        <WPIcon :icon="tool" :size="20" class="task-list__nav-icon" />
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'settings' }" @click="$emit('navigate', 'settings')">
+        <WPIcon :icon="tool" :size="20" class="site-sections__icon" />
         Settings
       </button>
     </nav>
@@ -346,15 +346,15 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 </template>
 
 <style scoped>
-.task-list {
+.site-navigation {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-/* ── Overview card ── */
+/* ── Site overview ── */
 
-.task-list__overview {
+.site-overview {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxs);
@@ -576,13 +576,13 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   padding: 0 32px 32px;
 }
 
-.mock__project {
+.mock__site {
   flex: 1;
   border-radius: 10px;
   overflow: hidden;
 }
 
-.mock__project img {
+.mock__site img {
   width: 100%;
   aspect-ratio: 3 / 2;
   object-fit: cover;
@@ -681,7 +681,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 .overview__url {
   font-size: var(--font-size-s);
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -716,13 +716,13 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 }
 
 .overview__copy-btn:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
-/* ── Site nav ── */
+/* ── Site sections nav ── */
 
-.task-list__nav {
+.site-sections {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -733,11 +733,11 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   transition: padding-block-end 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.task-list__nav.has-toggle {
+.site-sections.has-toggle {
   padding-block-end: 48px;
 }
 
-.task-list__nav-item {
+.site-sections__item {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -746,7 +746,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   border: none;
   border-radius: var(--radius-s);
   background: none;
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   font-family: inherit;
   font-size: var(--font-size-m);
   cursor: pointer;
@@ -754,30 +754,30 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     color var(--duration-instant) var(--ease-default);
 }
 
-.task-list__nav-icon {
+.site-sections__icon {
   flex-shrink: 0;
   color: var(--color-frame-fg-muted);
   transition: color var(--duration-instant) var(--ease-default);
 }
 
-.task-list__nav-item:hover .task-list__nav-icon,
-.task-list__nav-item.is-active .task-list__nav-icon {
-  color: var(--color-frame-fg-secondary);
+.site-sections__item:hover .site-sections__icon,
+.site-sections__item.is-active .site-sections__icon {
+  color: var(--color-frame-fg-muted);
 }
 
-.task-list__nav-item:hover {
-  background: var(--color-frame-bg-secondary);
+.site-sections__item:hover {
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
-.task-list__nav-item.is-active {
-  background: var(--color-frame-bg-secondary);
+.site-sections__item.is-active {
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
-/* ── Section header ── */
+/* ── Site tasks ── */
 
-.task-list__section-header {
+.site-tasks__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -785,7 +785,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   flex-shrink: 0;
 }
 
-.task-list__title {
+.site-tasks__title {
   font-size: 11px;
   font-weight: var(--font-weight-semibold);
   color: var(--color-frame-fg);
@@ -794,13 +794,13 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   line-height: 16px;
 }
 
-.task-list__header-actions {
+.site-tasks__actions {
   display: flex;
   align-items: center;
   gap: 2px;
 }
 
-.task-list__icon-btn {
+.site-tasks__icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -815,15 +815,15 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     color var(--duration-instant) var(--ease-default);
 }
 
-.task-list__icon-btn:hover,
-.task-list__icon-btn.is-active {
-  background: var(--color-frame-bg-secondary);
+.site-tasks__icon-btn:hover,
+.site-tasks__icon-btn.is-active {
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
-/* ── Scrollable task list ── */
+/* ── Task list items ── */
 
-.task-list__scroll {
+.site-tasks__list {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -832,7 +832,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   padding: 0 8px 8px;
 }
 
-.task-list__item {
+.site-tasks__item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -844,43 +844,43 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   transition: background var(--duration-instant) var(--ease-default);
 }
 
-.task-list__item:hover {
-  background: var(--color-frame-bg-secondary);
+.site-tasks__item:hover {
+  background: var(--color-frame-hover);
 }
 
-.task-list__item.is-selected {
-  background: var(--color-frame-bg-secondary);
+.site-tasks__item.is-selected {
+  background: var(--color-frame-hover);
 }
 
-.task-list__item.is-selected .task-list__item-title {
+.site-tasks__item.is-selected .site-tasks__item-title {
   color: var(--color-frame-fg);
 }
 
-.task-list__item-title {
+.site-tasks__item-title {
   flex: 1;
   min-width: 0;
   font-size: var(--font-size-m);
   line-height: 20px;
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.task-list__item-end {
+.site-tasks__item-end {
   display: flex;
   align-items: center;
   flex-shrink: 0;
 }
 
-.task-list__time {
+.site-tasks__time {
   font-size: var(--font-size-m);
   color: var(--color-frame-fg);
   opacity: 0.5;
   white-space: nowrap;
 }
 
-.task-list__archive {
+.site-tasks__archive {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -895,25 +895,25 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     color var(--duration-instant) var(--ease-default);
 }
 
-.task-list__archive:hover {
+.site-tasks__archive:hover {
   background: var(--color-frame-border);
   color: var(--color-frame-fg);
 }
 
 /* Hide time, show archive on end-area hover */
-.task-list__archive {
+.site-tasks__archive {
   display: none;
 }
 
-.task-list__item-end:hover .task-list__time {
+.site-tasks__item-end:hover .site-tasks__time {
   display: none;
 }
 
-.task-list__item-end:hover .task-list__archive {
+.site-tasks__item-end:hover .site-tasks__archive {
   display: flex;
 }
 
-.task-list__empty {
+.site-tasks__empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -939,7 +939,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 /* ── All Sites summary ── */
 
-.task-list__summary {
+.site-overview--all {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);

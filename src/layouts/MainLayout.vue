@@ -3,18 +3,17 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { drawerLeft } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
-import ProjectList from '@/components/features/ProjectList.vue'
+import SiteList from '@/components/features/SiteList.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
+import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
-import SpotlightTour from '@/components/composites/SpotlightTour.vue'
-import { useTour } from '@/data/useTour'
 import { useSidebarCollapse } from '@/data/useSidebarCollapse'
 
 const router = useRouter()
-const { start: startTour } = useTour()
 const { hidden, toggle: toggleSidebar } = useSidebarCollapse()
 
 const showShortcuts = ref(false)
+const showPreferences = ref(false)
 const showGlobalMenu = ref(false)
 const gravatarRef = ref<HTMLElement | null>(null)
 
@@ -22,6 +21,10 @@ function onGlobalKeydown(e: KeyboardEvent) {
   if ((e.metaKey || e.ctrlKey) && e.key === '/') {
     e.preventDefault()
     showShortcuts.value = !showShortcuts.value
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === ',') {
+    e.preventDefault()
+    showPreferences.value = !showPreferences.value
   }
   if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
     e.preventDefault()
@@ -38,7 +41,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', onGlobalKeydown)
 })
 
-function handleNewProject() {
+function handleNewSite() {
   router.push({ name: 'add-site' })
 }
 </script>
@@ -75,13 +78,13 @@ function handleNewProject() {
         :class="{ 'is-hidden': hidden }"
         :style="{ viewTransitionName: 'sidebar' }"
       >
-        <ProjectList class="flex-1 min-h-0" @new-project="handleNewProject" />
+        <SiteList class="flex-1 min-h-0" @new-site="handleNewSite" />
       </div>
 
       <main
         class="frame"
         :class="{ 'is-full': hidden }"
-        :style="{ viewTransitionName: 'project-frame' }"
+        :style="{ viewTransitionName: 'site-frame' }"
       >
         <router-view name="main" v-slot="{ Component }">
           <component :is="Component" :sidebar-hidden="hidden" />
@@ -89,8 +92,8 @@ function handleNewProject() {
       </main>
     </div>
     <ShortcutsModal :open="showShortcuts" @close="showShortcuts = false" />
+    <PreferencesModal :open="showPreferences" @close="showPreferences = false" />
     <GlobalMenu :open="showGlobalMenu" :anchor="gravatarRef" @close="showGlobalMenu = false" />
-    <SpotlightTour />
   </div>
 </template>
 
@@ -98,8 +101,8 @@ function handleNewProject() {
 .main-layout {
   position: relative;
   height: 100vh;
-  background: var(--color-chrome);
-  color: var(--color-chrome-text);
+  background: var(--color-chrome-bg);
+  color: var(--color-chrome-fg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
@@ -123,9 +126,9 @@ function handleNewProject() {
   border-radius: 50%;
 }
 
-.light.close { background: var(--color-light-close); }
-.light.minimize { background: var(--color-light-minimize); }
-.light.maximize { background: var(--color-light-maximize); }
+.light.close { background: var(--color-macos-close); }
+.light.minimize { background: var(--color-macos-minimize); }
+.light.maximize { background: var(--color-macos-maximize); }
 
 .app-body {
   position: relative;
@@ -229,7 +232,7 @@ function handleNewProject() {
   border-radius: var(--radius-full);
   border: 1px solid transparent;
   background: transparent;
-  color: var(--color-chrome-text-muted);
+  color: var(--color-chrome-fg-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -269,7 +272,7 @@ function handleNewProject() {
 }
 
 .gravatar-btn.is-sidebar-hidden:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 /* ── Sidebar toggle ── */
@@ -288,7 +291,7 @@ function handleNewProject() {
 
 .sidebar-toggle:hover {
   background: var(--color-chrome-hover);
-  color: var(--color-chrome-text);
+  color: var(--color-chrome-fg);
 }
 
 .sidebar-toggle.is-sidebar-hidden {
@@ -306,7 +309,7 @@ function handleNewProject() {
 }
 
 .sidebar-toggle.is-sidebar-hidden:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 </style>

@@ -127,16 +127,16 @@ const html = computed(() => renderMarkdown(props.text))
 }
 
 .markdown :deep(code) {
-  background: var(--color-surface-secondary);
-  border: 1px solid var(--color-surface-border);
+  background: var(--color-frame-hover);
+  border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-s);
   padding: 0 0.3em;
   font-size: 0.92em;
 }
 
 .markdown :deep(pre) {
-  background: var(--color-surface-secondary);
-  border: 1px solid var(--color-surface-border);
+  background: var(--color-frame-hover);
+  border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-s);
   padding: var(--space-xs);
   overflow-x: auto;
@@ -149,6 +149,6 @@ const html = computed(() => renderMarkdown(props.text))
 }
 
 .markdown :deep(a) {
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
 }
 </style>

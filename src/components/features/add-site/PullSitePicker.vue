@@ -111,14 +111,14 @@ function select(site: RemoteSite) {
 
 .auth-desc {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   margin: 0;
   line-height: 1.5;
 }
 
 .auth-steps {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   padding-inline-start: var(--space-m);
   margin: 0;
 }
@@ -129,7 +129,7 @@ function select(site: RemoteSite) {
 
 .auth-link {
   font-size: var(--font-size-s);
-  color: var(--color-primary);
+  color: var(--color-frame-theme);
   text-decoration: none;
 }
 
@@ -167,8 +167,8 @@ function select(site: RemoteSite) {
 }
 
 .search-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border-color: var(--color-frame-theme);
+  box-shadow: 0 0 0 1px var(--color-frame-theme);
 }
 
 .search-input::placeholder {
@@ -198,12 +198,12 @@ function select(site: RemoteSite) {
 }
 
 .site-row:hover {
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 .site-row.is-selected {
-  border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-frame-bg));
+  border-color: var(--color-frame-theme);
+  background: color-mix(in srgb, var(--color-frame-theme) 5%, var(--color-frame-bg));
 }
 
 .site-favicon {
@@ -212,7 +212,7 @@ function select(site: RemoteSite) {
   border-radius: var(--radius-s);
   overflow: hidden;
   flex-shrink: 0;
-  background: var(--color-frame-bg-secondary);
+  background: var(--color-frame-hover);
 }
 
 .site-favicon img {
@@ -234,7 +234,7 @@ function select(site: RemoteSite) {
 
 .empty-text {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-secondary);
+  color: var(--color-frame-fg-muted);
   margin: 0;
 }
 </style>

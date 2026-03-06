@@ -11,15 +11,15 @@ import PullSitePicker from '@/components/features/add-site/PullSitePicker.vue'
 import type { Blueprint } from '@/components/features/add-site/BlueprintPicker.vue'
 import type { RemoteSite } from '@/components/features/add-site/PullSitePicker.vue'
 import type { SelectedFile } from '@/components/features/add-site/ImportDropZone.vue'
-import { useProjects } from '@/data/useProjects'
-import { useProjectTransition } from '@/data/useProjectTransition'
+import { useSites } from '@/data/useSites'
+import { useSiteTransition } from '@/data/useSiteTransition'
 
 type Path = 'blank' | 'blueprint' | 'pull' | 'import'
 type Step = 'choose' | 'picker' | 'details'
 
 const router = useRouter()
-const { createUntitledProject, updateProject } = useProjects()
-const { navigateToProject } = useProjectTransition('project')
+const { createUntitledSite, updateSite } = useSites()
+const { navigateToSite } = useSiteTransition('site')
 
 const currentPath = ref<Path | null>(null)
 const currentStep = ref<Step>('choose')
@@ -103,10 +103,10 @@ function initialName(): string | undefined {
 
 async function onSubmit(data: { name: string }) {
   leaving.value = true
-  const project = createUntitledProject()
-  updateProject(project.id, { name: data.name })
+  const site = createUntitledSite()
+  updateSite(site.id, { name: data.name })
   setTimeout(async () => {
-    await navigateToProject(project.id)
+    await navigateToSite(site.id)
   }, 250)
 }
 </script>
@@ -245,7 +245,7 @@ async function onSubmit(data: { name: string }) {
   transform: translateX(-50%);
   width: 800px;
   height: 500px;
-  background: radial-gradient(ellipse at center, var(--color-primary) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, var(--color-frame-theme) 0%, transparent 70%);
   opacity: 0.06;
   pointer-events: none;
   z-index: 0;
@@ -341,8 +341,8 @@ async function onSubmit(data: { name: string }) {
 }
 
 .option-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border-color: var(--color-frame-theme);
+  box-shadow: 0 0 0 1px var(--color-frame-theme);
 }
 
 /* Icon */
@@ -354,8 +354,8 @@ async function onSubmit(data: { name: string }) {
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-m);
-  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-frame-bg));
-  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-frame-theme) 8%, var(--color-frame-bg));
+  color: var(--color-frame-theme);
 }
 
 /* Text */

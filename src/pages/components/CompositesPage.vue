@@ -1,29 +1,31 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import ChatMessage from '@/components/composites/ChatMessage.vue'
+import ChatMessageList from '@/components/composites/ChatMessageList.vue'
+import GlobalMenu from '@/components/composites/GlobalMenu.vue'
 import InputChat from '@/components/composites/InputChat.vue'
-import Panel from '@/components/composites/Panel.vue'
+import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import PanelToolbar from '@/components/composites/PanelToolbar.vue'
-import ProjectItem from '@/components/composites/ProjectItem.vue'
-import TabBar from '@/components/composites/TabBar.vue'
+import SiteItem from '@/components/composites/SiteItem.vue'
+import ScreenHeader from '@/components/composites/ScreenHeader.vue'
+import ScreenLayout from '@/components/composites/ScreenLayout.vue'
+import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
+import SiteToolbar from '@/components/composites/SiteToolbar.vue'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
 import { cog, chevronDown } from '@wordpress/icons'
-import type { Project } from '@/data/types'
-import '@/pages/components/components-docs.css'
+import type { Site } from '@/data/types'
+import '@/pages/dev-docs.css'
 
-const sampleProjects: Project[] = [
+const sampleSites: Site[] = [
   { id: '1', name: 'Downstreet Cafe', favicon: 'https://api.dicebear.com/9.x/shapes/svg?seed=cafe', status: 'running', url: 'downstreetcafe.local', createdAt: '2025-01-01', description: 'A cozy cafe site' },
   { id: '2', name: "Shaun's Blog", favicon: 'https://api.dicebear.com/9.x/shapes/svg?seed=blog', status: 'running', url: 'shaunsblog.local', createdAt: '2025-01-02' },
   { id: '3', name: 'UI Portfolio', favicon: 'https://api.dicebear.com/9.x/shapes/svg?seed=portfolio', status: 'stopped', url: 'portfolio.local', createdAt: '2025-01-03' },
 ]
 
-const activeTabId = ref('tab-1')
-const tabBarTabs = [
-  { id: 'tab-1', label: 'Site Assistant' },
-  { id: 'tab-2', label: 'Code Agent' },
-  { id: 'tab-3', label: 'Design Agent' },
-]
+const prefsOpen = ref(false)
+const shortcutsOpen = ref(false)
+
 </script>
 
 <template>
@@ -64,6 +66,62 @@ const tabBarTabs = [
     </div>
   </section>
 
+  <!-- ChatMessageList -->
+  <section id="chat-message-list">
+    <h2>ChatMessageList</h2>
+    <p class="section-desc">Scrolling container for chat messages with auto-scroll to bottom on new messages.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>messages</code></td><td><code>Message[]</code></td><td>—</td><td>Array of messages to display</td></tr>
+          <tr><td><code>siteId</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Optional site ID passed to child messages</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="example-section" style="max-width: 640px; height: 200px; border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
+      <ChatMessageList :messages="[
+        { id: '1', conversationId: 'c1', role: 'user', content: 'Can you update the homepage hero?', timestamp: '' },
+        { id: '2', conversationId: 'c1', role: 'agent', content: 'Sure! I will update the hero section with a new gradient background.', timestamp: '' },
+      ]" />
+    </div>
+  </section>
+
+  <!-- GlobalMenu -->
+  <section id="global-menu">
+    <h2>GlobalMenu</h2>
+    <p class="section-desc">Teleported account menu showing user profile, usage meters, and navigation links. Positioned below a trigger element.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>open</code></td><td><code>boolean</code></td><td>—</td><td>Controls menu visibility</td></tr>
+          <tr><td><code>anchor</code></td><td><code>HTMLElement | null</code></td><td>—</td><td>DOM element to position menu below</td></tr>
+        </tbody>
+      </table>
+      <h3>Events</h3>
+      <table>
+        <thead><tr><th>Event</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>close</code></td><td>Menu close requested</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="example-section">
+      <div class="card p-s">
+        <Text variant="body" color="secondary">GlobalMenu uses Teleport and requires a positioned anchor element. See it live in the app titlebar.</Text>
+      </div>
+    </div>
+  </section>
+
   <!-- InputChat -->
   <section id="input-chat">
     <h2>InputChat</h2>
@@ -82,35 +140,6 @@ const tabBarTabs = [
     <h3>Preview</h3>
     <div class="example-section" style="max-width: 500px;">
       <InputChat />
-    </div>
-  </section>
-
-  <!-- Panel -->
-  <section id="panel">
-    <h2>Panel</h2>
-    <p class="section-desc">Generic content panel with a left border separator. Used as the main layout container within the app body — panels sit side by side (e.g. AgentPanel + SitePreview).</p>
-
-    <div class="props-table">
-      <h3>Props</h3>
-      <table>
-        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Optional panel title (unused currently, reserved)</td></tr>
-        </tbody>
-      </table>
-      <h3>Slots</h3>
-      <table>
-        <thead><tr><th>Slot</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>default</code></td><td>Panel content</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Preview</h3>
-    <div class="example-section hstack" style="height: 120px; border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <Panel><div class="p-s"><Text color="secondary">Panel A</Text></div></Panel>
-      <Panel><div class="p-s"><Text color="secondary">Panel B</Text></div></Panel>
     </div>
   </section>
 
@@ -149,19 +178,48 @@ const tabBarTabs = [
     </div>
   </section>
 
-  <!-- ProjectItem -->
-  <section id="project-item">
-    <h2>ProjectItem</h2>
-    <p class="section-desc">A single project entry that renders in card or row mode. Used by ProjectList for grid/list layouts.</p>
+  <!-- PreferencesModal -->
+  <section id="preferences-modal">
+    <h2>PreferencesModal</h2>
+    <p class="section-desc">Multi-tab settings modal covering appearance, agents, skills, and account configuration.</p>
 
     <div class="props-table">
       <h3>Props</h3>
       <table>
         <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>project</code></td><td><code>Project</code></td><td>—</td><td>Project data object</td></tr>
+          <tr><td><code>open</code></td><td><code>boolean</code></td><td>—</td><td>Controls modal visibility</td></tr>
+        </tbody>
+      </table>
+      <h3>Events</h3>
+      <table>
+        <thead><tr><th>Event</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>close</code></td><td>Modal close requested</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="example-section">
+      <Button variant="secondary" label="Open Preferences" @click="prefsOpen = true" />
+      <PreferencesModal :open="prefsOpen" @close="prefsOpen = false" />
+    </div>
+  </section>
+
+  <!-- SiteItem -->
+  <section id="site-item">
+    <h2>SiteItem</h2>
+    <p class="section-desc">A single site entry that renders in card or row mode. Used by SiteList for grid/list layouts.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>site</code></td><td><code>Site</code></td><td>—</td><td>Site data object</td></tr>
           <tr><td><code>mode</code></td><td><code>'card' | 'row'</code></td><td>—</td><td>Display mode</td></tr>
-          <tr><td><code>active</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether this project is currently selected (row mode highlight)</td></tr>
+          <tr><td><code>active</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether this site is currently selected (row mode highlight)</td></tr>
         </tbody>
       </table>
       <h3>Events</h3>
@@ -177,46 +235,156 @@ const tabBarTabs = [
     <h3>Card mode</h3>
     <div class="example-section example-section--dark">
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-m);">
-        <ProjectItem v-for="p in sampleProjects" :key="p.id" :project="p" mode="card" />
+        <SiteItem v-for="p in sampleSites" :key="p.id" :site="p" mode="card" />
       </div>
     </div>
 
     <h3>Row mode</h3>
     <div class="example-section example-section--dark" style="max-width: 240px;">
-      <ProjectItem :project="sampleProjects[0]!" mode="row" />
-      <ProjectItem :project="sampleProjects[1]!" mode="row" :active="true" />
-      <ProjectItem :project="sampleProjects[2]!" mode="row" />
+      <SiteItem :site="sampleSites[0]!" mode="row" />
+      <SiteItem :site="sampleSites[1]!" mode="row" :active="true" />
+      <SiteItem :site="sampleSites[2]!" mode="row" />
     </div>
   </section>
 
-  <!-- TabBar -->
-  <section id="tab-bar">
-    <h2>TabBar</h2>
-    <p class="section-desc">Horizontal tab strip with scrollable overflow, fade edges, close buttons on the active tab, and an add button. Used for switching between agent conversations.</p>
+  <!-- ScreenHeader -->
+  <section id="screen-header">
+    <h2>ScreenHeader</h2>
+    <p class="section-desc">Header bar with title, optional subtitle, and right-aligned action slot.</p>
 
     <div class="props-table">
       <h3>Props</h3>
       <table>
         <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>tabs</code></td><td><code>Tab[]</code></td><td>—</td><td>Array of <code>{ id: string, label: string }</code></td></tr>
-          <tr><td><code>activeId</code></td><td><code>string</code></td><td>—</td><td>Currently active tab id</td></tr>
+          <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Header title</td></tr>
+          <tr><td><code>subtitle</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Optional subtitle text</td></tr>
+        </tbody>
+      </table>
+      <h3>Slots</h3>
+      <table>
+        <thead><tr><th>Slot</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>actions</code></td><td>Right-aligned action buttons</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
+      <ScreenHeader title="Settings" subtitle="Configure your site">
+        <template #actions>
+          <Button variant="primary" label="Save" size="small" />
+        </template>
+      </ScreenHeader>
+    </div>
+  </section>
+
+  <!-- ScreenLayout -->
+  <section id="screen-layout">
+    <h2>ScreenLayout</h2>
+    <p class="section-desc">Full-screen layout combining ScreenHeader with a scrollable body area.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Header title</td></tr>
+          <tr><td><code>subtitle</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Optional header subtitle</td></tr>
+          <tr><td><code>scrollable</code></td><td><code>boolean</code></td><td><code>undefined</code></td><td>Enable vertical scrolling in body</td></tr>
+        </tbody>
+      </table>
+      <h3>Slots</h3>
+      <table>
+        <thead><tr><th>Slot</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>actions</code></td><td>Right-aligned header actions</td></tr>
+          <tr><td><code>default</code></td><td>Body content</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="example-section" style="height: 200px; border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
+      <ScreenLayout title="Import / Export" :scrollable="true">
+        <div class="p-m">
+          <Text color="secondary">Scrollable body content goes here.</Text>
+        </div>
+      </ScreenLayout>
+    </div>
+  </section>
+
+  <!-- ShortcutsModal -->
+  <section id="shortcuts-modal">
+    <h2>ShortcutsModal</h2>
+    <p class="section-desc">Read-only modal displaying keyboard shortcuts organized by category.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>open</code></td><td><code>boolean</code></td><td>—</td><td>Controls modal visibility</td></tr>
         </tbody>
       </table>
       <h3>Events</h3>
       <table>
         <thead><tr><th>Event</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>update:activeId</code></td><td>Emitted when a tab is clicked</td></tr>
-          <tr><td><code>close</code></td><td>Emitted when a tab's close button is clicked</td></tr>
-          <tr><td><code>add</code></td><td>Emitted when the add button is clicked</td></tr>
+          <tr><td><code>close</code></td><td>Modal close requested</td></tr>
         </tbody>
       </table>
     </div>
 
     <h3>Preview</h3>
-    <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden; padding: var(--space-xxs);">
-      <TabBar :tabs="tabBarTabs" :active-id="activeTabId" @update:active-id="activeTabId = $event" />
+    <div class="example-section">
+      <Button variant="secondary" label="Open Shortcuts" @click="shortcutsOpen = true" />
+      <ShortcutsModal :open="shortcutsOpen" @close="shortcutsOpen = false" />
     </div>
   </section>
+
+  <!-- SiteToolbar -->
+  <section id="site-toolbar">
+    <h2>SiteToolbar</h2>
+    <p class="section-desc">Top toolbar showing site name, status indicator, WordPress/open buttons, and action menu with duplicate/delete options.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Site name</td></tr>
+          <tr><td><code>siteId</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Site ID</td></tr>
+          <tr><td><code>favicon</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Site favicon URL</td></tr>
+          <tr><td><code>status</code></td><td><code>'running' | 'stopped' | 'loading'</code></td><td><code>undefined</code></td><td>Site run status</td></tr>
+          <tr><td><code>loadingTarget</code></td><td><code>'running' | 'stopped'</code></td><td><code>undefined</code></td><td>Target state when loading</td></tr>
+          <tr><td><code>sidebarHidden</code></td><td><code>boolean</code></td><td><code>undefined</code></td><td>Shows site picker pill when sidebar is hidden</td></tr>
+          <tr><td><code>isAllSites</code></td><td><code>boolean</code></td><td><code>undefined</code></td><td>Shows category icon instead of favicon</td></tr>
+        </tbody>
+      </table>
+      <h3>Events</h3>
+      <table>
+        <thead><tr><th>Event</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>toggle-status</code></td><td>Start/stop button clicked</td></tr>
+          <tr><td><code>switch-site</code></td><td>Site selected from picker (id: string)</td></tr>
+          <tr><td><code>duplicate</code></td><td>Duplicate site requested</td></tr>
+          <tr><td><code>delete</code></td><td>Delete site requested</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Running site</h3>
+    <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
+      <SiteToolbar title="Downstreet Cafe" favicon="https://api.dicebear.com/9.x/shapes/svg?seed=cafe" status="running" />
+    </div>
+
+    <h3>Stopped site</h3>
+    <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
+      <SiteToolbar title="UI Portfolio" favicon="https://api.dicebear.com/9.x/shapes/svg?seed=portfolio" status="stopped" />
+    </div>
+  </section>
+
+
 </template>
