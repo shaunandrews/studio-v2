@@ -3,7 +3,10 @@ import { ref, computed, toRef } from 'vue'
 import { useSites } from '@/data/useSites'
 import { useImportExport } from '@/data/useImportExport'
 import Button from '@/components/primitives/Button.vue'
+import Text from '@/components/primitives/Text.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
+import { wordpress, page } from '@wordpress/icons'
 
 const props = defineProps<{
   siteId: string
@@ -15,36 +18,58 @@ const site = computed(() => sites.value.find(p => p.id === props.siteId))
 const {
   importState,
   exportState,
+  isConfirming,
   isImporting,
   isExporting,
   isImportDone,
   isExportDone,
   isValidFile,
   startImport,
+  confirmImport,
+  cancelImport,
   startExport,
   clearImport,
   clearExport,
+  formatFileSize,
   ACCEPTED_FILE_TYPES,
+  IMPORT_STAGES,
+  EXPORT_STAGES_FULL,
+  EXPORT_STAGES_DB,
 } = useImportExport(toRef(props, 'siteId'))
 
-// --- Drag and drop (screen-level overlay) ---
+// --- File extensions for pills ---
+const fileExtensions = computed(() => {
+  const exts = [...new Set(ACCEPTED_FILE_TYPES.map(t => t.replace(/^\./, '')))]
+  return exts.map((ext, i) => ({
+    ext: `.${ext}`,
+    delay: (Math.random() * 2).toFixed(2),
+  }))
+})
+
+// --- Export stages ---
+const activeExportStages = computed(() => {
+  if (!exportState.value) return EXPORT_STAGES_FULL
+  return exportState.value.exportType === 'full' ? EXPORT_STAGES_FULL : EXPORT_STAGES_DB
+})
+
+// --- Drag and drop ---
 
 const isDragging = ref(false)
 const fileError = ref<string | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
-function handleScreenDragEnter(e: DragEvent) {
+function handleDragEnter(e: DragEvent) {
   e.preventDefault()
-  if (isImporting.value) return
+  if (isImporting.value || isConfirming.value) return
   isDragging.value = true
   fileError.value = null
 }
 
-function handleScreenDragOver(e: DragEvent) {
+function handleDragOver(e: DragEvent) {
   e.preventDefault()
 }
 
-function handleScreenDragLeave(e: DragEvent) {
+function handleDragLeave(e: DragEvent) {
   const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
   if (
     e.clientX <= rect.left ||
@@ -56,10 +81,10 @@ function handleScreenDragLeave(e: DragEvent) {
   }
 }
 
-function handleScreenDrop(e: DragEvent) {
+function handleDrop(e: DragEvent) {
   e.preventDefault()
   isDragging.value = false
-  if (isImporting.value || isExporting.value) return
+  if (isImporting.value || isExporting.value || isConfirming.value) return
 
   const file = e.dataTransfer?.files[0]
   if (!file) return
@@ -70,11 +95,11 @@ function handleScreenDrop(e: DragEvent) {
   }
 
   fileError.value = null
-  startImport(file.name)
+  startImport(file.name, file.size)
 }
 
 function openFileSelector() {
-  if (isImporting.value || isExporting.value) return
+  if (isImporting.value || isExporting.value || isConfirming.value) return
   fileInputRef.value?.click()
 }
 
@@ -90,383 +115,542 @@ function onFileSelected(e: Event) {
   }
 
   fileError.value = null
-  startImport(file.name)
+  startImport(file.name, file.size)
   input.value = ''
 }
 
-function handleStartAgain() {
+function handleImportAnother() {
   clearImport()
   fileError.value = null
 }
 
-const importDisabled = computed(() => isImporting.value || isExporting.value)
-const exportDisabled = computed(() => isImporting.value || isExporting.value)
+// --- Truncated filename ---
+function truncateFilename(name: string, maxLen = 28): string {
+  if (name.length <= maxLen) return name
+  const ext = name.lastIndexOf('.')
+  if (ext === -1) return name.slice(0, maxLen - 3) + '...'
+  const extStr = name.slice(ext)
+  const base = name.slice(0, ext)
+  const available = maxLen - extStr.length - 3
+  if (available < 4) return name.slice(0, maxLen - 3) + '...'
+  return base.slice(0, available) + '...' + extStr
+}
+
+const importDisabled = computed(() => isImporting.value || isExporting.value || isConfirming.value)
+const exportDisabled = computed(() => isImporting.value || isExporting.value || isConfirming.value)
+
+// --- Import state key for transitions ---
+const importStateKey = computed(() => {
+  if (isImportDone.value) return 'done'
+  if (isImporting.value) return 'importing'
+  if (isConfirming.value) return 'confirming'
+  return 'idle'
+})
 </script>
 
 <template>
   <ScreenLayout
     title="Import / Export"
     subtitle="Your data, your rules. Take it anywhere."
+    :scrollable="true"
   >
-    <div
-      class="ie__grid"
-      @dragenter="handleScreenDragEnter"
-      @dragover="handleScreenDragOver"
-      @dragleave="handleScreenDragLeave"
-      @drop="handleScreenDrop"
-    >
-      <!-- ── Import card ── -->
-      <div class="ie__card">
-        <!-- Illustration: arrow pointing into a box -->
-        <div class="ie__illustration">
-          <div class="ie__illo-box">
-            <div class="ie__illo-box-flap ie__illo-box-flap--left" />
-            <div class="ie__illo-box-flap ie__illo-box-flap--right" />
-          </div>
-          <svg class="ie__illo-arrow ie__illo-arrow--down" width="20" height="32" viewBox="0 0 20 32" fill="none">
-            <path d="M10 0 L10 24 M3 17 L10 24 L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </div>
-
-        <div class="ie__card-body">
-          <h3 class="ie__card-title">Import</h3>
-          <p class="ie__card-desc">
-            Restore from a Jetpack backup, site archive, or .sql database file.
-          </p>
-        </div>
-
-        <!-- States -->
-        <div class="ie__card-footer">
-          <template v-if="!isImporting && !isImportDone">
+    <div class="ie">
+      <!-- ── Import Section ── -->
+      <div
+        class="ie__dropzone"
+        :class="{
+          'is-dragging': isDragging,
+          'is-active': isConfirming || isImporting || isImportDone,
+        }"
+        @dragenter="handleDragEnter"
+        @dragover="handleDragOver"
+        @dragleave="handleDragLeave"
+        @drop="handleDrop"
+      >
+        <Transition name="ie-fade" mode="out-in">
+          <!-- Idle state -->
+          <div v-if="importStateKey === 'idle'" key="idle" class="ie__dropzone-idle">
+            <div class="ie__pills">
+              <span
+                v-for="item in fileExtensions"
+                :key="item.ext"
+                class="ie__pill"
+                :style="{ '--delay': item.delay + 's' }"
+              >{{ item.ext }}</span>
+            </div>
             <Button
               variant="primary"
               label="Choose file..."
               :disabled="importDisabled"
               @click="openFileSelector"
             />
-            <span class="ie__hint">or drag a file anywhere here</span>
-          </template>
+            <Text variant="caption" color="muted">or drag a file anywhere</Text>
+          </div>
 
-          <template v-if="isImporting">
-            <div class="ie__progress">
-              <div class="ie__progress-bar">
-                <div class="ie__progress-fill" :style="{ width: `${importState?.progress ?? 0}%` }" />
+          <!-- Confirm state -->
+          <div v-else-if="importStateKey === 'confirming'" key="confirming" class="ie__confirm">
+            <div class="ie__file-pill">
+              <svg class="ie__file-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4 1h5l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V2a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" fill="none" />
+                <path d="M9 1v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none" />
+              </svg>
+              <span class="ie__file-name">{{ truncateFilename(importState?.fileName ?? '') }}</span>
+              <span class="ie__file-sep">&mdash;</span>
+              <span class="ie__file-size">{{ formatFileSize(importState?.fileSize ?? 0) }}</span>
+            </div>
+            <Text variant="caption" color="muted">This will replace the current site.</Text>
+            <div class="ie__confirm-actions">
+              <Button variant="primary" label="Import" @click="confirmImport" />
+              <Button variant="tertiary" label="Cancel" @click="cancelImport" />
+            </div>
+          </div>
+
+          <!-- Importing state -->
+          <div v-else-if="importStateKey === 'importing'" key="importing" class="ie__stepper-wrap">
+            <div class="ie__stepper">
+              <div
+                v-for="(stage, i) in IMPORT_STAGES"
+                :key="stage.key"
+                class="ie__step"
+                :class="{
+                  'is-done': i < (importState?.currentStage ?? 0),
+                  'is-active': i === (importState?.currentStage ?? 0),
+                  'is-pending': i > (importState?.currentStage ?? 0),
+                  'is-last': i === IMPORT_STAGES.length - 1,
+                }"
+              >
+                <div class="ie__step-dot">
+                  <svg v-if="i < (importState?.currentStage ?? 0)" class="ie__step-check" viewBox="0 0 12 12" width="12" height="12">
+                    <path d="M3 6 L5.5 8.5 L9 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                  </svg>
+                </div>
+                <span class="ie__step-label">{{ stage.label }}</span>
               </div>
-              <span class="ie__progress-label">{{ importState?.statusMessage ?? 'Importing...' }}</span>
             </div>
-          </template>
+            <Text variant="caption" color="muted">{{ importState?.statusMessage ?? 'Importing...' }}</Text>
+          </div>
 
-          <template v-if="isImportDone">
-            <div class="ie__done">
+          <!-- Done state -->
+          <div v-else-if="importStateKey === 'done'" key="done" class="ie__done">
+            <svg class="ie__checkmark" viewBox="0 0 36 36" width="36" height="36">
+              <circle cx="18" cy="18" r="16" />
+              <path d="M11 18 L16 23 L25 13" />
+            </svg>
+            <Text variant="body" weight="medium">Import complete!</Text>
+            <div class="ie__done-actions">
               <Button variant="primary" label="Open site" @click.stop />
-              <button class="ie__link-btn" @click="handleStartAgain">Start again</button>
+              <button class="ie__text-btn" @click="handleImportAnother">Import another</button>
             </div>
-          </template>
+          </div>
+        </Transition>
 
-          <div v-if="fileError" class="ie__error">{{ fileError }}</div>
-        </div>
-
-        <input
-          ref="fileInputRef"
-          type="file"
-          :accept="ACCEPTED_FILE_TYPES.join(',') + ',.sql'"
-          class="ie__file-input"
-          @change="onFileSelected"
-        />
+        <!-- Drag overlay -->
+        <Transition name="ie-overlay">
+          <div v-if="isDragging" class="ie__drag-overlay">
+            <div class="ie__drag-overlay-content">
+              <svg class="ie__drag-arrow" width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <path d="M14 4 L14 20 M7 13 L14 20 L21 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <Text variant="body" weight="medium" color="inherit">Drop file to import</Text>
+            </div>
+          </div>
+        </Transition>
       </div>
 
-      <!-- ── Export card ── -->
-      <div class="ie__card">
-        <!-- Illustration: arrow pointing out of a box -->
-        <div class="ie__illustration">
-          <div class="ie__illo-box ie__illo-box--open">
-            <div class="ie__illo-box-flap ie__illo-box-flap--left ie__illo-box-flap--open" />
-            <div class="ie__illo-box-flap ie__illo-box-flap--right ie__illo-box-flap--open" />
-          </div>
-          <svg class="ie__illo-arrow ie__illo-arrow--up" width="20" height="32" viewBox="0 0 20 32" fill="none">
-            <path d="M10 32 L10 8 M3 15 L10 8 L17 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </div>
+      <!-- Error display -->
+      <div v-if="fileError" class="ie__error">
+        <Text variant="caption" color="muted">{{ fileError }}</Text>
+      </div>
 
-        <div class="ie__card-body">
-          <h3 class="ie__card-title">Export</h3>
-          <p class="ie__card-desc">
-            Download your entire site or just the database as an archive.
-          </p>
-        </div>
+      <!-- Hidden file input -->
+      <input
+        ref="fileInputRef"
+        type="file"
+        :accept="ACCEPTED_FILE_TYPES.join(',')"
+        class="ie__file-input"
+        @change="onFileSelected"
+      />
 
-        <div class="ie__card-footer">
-          <template v-if="!isExporting && !isExportDone">
-            <div class="ie__button-row">
+      <!-- ── Divider ── -->
+      <div class="ie__divider" />
+
+      <!-- ── Export Section ── -->
+      <div class="ie__export">
+        <Text variant="label" color="muted" tag="h3">Export</Text>
+
+        <Transition name="ie-fade" mode="out-in">
+          <!-- Idle -->
+          <div v-if="!isExporting && !isExportDone" key="export-idle" class="ie__export-cards">
+            <div class="ie__export-card">
+              <div class="ie__export-card-icon">
+                <WPIcon :icon="wordpress" :size="24" />
+              </div>
+              <Text variant="body" weight="semibold" tag="h4">Full site</Text>
+              <Text variant="caption" color="muted">Database, themes, plugins, uploads, and configuration</Text>
               <Button
                 variant="primary"
-                label="Entire site"
+                label="Export site"
                 :disabled="exportDisabled"
+                width="full"
                 @click="startExport('full')"
               />
+            </div>
+            <div class="ie__export-card">
+              <div class="ie__export-card-icon">
+                <WPIcon :icon="page" :size="24" />
+              </div>
+              <Text variant="body" weight="semibold" tag="h4">Database only</Text>
+              <Text variant="caption" color="muted">Export a .sql dump of your site database</Text>
               <Button
                 variant="secondary"
-                label="Database only"
+                label="Export .sql"
                 :disabled="exportDisabled"
+                width="full"
                 @click="startExport('database')"
               />
             </div>
-          </template>
-
-          <template v-if="isExporting">
-            <div class="ie__progress">
-              <div class="ie__progress-bar">
-                <div class="ie__progress-fill" :style="{ width: `${exportState?.progress ?? 0}%` }" />
-              </div>
-              <span class="ie__progress-label">{{ exportState?.statusMessage ?? 'Exporting...' }}</span>
-            </div>
-          </template>
-
-          <template v-if="isExportDone">
-            <button class="ie__clear-btn" @click="clearExport">
-              <span class="ie__clear-text">{{ exportState?.statusMessage }}</span>
-              <span class="ie__clear-x">&times;</span>
-            </button>
-          </template>
-        </div>
-      </div>
-
-      <!-- ── Drag overlay ── -->
-      <Transition name="drop-overlay">
-        <div v-if="isDragging" class="ie__drop-overlay">
-          <div class="ie__drop-overlay-content">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <path d="M16 4 L16 22 M8 14 L16 22 L24 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M4 26 L28 26" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-            </svg>
-            <span>Drop file to import</span>
           </div>
-        </div>
-      </Transition>
+
+          <!-- Exporting -->
+          <div v-else-if="isExporting" key="export-progress" class="ie__stepper-wrap">
+            <div class="ie__stepper">
+              <div
+                v-for="(stage, i) in activeExportStages"
+                :key="stage.key"
+                class="ie__step"
+                :class="{
+                  'is-done': i < (exportState?.currentStage ?? 0),
+                  'is-active': i === (exportState?.currentStage ?? 0),
+                  'is-pending': i > (exportState?.currentStage ?? 0),
+                  'is-last': i === activeExportStages.length - 1,
+                }"
+              >
+                <div class="ie__step-dot">
+                  <svg v-if="i < (exportState?.currentStage ?? 0)" class="ie__step-check" viewBox="0 0 12 12" width="12" height="12">
+                    <path d="M3 6 L5.5 8.5 L9 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                  </svg>
+                </div>
+                <span class="ie__step-label">{{ stage.label }}</span>
+              </div>
+            </div>
+            <Text variant="caption" color="muted">{{ exportState?.statusMessage ?? 'Exporting...' }}</Text>
+          </div>
+
+          <!-- Export done -->
+          <div v-else-if="isExportDone" key="export-done" class="ie__done">
+            <svg class="ie__checkmark" viewBox="0 0 36 36" width="36" height="36">
+              <circle cx="18" cy="18" r="16" />
+              <path d="M11 18 L16 23 L25 13" />
+            </svg>
+            <Text variant="body" weight="medium">Export complete!</Text>
+            <Text variant="caption" color="muted">{{ exportState?.statusMessage }}</Text>
+            <button class="ie__text-btn" @click="clearExport">Export again</button>
+          </div>
+        </Transition>
+      </div>
     </div>
   </ScreenLayout>
 </template>
 
 <style scoped>
-/* ── Grid layout ── */
+/* ── Layout ── */
 
-.ie__grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-m);
-  position: relative;
+.ie {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-l);
 }
 
-/* ── Card ── */
+/* ── Drop Zone ── */
 
-.ie__card {
+.ie__dropzone {
+  position: relative;
+  border: 1.5px dashed var(--color-frame-border);
+  border-radius: var(--radius-l);
+  padding: var(--space-xxl) var(--space-m);
+  transition: border-color var(--duration-moderate) var(--ease-default),
+              background var(--duration-moderate) var(--ease-default);
+}
+
+.ie__dropzone:hover:not(.is-active) {
+  border-color: var(--color-frame-theme);
+}
+
+.ie__dropzone.is-dragging {
+  border-color: var(--color-frame-theme);
+  background: color-mix(in srgb, var(--color-frame-theme) 4%, transparent);
+  animation: ie-border-pulse 1.2s var(--ease-in-out) infinite;
+}
+
+.ie__dropzone.is-active {
+  border-style: solid;
+  border-color: var(--color-frame-border);
+}
+
+@keyframes ie-border-pulse {
+  0%, 100% { border-color: var(--color-frame-theme); }
+  50% { border-color: color-mix(in srgb, var(--color-frame-theme) 40%, transparent); }
+}
+
+/* ── Drop Zone Idle ── */
+
+.ie__dropzone-idle {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: var(--space-m);
-  padding: var(--space-l) var(--space-m);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-l);
-  background: var(--color-frame-bg);
+  gap: var(--space-s);
 }
 
-.ie__card-body {
+/* ── Floating Pills ── */
+
+.ie__pills {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-xxxs);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding-block-end: var(--space-xxs);
 }
 
-.ie__card-title {
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-  margin: 0;
-}
-
-.ie__card-desc {
-  font-size: var(--font-size-s);
+.ie__pill {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-xxs) var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
   color: var(--color-frame-fg-muted);
-  margin: 0;
-  line-height: 1.5;
+  background: var(--color-frame-hover);
+  border-radius: var(--radius-m);
+  animation: ie-pill-drift 3s var(--ease-in-out) infinite;
+  animation-delay: var(--delay, 0s);
+  transition: transform var(--duration-moderate) var(--ease-default),
+              opacity var(--duration-moderate) var(--ease-default);
 }
 
-.ie__card-footer {
+.is-dragging .ie__pill {
+  animation-play-state: paused;
+  transform: scale(0.9);
+  opacity: 0.5;
+}
+
+@keyframes ie-pill-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ── Confirm State ── */
+
+.ie__confirm {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: var(--space-s);
+}
+
+.ie__file-pill {
+  display: inline-flex;
   align-items: center;
   gap: var(--space-xxs);
-  width: 100%;
+  padding: var(--space-xxs) var(--space-s);
+  background: var(--color-frame-hover);
+  border-radius: var(--radius-m);
+  font-size: var(--font-size-s);
+  color: var(--color-frame-fg);
 }
 
-/* ── Illustrations ── */
-
-.ie__illustration {
-  position: relative;
-  width: 100%;
-  height: 90px;
-  border-radius: var(--radius-m);
-  background:
-    radial-gradient(ellipse 100% 90px at center, transparent 50%, rgba(0, 0, 0, 0.04) 100%),
-    rgba(0, 0, 0, 0.03);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.ie__file-icon {
+  color: var(--color-frame-fg-muted);
   flex-shrink: 0;
 }
 
-.ie__illo-box {
-  width: 44px;
-  height: 32px;
-  border: 2px solid var(--color-frame-fg-muted);
-  border-radius: 2px 2px var(--radius-s) var(--radius-s);
-  position: relative;
-  opacity: 0.6;
-  /* No top border — the flaps are the lid */
-  border-block-start: none;
-  margin-block-start: 14px;
+.ie__file-name {
+  font-weight: var(--font-weight-medium);
 }
 
-.ie__illo-box-flap {
-  position: absolute;
-  inset-block-start: -2px;
-  width: 50%;
-  height: 2px;
-  background: var(--color-frame-fg-muted);
-}
-
-.ie__illo-box-flap--left {
-  inset-inline-start: 0;
-  transform-origin: 0% 50%;
-}
-
-.ie__illo-box-flap--right {
-  inset-inline-end: 0;
-  transform-origin: 100% 50%;
-}
-
-.ie__illo-box-flap--open.ie__illo-box-flap--left {
-  transform: rotate(-45deg);
-}
-
-.ie__illo-box-flap--open.ie__illo-box-flap--right {
-  transform: rotate(45deg);
-}
-
-.ie__illo-arrow {
-  position: absolute;
-  color: var(--color-frame-theme);
-  opacity: 0.7;
-}
-
-.ie__illo-arrow--down {
-  inset-block-start: 8px;
-}
-
-.ie__illo-arrow--up {
-  inset-block-start: 4px;
-}
-
-/* ── Import hint ── */
-
-.ie__hint {
-  font-size: var(--font-size-xs);
+.ie__file-sep {
   color: var(--color-frame-fg-muted);
 }
 
-/* ── Button row ── */
+.ie__file-size {
+  color: var(--color-frame-fg-muted);
+}
 
-.ie__button-row {
+.ie__confirm-actions {
   display: flex;
   gap: var(--space-xs);
 }
 
-/* ── Progress ── */
+/* ── Stepper ── */
 
-.ie__progress {
+.ie__stepper-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-m);
+  padding-block: var(--space-xs);
+}
+
+.ie__stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.ie__step {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-xxs);
-  width: 100%;
+  position: relative;
+  min-width: 80px;
 }
 
-.ie__progress-bar {
-  width: 100%;
-  max-width: 200px;
-  height: 4px;
+/* Connecting line between steps */
+.ie__step:not(.is-last)::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 10px; /* center of the 20px dot */
+  inset-inline-start: calc(50% + 14px);
+  width: calc(100% - 28px);
+  height: 2px;
   background: var(--color-frame-border);
-  border-radius: var(--radius-full);
-  overflow: hidden;
+  transition: background var(--duration-moderate) var(--ease-default);
 }
 
-.ie__progress-fill {
-  height: 100%;
+.ie__step.is-done:not(.is-last)::after {
   background: var(--color-frame-theme);
-  border-radius: var(--radius-full);
-  transition: width 300ms var(--ease-default);
 }
 
-.ie__progress-label {
+.ie__step-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-frame-border);
+  background: var(--color-frame-bg);
+  transition: border-color var(--duration-moderate) var(--ease-default),
+              background var(--duration-moderate) var(--ease-default),
+              box-shadow var(--duration-moderate) var(--ease-default);
+  position: relative;
+  z-index: 1;
+}
+
+.is-active .ie__step-dot {
+  border-color: var(--color-frame-theme);
+  animation: ie-step-pulse 1.5s var(--ease-in-out) infinite;
+}
+
+.is-done .ie__step-dot {
+  border-color: var(--color-frame-theme);
+  background: var(--color-frame-theme);
+}
+
+.ie__step-check {
+  color: var(--color-frame-bg);
+}
+
+.ie__step-label {
   font-size: var(--font-size-xs);
   color: var(--color-frame-fg-muted);
+  white-space: nowrap;
 }
 
-/* ── Done state ── */
+.is-active .ie__step-label {
+  color: var(--color-frame-fg);
+  font-weight: var(--font-weight-medium);
+}
+
+.is-done .ie__step-label {
+  color: var(--color-frame-theme);
+}
+
+@keyframes ie-step-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-frame-theme) 30%, transparent); }
+  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-frame-theme) 15%, transparent); }
+}
+
+/* ── Done State ── */
 
 .ie__done {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--space-s);
+  padding-block: var(--space-xs);
 }
 
-.ie__link-btn {
+.ie__done-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  animation: ie-fade-in var(--duration-slow) var(--ease-out) 600ms both;
+}
+
+/* ── Animated Checkmark ── */
+
+.ie__checkmark {
+  fill: none;
+}
+
+.ie__checkmark circle {
+  stroke: var(--color-frame-theme);
+  stroke-width: 2;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: ie-draw-circle 400ms var(--ease-out) forwards;
+}
+
+.ie__checkmark path {
+  stroke: var(--color-frame-theme);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: ie-draw-check 300ms var(--ease-out) 300ms forwards;
+}
+
+@keyframes ie-draw-circle {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes ie-draw-check {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes ie-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Text Button ── */
+
+.ie__text-btn {
   font-family: inherit;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-s);
   color: var(--color-frame-theme);
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--space-xxxs) var(--space-xxs);
-}
-
-.ie__link-btn:hover {
-  text-decoration: underline;
-}
-
-/* ── Clear button (export done) ── */
-
-.ie__clear-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xxs);
-  font-family: inherit;
-  font-size: var(--font-size-xs);
-  color: var(--color-frame-fg);
-  background: var(--color-frame-hover);
-  border: none;
-  border-radius: var(--radius-s);
   padding: var(--space-xxs) var(--space-xs);
-  cursor: pointer;
-  transition: background var(--duration-instant) var(--ease-default);
+  border-radius: var(--radius-s);
+  transition: background var(--duration-fast) var(--ease-default);
 }
 
-.ie__clear-btn:hover {
-  background: var(--color-frame-border);
-}
-
-.ie__clear-x {
-  font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
-  line-height: 1;
+.ie__text-btn:hover {
+  background: var(--color-frame-hover);
 }
 
 /* ── Error ── */
 
 .ie__error {
-  font-size: var(--font-size-xs);
-  color: var(--color-error, #dc2626);
-  line-height: 1.5;
+  color: var(--color-frame-danger);
+  text-align: center;
+}
+
+.ie__error :deep(.text) {
+  color: var(--color-frame-danger);
 }
 
 /* ── Hidden file input ── */
@@ -475,43 +659,105 @@ const exportDisabled = computed(() => isImporting.value || isExporting.value)
   display: none;
 }
 
-/* ── Drop overlay ── */
+/* ── Divider ── */
 
-.ie__drop-overlay {
+.ie__divider {
+  height: 1px;
+  background: var(--color-frame-border);
+}
+
+/* ── Drag Overlay ── */
+
+.ie__drag-overlay {
   position: absolute;
   inset: 0;
   border-radius: var(--radius-l);
-  border: 2px dashed var(--color-frame-theme);
-  background: color-mix(in srgb, var(--color-frame-theme) 6%, var(--color-frame-bg) 94%);
+  background: color-mix(in srgb, var(--color-frame-bg) 70%, transparent);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
 }
 
-.ie__drop-overlay-content {
+.ie__drag-overlay-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-xs);
   color: var(--color-frame-theme);
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-medium);
 }
 
-/* Drop overlay transition */
-.drop-overlay-enter-active {
-  transition:
-    opacity var(--duration-instant) var(--ease-default);
+.ie__drag-arrow {
+  color: var(--color-frame-theme);
+  animation: ie-bounce 1s var(--ease-in-out) infinite;
 }
 
-.drop-overlay-leave-active {
-  transition:
-    opacity var(--duration-instant) var(--ease-default);
+@keyframes ie-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
 }
 
-.drop-overlay-enter-from,
-.drop-overlay-leave-to {
+/* ── Drag Overlay Transition ── */
+
+.ie-overlay-enter-active,
+.ie-overlay-leave-active {
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.ie-overlay-enter-from,
+.ie-overlay-leave-to {
   opacity: 0;
+}
+
+/* ── Export Section ── */
+
+.ie__export {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+}
+
+.ie__export-cards {
+  display: flex;
+  gap: var(--space-m);
+}
+
+.ie__export-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-l);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-l);
+  background: var(--color-frame-bg);
+  transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.ie__export-card:hover {
+  border-color: var(--color-frame-fg-muted);
+}
+
+.ie__export-card-icon {
+  color: var(--color-frame-fg-muted);
+}
+
+/* ── State Transitions ── */
+
+.ie-fade-enter-active,
+.ie-fade-leave-active {
+  transition: opacity var(--duration-moderate) var(--ease-default),
+              transform var(--duration-moderate) var(--ease-default);
+}
+
+.ie-fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.ie-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>
