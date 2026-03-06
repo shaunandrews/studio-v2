@@ -108,11 +108,14 @@ onBeforeUnmount(() => {
 
         <!-- Links -->
         <div class="global-menu__section global-menu__nav">
-          <RouterLink to="/design-system" class="global-menu__item" @click="emit('close')">
+          <RouterLink to="/dev/design-system" class="global-menu__item" @click="emit('close')">
             Design System
           </RouterLink>
-          <RouterLink to="/components" class="global-menu__item" @click="emit('close')">
+          <RouterLink to="/dev/components" class="global-menu__item" @click="emit('close')">
             Components
+          </RouterLink>
+          <RouterLink to="/dev/architecture" class="global-menu__item" @click="emit('close')">
+            Architecture
           </RouterLink>
           <div class="global-menu__item" @click="openPreferences">
             Preferences
@@ -219,7 +222,7 @@ onBeforeUnmount(() => {
 
 .global-menu__meter-fill {
   height: 100%;
-  background: var(--color-primary);
+  background: var(--color-frame-theme);
   border-radius: var(--radius-full);
   transition: width var(--duration-normal) var(--ease-default);
 }

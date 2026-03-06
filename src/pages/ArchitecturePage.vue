@@ -1,145 +1,127 @@
 <script setup lang="ts">
-import Text from '@/components/primitives/Text.vue'
+import '@/pages/dev-docs.css'
 
 const sections = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'screens', label: 'Screens & States' },
-  { id: 'data-layer', label: 'Data Layer' },
-  { id: 'routing', label: 'Routing' },
-  { id: 'components', label: 'Components' },
+  { id: 'layout', label: 'App Layout' },
+  { id: 'screens', label: 'Screens' },
+  { id: 'navigation', label: 'Navigation' },
 ]
+
+function scrollTo(e: Event, id: string) {
+  e.preventDefault()
+  const el = document.getElementById(id)
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 </script>
 
 <template>
-  <div class="arch-layout hstack">
-    <nav class="arch-nav">
+  <div class="dev-layout hstack">
+    <nav class="dev-nav">
       <h2 class="nav-heading">Architecture</h2>
       <ul class="vstack gap-xxxs">
         <li v-for="item in sections" :key="item.id">
-          <a :href="'#' + item.id" class="nav-link">{{ item.label }}</a>
+          <a :href="'#' + item.id" class="nav-link" @click="scrollTo($event, item.id)">{{ item.label }}</a>
         </li>
       </ul>
-      <div class="nav-docs vstack gap-xxxs mt-m">
-        <Text variant="label" color="muted">Plan docs</Text>
-        <a href="/DATA-LAYER.md" class="nav-link" target="_blank">DATA-LAYER.md</a>
-        <a href="/ROUTING.md" class="nav-link" target="_blank">ROUTING.md</a>
-        <a href="/COMPONENTS.md" class="nav-link" target="_blank">COMPONENTS.md</a>
-      </div>
     </nav>
-    <div class="arch-content flex-1 min-w-0">
+    <div class="arch-main">
 
-      <section id="overview">
-        <h2>Overview</h2>
-        <p class="section-desc">Architecture plans for the projects-i0 prototype. This page summarizes the key decisions; full details live in the linked plan docs.</p>
+      <!-- ═══════════════════════ -->
+      <!-- APP LAYOUT              -->
+      <!-- ═══════════════════════ -->
 
-        <div class="card vstack gap-xs p-m mt-m">
-          <Text variant="body" weight="medium">Status: Plans Complete ✅</Text>
-          <Text variant="body" color="secondary">All three architecture plans (data layer, routing, components) are finalized. See summaries below or read the full MD files linked in the sidebar.</Text>
+      <section id="layout">
+        <h2>App Layout</h2>
+        <p class="arch-intro">The app is a dark chrome shell containing a sidebar and a content frame.</p>
+
+        <div class="bp">
+          <div class="bp-chrome">
+            <div class="bp-sidebar">Sidebar</div>
+            <div class="bp-frame">
+              <div class="bp-toolbar">Toolbar</div>
+              <div class="bp-content">
+                <div class="bp-nav">Nav</div>
+                <div class="bp-detail">Detail</div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <dl class="arch-defs">
+          <dt>Chrome</dt>
+          <dd>Dark background filling the viewport. Everything else sits on top of it.</dd>
+
+          <dt>Sidebar</dt>
+          <dd><code>SiteList</code> — 210px, left edge. Lists all sites. Collapsible via <code>Cmd+B</code>. When collapsed, the frame expands to fill the full viewport and a site-picker pill appears in the toolbar.</dd>
+
+          <dt>Frame</dt>
+          <dd>Inset panel with rounded corners. Holds the active screen. Contains three zones:</dd>
+
+          <dt class="arch-sub">Toolbar</dt>
+          <dd><code>SiteToolbar</code> — site name, status, action buttons. Top of the frame.</dd>
+
+          <dt class="arch-sub">Nav</dt>
+          <dd><code>SiteNavigation</code> — left column within the frame. Site overview, task list, and section links.</dd>
+
+          <dt class="arch-sub">Detail</dt>
+          <dd>Right column. Changes based on the active screen (chat, sync pipeline, previews, etc).</dd>
+        </dl>
       </section>
+
+      <!-- ═══════════════════════ -->
+      <!-- SCREENS                 -->
+      <!-- ═══════════════════════ -->
 
       <section id="screens">
-        <h2>Screens &amp; States</h2>
-        <p class="section-desc">The app has three primary screens, plus dev/documentation pages.</p>
+        <h2>Screens</h2>
+        <p class="arch-intro">Every screen shares the same sidebar + toolbar + nav + detail structure, except Add Site which uses a standalone full-screen layout.</p>
 
-        <h3>Home <code>/</code></h3>
-        <div class="screen-desc vstack gap-xxs">
-          <Text variant="body" color="secondary">Landing page. Grid of projects, global cross-project chat, onboarding for new users without projects.</Text>
-        </div>
+        <h3>All Sites <code>/all-sites</code></h3>
+        <p class="arch-body">Landing view. Nav pane shows an all-sites summary (favicon stack, running/stopped counts) and a cross-site task list. Detail pane shows the selected conversation or an empty state. Toolbar has no status pill or site-specific actions.</p>
 
-        <h3>Project <code>/projects/:id</code></h3>
-        <div class="screen-desc vstack gap-xxs">
-          <Text variant="body" color="secondary">The working view. Sidebar with project list, agent chat panel with tabs, site preview. This is what the current app-shell demo represents.</Text>
-        </div>
+        <h3>Tasks <code>/sites/:id/tasks/:convoId?</code></h3>
+        <p class="arch-body">The primary working view. Nav pane has three zones: site overview (thumbnail, URL, credentials), task list (conversations with archive), and section nav links. Detail pane shows the selected conversation as a chat — messages rendered as <code>MarkdownText</code> or structured cards (plugin, settings, progress, page, post draft). <code>InputChat</code> pins to the bottom with a model selector and action strip.</p>
 
-        <h3>Settings <code>/settings</code></h3>
-        <div class="screen-desc vstack gap-xxs">
-          <Text variant="body" color="secondary">App configuration. Details TBD.</Text>
-        </div>
+        <h3>Sync <code>/sites/:id/sync</code></h3>
+        <p class="arch-body">Detail pane switches to <code>SyncScreen</code>. A horizontal pipeline of stage cards connected by arrows. Each stage can link to a remote environment. Push/pull actions open <code>SyncModal</code>.</p>
 
-        <h3>Dev Pages</h3>
-        <div class="screen-desc vstack gap-xxs">
-          <Text variant="body" color="secondary">Design System, Components, and this Architecture page. Accessible during development, not part of the user-facing app.</Text>
-        </div>
+        <h3>Previews <code>/sites/:id/previews</code></h3>
+        <p class="arch-body">Detail pane shows <code>PreviewsScreen</code>. Shareable preview link cards with invite management, view counts, and expiry. Progress card shown during create/delete operations.</p>
+
+        <h3>Import / Export <code>/sites/:id/import-export</code></h3>
+        <p class="arch-body">Detail pane shows <code>ImportExportScreen</code>. Drag-and-drop import zone accepting Jetpack backups and full-site exports. Export download button. Both show progress states.</p>
+
+        <h3>Settings <code>/sites/:id/settings</code></h3>
+        <p class="arch-body">Detail pane shows <code>SiteSettingsScreen</code>. Four groups: general (name, PHP, WP version, domain), admin credentials, debugging, and git repository.</p>
+
+        <h3>Add Site <code>/add-site</code></h3>
+        <p class="arch-body">Standalone full-screen flow — no sidebar, no chrome. Three steps: choose a path (Blank, Blueprint, Pull, Import), select from a picker, then name and create. Uses <code>BareLayout</code>.</p>
       </section>
 
-      <section id="data-layer">
-        <h2>Data Layer</h2>
-        <p class="section-desc">How the app manages state — models, stores, and seed data.</p>
+      <!-- ═══════════════════════ -->
+      <!-- NAVIGATION              -->
+      <!-- ═══════════════════════ -->
 
-        <h3>Approach</h3>
-        <div class="card vstack gap-xs p-m">
-          <Text variant="body"><strong>Vue composables with reactive state + typed seed data.</strong> No Pinia, no JSON server, no localStorage. Module-level <code>ref</code>/<code>reactive</code> state initialized from TypeScript seed objects acts as a singleton store shared across components.</Text>
-          <Text variant="body" color="secondary">Refreshing resets to seed state — a feature for demos, not a limitation. Zero new dependencies.</Text>
-        </div>
+      <section id="navigation">
+        <h2>Navigation</h2>
+        <p class="arch-intro">How users move through the app.</p>
 
-        <h3>Core Models</h3>
-        <div class="card vstack gap-xs p-m">
-          <Text variant="body"><code>Project</code> — id, name, favicon, status (<code>running</code> | <code>stopped</code> | <code>loading</code>), url, description</Text>
-          <Text variant="body"><code>Agent</code> — id (<code>assistant</code> | <code>code</code> | <code>design</code>), label, description</Text>
-          <Text variant="body"><code>Conversation</code> — ties a project (or <code>null</code> for global) to an agent</Text>
-          <Text variant="body"><code>Message</code> — role (<code>user</code> | <code>agent</code>), content, timestamp, linked to conversation</Text>
-        </div>
+        <dl class="arch-defs">
+          <dt>SiteList</dt>
+          <dd>Sidebar. "All Sites" at top, then individual sites. Click to focus a site. "+" at bottom for site creation.</dd>
 
-        <h3>File Structure</h3>
-        <div class="card vstack gap-xs p-m">
-          <Text variant="body"><code>src/data/types.ts</code> — TypeScript interfaces</Text>
-          <Text variant="body"><code>src/data/agents.ts</code> — Static agent definitions</Text>
-          <Text variant="body"><code>src/data/seed-projects.ts</code> — 4 demo projects</Text>
-          <Text variant="body"><code>src/data/seed-conversations.ts</code> — Conversations + messages</Text>
-          <Text variant="body"><code>src/data/useProjects.ts</code> — Project CRUD composable</Text>
-          <Text variant="body"><code>src/data/useConversations.ts</code> — Conversation/message composable</Text>
-        </div>
-      </section>
+          <dt>SiteToolbar</dt>
+          <dd>Top of the frame. Site name, start/stop status pill, and three flyout menus: <strong>WordPress</strong> (admin links via split button), <strong>Open In</strong> (Browser, VS Code, Cursor, Claude, Codex, Terminal, Finder), and <strong>More</strong> (copy URLs, share, duplicate, delete). When sidebar is collapsed, a site-picker pill appears here too.</dd>
 
-      <section id="routing">
-        <h2>Routing</h2>
-        <p class="section-desc">Route structure, layouts, and navigation patterns.</p>
+          <dt>SiteNavigation</dt>
+          <dd>Nav pane within the frame. Section links at the bottom switch the detail pane between Tasks, Sync, Previews, Import/Export, and Settings.</dd>
 
-        <h3>Approach</h3>
-        <div class="card vstack gap-xs p-m">
-          <Text variant="body"><strong>Layout wrapper pattern via <code>route.meta.layout</code>.</strong> Each route declares its layout; <code>App.vue</code> dynamically renders the correct layout component wrapping <code>&lt;router-view&gt;</code>.</Text>
-          <Text variant="body" color="secondary">Two real layouts + bare for dev pages. Simpler than nested routes since layouts don't share sub-routes. Project switching is a route change (<code>/projects/:id</code>) so URLs are shareable and back-button works.</Text>
-        </div>
+          <dt>GlobalMenu</dt>
+          <dd>Opens upward from the gravatar button in the bottom-left corner. Account info, usage meters, links to Preferences and dev pages.</dd>
 
-        <h3>Layouts</h3>
-        <div class="card vstack gap-xs p-m">
-          <Text variant="body"><code>AppLayout</code> — Titlebar + full-width content (Home, Settings)</Text>
-          <Text variant="body"><code>ProjectLayout</code> — Titlebar + Sidebar + panel area (extracted from AppShell)</Text>
-          <Text variant="body"><code>BareLayout</code> — No chrome, just <code>&lt;slot /&gt;</code> (dev pages)</Text>
-        </div>
-
-        <h3>Route Table</h3>
-        <div class="card vstack gap-xs p-m">
-          <Text variant="body"><code>/</code> → <code>HomePage</code> · AppLayout — project grid + global chat</Text>
-          <Text variant="body"><code>/projects/:id</code> → <code>ProjectPage</code> · ProjectLayout — sidebar + agent chat + preview</Text>
-          <Text variant="body"><code>/settings</code> → <code>SettingsPage</code> · AppLayout</Text>
-          <Text variant="body"><code>/design-system</code>, <code>/components</code>, <code>/architecture</code> → BareLayout (dev pages)</Text>
-        </div>
-      </section>
-
-      <section id="components">
-        <h2>Components</h2>
-        <p class="section-desc">Component organization, decomposition, and new components needed.</p>
-
-        <h3>Approach</h3>
-        <div class="card vstack gap-xs p-m">
-          <Text variant="body"><strong>Three-tier component organization:</strong> <code>primitives/</code> (atomic, no business logic), <code>composites/</code> (multi-primitive combos, still generic), and <code>features/</code> (screen-specific, business-aware). Layouts live separately in <code>layouts/</code>.</Text>
-          <Text variant="body" color="secondary">Key refactor: AgentPanel is decomposed into TabBar + ChatMessageList + InputChat, with state extracted into composables (<code>useChat</code>, <code>useAgentTabs</code>, <code>useProjects</code>).</Text>
-        </div>
-
-        <h3>New Components</h3>
-        <div class="card vstack gap-xs p-m">
-          <Text variant="body"><strong>Primitives:</strong> <code>Avatar</code>, <code>Badge</code></Text>
-          <Text variant="body"><strong>Composites:</strong> <code>TabBar</code>, <code>ChatMessageList</code>, <code>ProjectCard</code></Text>
-          <Text variant="body"><strong>Features:</strong> <code>ProjectGrid</code>, <code>OnboardingEmpty</code></Text>
-          <Text variant="body"><strong>Layouts:</strong> <code>AppChrome</code> (titlebar + chrome background), <code>SplitLayout</code> (resizable two-pane)</Text>
-        </div>
-
-        <h3>Implementation Order</h3>
-        <div class="card vstack gap-xs p-m">
-          <Text variant="body" color="secondary">1. Create folder structure + move files → 2. Extract types + composables → 3. Split AgentPanel → 4. Build layouts → 5. Refactor ProjectPage → 6. Build Home components → 7. Build HomePage → 8. Stub Settings → 9. Update router. Steps 1–5 are refactors (no visual change); 6–9 add new screens.</Text>
-        </div>
+          <dt>Modals</dt>
+          <dd><strong>Preferences</strong> (global settings), <strong>Shortcuts</strong> (keyboard reference), <strong>SyncModal</strong> (push/pull confirmation), <strong>ConnectSiteModal</strong> (link environment to pipeline stage).</dd>
+        </dl>
       </section>
 
     </div>
@@ -147,100 +129,183 @@ const sections = [
 </template>
 
 <style scoped>
-.arch-layout {
-  min-height: 100vh;
+/* ── Main content area (overrides dev-docs defaults for better spacing) ── */
+
+.arch-main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-l) var(--space-xl);
+  overflow-y: auto;
   scroll-behavior: smooth;
-  font-family: var(--font-family);
-  color: var(--color-text);
+  max-width: 720px;
 }
 
-.arch-nav {
-  position: sticky;
-  top: 0;
-  align-self: flex-start;
-  width: 200px;
-  padding: var(--space-xxxl) var(--space-m);
-  border-inline-end: 1px solid var(--color-surface-border);
-}
-
-.nav-heading {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-secondary);
-  margin: 0 0 var(--space-xs);
-}
-
-.arch-nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  display: block;
-  padding: var(--space-xxs) var(--space-xs);
-  border-radius: var(--radius-s);
-  font-size: var(--font-size-m);
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: background var(--duration-instant) var(--ease-default), color var(--duration-instant) var(--ease-default);
-}
-
-.nav-link:hover {
-  background: var(--color-surface-secondary);
-  color: var(--color-text);
-}
-
-.arch-content {
-  max-width: 960px;
-  padding: var(--space-xxxl) var(--space-xl);
-}
-
-section {
+.arch-main section {
   margin-block-end: var(--space-xxxl);
 }
 
-h2 {
-  font-size: 20px; /* Section heading — intentional, outside type scale */
+.arch-main h2 {
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
-  margin-block-end: var(--space-xxxs);
-  padding-block-end: var(--space-xs);
-  border-block-end: 1px solid var(--color-surface-border);
+  margin-block-end: var(--space-xxs);
 }
 
-h3 {
+.arch-main h3 {
   font-size: var(--font-size-l);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-  margin: var(--space-m) 0 var(--space-xxs);
+  color: var(--color-frame-fg);
+  margin: var(--space-l) 0 var(--space-xs);
 }
 
-h3 code {
+.arch-main h3 code {
   font-size: var(--font-size-s);
   font-family: var(--font-family-mono);
-  background: var(--color-surface-secondary);
+  background: var(--color-frame-hover);
   padding: var(--space-xxxs) var(--space-xxs);
   border-radius: var(--radius-s);
   font-weight: var(--font-weight-regular);
   margin-inline-start: var(--space-xxs);
 }
 
-.section-desc {
+.arch-main h4 {
   font-size: var(--font-size-m);
-  color: var(--color-text-secondary);
-  margin-block-end: var(--space-s);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg-muted);
+  margin: var(--space-m) 0 var(--space-xs);
 }
 
-.card {
-  background: var(--color-surface-secondary);
+/* ── Text ── */
+
+.arch-intro {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  margin-block-end: var(--space-l);
+  line-height: 1.6;
+}
+
+.arch-body {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  line-height: 1.6;
+}
+
+.arch-body code {
+  font-size: var(--font-size-s);
+  font-family: var(--font-family-mono);
+  background: var(--color-frame-hover);
+  padding: 1px var(--space-xxxs);
+  border-radius: var(--radius-s);
+}
+
+/* ── Definition lists ── */
+
+.arch-defs {
+  margin: 0;
+}
+
+.arch-defs dt {
+  font-size: var(--font-size-m);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg);
+  margin-block-start: var(--space-m);
+}
+
+.arch-defs dt.arch-sub {
+  padding-inline-start: var(--space-m);
+  font-size: var(--font-size-s);
+  color: var(--color-frame-fg-muted);
+}
+
+.arch-defs dd {
+  margin: var(--space-xxs) 0 0 0;
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  line-height: 1.6;
+}
+
+.arch-defs dt.arch-sub + dd {
+  padding-inline-start: var(--space-m);
+}
+
+.arch-defs dd code {
+  font-size: var(--font-size-s);
+  font-family: var(--font-family-mono);
+  background: var(--color-frame-hover);
+  padding: 1px var(--space-xxxs);
+  border-radius: var(--radius-s);
+}
+
+/* ══════════════════════════
+   BLUEPRINT — the one diagram
+   ══════════════════════════ */
+
+.bp {
+  margin-block-end: var(--space-l);
+}
+
+.bp-chrome {
+  display: flex;
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  background: var(--color-chrome-bg);
+  border-radius: var(--radius-l);
+  height: 280px;
+}
+
+.bp-sidebar {
+  width: 80px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-chrome-fg-muted);
+  letter-spacing: 0.02em;
+}
+
+.bp-frame {
+  flex: 1;
+  background: var(--color-frame-bg);
   border-radius: var(--radius-m);
-  border: 1px solid var(--color-surface-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.screen-desc {
-  padding-inline-start: var(--space-s);
-  border-inline-start: 2px solid var(--color-surface-border);
+.bp-toolbar {
+  padding: var(--space-xs) var(--space-s);
+  border-block-end: 1px solid var(--color-frame-border);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-frame-fg-muted);
+}
+
+.bp-content {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.bp-nav {
+  width: 100px;
+  flex-shrink: 0;
+  border-inline-end: 1px solid var(--color-frame-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-frame-fg-muted);
+}
+
+.bp-detail {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-frame-fg-muted);
 }
 </style>
