@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { file as fileIcon, check } from '@wordpress/icons'
-import Modal from '@shared/primitives/Modal.vue'
+import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
 import { codingAgents } from '@/data/agents'
 

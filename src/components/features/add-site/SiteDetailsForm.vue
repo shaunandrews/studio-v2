@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { chevronDown, chevronUp } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 
 const props = defineProps<{

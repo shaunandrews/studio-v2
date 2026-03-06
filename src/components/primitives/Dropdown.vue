@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { chevronDown } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
-import Tooltip from '@shared/primitives/Tooltip.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 

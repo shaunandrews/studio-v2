@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { plus, closeSmall, chevronDown } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
-import Text from '@shared/primitives/Text.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
+import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
-import Tooltip from '@shared/primitives/Tooltip.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 

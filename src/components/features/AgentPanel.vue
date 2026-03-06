@@ -2,11 +2,11 @@
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import PanelToolbar from '@/components/composites/PanelToolbar.vue'
 import TabBar from '@/components/composites/TabBar.vue'
-import ChatMessageList from '@shared/composites/ChatMessageList.vue'
+import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import InputChat from '@/components/composites/InputChat.vue'
 import { useConversations } from '@/data/useConversations'
 import { useInputActions } from '@/data/useInputActions'
-import AllChatsModal from '@shared/composites/AllChatsModal.vue'
+import AllChatsModal from '@/components/composites/AllChatsModal.vue'
 import type { ActionButton, Conversation } from '@/data/types'
 import type { Tab } from '@/components/composites/TabBar.vue'
 

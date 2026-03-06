@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Text from '@shared/primitives/Text.vue'
+import Text from '@/components/primitives/Text.vue'
 
 const dsNav = [
   { id: 'typography', label: 'Typography' },

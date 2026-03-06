@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { search, external } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 
 export interface RemoteSite {

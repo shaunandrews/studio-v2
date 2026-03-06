@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Text from '@shared/primitives/Text.vue'
+import Text from '@/components/primitives/Text.vue'
 
 const sections = [
   { id: 'overview', label: 'Overview' },
@@ -89,7 +89,6 @@ const sections = [
           <Text variant="body"><code>src/data/seed-conversations.ts</code> — Conversations + messages</Text>
           <Text variant="body"><code>src/data/useProjects.ts</code> — Project CRUD composable</Text>
           <Text variant="body"><code>src/data/useConversations.ts</code> — Conversation/message composable</Text>
-          <Text variant="body"><code>src/data/useAgents.ts</code> — Agent list composable</Text>
         </div>
       </section>
 
@@ -133,7 +132,7 @@ const sections = [
         <div class="card vstack gap-xs p-m">
           <Text variant="body"><strong>Primitives:</strong> <code>Avatar</code>, <code>Badge</code></Text>
           <Text variant="body"><strong>Composites:</strong> <code>TabBar</code>, <code>ChatMessageList</code>, <code>ProjectCard</code></Text>
-          <Text variant="body"><strong>Features:</strong> <code>ProjectGrid</code>, <code>HomeChat</code>, <code>OnboardingEmpty</code></Text>
+          <Text variant="body"><strong>Features:</strong> <code>ProjectGrid</code>, <code>OnboardingEmpty</code></Text>
           <Text variant="body"><strong>Layouts:</strong> <code>AppChrome</code> (titlebar + chrome background), <code>SplitLayout</code> (resizable two-pane)</Text>
         </div>
 

@@ -4,12 +4,6 @@
 
 Interactive prototype for Studio's AI interface concepts. Vue 3 + Vite + TypeScript.
 
-## Shared components (`src/shared/`)
-
-Shared design tokens, primitives, composites, and data utilities live in `src/shared/`. They're imported via the `@shared` Vite alias.
-
-**Imports:** `import Text from '@shared/primitives/Text.vue'`, `import { type Site } from '@shared/data/site-types'`, etc.
-
 ## Dev server
 
 ```bash
@@ -22,7 +16,7 @@ Read `DESIGN-SYSTEM.md` before touching any component. Key rules:
 
 - **Spacing:** 5px grid only. Use `--space-xxxs` through `--space-xxxl`. No magic numbers.
 - **Radius:** `--radius-s`, `--radius-m`, `--radius-l`. No custom values.
-- **Colors:** All from CSS variables in `src/shared/styles/colors.css`. No hardcoded hex/rgb.
+- **Colors:** All from CSS variables in `src/styles/colors.css`. No hardcoded hex/rgb.
 - **Icons:** `@wordpress/icons` via `WPIcon` component. No inline SVGs.
 - **Directions:** Use logical properties (`start`/`end`, `block`/`inline`) not physical (`left`/`right`, `top`/`bottom`). Exception: physical directions for app chrome edges (documented with comments).
 - **Dark mode:** Supported via `prefers-color-scheme`. All page styles must use token variables, never hardcode light-only colors.
@@ -31,19 +25,14 @@ Read `DESIGN-SYSTEM.md` before touching any component. Key rules:
 
 ```
 src/
-  shared/            # Design tokens, shared primitives, composites, data
-    styles/          # CSS tokens (colors, space, radius, typography, layout, motion)
-    primitives/      # Avatar, Badge, Modal, StatusIndicator, Text, Tooltip, WPIcon
-    composites/      # AllChatsModal, ChatMessageList, Panel, chat-cards/, renderers/
-    data/            # site-types, site-renderer, useProjectTransition
-  styles/            # Local CSS overrides (motion-overrides, radius-overrides)
+  styles/            # CSS tokens (colors, space, radius, typography, layout, motion) + overrides
   components/
-    primitives/      # Button, ContextRing, Dropdown, FlyoutMenu, Titlebar, etc.
-    composites/      # ChatMessage, InputChat, ProjectItem, TabBar, Panel, chat-cards/
+    primitives/      # Avatar, Badge, Button, ContextRing, Dropdown, FlyoutMenu, Modal, StatusIndicator, Text, Titlebar, Tooltip, WPIcon
+    composites/      # AllChatsModal, ChatMessage, ChatMessageList, InputChat, Panel, ProjectItem, TabBar, chat-cards/, renderers/
     features/        # ProjectList, AgentPanel, SyncScreen, PreviewsScreen, add-site/
   layouts/           # MainLayout (app shell), BareLayout (standalone pages)
   pages/             # ProjectPage, DesignSystem, Components, Settings, Architecture
-  data/              # State composables, AI service, seed data, types
+  data/              # State composables, AI service, seed data, types, site-types, site-renderer, useProjectTransition
   router.ts
 ```
 
@@ -73,8 +62,6 @@ Kit (AI assistant) proposes changes via cards, user confirms via input actions, 
 ```bash
 npm run deploy  # vercel --prod
 ```
-
-`@shared` alias points to `src/shared/` — everything is self-contained, no copy tricks needed.
 
 ## Don't
 

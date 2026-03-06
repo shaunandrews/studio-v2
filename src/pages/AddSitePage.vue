@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { wordpress, page, download, backup, chevronLeft, close } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import SiteDetailsForm from '@/components/features/add-site/SiteDetailsForm.vue'
 import BlueprintPicker from '@/components/features/add-site/BlueprintPicker.vue'
@@ -12,7 +12,7 @@ import type { Blueprint } from '@/components/features/add-site/BlueprintPicker.v
 import type { RemoteSite } from '@/components/features/add-site/PullSitePicker.vue'
 import type { SelectedFile } from '@/components/features/add-site/ImportDropZone.vue'
 import { useProjects } from '@/data/useProjects'
-import { useProjectTransition } from '@shared/data/useProjectTransition'
+import { useProjectTransition } from '@/data/useProjectTransition'
 
 type Path = 'blank' | 'blueprint' | 'pull' | 'import'
 type Step = 'choose' | 'picker' | 'details'

@@ -2,10 +2,10 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { plus, category } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import ProjectItem from '@/components/composites/ProjectItem.vue'
 import { useProjects } from '@/data/useProjects'
-import { useProjectTransition } from '@shared/data/useProjectTransition'
+import { useProjectTransition } from '@/data/useProjectTransition'
 
 const emit = defineEmits<{
   'new-project': []

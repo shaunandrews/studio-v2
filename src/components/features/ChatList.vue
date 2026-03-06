@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
 import { plus, archive, update, customLink, login, tool } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
-import Tooltip from '@shared/primitives/Tooltip.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
 import Button from '@/components/primitives/Button.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'

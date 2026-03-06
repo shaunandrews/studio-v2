@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { chevronDownSmall } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 
 defineProps<{
   label: string

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import type { Directive } from 'vue'
-import Modal from '@shared/primitives/Modal.vue'
+import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import {
   file as fileIcon,
   page as pageIcon,

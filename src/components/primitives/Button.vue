@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import WPIcon from '@shared/primitives/WPIcon.vue'
-import Tooltip from '@shared/primitives/Tooltip.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
 
 const props = defineProps<{
   icon?: any
@@ -171,7 +171,7 @@ onUnmounted(() => {
    PRIMARY — frame (light) surface
    ============================================ */
 .btn--primary.btn--on-light {
-  background: var(--color-primary);
+  background: var(--color-frame-theme);
   color: var(--color-primary-text);
   border-color: rgba(0, 0, 0, 0.1);
 }
@@ -184,7 +184,7 @@ onUnmounted(() => {
    PRIMARY — chrome (dark) surface
    ============================================ */
 .btn--primary.btn--on-dark {
-  background: var(--color-primary);
+  background: var(--color-chrome-theme);
   color: var(--color-primary-text);
   border-color: rgba(255, 255, 255, 0.1);
 }

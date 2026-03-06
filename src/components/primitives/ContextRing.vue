@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import Tooltip from '@shared/primitives/Tooltip.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
 
 const props = withDefaults(defineProps<{
   percent: number

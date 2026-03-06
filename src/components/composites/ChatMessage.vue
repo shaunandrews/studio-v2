@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import MarkdownText from '@shared/composites/renderers/MarkdownText.vue'
-import PluginCard from '@shared/composites/chat-cards/PluginCard.vue'
-import SettingsCard from '@shared/composites/chat-cards/SettingsCard.vue'
-import ProgressCard from '@shared/composites/chat-cards/ProgressCard.vue'
-import PageCard from '@shared/composites/chat-cards/PageCard.vue'
-import PostDraftCard from '@shared/composites/chat-cards/PostDraftCard.vue'
+import MarkdownText from '@/components/composites/renderers/MarkdownText.vue'
+import PluginCard from '@/components/composites/chat-cards/PluginCard.vue'
+import SettingsCard from '@/components/composites/chat-cards/SettingsCard.vue'
+import ProgressCard from '@/components/composites/chat-cards/ProgressCard.vue'
+import PageCard from '@/components/composites/chat-cards/PageCard.vue'
+import PostDraftCard from '@/components/composites/chat-cards/PostDraftCard.vue'
 import type { ContentBlock, AgentId } from '@/data/types'
 
 const props = defineProps<{

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { closeSmall } from '@wordpress/icons'
-import Modal from '@shared/primitives/Modal.vue'
+import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
 
 defineProps<{

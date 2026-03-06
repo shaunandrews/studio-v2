@@ -5,7 +5,7 @@ import type { GitRepo } from '@/data/types'
 import Button from '@/components/primitives/Button.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
 import { seen as seenIcon, unseen as unseenIcon } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 
 const props = defineProps<{
   projectId: string

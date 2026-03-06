@@ -1,9 +1,9 @@
-@import '@shared/styles/colors.css';
-@import '@shared/styles/space.css';
-@import '@shared/styles/radius.css';
-@import '@shared/styles/typography.css';
-@import '@shared/styles/layout.css';
-@import '@shared/styles/motion.css';
+@import './styles/colors.css';
+@import './styles/space.css';
+@import './styles/radius.css';
+@import './styles/typography.css';
+@import './styles/layout.css';
+@import './styles/motion.css';
 @import './styles/radius-overrides.css';
 @import './styles/motion-overrides.css';
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import Tooltip from '@shared/primitives/Tooltip.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
 
 const props = defineProps<{
   status: 'stopped' | 'loading' | 'running'

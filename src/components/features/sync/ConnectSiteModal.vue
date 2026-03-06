@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import Modal from '@shared/primitives/Modal.vue'
+import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import { closeSmall, search as searchIcon, external } from '@wordpress/icons'
 
 export interface WpcomSite {

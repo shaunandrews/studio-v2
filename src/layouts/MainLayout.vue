@@ -2,7 +2,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { drawerLeft } from '@wordpress/icons'
-import WPIcon from '@shared/primitives/WPIcon.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import ProjectList from '@/components/features/ProjectList.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
