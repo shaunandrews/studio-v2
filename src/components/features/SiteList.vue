@@ -1,18 +1,58 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { plus, category } from '@wordpress/icons'
+import { plus, category, globe, copy, desktop, code, settings, backup, trash, external } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
+import ContextMenu from '@/components/primitives/ContextMenu.vue'
+import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import { useSites } from '@/data/useSites'
 import { useSiteTransition } from '@/data/useSiteTransition'
+import type { Site } from '@/data/types'
 
 const emit = defineEmits<{
   'new-site': []
 }>()
 
-const { sites, activeSiteId } = useSites()
+const { sites, activeSiteId, setStatus } = useSites()
 const { navigateToSite } = useSiteTransition('site')
+
+function getSiteMenuGroups(site: Site): FlyoutMenuGroup[] {
+  return [
+    {
+      items: [
+        { label: 'Open in Browser', icon: globe, action: () => alert(`Open ${site.url} in browser`) },
+        { label: 'Copy Site URL', icon: copy, action: () => alert(`Copied ${site.url}`) },
+      ],
+    },
+    {
+      items: [
+        { label: 'Open in Finder', icon: desktop, action: () => alert(`Open ${site.name} in Finder`) },
+        { label: 'Open in VS Code', icon: code, action: () => alert(`Open ${site.name} in VS Code`) },
+        { label: 'Open in Terminal', icon: external, action: () => alert(`Open ${site.name} in Terminal`) },
+      ],
+    },
+    {
+      items: [
+        {
+          label: site.status === 'running' ? 'Stop Site' : 'Start Site',
+          action: () => {
+            const target = site.status === 'running' ? 'stopped' : 'running'
+            setStatus(site.id, 'loading')
+            setTimeout(() => setStatus(site.id, target), 1200)
+          },
+        },
+        { label: 'Site Settings', icon: settings, action: () => alert(`Settings for ${site.name}`) },
+        { label: 'Duplicate Site', icon: backup, action: () => alert(`Duplicate ${site.name}`) },
+      ],
+    },
+    {
+      items: [
+        { label: 'Delete Site', icon: trash, destructive: true, action: () => alert(`Delete ${site.name}`) },
+      ],
+    },
+  ]
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -39,13 +79,18 @@ function goToAllSites() {
     <div class="sidebar-divider" />
 
     <div class="items-stack">
-      <SiteItem
+      <ContextMenu
         v-for="site in sites"
         :key="site.id"
-        :site="site"
-        :active="site.id === activeSiteId"
-        @select="navigateToSite"
-      />
+        :groups="getSiteMenuGroups(site)"
+        surface="dark"
+      >
+        <SiteItem
+          :site="site"
+          :active="site.id === activeSiteId"
+          @select="navigateToSite"
+        />
+      </ContextMenu>
     </div>
 
     <div class="add-site-item" @click="emit('new-site')">
