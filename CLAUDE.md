@@ -27,7 +27,7 @@ Read `DESIGN-SYSTEM.md` before touching any component. Key rules:
 src/
   styles/            # CSS tokens (colors, space, radius, typography, layout, motion) + overrides
   components/
-    primitives/      # Badge, Button, ButtonSplit, ContextRing, Dropdown, FlyoutMenu, Modal, StatusIndicator, Text, Tooltip, WPIcon
+    primitives/      # Badge, Button, ButtonSplit, ContextMenu, ContextRing, Dropdown, FlyoutMenu, Modal, StatusIndicator, Text, Tooltip, WPIcon
     composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, PreferencesModal, ScreenHeader, ScreenLayout, ShortcutsModal, SiteItem, SiteToolbar, chat-cards/, renderers/
     features/        # SiteNavigation, SiteList, SiteSettingsScreen, SyncScreen, PreviewsScreen, ImportExportScreen, add-site/, sync/
   layouts/           # MainLayout (app shell), BareLayout (standalone pages)
@@ -43,6 +43,7 @@ src/
 - **WPIcon** — Vue wrapper for `@wordpress/icons`. Props: `icon`, `size`
 - **StatusIndicator** — `status` (stopped/loading/running). Emits `toggle`. Clip-path morph animation on hover.
 - **Titlebar** — App titlebar with traffic lights, sidebar toggle, greeting, settings/help
+- **ContextMenu** — `groups` (FlyoutMenuGroup[]), `surface` (light/dark). Wraps slot content with right-click menu at cursor position. Reuses FlyoutMenu CSS classes. Singleton (one open at a time). Supports submenus.
 - **InputChat** — Chat input with model selector and action strip. Three action rendering modes: brief cards, card actions, text buttons.
 
 ## View transitions (home <> site)
