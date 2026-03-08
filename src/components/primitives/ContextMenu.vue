@@ -84,6 +84,7 @@ function open(e: MouseEvent) {
     }
     if (y < EDGE_PADDING) y = EDGE_PADDING
 
+    // Physical properties intentional — cursor position is inherently physical
     menuStyle.value = {
       position: 'fixed',
       zIndex: '10001',
