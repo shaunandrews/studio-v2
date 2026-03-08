@@ -1,3 +1,8 @@
+<script lang="ts">
+// ── Singleton: only one context menu open at a time (module-level) ──
+let globalCloseCallback: (() => void) | null = null
+</script>
+
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { check, chevronRight } from '@wordpress/icons'
@@ -10,9 +15,6 @@ const props = withDefaults(defineProps<{
 }>(), {
   surface: 'light',
 })
-
-// ── Singleton: only one context menu open at a time ──
-let globalCloseCallback: (() => void) | null = null
 
 const isOpen = ref(false)
 const menuStyle = ref<Record<string, string>>({})
