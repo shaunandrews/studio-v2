@@ -4,6 +4,8 @@ import { plus, archive, update, customLink, login, tool } from '@wordpress/icons
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Button from '@/components/primitives/Button.vue'
+import Text from '@/components/primitives/Text.vue'
+import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import { useConversations } from '@/data/useConversations'
@@ -65,6 +67,7 @@ function onArchive(e: Event, convoId: string) {
 
 const currentSite = computed(() => allSites.value.find(p => p.id === props.siteId))
 const siteLayout = computed(() => currentSite.value?.mockLayout ?? 'cafe')
+const localPath = computed(() => `/Users/shaun/Studio/${currentSite.value?.id ?? 'site'}`)
 
 const copiedField = ref<string | null>(null)
 let copiedTimeout: ReturnType<typeof setTimeout> | undefined
@@ -265,21 +268,34 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         </div>
       </button>
       </Tooltip>
-      <div class="overview__info">
-        <span class="overview__url">localhost:3920</span>
-      </div>
-      <div class="overview__info">
-        <span class="overview__creds">
-          <Tooltip :text="copiedField === 'user' ? 'Copied!' : 'Copy username'" placement="bottom" :delay="0">
-            <button class="overview__copy-btn" @click="copyToClipboard('admin', 'user')">admin</button>
-          </Tooltip>
-          <span class="overview__creds-sep">/</span>
-          <Tooltip :text="copiedField === 'pass' ? 'Copied!' : 'Copy password'" placement="bottom" :delay="0">
-            <button class="overview__copy-btn" @click="copyToClipboard('password', 'pass')">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</button>
-          </Tooltip>
-        </span>
-      </div>
+      <Text variant="body" weight="semibold" class="overview__url">localhost:3920</Text>
+      <span class="overview__creds">
+        <Button variant="tertiary" size="small" label="admin" :tooltip="copiedField === 'user' ? 'Copied!' : 'Copy username'" tooltip-placement="bottom" @click="copyToClipboard('admin', 'user')" />
+        <span class="overview__creds-sep">/</span>
+        <Button variant="tertiary" size="small" label="••••••••" :tooltip="copiedField === 'pass' ? 'Copied!' : 'Copy password'" tooltip-placement="bottom" @click="copyToClipboard('password', 'pass')" />
+      </span>
+      <Button variant="tertiary" size="small" :label="localPath" :tooltip="copiedField === 'path' ? 'Copied!' : 'Copy local path'" tooltip-placement="bottom" @click="copyToClipboard(localPath, 'path')" />
     </div>
+
+    <!-- Site nav -->
+    <nav v-if="!isAllSites" class="site-sections">
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'sync' }" @click="$emit('navigate', 'sync')">
+        <WPIcon :icon="update" :size="20" class="site-sections__icon" />
+        Sync
+      </button>
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'previews' }" @click="$emit('navigate', 'previews')">
+        <WPIcon :icon="customLink" :size="20" class="site-sections__icon" />
+        Previews
+      </button>
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'import-export' }" @click="$emit('navigate', 'import-export')">
+        <WPIcon :icon="login" :size="20" class="site-sections__icon" />
+        Import/Export
+      </button>
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'settings' }" @click="$emit('navigate', 'settings')">
+        <WPIcon :icon="tool" :size="20" class="site-sections__icon" />
+        Settings
+      </button>
+    </nav>
 
     <div class="site-tasks__header">
       <span class="site-tasks__title">Tasks</span>
@@ -323,33 +339,20 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
     </div>
 
-    <!-- Site nav -->
-    <nav v-if="!isAllSites" class="site-sections" :class="{ 'has-toggle': sidebarHidden }">
-      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'sync' }" @click="$emit('navigate', 'sync')">
-        <WPIcon :icon="update" :size="20" class="site-sections__icon" />
-        Sync
-      </button>
-      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'previews' }" @click="$emit('navigate', 'previews')">
-        <WPIcon :icon="customLink" :size="20" class="site-sections__icon" />
-        Previews
-      </button>
-      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'import-export' }" @click="$emit('navigate', 'import-export')">
-        <WPIcon :icon="login" :size="20" class="site-sections__icon" />
-        Import/Export
-      </button>
-      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'settings' }" @click="$emit('navigate', 'settings')">
-        <WPIcon :icon="tool" :size="20" class="site-sections__icon" />
-        Settings
-      </button>
-    </nav>
+    <ProgressiveBlur v-if="sidebarHidden" class="nav-blur" height="80px" />
   </div>
 </template>
 
 <style scoped>
 .site-navigation {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+.nav-blur {
+  z-index: 1;
 }
 
 /* ── Site overview ── */
@@ -357,8 +360,9 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 .site-overview {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xxs);
-  padding: var(--space-s);
+  align-items: center;
+  gap: var(--space-xxxs);
+  padding: var(--space-l) var(--space-s) var(--space-m);
   flex-shrink: 0;
   border-block-end: 1px solid var(--color-frame-border);
 }
@@ -367,9 +371,9 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 .overview__thumb {
   position: relative;
   flex-shrink: 0;
-  width: 100%;
+  width: 90%;
   aspect-ratio: 16 / 10;
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-s);
   border: 1px solid var(--color-frame-border);
   overflow: hidden;
   background: white;
@@ -379,6 +383,14 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   color: inherit;
   transition: transform 120ms var(--ease-default), box-shadow 200ms var(--ease-default);
   will-change: transform;
+  margin-block-end: var(--space-xs);
+}
+
+/* Override Tooltip's inline-flex trigger so thumb gets full width */
+.site-overview > :deep(.tooltip-trigger) {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .overview__thumb:hover {
@@ -412,7 +424,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 32px;
+  padding: 12px 32px;
   border-block-end: 1px solid rgba(0, 0, 0, 0.08);
   background: white;
 }
@@ -458,7 +470,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 .mock__hero {
   position: relative;
-  height: 240px;
+  height: 200px;
   overflow: hidden;
 }
 
@@ -497,15 +509,15 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 .mock__card img {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
 }
 
 .mock__card-label {
-  height: 8px;
-  margin: 10px 12px;
-  border-radius: 4px;
+  height: 6px;
+  margin: 8px 12px;
+  border-radius: 3px;
   background: rgba(0, 0, 0, 0.08);
   width: 60%;
 }
@@ -671,16 +683,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   width: 70%;
 }
 
-/* Info */
-.overview__info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-}
-
 .overview__url {
-  font-size: var(--font-size-s);
   color: var(--color-frame-theme);
   text-decoration: underline;
   cursor: pointer;
@@ -689,35 +692,16 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 .overview__creds {
   display: flex;
   align-items: center;
-  gap: 2px;
-  font-size: var(--font-size-xs);
+  gap: var(--space-xxxs);
+  font-size: var(--font-size-m);
   color: var(--color-frame-fg-muted);
-  letter-spacing: 0;
+  margin-block: var(--space-xxs);
 }
 
 .overview__creds-sep {
   color: var(--color-frame-fg-muted);
   opacity: 0.5;
   margin: 0 1px;
-}
-
-.overview__copy-btn {
-  border: none;
-  background: none;
-  padding: 0 2px;
-  margin: 0;
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-  cursor: pointer;
-  border-radius: var(--radius-s);
-  transition: background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
-}
-
-.overview__copy-btn:hover {
-  background: var(--color-frame-hover);
-  color: var(--color-frame-fg);
 }
 
 /* ── Site sections nav ── */
@@ -727,14 +711,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   flex-direction: column;
   gap: 2px;
   padding: var(--space-xs);
-  padding-block-end: var(--space-xs);
-  border-block-start: 1px solid var(--color-frame-border);
   flex-shrink: 0;
-  transition: padding-block-end 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.site-sections.has-toggle {
-  padding-block-end: 48px;
 }
 
 .site-sections__item {
@@ -781,7 +758,8 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 8px 2px var(--space-m);
+  padding: 8px 8px 2px 20px;
+  border-block-start: 1px solid var(--color-frame-border);
   flex-shrink: 0;
 }
 
@@ -829,7 +807,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   gap: 2px;
   flex: 1;
   overflow-y: auto;
-  padding: 0 8px 8px;
+  padding: 0 8px 48px;
 }
 
 .site-tasks__item {

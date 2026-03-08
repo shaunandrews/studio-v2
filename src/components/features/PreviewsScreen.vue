@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, nextTick } from 'vue'
+import { computed, ref } from 'vue'
 import { plus } from '@wordpress/icons'
 import { useSites } from '@/data/useSites'
 import { usePreviews } from '@/data/usePreviews'
@@ -7,7 +7,6 @@ import Button from '@/components/primitives/Button.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
 import PreviewsEmptyState from './previews/PreviewsEmptyState.vue'
 import PreviewCard from './previews/PreviewCard.vue'
-import ProgressCard from './previews/ProgressCard.vue'
 
 const props = defineProps<{
   siteId: string
@@ -26,13 +25,12 @@ const {
 const previews = getPreviews(props.siteId)
 const createOp = computed(() => activeOperation(props.siteId).value)
 const site = computed(() => sites.value.find(p => p.id === props.siteId))
-const hasPreviews = computed(() => previews.value.length > 0 || !!createOp.value)
+const hasPreviews = computed(() => previews.value.length > 0)
 
 // --- Celebration ---
 
 const COLORS = ['#3858e9', '#5b7bf3', '#1fd15b', '#f2d76b', '#e65054', '#a855f7']
 
-const justCreatedId = ref<string | null>(null)
 const confetti = ref<Array<{
   id: number
   x: string
@@ -44,14 +42,17 @@ const confetti = ref<Array<{
   spin: number
 }>>([])
 
-function celebrate() {
+function onCreated(url: string) {
+  navigator.clipboard.writeText(`https://${url}`)
+
+  // Spawn confetti
   const pieces = []
   for (let i = 0; i < 24; i++) {
     pieces.push({
       id: i,
-      x: `${40 + Math.random() * 20}%`,
-      spread: -100 + Math.random() * 200,
-      fall: 80 + Math.random() * 120,
+      x: `${35 + Math.random() * 30}%`,
+      spread: -120 + Math.random() * 240,
+      fall: 60 + Math.random() * 100,
       delay: Math.random() * 0.3,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       size: 4 + Math.random() * 4,
@@ -61,22 +62,6 @@ function celebrate() {
   confetti.value = pieces
   setTimeout(() => { confetti.value = [] }, 2000)
 }
-
-// When createOp goes from something → null, creation just finished
-watch(createOp, (newVal, oldVal) => {
-  if (oldVal && !newVal) {
-    nextTick(() => {
-      const newest = previews.value
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
-      if (newest) {
-        justCreatedId.value = newest.id
-        navigator.clipboard.writeText(`https://${newest.url}`)
-        celebrate()
-        setTimeout(() => { justCreatedId.value = null }, 1500)
-      }
-    })
-  }
-})
 
 // --- Actions ---
 
@@ -100,12 +85,8 @@ function handleClear(previewId: string) {
 <template>
   <PreviewsEmptyState v-if="!hasPreviews" @create="handleCreate" />
 
-  <ScreenLayout
-    v-else
-    title="Preview sites"
-    subtitle="Share a hosted preview of your site for feedback."
-  >
-    <template #actions>
+  <ScreenLayout v-else>
+    <div class="previews-list__header">
       <Button
         variant="primary"
         :icon="plus"
@@ -114,19 +95,15 @@ function handleClear(previewId: string) {
         :disabled="!!createOp"
         @click="handleCreate"
       />
-    </template>
+    </div>
 
     <div class="previews-list vstack gap-xxl">
-      <Transition name="progress">
-        <ProgressCard v-if="createOp" :operation="createOp" />
-      </Transition>
-
       <PreviewCard
         v-for="preview in previews"
         :key="preview.id"
         :preview="preview"
         :site-id="siteId"
-        :class="{ 'is-just-created': justCreatedId === preview.id }"
+        @created="onCreated"
         @delete="handleDelete(preview.id)"
         @extend="handleExtend(preview.id)"
         @clear="handleClear(preview.id)"
@@ -154,45 +131,14 @@ function handleClear(previewId: string) {
 </template>
 
 <style scoped>
+.previews-list__header {
+  display: flex;
+  justify-content: flex-end;
+  margin-block-end: var(--space-m);
+}
+
 .previews-list {
   position: relative;
-}
-
-/* ── Progress card enter/leave ── */
-
-.progress-enter-active {
-  transition: opacity var(--duration-slow) var(--ease-out),
-              transform var(--duration-slow) var(--ease-out);
-}
-
-.progress-leave-active {
-  transition: opacity var(--duration-moderate) var(--ease-in),
-              transform var(--duration-moderate) var(--ease-in);
-}
-
-.progress-enter-from {
-  opacity: 0;
-  transform: translateY(var(--space-xs)) scale(0.98);
-}
-
-.progress-leave-to {
-  opacity: 0;
-  transform: scale(0.97);
-}
-
-/* ── Just-created card glow ── */
-
-.is-just-created {
-  animation: card-glow 1.2s var(--ease-out) both;
-}
-
-@keyframes card-glow {
-  0% {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-frame-theme) 30%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 3px transparent;
-  }
 }
 
 /* ── Confetti ── */
@@ -215,7 +161,7 @@ function handleClear(previewId: string) {
   height: var(--size);
   background: var(--color);
   border-radius: 1px;
-  animation: confetti-pop 1.2s var(--ease-out) var(--delay) both;
+  animation: confetti-pop 1.2s ease-out var(--delay) both;
 }
 
 @keyframes confetti-pop {

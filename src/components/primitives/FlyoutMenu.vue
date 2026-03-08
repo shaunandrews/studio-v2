@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue'
+import { ref, nextTick, computed, onBeforeUnmount } from 'vue'
 import { check, chevronRight } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
+import Popover from '@/components/primitives/Popover.vue'
 
 export interface FlyoutMenuItem {
   label: string
@@ -36,10 +37,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const open = ref(false)
-const triggerRef = ref<HTMLElement | null>(null)
-const menuRef = ref<HTMLElement | null>(null)
-const menuStyle = ref<Record<string, string>>({})
+const popoverRef = ref<InstanceType<typeof Popover> | null>(null)
 
 // Track which top-level item has its flyout open
 const activeParent = ref<string | null>(null)
@@ -50,14 +48,12 @@ const flyoutRefs = ref<Record<string, HTMLElement | null>>({})
 // Track item refs for flyout positioning
 const itemRefs = ref<Record<string, HTMLElement | null>>({})
 
-const resolvedPlacement = ref<'above' | 'below'>('below')
-
-const EDGE_PADDING = 8
 const GAP = 4
+const EDGE_PADDING = 8
 
 // Debounced mouseleave — gives the cursor time to cross the gap to the flyout
 let leaveTimer: ReturnType<typeof setTimeout> | null = null
-const LEAVE_DELAY = 100 // ms grace period
+const LEAVE_DELAY = 100
 
 function scheduleDeactivate() {
   leaveTimer = setTimeout(() => {
@@ -74,85 +70,42 @@ function cancelDeactivate() {
 }
 
 function toggle() {
-  open.value = !open.value
+  popoverRef.value?.toggle()
 }
 
 function close() {
-  open.value = false
+  popoverRef.value?.close()
   activeParent.value = null
+}
+
+const open = computed(() => popoverRef.value?.open ?? false)
+
+function onPopoverClose() {
+  activeParent.value = null
+  flyoutStyles.value = {}
   emit('close')
 }
 
-function positionMenu() {
-  const trigger = triggerRef.value
-  const menu = menuRef.value
-  if (!trigger || !menu) return
+function onPopoverReposition() {
+  if (activeParent.value) positionFlyout(activeParent.value)
+}
 
-  const rect = trigger.getBoundingClientRect()
-  const menuRect = menu.getBoundingClientRect()
-  const vw = window.innerWidth
-  const vh = window.innerHeight
-
-  const spaceBelow = vh - rect.bottom - GAP - EDGE_PADDING
-  const spaceAbove = rect.top - GAP - EDGE_PADDING
-
-  // Resolve placement with flip
-  let placeAbove = props.placement === 'above'
-  if (placeAbove && spaceAbove < menuRect.height && spaceBelow > spaceAbove) {
-    placeAbove = false
-  } else if (!placeAbove && spaceBelow < menuRect.height && spaceAbove > spaceBelow) {
-    placeAbove = true
+// Tell Popover that submenu elements are "inside"
+function containsTarget(target: Node): boolean {
+  for (const el of Object.values(flyoutRefs.value)) {
+    if (el?.contains(target)) return true
   }
-  resolvedPlacement.value = placeAbove ? 'above' : 'below'
-
-  const style: Record<string, string> = {
-    position: 'fixed',
-    zIndex: '9999',
-  }
-  if (props.maxWidth) style.maxWidth = props.maxWidth
-
-  // Parse prop maxHeight as a pixel cap (if provided)
-  const propMax = props.maxHeight ? parseInt(props.maxHeight, 10) : Infinity
-
-  if (placeAbove) {
-    const bottom = vh - rect.top + GAP
-    const cap = Math.min(spaceAbove, propMax)
-    style.maxHeight = `${cap}px`
-    style.overflowY = 'auto'
-    style.bottom = `${bottom}px`
-    style.top = 'auto'
-  } else {
-    style.top = `${rect.bottom + GAP}px`
-    style.bottom = 'auto'
-    const cap = Math.min(spaceBelow, propMax)
-    style.maxHeight = `${cap}px`
-    style.overflowY = 'auto'
-  }
-
-  // Horizontal alignment
-  let left: number
-  if (props.align === 'end') {
-    left = rect.right - menuRect.width
-  } else if (props.align === 'start') {
-    left = rect.left
-  } else {
-    left = rect.left + rect.width / 2 - menuRect.width / 2
-  }
-  if (left + menuRect.width > vw - EDGE_PADDING) left = vw - EDGE_PADDING - menuRect.width
-  if (left < EDGE_PADDING) left = EDGE_PADDING
-  style.left = `${left}px`
-
-  menuStyle.value = style
+  return false
 }
 
 function positionFlyout(key: string) {
   const itemEl = itemRefs.value[key]
   const flyoutEl = flyoutRefs.value[key]
-  const menu = menuRef.value
-  if (!itemEl || !flyoutEl || !menu) return
+  const panelEl = popoverRef.value?.panelRef
+  if (!itemEl || !flyoutEl || !panelEl) return
 
   const itemRect = itemEl.getBoundingClientRect()
-  const menuRect = menu.getBoundingClientRect()
+  const menuRect = panelEl.getBoundingClientRect()
   const flyoutRect = flyoutEl.getBoundingClientRect()
   const vw = window.innerWidth
   const vh = window.innerHeight
@@ -162,20 +115,16 @@ function positionFlyout(key: string) {
     zIndex: '10000',
   }
 
-  // Horizontal: try placing to the right of the parent menu
   const rightSpace = vw - menuRect.right - GAP - EDGE_PADDING
   const leftSpace = menuRect.left - GAP - EDGE_PADDING
 
   if (rightSpace >= flyoutRect.width || rightSpace >= leftSpace) {
-    // Place to the right
     style.left = `${menuRect.right + GAP}px`
   } else {
-    // Place to the left
     style.left = `${menuRect.left - GAP - flyoutRect.width}px`
   }
 
-  // Vertical: align top of flyout with the hovered item, but keep in viewport
-  let top = itemRect.top - GAP // slight offset up so flyout overlaps with item row
+  let top = itemRect.top - GAP
   if (top + flyoutRect.height > vh - EDGE_PADDING) {
     top = vh - EDGE_PADDING - flyoutRect.height
   }
@@ -197,7 +146,7 @@ function onItemEnter(item: FlyoutMenuItem, groupIdx: number, itemIdx: number) {
 }
 
 function onItemClick(item: FlyoutMenuItem) {
-  if (item.children?.length) return // parent items don't fire actions
+  if (item.children?.length) return
   item.action?.()
   close()
 }
@@ -215,64 +164,12 @@ function setFlyoutRef(key: string, el: any) {
   flyoutRefs.value[key] = el as HTMLElement | null
 }
 
-watch(open, (val) => {
-  if (val) {
-    nextTick(() => {
-      positionMenu()
-      nextTick(positionMenu)
-    })
-  } else {
-    menuStyle.value = {}
-    activeParent.value = null
-    flyoutStyles.value = {}
-  }
-})
-
-function onClickOutside(e: MouseEvent) {
-  const target = e.target as Node
-  if (
-    triggerRef.value?.contains(target) ||
-    menuRef.value?.contains(target)
-  ) return
-  // Check flyout refs
-  for (const el of Object.values(flyoutRefs.value)) {
-    if (el?.contains(target)) return
-  }
-  if (open.value) close()
-}
-
-function onScrollOrResize() {
-  if (!open.value) return
-  positionMenu()
-  if (activeParent.value) positionFlyout(activeParent.value)
-}
-
-// Close on Escape
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape' && open.value) {
-    close()
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', onClickOutside)
-  document.addEventListener('keydown', onKeydown)
-  window.addEventListener('scroll', onScrollOrResize, true)
-  window.addEventListener('resize', onScrollOrResize)
-})
-
 onBeforeUnmount(() => {
   cancelDeactivate()
-  document.removeEventListener('click', onClickOutside)
-  document.removeEventListener('keydown', onKeydown)
-  window.removeEventListener('scroll', onScrollOrResize, true)
-  window.removeEventListener('resize', onScrollOrResize)
 })
 
-// Surface class for the dropdown panels
 const surfaceClass = computed(() => props.surface === 'dark' ? 'flyout--dark' : 'flyout--light')
 
-// Whether any item has a `checked` field — reserve checkmark column for all items
 const hasCheckedItems = computed(() =>
   props.groups.some(g => g.items.some(i => i.checked !== undefined))
 )
@@ -281,60 +178,69 @@ defineExpose({ toggle, close, open })
 </script>
 
 <template>
-  <div class="flyout-anchor" ref="triggerRef">
-    <slot name="trigger" :toggle="toggle" :open="open" />
-    <Teleport to="body">
-      <Transition name="flyout">
-        <div
-          v-if="open"
-          ref="menuRef"
-          class="flyout-menu vstack"
-          :class="[surfaceClass, { 'flyout-menu--above': resolvedPlacement === 'above' }]"
-          :style="menuStyle"
-          @mouseleave="scheduleDeactivate"
-        >
-          <div
-            v-for="(group, gi) in groups"
-            :key="gi"
-            class="flyout-group"
-          >
-            <span v-if="group.label" class="flyout-group-label">{{ group.label }}</span>
-            <div
-              v-for="(item, ii) in group.items"
-              :key="item.label"
-              :ref="(el) => setItemRef(`${gi}-${ii}`, el)"
-              class="flyout-item hstack"
-              :class="{
-                'flyout-item--destructive': item.destructive,
-                'flyout-item--active': activeParent === `${gi}-${ii}`,
-                'flyout-item--parent': item.children?.length,
-              }"
-              @mouseenter="onItemEnter(item, gi, ii)"
-              @click="onItemClick(item)"
-            >
-              <span v-if="item.detail" class="flyout-item-detail">{{ item.detail }}</span>
-              <img v-if="item.iconUrl" :src="item.iconUrl" class="flyout-item-icon flyout-item-icon--img" />
-              <WPIcon v-else-if="item.icon" :icon="item.icon" :size="18" class="flyout-item-icon" />
-              <span class="flyout-item-label">{{ item.label }}</span>
-              <WPIcon
-                v-if="hasCheckedItems"
-                :icon="check"
-                :size="18"
-                class="flyout-item-check"
-                :class="{ 'flyout-item-check--hidden': !item.checked }"
-              />
-              <WPIcon
-                v-if="item.children?.length"
-                :icon="chevronRight"
-                :size="16"
-                class="flyout-item-chevron"
-              />
-            </div>
-          </div>
-        </div>
-      </Transition>
+  <Popover
+    ref="popoverRef"
+    :surface="surface"
+    :align="align"
+    :placement="placement"
+    :max-width="maxWidth"
+    :max-height="maxHeight"
+    bare
+    :contains-target="containsTarget"
+    @close="onPopoverClose"
+    @reposition="onPopoverReposition"
+  >
+    <template #trigger="{ toggle: t, open: o }">
+      <slot name="trigger" :toggle="t" :open="o" />
+    </template>
 
-      <!-- Flyout submenus -->
+    <div
+      class="flyout-menu vstack"
+      :class="surfaceClass"
+      @mouseleave="scheduleDeactivate"
+    >
+      <div
+        v-for="(group, gi) in groups"
+        :key="gi"
+        class="flyout-group"
+      >
+        <span v-if="group.label" class="flyout-group-label">{{ group.label }}</span>
+        <div
+          v-for="(item, ii) in group.items"
+          :key="item.label"
+          :ref="(el) => setItemRef(`${gi}-${ii}`, el)"
+          class="flyout-item hstack"
+          :class="{
+            'flyout-item--destructive': item.destructive,
+            'flyout-item--active': activeParent === `${gi}-${ii}`,
+            'flyout-item--parent': item.children?.length,
+          }"
+          @mouseenter="onItemEnter(item, gi, ii)"
+          @click="onItemClick(item)"
+        >
+          <span v-if="item.detail" class="flyout-item-detail">{{ item.detail }}</span>
+          <img v-if="item.iconUrl" :src="item.iconUrl" class="flyout-item-icon flyout-item-icon--img" />
+          <WPIcon v-else-if="item.icon" :icon="item.icon" :size="18" class="flyout-item-icon" />
+          <span class="flyout-item-label">{{ item.label }}</span>
+          <WPIcon
+            v-if="hasCheckedItems"
+            :icon="check"
+            :size="18"
+            class="flyout-item-check"
+            :class="{ 'flyout-item-check--hidden': !item.checked }"
+          />
+          <WPIcon
+            v-if="item.children?.length"
+            :icon="chevronRight"
+            :size="16"
+            class="flyout-item-chevron"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Flyout submenus (teleported separately) -->
+    <Teleport to="body">
       <template v-for="(group, gi) in groups" :key="`flyout-group-${gi}`">
         <template v-for="(item, ii) in group.items" :key="`flyout-${gi}-${ii}`">
           <Transition name="flyout-sub">
@@ -363,16 +269,10 @@ defineExpose({ toggle, close, open })
         </template>
       </template>
     </Teleport>
-  </div>
+  </Popover>
 </template>
 
-<style scoped>
-.flyout-anchor {
-  position: relative;
-}
-</style>
-
-<!-- Teleported styles (unscoped) -->
+<!-- Unscoped styles for teleported content -->
 <style>
 /* ── Base menu panel ── */
 .flyout-menu,
@@ -551,24 +451,7 @@ defineExpose({ toggle, close, open })
   color: #f86368;
 }
 
-/* ── Transitions ── */
-.flyout-enter-active,
-.flyout-leave-active {
-  transition: opacity var(--duration-instant) var(--ease-default),
-    transform var(--duration-instant) var(--ease-default);
-}
-
-.flyout-enter-from,
-.flyout-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.flyout-menu--above.flyout-enter-from,
-.flyout-menu--above.flyout-leave-to {
-  transform: translateY(4px);
-}
-
+/* ── Submenu transitions ── */
 .flyout-sub-enter-active,
 .flyout-sub-leave-active {
   transition: opacity var(--duration-instant) var(--ease-default),

@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
 import { drawerLeft } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteList from '@/components/features/SiteList.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
+import AddSitePage from '@/pages/AddSitePage.vue'
 import { useSidebarCollapse } from '@/data/useSidebarCollapse'
+import { useAddSite } from '@/data/useAddSite'
 
-const router = useRouter()
 const { hidden, toggle: toggleSidebar } = useSidebarCollapse()
+const { shouldShowAddSite, hasSites, openAddSite } = useAddSite()
 
 const showShortcuts = ref(false)
 const showPreferences = ref(false)
@@ -42,14 +43,14 @@ onBeforeUnmount(() => {
 })
 
 function handleNewSite() {
-  router.push({ name: 'add-site' })
+  openAddSite()
 }
 </script>
 
 <template>
   <div class="main-layout">
     <!-- Traffic lights: fixed window position, UI moves around them -->
-    <div class="traffic-lights">
+    <div v-show="!shouldShowAddSite" class="traffic-lights">
       <span class="light close"></span>
       <span class="light minimize"></span>
       <span class="light maximize"></span>
@@ -57,6 +58,7 @@ function handleNewSite() {
 
     <!-- Floating footer buttons: persist outside sidebar so they survive collapse -->
     <button
+      v-show="!shouldShowAddSite"
       ref="gravatarRef"
       class="floating-btn gravatar-btn"
       :class="{ 'is-sidebar-hidden': hidden }"
@@ -65,6 +67,7 @@ function handleNewSite() {
       <img class="gravatar" src="https://gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=64" alt="User" />
     </button>
     <button
+      v-show="!shouldShowAddSite"
       class="floating-btn sidebar-toggle"
       :class="{ 'is-sidebar-hidden': hidden }"
       @click="toggleSidebar()"
@@ -73,9 +76,17 @@ function handleNewSite() {
     </button>
 
     <div class="app-body">
+      <!-- Add-site surface: lives behind sidebar + frame -->
+      <AddSitePage
+        v-show="shouldShowAddSite"
+        class="add-site-surface"
+        :visible="shouldShowAddSite"
+        :has-sites="hasSites"
+      />
+
       <div
         class="sidebar vstack"
-        :class="{ 'is-hidden': hidden }"
+        :class="{ 'is-hidden': hidden, 'is-offscreen': shouldShowAddSite }"
         :style="{ viewTransitionName: 'sidebar' }"
       >
         <SiteList class="flex-1 min-h-0" @new-site="handleNewSite" />
@@ -83,7 +94,7 @@ function handleNewSite() {
 
       <main
         class="frame"
-        :class="{ 'is-full': hidden }"
+        :class="{ 'is-full': hidden, 'is-offscreen': shouldShowAddSite }"
         :style="{ viewTransitionName: 'site-frame' }"
       >
         <router-view name="main" v-slot="{ Component }">
@@ -139,6 +150,14 @@ function handleNewSite() {
 
 /* ── Sidebar ── */
 
+/* ── Add-site surface ── */
+
+.add-site-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
 .sidebar {
   position: relative;
   z-index: 1;
@@ -147,13 +166,24 @@ function handleNewSite() {
   overflow: hidden;
   padding-block-start: 36px; /* Clear traffic lights: 15px top + 12px dots + 9px gap */
   /* Return: slide open after frame insets restore (200ms delay) */
-  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1) 200ms;
+  transition:
+    width 300ms cubic-bezier(0.4, 0, 0.2, 1) 200ms,
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sidebar.is-hidden {
   width: 0;
   /* Hide: collapse immediately */
-  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    width 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar.is-offscreen {
+  transform: translateX(calc(-100% - 16px)); /* Clear body padding */
+  transition:
+    width 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .gravatar {
@@ -190,7 +220,8 @@ function handleNewSite() {
     inset-block-end 200ms var(--ease-default),
     inset-inline-end 200ms var(--ease-default),
     inset-inline-start 300ms cubic-bezier(0.4, 0, 0.2, 1) 200ms,
-    border-radius 200ms var(--ease-default);
+    border-radius 200ms var(--ease-default),
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .frame.is-full {
@@ -206,7 +237,19 @@ function handleNewSite() {
     inset-block-end 200ms var(--ease-default) 300ms,
     inset-inline-end 200ms var(--ease-default) 300ms,
     inset-inline-start 300ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius 200ms var(--ease-default) 300ms;
+    border-radius 200ms var(--ease-default) 300ms,
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.frame.is-offscreen {
+  transform: translateX(calc(100% + 16px)); /* Clear body padding */
+  transition:
+    inset-block-start 200ms var(--ease-default),
+    inset-block-end 200ms var(--ease-default),
+    inset-inline-end 200ms var(--ease-default),
+    inset-inline-start 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 200ms var(--ease-default),
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Floating footer buttons ──

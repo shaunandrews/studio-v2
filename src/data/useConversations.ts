@@ -1,6 +1,7 @@
 import { ref, computed, type Ref, unref } from 'vue'
+import Anthropic from '@anthropic-ai/sdk'
 import { seedConversations, seedMessages } from './seed-conversations'
-import { isAIConfigured, streamAI } from './ai-service'
+import { isAIConfigured, getAPIKey, streamAI } from './ai-service'
 import { AI_SYSTEM_PROMPT } from './ai-system-prompt'
 import type { Conversation, Message, AgentId, ContentBlock, MessageContext } from './types'
 
@@ -117,6 +118,31 @@ async function sendToAIWithIndicator(conversationId: string, text: string, agent
       messages.value[idx]!.content = blocks
     }
   })
+}
+
+async function generateTaskTitle(conversationId: string, userMessage: string) {
+  if (!isAIConfigured()) return
+  try {
+    const client = new Anthropic({
+      apiKey: getAPIKey(),
+      dangerouslyAllowBrowser: true,
+    })
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 30,
+      messages: [
+        {
+          role: 'user',
+          content: `Generate a very short title (2-5 words, no quotes) for a task described as: "${userMessage}"`,
+        },
+      ],
+    })
+    const title = (response.content[0] as { type: 'text'; text: string }).text.trim()
+    const conv = conversations.value.find(c => c.id === conversationId)
+    if (conv && title) conv.title = title
+  } catch {
+    // Silent fail — title stays as "New task"
+  }
 }
 
 export function useConversations() {
@@ -264,5 +290,6 @@ export function useConversations() {
     streamAgentMessage,
     archiveConversation,
     unarchiveConversation,
+    generateTaskTitle,
   }
 }

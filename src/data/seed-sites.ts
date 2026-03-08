@@ -71,7 +71,7 @@ export const seedProjects: Site[] = [
     name: 'Studio Meridian',
     favicon: 'https://api.dicebear.com/9.x/shapes/svg?seed=meridian',
     status: 'running',
-    url: 'https://studiomeridian.com',
+    url: 'localhost:3920',
     createdAt: '2026-01-20T09:00:00Z',
     description: 'A design studio portfolio.',
     mockLayout: 'portfolio',

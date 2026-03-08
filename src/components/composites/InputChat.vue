@@ -37,6 +37,7 @@ const props = withDefaults(defineProps<{
   modelValue?: string
   placeholder?: string
   actions?: ActionButton[]
+  elevated?: boolean
 }>(), {
   surface: 'light',
   modelValue: '',
@@ -111,7 +112,7 @@ function actionLabel(idx: number): string {
 </script>
 
 <template>
-  <div class="input-chat" :class="[`surface-${props.surface}`, { 'has-content': canSend }]" @click="focusInput">
+  <div class="input-chat" :class="[`surface-${props.surface}`, { 'has-content': canSend, 'is-elevated': props.elevated }]" @click="focusInput">
 
     <!-- Card actions: caller controls all styling and content -->
     <div v-if="hasCardActions" class="input-actions-cards hstack gap-xs">
@@ -195,11 +196,18 @@ function actionLabel(idx: number): string {
 <style scoped>
 .input-chat {
   width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
   background: var(--color-frame-bg);
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-xl);
   cursor: text;
-  transition: border-color var(--duration-instant) var(--ease-default);
+  transition: border-color var(--duration-instant) var(--ease-default),
+    box-shadow var(--duration-slow) var(--ease-default);
+}
+
+.input-chat.is-elevated {
+  box-shadow: var(--shadow-m);
 }
 
 .input-chat:focus-within {

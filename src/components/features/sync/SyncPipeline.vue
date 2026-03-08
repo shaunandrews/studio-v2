@@ -3,6 +3,8 @@ import { computed, ref, watch, nextTick, toRef } from 'vue'
 import { useSites } from '@/data/useSites'
 import { usePipeline } from '@/data/usePipeline'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
+import Text from '@/components/primitives/Text.vue'
+import Button from '@/components/primitives/Button.vue'
 import StageCard from './StageCard.vue'
 import PipelineConnector from './PipelineConnector.vue'
 
@@ -18,6 +20,18 @@ const { pipeline, setupPhase, skipSetupStep, openSyncModal, openConnectModal, sy
 const site = computed(() => sites.value.find(p => p.id === props.siteId))
 
 const isSetup = computed(() => setupPhase.value !== null)
+const hasConnectedStage = computed(() => pipeline.value.some(s => s.site))
+
+// Keep layout in setup mode briefly while the guide fades out and envs expand
+const setupEnding = ref(false)
+const showSetupLayout = computed(() => isSetup.value || setupEnding.value)
+
+watch(isSetup, (val, oldVal) => {
+  if (!val && oldVal) {
+    setupEnding.value = true
+    setTimeout(() => { setupEnding.value = false }, 500)
+  }
+})
 
 // ── Setup step definitions ──
 // Phase -1 = local, 0+ = pipeline stage indices
@@ -28,18 +42,18 @@ interface SetupStep {
 }
 
 const STEP_LOCAL: SetupStep = {
-  title: 'Step 1: Your local site',
-  subtitle: 'This is where you build and test. Changes here stay private until you push them.',
+  title: 'Your local site',
+  subtitle: 'Connect an environment below to start syncing.',
 }
 
 const STEP_DEFS: Record<string, SetupStep> = {
   staging: {
-    title: 'Step 2: Connect your staging site',
-    subtitle: 'A place for you to test changes without stress or worry.',
+    title: 'Connect a staging site',
+    subtitle: 'Test changes before they go live.',
   },
   production: {
-    title: 'Step 3: Connect your production site',
-    subtitle: 'Your live website that visitors see. Deploy here when you\'re ready.',
+    title: 'Connect a production site',
+    subtitle: 'Your live site that visitors see.',
   },
 }
 
@@ -111,18 +125,16 @@ function envColor(environment?: string): string {
 </script>
 
 <template>
-  <ScreenLayout
-    title="Sync your site across environments"
-    subtitle="Work locally, push to staging to test, then deploy to production when ready."
-  >
-    <div class="sync-pipeline__layout" :class="{ 'is-setup': isSetup }">
+  <ScreenLayout>
+    <div class="sync-pipeline__layout" :class="{ 'is-setup': showSetupLayout, 'is-ending': setupEnding }">
       <div ref="envContainerRef" class="sync-pipeline__environments">
         <StageCard
           data-setup-index="-1"
-          label="Local"
+          label="Studio"
           :url="siteUrl"
           :favicon="site?.favicon"
           :connected="true"
+          :sync-disabled="!hasConnectedStage"
           :env-color="envColor('local')"
           :sync-phase="getProgress('local').phase"
           :sync-percent="getProgress('local').percent"
@@ -134,7 +146,7 @@ function envColor(environment?: string): string {
 
         <template v-for="(stage, index) in pipeline" :key="stage.id">
           <PipelineConnector
-            :from-label="index === 0 ? 'Local' : pipeline[index - 1].label"
+            :from-label="index === 0 ? 'Studio' : pipeline[index - 1].label"
             :to-label="stage.label"
             :to-connected="!!stage.site"
             :dimmed="isSetup && index > setupPhase!"
@@ -160,30 +172,30 @@ function envColor(environment?: string): string {
       </div>
 
       <!-- Setup guide panel on the right -->
+      <Transition name="guide-fade">
       <div v-if="currentStep" class="setup-guide" :style="{ paddingBlockStart: guideOffset + 'px' }">
-        <p class="setup-guide__title">{{ currentStep.title }}</p>
-        <p class="setup-guide__subtitle">{{ currentStep.subtitle }}</p>
-        <button v-if="isLocalStep" class="setup-guide__action" @click="skipSetupStep">
-          Got it
-        </button>
+        <Text variant="body" weight="semibold" tag="p">{{ currentStep.title }}</Text>
+        <Text variant="body" color="muted" tag="p">{{ currentStep.subtitle }}</Text>
+        <Button v-if="isLocalStep" label="Continue" variant="secondary" size="small" @click="skipSetupStep" />
         <button v-else class="setup-guide__skip" @click="skipSetupStep">
           Skip this step
         </button>
       </div>
+      </Transition>
     </div>
   </ScreenLayout>
 </template>
 
 <style scoped>
 .sync-pipeline__layout {
-  max-width: 680px;
+  display: flex;
+  gap: var(--space-xxl);
   margin-inline: auto;
   width: 100%;
+  max-width: 680px;
 }
 
 .sync-pipeline__layout.is-setup {
-  display: flex;
-  gap: var(--space-xxl);
   max-width: none;
 }
 
@@ -194,11 +206,17 @@ function envColor(environment?: string): string {
   align-items: stretch;
   gap: 4px;
   width: 100%;
+  max-width: 680px;
+  transition: max-width 400ms var(--ease-default);
 }
 
 .is-setup .sync-pipeline__environments {
   max-width: 420px;
   flex-shrink: 0;
+}
+
+.is-ending .sync-pipeline__environments {
+  max-width: 680px;
 }
 
 /* ── Setup guide panel ── */
@@ -207,46 +225,28 @@ function envColor(environment?: string): string {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxs);
-  max-width: 280px;
+  min-width: 240px;
+  max-width: 360px;
   transition: padding-block-start 200ms var(--ease-default);
 }
 
-.setup-guide__title {
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
+.setup-guide p {
   margin: 0;
 }
 
-.setup-guide__subtitle {
-  font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
-  margin: 0;
+/* ── Guide fade transition ── */
+
+.guide-fade-enter-active {
+  transition: opacity 200ms var(--ease-default);
 }
 
-.setup-guide__action {
-  align-self: flex-start;
-  height: 32px;
-  padding-inline: var(--space-m);
-  margin-block-start: var(--space-s);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
-  font-family: inherit;
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-medium);
-  line-height: 20px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background var(--duration-instant) var(--ease-default),
-    border-color var(--duration-instant) var(--ease-default);
+.guide-fade-leave-active {
+  transition: opacity 300ms var(--ease-default);
 }
 
-.setup-guide__action:hover {
-  background: var(--color-frame-hover);
-  border-color: var(--color-frame-fg-muted);
+.guide-fade-enter-from,
+.guide-fade-leave-to {
+  opacity: 0;
 }
 
 .setup-guide__skip {

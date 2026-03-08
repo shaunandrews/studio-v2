@@ -12,10 +12,14 @@ import Modal from '@/components/primitives/Modal.vue'
 import Badge from '@/components/primitives/Badge.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import ContextRing from '@/components/primitives/ContextRing.vue'
+import Toggle from '@/components/primitives/Toggle.vue'
 import { cog, plus, upload, external, trash, pencil, chevronDown } from '@wordpress/icons'
 import '@/pages/dev-docs.css'
 
 const modalOpen = ref(false)
+const toggleA = ref(false)
+const toggleB = ref(true)
+const toggleC = ref(true)
 
 const icons = Object.entries(wpIcons)
   .filter(([key, val]) => key !== 'Icon' && typeof val === 'object' && val !== null && (val as any)?.props)
@@ -473,6 +477,38 @@ const icons = Object.entries(wpIcons)
         <Text variant="label" color="muted" tag="h2">Rendered as h2</Text>
         <Text variant="body" tag="p">Rendered as p</Text>
         <Text variant="caption" tag="small">Rendered as small</Text>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toggle -->
+  <section id="toggle">
+    <h2>Toggle</h2>
+    <p class="section-desc">Boolean switch with optional label. Used for enabling/disabling features inline.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>modelValue</code></td><td><code>boolean</code></td><td>—</td><td>Checked state (v-model)</td></tr>
+          <tr><td><code>label</code></td><td><code>string</code></td><td>—</td><td>Optional text label beside the switch</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>States</h3>
+    <div class="example-section">
+      <div class="vstack gap-m">
+        <div class="hstack gap-m align-center">
+          <Toggle v-model="toggleA" />
+          <Text variant="caption" color="muted">Off (no label)</Text>
+        </div>
+        <div class="hstack gap-m align-center">
+          <Toggle v-model="toggleB" />
+          <Text variant="caption" color="muted">On (no label)</Text>
+        </div>
+        <Toggle v-model="toggleC" label="Files and folders" />
       </div>
     </div>
   </section>

@@ -17,11 +17,25 @@ const emit = defineEmits<{
   delete: []
   extend: []
   clear: []
+  created: [url: string]
 }>()
 
 const { getExpiration, relativeTime, operationForPreview, updateNote, addInvite, removeInvite } = usePreviews()
 
 const operation = computed(() => operationForPreview(props.preview.id).value)
+
+const isCreating = computed(() => props.preview.status === 'creating')
+
+// --- Watch for creation completing ---
+
+watch(
+  () => props.preview.status,
+  (newStatus, oldStatus) => {
+    if (oldStatus === 'creating' && newStatus === 'active') {
+      emit('created', props.preview.url)
+    }
+  },
+)
 
 // --- "Just updated" flash ---
 
@@ -140,36 +154,41 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
   <div v-if="isDeleting" class="preview-card preview-card--deleting">
     <div class="vstack gap-xxs p-xs">
       <span class="preview-card__detail">{{ operation!.detail }}</span>
-      <div class="preview-card__track">
+      <div class="preview-card__progress">
         <div
-          class="preview-card__fill"
+          class="preview-card__progress-fill"
           :style="{ width: `${operation!.progress}%` }"
         />
       </div>
     </div>
   </div>
 
-  <!-- Normal / Inactive -->
-  <div v-else class="preview-card" :class="{ 'preview-card--inactive': isInactive }">
-    <!-- Main section -->
+  <!-- Creating / Active / Inactive — same element throughout -->
+  <div
+    v-else
+    class="preview-card"
+    :class="{
+      'preview-card--creating': isCreating,
+      'preview-card--inactive': isInactive,
+    }"
+  >
     <div class="preview-card__main">
-      <!-- Header row: URL + actions -->
+      <!-- Row 1: URL/stage + actions -->
       <div class="hstack gap-xs min-w-0">
-        <a class="preview-card__url" :href="`https://${preview.url}`" target="_blank">{{ preview.url }}</a>
-        <div class="hstack gap-xxs shrink-0">
+        <!-- Creating: stage text in URL position -->
+        <span v-if="isCreating" class="preview-card__url preview-card__url--creating">
+          {{ operation?.detail ?? 'Preparing...' }}
+        </span>
+        <!-- Active: real URL -->
+        <a v-else class="preview-card__url" :href="`https://${preview.url}`" target="_blank">
+          {{ preview.url }}
+        </a>
+
+        <!-- Actions (hidden during creation) -->
+        <div v-if="!isCreating" class="preview-card__actions hstack gap-xxs shrink-0">
           <template v-if="!isInactive">
-            <Button
-              variant="secondary"
-              label="Copy"
-              size="small"
-              @click="handleCopy"
-            />
-            <Button
-              variant="secondary"
-              label="View"
-              size="small"
-              @click="handleView"
-            />
+            <Button variant="secondary" label="Copy" size="small" @click="handleCopy" />
+            <Button variant="secondary" label="View" size="small" @click="handleView" />
           </template>
           <FlyoutMenu :groups="menuGroups" align="end">
             <template #trigger="{ toggle }">
@@ -185,8 +204,16 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
         </div>
       </div>
 
-      <!-- Note (active only) -->
-      <div v-if="!isInactive" class="preview-card__note">
+      <!-- Row 2: progress bar (creating) or note (active) -->
+      <div v-if="isCreating" class="preview-card__progress-wrap">
+        <div class="preview-card__progress">
+          <div
+            class="preview-card__progress-fill"
+            :style="{ width: `${operation?.progress ?? 0}%` }"
+          />
+        </div>
+      </div>
+      <div v-else-if="!isInactive" class="preview-card__note">
         <input
           v-if="isEditingNote"
           ref="noteInputRef"
@@ -206,7 +233,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
 
       <!-- Invites (active only) -->
-      <div v-if="!isInactive && (preview.invites.length > 0 || isInviting)" class="hstack flex-wrap gap-xxs">
+      <div v-if="!isCreating && !isInactive && (preview.invites.length > 0 || isInviting)" class="hstack flex-wrap gap-xxs">
         <span
           v-for="invite in preview.invites"
           :key="invite.email"
@@ -233,23 +260,28 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 
     <!-- Footer -->
     <div class="preview-card__footer">
-      <div class="preview-card__stats">
-        <Tooltip text="Total page loads">
-          <span>{{ preview.views.toLocaleString() }} view{{ preview.views !== 1 ? 's' : '' }}</span>
-        </Tooltip>
-        <span class="preview-card__dot">&middot;</span>
-        <Tooltip text="Unique people who visited">
-          <span>{{ preview.uniqueVisitors.toLocaleString() }} visitor{{ preview.uniqueVisitors !== 1 ? 's' : '' }}</span>
-        </Tooltip>
-        <template v-if="preview.lastVisitedAt">
+      <template v-if="isCreating">
+        <span>Your preview link will appear shortly</span>
+      </template>
+      <template v-else>
+        <div class="preview-card__stats">
+          <Tooltip text="Total page loads">
+            <span>{{ preview.views === 0 ? 'No views' : `${preview.views.toLocaleString()} view${preview.views !== 1 ? 's' : ''}` }}</span>
+          </Tooltip>
           <span class="preview-card__dot">&middot;</span>
-          <span>Last visited {{ relativeTime(preview.lastVisitedAt) }}</span>
-        </template>
-      </div>
-      <span
-        class="preview-card__expires"
-        :class="{ 'is-danger': isExpiringSoon || isInactive }"
-      >{{ expiresText }}</span>
+          <Tooltip text="Unique people who visited">
+            <span>{{ preview.uniqueVisitors === 0 ? 'No visitors' : `${preview.uniqueVisitors.toLocaleString()} visitor${preview.uniqueVisitors !== 1 ? 's' : ''}` }}</span>
+          </Tooltip>
+          <template v-if="preview.lastVisitedAt">
+            <span class="preview-card__dot">&middot;</span>
+            <span>Last visited {{ relativeTime(preview.lastVisitedAt) }}</span>
+          </template>
+        </div>
+        <span
+          class="preview-card__expires"
+          :class="{ 'is-danger': isExpiringSoon || isInactive }"
+        >{{ expiresText }}</span>
+      </template>
     </div>
   </div>
 </template>
@@ -281,7 +313,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* ── URL ── */
+/* ── URL / stage text ── */
 
 .preview-card__url {
   flex: 1;
@@ -294,13 +326,57 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
   text-overflow: ellipsis;
   text-decoration: none;
   min-width: 0;
+  transition: color var(--duration-moderate) var(--ease-default);
 }
 
 .preview-card__url:hover {
   color: var(--color-frame-theme);
 }
 
+.preview-card__url--creating {
+  color: var(--color-frame-fg-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.preview-card__url--creating:hover {
+  color: var(--color-frame-fg-muted);
+}
+
+/* ── Actions ── */
+
+.preview-card__actions {
+  animation: fade-in var(--duration-slow) var(--ease-out) both;
+}
+
+/* ── Progress bar ── */
+
+/* Match note row height so creating card = active card dimensions */
+.preview-card__progress-wrap {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--font-size-l) * var(--line-height-normal));
+}
+
+.preview-card__progress {
+  width: 100%;
+  height: 4px;
+  background: var(--color-frame-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.preview-card__progress-fill {
+  height: 100%;
+  background: var(--color-frame-theme);
+  border-radius: var(--radius-full);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
 /* ── Note ── */
+
+.preview-card__note {
+  animation: fade-in var(--duration-slow) var(--ease-out) both;
+}
 
 .preview-card__note-text {
   font-size: var(--font-size-l);
@@ -408,6 +484,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
   display: flex;
   align-items: center;
   gap: var(--space-xxs);
+  animation: fade-in var(--duration-slow) var(--ease-out) both;
 }
 
 .preview-card__dot {
@@ -416,11 +493,23 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 .preview-card__expires {
   opacity: 0.6;
+  animation: fade-in var(--duration-slow) var(--ease-out) both;
 }
 
 .preview-card__expires.is-danger {
   opacity: 1;
   color: var(--color-frame-danger);
+}
+
+/* ── Creating state ── */
+
+.preview-card--creating .hstack {
+  /* Match height of active state's button row */
+  min-height: 26px;
+}
+
+.preview-card--creating .preview-card__footer {
+  opacity: 0.5;
 }
 
 /* ── Inactive (deleted / expired) ── */
@@ -451,19 +540,10 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
   color: var(--color-frame-fg-muted);
 }
 
-.preview-card__track {
-  width: 100%;
-  max-width: 200px;
-  height: 4px;
-  background: var(--color-frame-border);
-  border-radius: var(--radius-s);
-  overflow: hidden;
-}
+/* ── Utilities ── */
 
-.preview-card__fill {
-  height: 100%;
-  background: var(--color-frame-theme);
-  border-radius: var(--radius-s);
-  transition: width var(--duration-fast) var(--ease-default);
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style>

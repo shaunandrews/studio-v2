@@ -5,6 +5,8 @@ import SiteToolbar from '@/components/composites/SiteToolbar.vue'
 import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import InputChat from '@/components/composites/InputChat.vue'
+import Text from '@/components/primitives/Text.vue'
+import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import SyncScreen from '@/components/features/SyncScreen.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
@@ -32,7 +34,7 @@ function toggleStatus() {
   setStatus(currentSite.value.id, 'loading')
   setTimeout(() => setStatus(currentSite.value!.id, target), 1200)
 }
-const { conversations, getConversations, getMessages, sendMessage, streamAgentMessage, ensureConversation } = useConversations()
+const { conversations, getConversations, getMessages, sendMessage, streamAgentMessage, ensureConversation, generateTaskTitle } = useConversations()
 const { getActions, clearActions } = useInputActions()
 
 const currentSite = computed(() =>
@@ -111,6 +113,7 @@ watch(inputWrapRef, (el, _, onCleanup) => {
 })
 
 const draft = ref('')
+const isScrolledUp = ref(false)
 
 function onNavigate(screen: string) {
   const id = activeSiteId.value
@@ -144,9 +147,13 @@ function onNewChat() {
 
 function onSend(text: string) {
   if (!selectedConvoId.value) return
+  const isFirst = isNewTask.value
   clearActions(selectedConvoId.value)
   sendMessage(selectedConvoId.value, 'user', text, undefined, { source: 'typed' })
   draft.value = ''
+  if (isFirst) {
+    generateTaskTitle(selectedConvoId.value, text)
+  }
 }
 
 const showPreferences = ref(false)
@@ -206,24 +213,27 @@ function onAction(action: ActionButton) {
       </div>
       <div class="pane pane-detail">
         <template v-if="currentScreen === 'tasks' && selectedConvoId">
-          <div v-if="isNewTask" class="new-task-welcome" :style="{ paddingBlockEnd: inputHeight + 'px' }">
-            <div class="new-task-welcome__content">
-              <p class="new-task-welcome__heading">What should this task do?</p>
-              <p class="new-task-welcome__description">A task is an AI agent that works on your site. Describe what you need and it'll get to work.</p>
-              <ul class="new-task-welcome__examples">
-                <li>Add a contact form to the homepage</li>
-                <li>Write a blog post about our new menu</li>
-                <li>Install and configure an SEO plugin</li>
-                <li>Change the header font to something bolder</li>
-              </ul>
-            </div>
-          </div>
-          <ChatMessageList v-else :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" />
+          <ChatMessageList v-if="!isNewTask" :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" />
           <div ref="inputWrapRef" class="detail-input" :class="{ 'is-new-task': isNewTask }">
+            <Transition name="welcome-fade">
+              <div v-if="isNewTask" class="new-task-welcome">
+                <div class="new-task-illustration" aria-hidden="true">
+                  <div class="new-task-illustration__user" />
+                  <div class="new-task-illustration__agent" />
+                  <div class="new-task-illustration__user" />
+                </div>
+                <div class="new-task-welcome__copy">
+                  <Text tag="p" variant="body-large" weight="semibold">New task</Text>
+                  <Text tag="p" color="muted">Describe what you need and an AI agent will get to work on your site.</Text>
+                </div>
+              </div>
+            </Transition>
+            <ProgressiveBlur v-if="!isNewTask" class="input-blur" height="calc(100% + 6px)" />
             <InputChat
               ref="inputChatRef"
               v-model="draft"
               :site-id="activeSiteId"
+              :elevated="isScrolledUp"
               :placeholder="isNewTask ? 'Describe what this task should do...' : 'Ask anything...'"
               :actions="inputActions"
               @send="onSend"
@@ -278,15 +288,32 @@ function onAction(action: ActionButton) {
   position: absolute;
   inset-block-end: 0;
   inset-inline: 0;
-  max-width: 720px;
   width: 100%;
-  margin-inline: auto;
   padding: var(--space-m) 0;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: inset-block-end var(--duration-slow) cubic-bezier(0.22, 1, 0.36, 1),
+    transform var(--duration-slow) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .detail-input.is-new-task {
-  max-width: 600px;
+  inset-block-end: 50%;
+  transform: translateY(50%);
+  padding: 0;
+}
+
+/* ── Progressive blur behind input ── */
+
+.input-blur {
+  inset-inline-start: calc(-1 * var(--space-xl));
+  inset-inline-end: 16px;
+  z-index: -1;
+}
+
+.detail-input.is-new-task :deep(.input-chat) {
+  max-width: 500px;
 }
 
 .detail-empty {
@@ -298,56 +325,117 @@ function onAction(action: ActionButton) {
   color: var(--color-frame-fg-muted);
 }
 
+/* ── New task welcome ── */
+
 .new-task-welcome {
-  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 0;
+  gap: var(--space-l);
+  padding-block-end: var(--space-l);
+  max-width: 360px;
 }
 
-.new-task-welcome__content {
-  max-width: 360px;
+.new-task-welcome__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xxxs);
   text-align: center;
 }
 
-.new-task-welcome__heading {
-  margin: 0 0 var(--space-xs);
-  font-size: var(--font-size-l);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-  line-height: 1.3;
+/* Welcome fade transition */
+.welcome-fade-leave-active {
+  transition: opacity var(--duration-slow) var(--ease-default),
+    transform var(--duration-slow) var(--ease-default);
 }
 
-.new-task-welcome__description {
-  margin: 0 0 var(--space-m);
-  font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
-  line-height: 1.5;
+.welcome-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
-.new-task-welcome__examples {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* ── New task illustration ── */
+
+.new-task-illustration {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xxs);
+  justify-content: flex-end;
+  width: 260px;
+  height: 140px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
-.new-task-welcome__examples li {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
-  line-height: 1.4;
+.new-task-illustration__user,
+.new-task-illustration__agent {
+  max-height: 0;
+  opacity: 0;
+  margin-block-start: 0;
+  animation: bubble-in 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-.new-task-welcome__examples li::before {
-  content: '\201C';
-  color: var(--color-frame-fg-muted);
+.new-task-illustration__user {
+  align-self: flex-end;
+  width: 140px;
+  height: 32px;
+  border-start-start-radius: var(--radius-xl);
+  border-start-end-radius: var(--radius-xl);
+  border-end-start-radius: var(--radius-xl);
+  border-end-end-radius: var(--radius-s);
+  background: var(--color-frame-hover);
 }
 
-.new-task-welcome__examples li::after {
-  content: '\201D';
-  color: var(--color-frame-fg-muted);
+.new-task-illustration__agent {
+  align-self: flex-start;
+  width: 180px;
+  height: 48px;
+  border-radius: var(--radius-l);
+  background: var(--color-frame-hover);
+  animation-name: bubble-in-dim;
+}
+
+.new-task-illustration > :nth-child(1) {
+  animation-delay: 300ms;
+}
+
+.new-task-illustration > :nth-child(2) {
+  animation-delay: 800ms;
+}
+
+.new-task-illustration > :nth-child(3) {
+  animation-delay: 1300ms;
+}
+
+@keyframes bubble-in {
+  0% {
+    max-height: 0;
+    margin-block-start: 0;
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    max-height: 48px;
+    margin-block-start: var(--space-m);
+    opacity: 1;
+  }
+}
+
+@keyframes bubble-in-dim {
+  0% {
+    max-height: 0;
+    margin-block-start: 0;
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.5;
+  }
+  100% {
+    max-height: 48px;
+    margin-block-start: var(--space-m);
+    opacity: 0.5;
+  }
 }
 </style>

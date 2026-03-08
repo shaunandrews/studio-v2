@@ -4,9 +4,8 @@ import { useSites } from '@/data/useSites'
 import { useImportExport } from '@/data/useImportExport'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
-import WPIcon from '@/components/primitives/WPIcon.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
-import { wordpress, page } from '@wordpress/icons'
+import ContentSelector from '@/components/composites/ContentSelector.vue'
 
 const props = defineProps<{
   siteId: string
@@ -35,6 +34,7 @@ const {
   IMPORT_STAGES,
   EXPORT_STAGES_FULL,
   EXPORT_STAGES_DB,
+  EXPORT_STAGES_FILES,
 } = useImportExport(toRef(props, 'siteId'))
 
 // --- File extensions for pills ---
@@ -46,10 +46,22 @@ const fileExtensions = computed(() => {
   }))
 })
 
+// --- Content selector ref ---
+const contentSelectorRef = ref<InstanceType<typeof ContentSelector> | null>(null)
+
+function handleExport() {
+  const type = contentSelectorRef.value?.exportType ?? 'full'
+  startExport(type)
+}
+
+const canExport = computed(() => contentSelectorRef.value?.canExport ?? true)
+
 // --- Export stages ---
 const activeExportStages = computed(() => {
   if (!exportState.value) return EXPORT_STAGES_FULL
-  return exportState.value.exportType === 'full' ? EXPORT_STAGES_FULL : EXPORT_STAGES_DB
+  if (exportState.value.exportType === 'database') return EXPORT_STAGES_DB
+  if (exportState.value.exportType === 'files') return EXPORT_STAGES_FILES
+  return EXPORT_STAGES_FULL
 })
 
 // --- Drag and drop ---
@@ -136,8 +148,10 @@ function truncateFilename(name: string, maxLen = 28): string {
   return base.slice(0, available) + '...' + extStr
 }
 
+const isNewSite = computed(() => !site.value?.mockLayout)
+
 const importDisabled = computed(() => isImporting.value || isExporting.value || isConfirming.value)
-const exportDisabled = computed(() => isImporting.value || isExporting.value || isConfirming.value)
+const exportDisabled = computed(() => isImporting.value || isExporting.value || isConfirming.value || isNewSite.value)
 
 // --- Import state key for transitions ---
 const importStateKey = computed(() => {
@@ -149,24 +163,25 @@ const importStateKey = computed(() => {
 </script>
 
 <template>
-  <ScreenLayout
-    title="Import / Export"
-    subtitle="Your data, your rules. Take it anywhere."
-    :scrollable="true"
-  >
+  <ScreenLayout title="Import / Export" class="ie-screen">
     <div class="ie">
       <!-- ── Import Section ── -->
-      <div
-        class="ie__dropzone"
-        :class="{
-          'is-dragging': isDragging,
-          'is-active': isConfirming || isImporting || isImportDone,
-        }"
-        @dragenter="handleDragEnter"
-        @dragover="handleDragOver"
-        @dragleave="handleDragLeave"
-        @drop="handleDrop"
-      >
+      <div class="ie__section">
+        <div class="ie__section-header">
+          <Text variant="body" color="muted" tag="h3">Import</Text>
+          <Text variant="caption" color="muted">Restore a site from a backup or migrate from another host.</Text>
+        </div>
+        <div
+          class="ie__dropzone"
+          :class="{
+            'is-dragging': isDragging,
+            'is-active': isConfirming || isImporting || isImportDone,
+          }"
+          @dragenter="handleDragEnter"
+          @dragover="handleDragOver"
+          @dragleave="handleDragLeave"
+          @drop="handleDrop"
+        >
         <Transition name="ie-fade" mode="out-in">
           <!-- Idle state -->
           <div v-if="importStateKey === 'idle'" key="idle" class="ie__dropzone-idle">
@@ -270,45 +285,30 @@ const importStateKey = computed(() => {
         class="ie__file-input"
         @change="onFileSelected"
       />
-
-      <!-- ── Divider ── -->
-      <div class="ie__divider" />
+      </div>
 
       <!-- ── Export Section ── -->
-      <div class="ie__export">
-        <Text variant="label" color="muted" tag="h3">Export</Text>
-
+      <div class="ie__section ie__section--export">
+        <div class="ie__section-header">
+          <Text variant="body" color="muted" tag="h3">Export</Text>
+          <Text variant="caption" color="muted">Your data, your rules. Take it anywhere.</Text>
+        </div>
+        <div class="ie__export-body">
         <Transition name="ie-fade" mode="out-in">
-          <!-- Idle -->
-          <div v-if="!isExporting && !isExportDone" key="export-idle" class="ie__export-cards">
-            <div class="ie__export-card">
-              <div class="ie__export-card-icon">
-                <WPIcon :icon="wordpress" :size="24" />
-              </div>
-              <Text variant="body" weight="semibold" tag="h4">Full site</Text>
-              <Text variant="caption" color="muted">Database, themes, plugins, uploads, and configuration</Text>
-              <Button
-                variant="primary"
-                label="Export site"
-                :disabled="exportDisabled"
-                width="full"
-                @click="startExport('full')"
-              />
-            </div>
-            <div class="ie__export-card">
-              <div class="ie__export-card-icon">
-                <WPIcon :icon="page" :size="24" />
-              </div>
-              <Text variant="body" weight="semibold" tag="h4">Database only</Text>
-              <Text variant="caption" color="muted">Export a .sql dump of your site database</Text>
-              <Button
-                variant="secondary"
-                label="Export .sql"
-                :disabled="exportDisabled"
-                width="full"
-                @click="startExport('database')"
-              />
-            </div>
+          <!-- Empty site -->
+          <div v-if="isNewSite && !isExporting && !isExportDone" key="export-empty" class="ie__export-empty">
+            <Text variant="caption" color="muted">Nothing to export yet. Start building your site first.</Text>
+          </div>
+
+          <!-- Idle: options panel + button -->
+          <div v-else-if="!isExporting && !isExportDone" key="export-idle" class="ie__export-options">
+            <ContentSelector ref="contentSelectorRef" />
+            <Button
+              variant="primary"
+              label="Export"
+              :disabled="exportDisabled || !canExport"
+              @click="handleExport"
+            />
           </div>
 
           <!-- Exporting -->
@@ -347,26 +347,68 @@ const importStateKey = computed(() => {
             <button class="ie__text-btn" @click="clearExport">Export again</button>
           </div>
         </Transition>
+        </div>
       </div>
     </div>
   </ScreenLayout>
 </template>
 
 <style scoped>
+/* ── Screen override ── */
+
+.ie-screen :deep(.screen-layout__content) {
+  max-width: 960px;
+}
+
 /* ── Layout ── */
 
 .ie {
   display: flex;
   flex-direction: column;
-  gap: var(--space-l);
+  gap: var(--space-xl);
+}
+
+@media (min-width: 720px) {
+  .ie {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.ie__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  flex: 1;
+  min-width: 0;
+}
+
+.ie__section-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxxs);
+}
+
+.ie__export-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+  flex: 1;
+  background: var(--color-frame-hover);
+  border-radius: var(--radius-m);
+  padding: var(--space-m);
 }
 
 /* ── Drop Zone ── */
 
 .ie__dropzone {
   position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border: 1.5px dashed var(--color-frame-border);
-  border-radius: var(--radius-l);
+  border-radius: var(--radius-m);
   padding: var(--space-xxl) var(--space-m);
   transition: border-color var(--duration-moderate) var(--ease-default),
               background var(--duration-moderate) var(--ease-default);
@@ -584,7 +626,7 @@ const importStateKey = computed(() => {
   display: flex;
   align-items: center;
   gap: var(--space-s);
-  animation: ie-fade-in var(--duration-slow) var(--ease-out) 600ms both;
+  animation: ie-fade-in var(--duration-slow) var(--ease-out) 700ms both;
 }
 
 /* ── Animated Checkmark ── */
@@ -608,7 +650,7 @@ const importStateKey = computed(() => {
   stroke-linejoin: round;
   stroke-dasharray: 30;
   stroke-dashoffset: 30;
-  animation: ie-draw-check 300ms var(--ease-out) 300ms forwards;
+  animation: ie-draw-check 300ms var(--ease-out) 400ms forwards;
 }
 
 @keyframes ie-draw-circle {
@@ -659,19 +701,12 @@ const importStateKey = computed(() => {
   display: none;
 }
 
-/* ── Divider ── */
-
-.ie__divider {
-  height: 1px;
-  background: var(--color-frame-border);
-}
-
 /* ── Drag Overlay ── */
 
 .ie__drag-overlay {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-l);
+  border-radius: var(--radius-m);
   background: color-mix(in srgb, var(--color-frame-bg) 70%, transparent);
   backdrop-filter: blur(8px);
   display: flex;
@@ -710,37 +745,23 @@ const importStateKey = computed(() => {
   opacity: 0;
 }
 
+/* ── Export Empty State ── */
+
+.ie__export-empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  text-align: center;
+}
+
 /* ── Export Section ── */
 
-.ie__export {
+.ie__export-options {
   display: flex;
   flex-direction: column;
   gap: var(--space-m);
-}
-
-.ie__export-cards {
-  display: flex;
-  gap: var(--space-m);
-}
-
-.ie__export-card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  padding: var(--space-l);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-l);
-  background: var(--color-frame-bg);
-  transition: border-color var(--duration-fast) var(--ease-default);
-}
-
-.ie__export-card:hover {
-  border-color: var(--color-frame-fg-muted);
-}
-
-.ie__export-card-icon {
-  color: var(--color-frame-fg-muted);
 }
 
 /* ── State Transitions ── */

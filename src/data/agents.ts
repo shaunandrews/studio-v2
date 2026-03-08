@@ -1,6 +1,24 @@
+import { reactive } from 'vue'
 import type { Agent } from './types'
 
-export const agents: Agent[] = [
+const INSTALLED_KEY = 'installed-agents'
+
+function getInstalledIds(): Set<string> {
+  try {
+    const stored = localStorage.getItem(INSTALLED_KEY)
+    return new Set(stored ? JSON.parse(stored) : ['wpcom'])
+  } catch {
+    return new Set(['wpcom'])
+  }
+}
+
+function saveInstalledIds(ids: Set<string>) {
+  localStorage.setItem(INSTALLED_KEY, JSON.stringify([...ids]))
+}
+
+const installedIds = getInstalledIds()
+
+export const agents: Agent[] = reactive([
   {
     id: 'wpcom',
     label: 'WordPress.com',
@@ -15,6 +33,7 @@ export const agents: Agent[] = [
     icon: '/icons/codex-outline.svg',
     url: 'https://openai.com/index/introducing-codex/',
     installHint: 'Install via npm: npm install -g @openai/codex',
+    installed: installedIds.has('codex'),
   },
   {
     id: 'claude-code',
@@ -23,6 +42,7 @@ export const agents: Agent[] = [
     icon: '/icons/claude.svg',
     url: 'https://docs.anthropic.com/en/docs/claude-code',
     installHint: 'Install via npm: npm install -g @anthropic-ai/claude-code',
+    installed: installedIds.has('claude-code'),
   },
   {
     id: 'cursor',
@@ -31,6 +51,7 @@ export const agents: Agent[] = [
     icon: '/icons/cursor.svg',
     url: 'https://cursor.com',
     installHint: 'Download the Cursor editor from cursor.com',
+    installed: installedIds.has('cursor'),
   },
   {
     id: 'opencode',
@@ -39,6 +60,7 @@ export const agents: Agent[] = [
     icon: '/icons/opencode.svg',
     url: 'https://github.com/opencode-ai/opencode',
     installHint: 'Install via npm: npm install -g opencode',
+    installed: installedIds.has('opencode'),
   },
   // Legacy agents (kept for backward compat with seed data)
   {
@@ -56,18 +78,32 @@ export const agents: Agent[] = [
     label: 'Design Agent',
     description: 'Visual design, layout, typography, colors, block styling.',
   },
-]
+])
+
+/** Install an agent (fake async flow) */
+export function installAgent(id: string): Promise<void> {
+  const agent = agents.find(a => a.id === id)
+  if (!agent) return Promise.resolve()
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      agent.installed = true
+      const ids = getInstalledIds()
+      ids.add(id)
+      saveInstalledIds(ids)
+      resolve()
+    }, 2000)
+  })
+}
 
 /** The coding agents available for the task input picker (order matches menu) */
 const codingAgentOrder = ['wpcom', 'codex', 'claude-code', 'cursor', 'opencode']
-export const codingAgents: Agent[] = codingAgentOrder
-  .map(id => agents.find(a => a.id === id)!)
-  .filter(Boolean)
+export const codingAgents = agents.filter(a => codingAgentOrder.includes(a.id))
 
 /** Built-in agent (always installed) */
 export const builtInAgent: Agent = agents.find(a => a.id === 'wpcom')!
 
 /** Third-party ACP agents */
-export const thirdPartyAgents: Agent[] = ['codex', 'claude-code', 'cursor', 'opencode']
-  .map(id => agents.find(a => a.id === id)!)
-  .filter(Boolean)
+export const thirdPartyAgents = agents.filter(a =>
+  codingAgentOrder.includes(a.id) && a.id !== 'wpcom'
+)

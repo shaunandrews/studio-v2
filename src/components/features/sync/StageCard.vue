@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import Button from '@/components/primitives/Button.vue'
 
 const props = withDefaults(defineProps<{
   label: string
@@ -8,6 +9,7 @@ const props = withDefaults(defineProps<{
   connected: boolean
   envColor?: string
   dimmed?: boolean
+  syncDisabled?: boolean
   syncPhase?: 'idle' | 'syncing' | 'done' | 'error'
   syncPercent?: number
   syncLabel?: string
@@ -91,19 +93,20 @@ const timeSince = computed(() => {
     <button
       v-if="connected && syncPhase !== 'syncing'"
       class="sync-env__action"
+      :disabled="syncDisabled"
       @click="$emit('sync')"
     >
       Sync
     </button>
 
     <!-- Unconnected: connect button (only when not dimmed) -->
-    <button
+    <Button
       v-if="!connected && !dimmed && syncPhase !== 'syncing'"
-      class="sync-env__action"
+      label="Connect site"
+      variant="primary"
+      size="small"
       @click="$emit('connect')"
-    >
-      Connect site
-    </button>
+    />
   </div>
 </template>
 
@@ -209,9 +212,15 @@ const timeSince = computed(() => {
     color var(--duration-instant) var(--ease-default);
 }
 
-.sync-env__action:hover {
+.sync-env__action:hover:not(:disabled) {
   background: var(--color-frame-hover);
   color: var(--color-frame-fg);
+}
+
+.sync-env__action:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
 }
 
 /* ── Syncing status ── */

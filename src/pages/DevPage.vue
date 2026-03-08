@@ -5,6 +5,10 @@ import { closeSmall } from '@wordpress/icons'
 import Button from '@/components/primitives/Button.vue'
 import { useSites } from '@/data/useSites'
 
+defineProps<{
+  sidebarHidden?: boolean
+}>()
+
 const route = useRoute()
 const router = useRouter()
 const { activeSiteId } = useSites()
@@ -13,6 +17,7 @@ const tabs = [
   { label: 'Design System', to: '/dev/design-system' },
   { label: 'Components', to: '/dev/components' },
   { label: 'Architecture', to: '/dev/architecture' },
+  { label: 'JTBD', to: '/dev/jtbd' },
 ]
 
 function isActive(to: string) {
@@ -30,7 +35,7 @@ function close() {
 
 <template>
   <div class="dev-page">
-    <div class="dev-toolbar">
+    <div class="dev-toolbar" :class="{ 'has-lights': sidebarHidden }">
       <div class="dev-tabs">
         <RouterLink
           v-for="tab in tabs"
@@ -72,6 +77,11 @@ function close() {
   height: 48px;
   flex-shrink: 0;
   border-block-end: 1px solid var(--color-frame-border);
+}
+
+/* When sidebar hidden, leave room for traffic lights */
+.dev-toolbar.has-lights {
+  padding-inline-start: 78px; /* Physical: 16px traffic light offset + 52px dots + 10px gap */
 }
 
 .dev-tabs {

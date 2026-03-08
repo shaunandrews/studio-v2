@@ -9,7 +9,7 @@ defineEmits<{
 <template>
   <div class="sync-empty">
     <div class="sync-empty__illustration">
-      <div class="sync-empty__env sync-empty__env--local">Local</div>
+      <div class="sync-empty__env sync-empty__env--local">Studio</div>
       <div class="sync-empty__env sync-empty__env--staging">Staging</div>
       <div class="sync-empty__env sync-empty__env--production">Production</div>
     </div>

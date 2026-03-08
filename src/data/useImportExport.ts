@@ -16,7 +16,7 @@ interface ExportState {
   phase: ExportPhase
   progress: number
   statusMessage: string
-  exportType: 'full' | 'database'
+  exportType: 'full' | 'database' | 'files'
   currentStage: number
 }
 
@@ -38,6 +38,11 @@ const EXPORT_STAGES_FULL = [
 const EXPORT_STAGES_DB = [
   { label: 'Exporting', key: 'export' },
   { label: 'Writing', key: 'write' },
+] as const
+
+const EXPORT_STAGES_FILES = [
+  { label: 'Files', key: 'files' },
+  { label: 'Compressing', key: 'compress' },
 ] as const
 
 function formatFileSize(bytes: number): string {
@@ -76,6 +81,14 @@ const exportDbMessages = [
   { progress: 50, message: 'Exporting database...' },
   { progress: 80, message: 'Writing SQL file...' },
   { progress: 100, message: 'Database exported! File saved to ~/Downloads' },
+]
+
+const exportFilesMessages = [
+  { progress: 15, message: 'Backing up files...' },
+  { progress: 40, message: 'Backing up files...' },
+  { progress: 70, message: 'Backing up files...' },
+  { progress: 90, message: 'Compressing archive...' },
+  { progress: 100, message: 'Files exported! File saved to ~/Downloads' },
 ]
 
 function simulateProgress(
@@ -165,7 +178,7 @@ export function useImportExport(siteId: Ref<string | null>) {
     if (id) delete importStates.value[id]
   }
 
-  function startExport(type: 'full' | 'database') {
+  function startExport(type: 'full' | 'database' | 'files') {
     const id = siteId.value
     if (!id || isImporting.value || isExporting.value) return
 
@@ -177,8 +190,8 @@ export function useImportExport(siteId: Ref<string | null>) {
       currentStage: 0,
     }
 
-    const steps = type === 'full' ? exportFullMessages : exportDbMessages
-    const stages = type === 'full' ? EXPORT_STAGES_FULL : EXPORT_STAGES_DB
+    const steps = type === 'full' ? exportFullMessages : type === 'database' ? exportDbMessages : exportFilesMessages
+    const stages = type === 'full' ? EXPORT_STAGES_FULL : type === 'database' ? EXPORT_STAGES_DB : EXPORT_STAGES_FILES
 
     simulateProgress(
       steps,
@@ -228,5 +241,6 @@ export function useImportExport(siteId: Ref<string | null>) {
     IMPORT_STAGES,
     EXPORT_STAGES_FULL,
     EXPORT_STAGES_DB,
+    EXPORT_STAGES_FILES,
   }
 }

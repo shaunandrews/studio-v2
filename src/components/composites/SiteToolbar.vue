@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { category, chevronDown, moreVertical, wordpress, copy, share, trash, backup, seen, dashboard, desktop, styles, symbolFilled, navigation, layout, page } from '@wordpress/icons'
+import { category, chevronDown, moreVertical, wordpress, share, trash, backup, seen, dashboard, desktop, styles, symbolFilled, navigation, layout, page } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import ButtonSplit from '@/components/primitives/ButtonSplit.vue'
@@ -88,22 +88,8 @@ const openMenuGroups = computed<FlyoutMenuGroup[]>(() => [
   },
 ])
 
-const currentSite = computed(() =>
-  props.siteId ? sites.value.find(p => p.id === props.siteId) : undefined
-)
-
-const siteUrl = computed(() => currentSite.value?.url || 'localhost:8882')
-const localPath = computed(() => `/Users/shaun/Studio/${currentSite.value?.id ?? 'site'}`)
-const adminUrl = computed(() => siteUrl.value.replace(/^https?:\/\//, '') + '/wp-admin/')
-
 const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   const groups: FlyoutMenuGroup[] = [{
-    items: [
-      { label: 'Site URL', detail: siteUrl.value.replace(/^https?:\/\//, ''), icon: copy, action: () => navigator.clipboard.writeText(siteUrl.value) },
-      { label: 'Local path', detail: localPath.value, icon: copy, action: () => navigator.clipboard.writeText(localPath.value) },
-      { label: 'Admin URL', detail: adminUrl.value, icon: copy, action: () => navigator.clipboard.writeText(adminUrl.value) },
-    ],
-  }, {
     items: [
       { label: 'Share preview link', icon: share, action: () => alert('Generating share link…') },
       { label: 'Preview site', icon: seen, action: () => alert('Opening site preview…') },

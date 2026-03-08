@@ -180,7 +180,7 @@ export interface PostDraftCardData {
 
 // --- Previews ---
 
-export type PreviewStatus = 'active' | 'expired' | 'deleted'
+export type PreviewStatus = 'creating' | 'active' | 'expired' | 'deleted'
 
 export interface PreviewInvite {
   email: string

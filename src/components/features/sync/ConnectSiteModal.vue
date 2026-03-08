@@ -2,8 +2,9 @@
 import { ref, computed, watch } from 'vue'
 import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
+import Text from '@/components/primitives/Text.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
-import { closeSmall, search as searchIcon, external } from '@wordpress/icons'
+import { search as searchIcon, external } from '@wordpress/icons'
 
 export interface WpcomSite {
   id: string
@@ -16,7 +17,9 @@ export interface WpcomSite {
 
 const props = defineProps<{
   open: boolean
+  siteName?: string
   stageLabel?: string
+  stageEnvironment?: string
   connectedSiteIds?: string[]
 }>()
 
@@ -31,23 +34,58 @@ const allSites: WpcomSite[] = [
   { id: 'wpcom-1', name: 'Downstreet Café', url: 'downstreet.cafe', provider: 'wpcom', environmentType: 'production', status: 'syncable' },
   { id: 'wpcom-2', name: 'Downstreet Café Staging', url: 'staging.downstreet.cafe', provider: 'pressable', environmentType: 'staging', status: 'syncable' },
   { id: 'wpcom-3', name: 'Studio Meridian', url: 'studiomeridian.com', provider: 'wpcom', environmentType: 'production', status: 'syncable' },
+  { id: 'wpcom-8', name: 'Studio Meridian Staging', url: 'staging.studiomeridian.com', provider: 'pressable', environmentType: 'staging', status: 'syncable' },
   { id: 'wpcom-4', name: 'Meridian Dev', url: 'dev.studiomeridian.com', provider: 'pressable', environmentType: 'development', status: 'syncable' },
   { id: 'wpcom-5', name: 'My Travel Blog', url: 'wanderlustdiaries.com', provider: 'wpcom', environmentType: 'production', status: 'syncable' },
   { id: 'wpcom-6', name: 'Starter Site', url: 'shaun2026.wordpress.com', provider: 'wpcom', environmentType: 'production', status: 'needs-upgrade' },
   { id: 'wpcom-7', name: 'Old Portfolio', url: 'shaundesign.wordpress.com', provider: 'wpcom', environmentType: 'production', status: 'needs-transfer' },
 ]
 
-// ── Search + filtering ──
+// ── State ──
 
 const query = ref('')
 const selectedId = ref<string | null>(null)
+const browsing = ref(false)
 
 watch(() => props.open, (isOpen) => {
   if (isOpen) {
     query.value = ''
     selectedId.value = null
+    browsing.value = false
   }
 })
+
+// ── Suggested match: best guess based on site name + target environment ──
+
+function nameScore(siteName: string, localName: string): number {
+  const a = siteName.toLowerCase()
+  const b = localName.toLowerCase()
+  // Exact base-name match (e.g. "Studio Meridian" in "Studio Meridian Staging")
+  if (a.includes(b) || b.includes(a)) return 3
+  // Shared words
+  const aWords = new Set(a.split(/\s+/))
+  const bWords = b.split(/\s+/)
+  const shared = bWords.filter(w => aWords.has(w)).length
+  if (shared > 0) return shared
+  // URL-based: check if domains share a root
+  return 0
+}
+
+const suggestedSite = computed(() => {
+  if (!props.siteName) return null
+  const connected = new Set(props.connectedSiteIds ?? [])
+  const candidates = allSites
+    .filter(s => s.status === 'syncable' && !connected.has(s.id))
+    .map(s => ({
+      ...s,
+      score: nameScore(s.name, props.siteName!) + (s.environmentType === props.stageEnvironment ? 2 : 0),
+    }))
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+  return candidates[0] ?? null
+})
+
+// ── Browse list (excludes suggestion) ──
 
 const sites = computed(() => {
   const connected = new Set(props.connectedSiteIds ?? [])
@@ -56,16 +94,25 @@ const sites = computed(() => {
     status: connected.has(s.id) ? 'already-connected' as const : s.status,
   }))
 
+  // Exclude the suggested site from the browse list
+  const excluded = suggestedSite.value?.id
+  const base = enriched.filter(s => s.id !== excluded)
+
   const q = query.value.toLowerCase().trim()
   const filtered = q
-    ? enriched.filter(s => s.name.toLowerCase().includes(q) || s.url.toLowerCase().includes(q))
-    : enriched
+    ? base.filter(s => s.name.toLowerCase().includes(q) || s.url.toLowerCase().includes(q))
+    : base
 
-  // Syncable first, then alphabetical within groups
+  const targetEnv = props.stageEnvironment
   return filtered.sort((a, b) => {
     const aOk = a.status === 'syncable' ? 0 : 1
     const bOk = b.status === 'syncable' ? 0 : 1
     if (aOk !== bOk) return aOk - bOk
+    if (targetEnv) {
+      const aMatch = a.environmentType === targetEnv ? 0 : 1
+      const bMatch = b.environmentType === targetEnv ? 0 : 1
+      if (aMatch !== bMatch) return aMatch - bMatch
+    }
     return a.name.localeCompare(b.name)
   })
 })
@@ -99,6 +146,12 @@ function onSelect(site: WpcomSite) {
   selectedId.value = site.id
 }
 
+function onConnectSuggested() {
+  if (suggestedSite.value) {
+    emit('select', suggestedSite.value)
+  }
+}
+
 function onConnect() {
   const site = sites.value.find(s => s.id === selectedId.value)
   if (site && isSelectable(site)) {
@@ -108,66 +161,85 @@ function onConnect() {
 </script>
 
 <template>
-  <Modal :open="open" width="480px" @close="$emit('close')">
-    <!-- Header -->
-    <div class="csm__header">
-      <span class="csm__title">Connect {{ stageLabel ?? 'site' }}</span>
-      <button class="csm__close" @click="$emit('close')">
-        <WPIcon :icon="closeSmall" :size="24" />
-      </button>
-    </div>
+  <Modal :open="open" width="480px" :title="`Connect ${stageLabel ?? 'site'}`" @close="$emit('close')">
 
-    <!-- Search -->
-    <div class="csm__search">
-      <WPIcon :icon="searchIcon" :size="20" class="csm__search-icon" />
-      <input
-        v-model="query"
-        class="csm__search-input"
-        type="text"
-        placeholder="Search sites..."
-      />
-    </div>
-
-    <!-- Site list -->
-    <div class="csm__list">
-      <div v-if="sites.length === 0" class="csm__empty">
-        No sites match your search.
-      </div>
-      <button
-        v-for="site in sites"
-        :key="site.id"
-        class="csm__site"
-        :class="{
-          'is-selected': selectedId === site.id,
-          'is-disabled': !isSelectable(site),
-        }"
-        :disabled="!isSelectable(site)"
-        @click="onSelect(site)"
-      >
+    <!-- Suggested match -->
+    <div v-if="suggestedSite && !browsing" class="csm__suggestion">
+      <Text variant="caption" color="muted" tag="p" class="csm__suggestion-label">Best match</Text>
+      <div class="csm__suggestion-card">
         <div class="csm__site-info">
-          <span class="csm__site-name">{{ site.name }}</span>
-          <span class="csm__site-url">{{ site.url }}</span>
+          <span class="csm__site-name">{{ suggestedSite.name }}</span>
+          <span class="csm__site-url">{{ suggestedSite.url }}</span>
         </div>
         <div class="csm__site-meta">
           <span
             class="csm__env-badge"
-            :style="{ background: envColor(site.environmentType) }"
-          >{{ envLabel(site.environmentType) }}</span>
-          <span v-if="site.provider === 'pressable'" class="csm__provider">Pressable</span>
+            :style="{ background: envColor(suggestedSite.environmentType) }"
+          >{{ envLabel(suggestedSite.environmentType) }}</span>
+          <span v-if="suggestedSite.provider === 'pressable'" class="csm__provider">Pressable</span>
         </div>
-        <span v-if="!isSelectable(site)" class="csm__site-status">
-          {{ statusLabel(site.status) }}
-        </span>
-      </button>
+      </div>
+      <div class="csm__suggestion-actions">
+        <Button variant="primary" label="Connect" @click="onConnectSuggested" />
+        <button class="csm__browse-toggle" @click="browsing = true">
+          Don't see your site? Browse all
+        </button>
+      </div>
     </div>
 
-    <!-- Footer -->
-    <div class="csm__footer">
+    <!-- Browse / search mode -->
+    <template v-if="!suggestedSite || browsing">
+      <!-- Search -->
+      <div class="csm__search">
+        <WPIcon :icon="searchIcon" :size="20" class="csm__search-icon" />
+        <input
+          v-model="query"
+          class="csm__search-input"
+          type="text"
+          placeholder="Search sites..."
+        />
+      </div>
+
+      <!-- Site list -->
+      <div class="csm__list">
+        <div v-if="sites.length === 0" class="csm__empty">
+          No sites match your search.
+        </div>
+        <button
+          v-for="site in sites"
+          :key="site.id"
+          class="csm__site"
+          :class="{
+            'is-selected': selectedId === site.id,
+            'is-disabled': !isSelectable(site),
+          }"
+          :disabled="!isSelectable(site)"
+          @click="onSelect(site)"
+        >
+          <div class="csm__site-info">
+            <span class="csm__site-name">{{ site.name }}</span>
+            <span class="csm__site-url">{{ site.url }}</span>
+          </div>
+          <div class="csm__site-meta">
+            <span
+              class="csm__env-badge"
+              :style="{ background: envColor(site.environmentType) }"
+            >{{ envLabel(site.environmentType) }}</span>
+            <span v-if="site.provider === 'pressable'" class="csm__provider">Pressable</span>
+          </div>
+          <span v-if="!isSelectable(site)" class="csm__site-status">
+            {{ statusLabel(site.status) }}
+          </span>
+        </button>
+      </div>
+    </template>
+
+    <template #footer>
       <a href="https://wordpress.com" target="_blank" rel="noopener" class="csm__create-link">
         Create a new WordPress.com site
         <WPIcon :icon="external" :size="16" />
       </a>
-      <div class="csm__footer-actions">
+      <div v-if="!suggestedSite || browsing" class="csm__footer-actions">
         <Button variant="tertiary" label="Cancel" @click="$emit('close')" />
         <Button
           variant="primary"
@@ -176,46 +248,52 @@ function onConnect() {
           @click="onConnect"
         />
       </div>
-    </div>
+    </template>
   </Modal>
 </template>
 
 <style scoped>
-/* ── Header ── */
+/* ── Suggestion ── */
 
-.csm__header {
+.csm__suggestion {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding-block: var(--space-xs);
 }
 
-.csm__title {
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-semibold);
-  line-height: 20px;
-  color: var(--color-frame-fg);
+.csm__suggestion-label {
+  margin: 0;
 }
 
-.csm__close {
+.csm__suggestion-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
+  gap: var(--space-xs);
+  padding: var(--space-s);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-m);
+  background: var(--color-frame-hover);
+}
+
+.csm__suggestion-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-m);
+}
+
+.csm__browse-toggle {
   border: none;
-  border-radius: var(--radius-s);
   background: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--font-size-s);
   color: var(--color-frame-fg-muted);
   cursor: pointer;
-  transition:
-    background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
+  transition: color var(--duration-instant) var(--ease-default);
 }
 
-.csm__close:hover {
-  background: var(--color-frame-hover);
+.csm__browse-toggle:hover {
   color: var(--color-frame-fg);
 }
 
@@ -225,7 +303,6 @@ function onConnect() {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  margin: 0 16px;
   padding: 0 12px;
   height: 36px;
   border: 1px solid var(--color-frame-border);
@@ -259,7 +336,8 @@ function onConnect() {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 12px 8px;
+  padding-block: var(--space-s);
+  margin-inline: calc(-1 * var(--space-xs));
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -364,19 +442,11 @@ function onConnect() {
 
 /* ── Footer ── */
 
-.csm__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-block-start: 1px solid var(--color-frame-border);
-  flex-shrink: 0;
-}
-
 .csm__create-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  margin-inline-end: auto;
   font-size: var(--font-size-s);
   color: var(--color-frame-theme);
   text-decoration: none;

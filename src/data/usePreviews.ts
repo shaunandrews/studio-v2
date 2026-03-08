@@ -235,6 +235,22 @@ export function usePreviews() {
   function createPreview(siteId: string, name: string) {
     const opId = `op-${randomId()}`
     const previewId = `prev-${randomId()}`
+    const slug = siteId.replace(/[^a-z0-9-]/g, '')
+
+    // Add preview immediately in 'creating' state
+    const preview: PreviewSite = {
+      id: previewId,
+      siteId,
+      name,
+      url: generatePreviewUrl(slug),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: 'creating',
+      views: 0,
+      uniqueVisitors: 0,
+      invites: [],
+    }
+    previews.value.unshift(preview)
 
     const op: PreviewOperation = {
       id: opId,
@@ -249,20 +265,11 @@ export function usePreviews() {
     operations.value.push(op)
 
     simulateProgress(op, () => {
-      const slug = siteId.replace(/[^a-z0-9-]/g, '')
-      const preview: PreviewSite = {
-        id: previewId,
-        siteId,
-        name,
-        url: generatePreviewUrl(slug),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        status: 'active',
-        views: 0,
-        uniqueVisitors: 0,
-        invites: [],
+      const p = previews.value.find(p => p.id === previewId)
+      if (p) {
+        p.status = 'active'
+        p.updatedAt = new Date().toISOString()
       }
-      previews.value.push(preview)
     })
 
     return opId

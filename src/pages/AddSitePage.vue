@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch } from 'vue'
 import { wordpress, page, download, backup, chevronLeft, close } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
@@ -13,13 +12,19 @@ import type { RemoteSite } from '@/components/features/add-site/PullSitePicker.v
 import type { SelectedFile } from '@/components/features/add-site/ImportDropZone.vue'
 import { useSites } from '@/data/useSites'
 import { useSiteTransition } from '@/data/useSiteTransition'
+import { useAddSite } from '@/data/useAddSite'
+
+const props = defineProps<{
+  visible: boolean
+  hasSites: boolean
+}>()
 
 type Path = 'blank' | 'blueprint' | 'pull' | 'import'
 type Step = 'choose' | 'picker' | 'details'
 
-const router = useRouter()
 const { createUntitledSite, updateSite } = useSites()
 const { navigateToSite } = useSiteTransition('site')
+const { closeAddSite } = useAddSite()
 
 const currentPath = ref<Path | null>(null)
 const currentStep = ref<Step>('choose')
@@ -29,7 +34,17 @@ const selectedBlueprint = ref<Blueprint | null>(null)
 const selectedRemoteSite = ref<RemoteSite | null>(null)
 const selectedFile = ref<SelectedFile | null>(null)
 const isAuthenticated = ref(true) // Prototype: pretend logged in
-const leaving = ref(false)
+
+// Reset state when opened
+watch(() => props.visible, (visible) => {
+  if (visible) {
+    currentPath.value = null
+    currentStep.value = 'choose'
+    selectedBlueprint.value = null
+    selectedRemoteSite.value = null
+    selectedFile.value = null
+  }
+})
 
 const heading = computed(() => {
   if (currentStep.value === 'choose') return 'Add a new site'
@@ -83,8 +98,7 @@ function goBack() {
 }
 
 function dismiss() {
-  leaving.value = true
-  setTimeout(() => router.back(), 250)
+  closeAddSite()
 }
 
 // Picker handlers
@@ -102,21 +116,22 @@ function initialName(): string | undefined {
 }
 
 async function onSubmit(data: { name: string }) {
-  leaving.value = true
   const site = createUntitledSite()
   updateSite(site.id, { name: data.name })
+  closeAddSite()
+  // Small delay so chrome slides back before navigating
   setTimeout(async () => {
     await navigateToSite(site.id)
-  }, 250)
+  }, 100)
 }
 </script>
 
 <template>
-  <div class="add-site-page" :class="{ 'is-leaving': leaving }">
+  <div class="add-site-page">
     <!-- Accent glow -->
     <div class="accent-glow" />
 
-    <!-- Header: always back (left) + title (center) + close (right) -->
+    <!-- Header: back (left) + title (center) + close (right, only if sites exist) -->
     <header class="page-header hstack">
       <div class="header-start">
         <Button
@@ -129,7 +144,7 @@ async function onSubmit(data: { name: string }) {
       </div>
       <h1 class="page-title">{{ heading }}</h1>
       <div class="header-end">
-        <Button :icon="close" variant="tertiary" tooltip="Close" @click="dismiss" />
+        <Button v-if="hasSites" :icon="close" variant="tertiary" tooltip="Close" @click="dismiss" />
       </div>
     </header>
 
@@ -204,51 +219,43 @@ async function onSubmit(data: { name: string }) {
 /* ── Page shell ── */
 
 .add-site-page {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 100;
   display: flex;
   flex-direction: column;
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
+  background: var(--color-chrome-bg);
+  color: var(--color-chrome-fg);
   overflow: hidden;
-  animation: page-enter 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.add-site-page.is-leaving {
-  animation: page-leave 300ms cubic-bezier(0.4, 0, 1, 1) forwards;
-}
-
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-  60% {
-    opacity: 1;
-  }
-}
-
-@keyframes page-leave {
-  to {
-    opacity: 0;
-    transform: translateY(40px) scale(0.98);
-  }
 }
 
 /* ── Accent glow ── */
 
 .accent-glow {
   position: absolute;
-  inset-block-start: -200px;
+  inset-block-start: 50%;
   inset-inline-start: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  height: 500px;
-  background: radial-gradient(ellipse at center, var(--color-frame-theme) 0%, transparent 70%);
-  opacity: 0.06;
+  width: 1400px;
+  height: 1400px;
+  background: radial-gradient(ellipse at center, var(--color-frame-theme) 0%, transparent 60%);
+  opacity: 0.08;
   pointer-events: none;
   z-index: 0;
+  animation: glow-wander 20s ease-in-out infinite, glow-pulse 8s ease-in-out infinite;
+}
+
+@keyframes glow-wander {
+  0% { transform: translate(-50%, -50%) translate(0, 0); }
+  15% { transform: translate(-50%, -50%) translate(200px, -150px); }
+  30% { transform: translate(-50%, -50%) translate(-180px, -80px); }
+  50% { transform: translate(-50%, -50%) translate(120px, 180px); }
+  65% { transform: translate(-50%, -50%) translate(-250px, 100px); }
+  80% { transform: translate(-50%, -50%) translate(150px, -200px); }
+  100% { transform: translate(-50%, -50%) translate(0, 0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.06; }
+  50% { opacity: 0.12; }
 }
 
 /* ── Header ── */
@@ -290,8 +297,8 @@ async function onSubmit(data: { name: string }) {
   overflow-y: auto;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: var(--space-xxxl) var(--space-m);
+  align-items: center;
+  padding: var(--space-m);
 }
 
 .step-content {

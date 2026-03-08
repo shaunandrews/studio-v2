@@ -48,12 +48,6 @@ const router = createRouter({
       component: { render: () => null },
       meta: { layout: 'main', mode: 'site' },
     },
-    {
-      name: 'add-site',
-      path: '/add-site',
-      component: () => import('@/pages/AddSitePage.vue'),
-      meta: { layout: 'bare' },
-    },
     // Dev pages — inside main layout frame
     {
       path: '/dev',
@@ -77,6 +71,7 @@ const router = createRouter({
           ],
         },
         { name: 'dev-architecture', path: 'architecture', component: () => import('@/pages/ArchitecturePage.vue') },
+        { name: 'dev-jtbd', path: 'jtbd', component: () => import('@/pages/JtbdPage.vue') },
       ],
     },
     // Catch-all

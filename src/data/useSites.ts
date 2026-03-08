@@ -18,9 +18,9 @@ export function useSites() {
     if (p) p.status = status
   }
 
-  function createUntitledSite(): Project {
+  function createUntitledSite(): Site {
     const id = `site-${Date.now()}`
-    const newSite: Project = {
+    const newSite: Site = {
       id,
       name: 'Untitled site',
       favicon: `https://api.dicebear.com/9.x/shapes/svg?seed=${encodeURIComponent(id)}`,
@@ -28,8 +28,8 @@ export function useSites() {
       url: '',
       createdAt: new Date().toISOString(),
     }
-    sites.value.push(newProject)
-    return newProject
+    sites.value.push(newSite)
+    return newSite
   }
 
   function updateSite(id: string, updates: Partial<Pick<Site, 'name' | 'favicon' | 'description'>>) {

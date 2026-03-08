@@ -78,11 +78,7 @@ function updateStageBranch(stageId: string, branch: string) {
 </script>
 
 <template>
-  <ScreenLayout
-    title="Settings"
-    subtitle="Configure your local WordPress environment."
-    scrollable
-  >
+  <ScreenLayout scrollable>
       <!-- Editable fields -->
       <div class="settings__field">
         <label class="settings__label" for="site-name">Site name</label>

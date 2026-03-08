@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
-import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
-import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
+import Popover from '@/components/primitives/Popover.vue'
 
 const props = withDefaults(defineProps<{
   percent: number
@@ -25,18 +24,18 @@ const dashoffset = computed(() => circumference * (1 - props.percent / 100))
 const isWarning = computed(() => props.percent >= 80)
 const isCritical = computed(() => props.percent >= 95)
 
-const menuGroups = computed<FlyoutMenuGroup[]>(() => {
-  const items = []
-  if (props.model) items.push({ label: 'Model', detail: props.model })
-  if (props.tokens) items.push({ label: 'Tokens', detail: props.tokens })
-  if (props.cost) items.push({ label: 'Est. cost', detail: props.cost })
-  if (props.messages > 0) items.push({ label: 'Messages', detail: String(props.messages) })
-  return items.length ? [{ items }] : []
+const stats = computed(() => {
+  const items: { label: string; value: string }[] = []
+  if (props.model) items.push({ label: 'Model', value: props.model })
+  if (props.tokens) items.push({ label: 'Tokens', value: props.tokens })
+  if (props.cost) items.push({ label: 'Est. cost', value: props.cost })
+  if (props.messages > 0) items.push({ label: 'Messages', value: String(props.messages) })
+  return items
 })
 </script>
 
 <template>
-  <FlyoutMenu :groups="menuGroups" surface="dark" placement="above" align="end">
+  <Popover surface="dark" placement="above" align="end">
     <template #trigger="{ toggle, open }">
       <Tooltip :text="open ? undefined : `Context: ${percent}% used`" placement="bottom">
         <button
@@ -58,7 +57,13 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
         </button>
       </Tooltip>
     </template>
-  </FlyoutMenu>
+    <dl class="context-info">
+      <div v-for="stat in stats" :key="stat.label" class="context-info__row">
+        <dt class="context-info__label">{{ stat.label }}</dt>
+        <dd class="context-info__value">{{ stat.value }}</dd>
+      </div>
+    </dl>
+  </Popover>
 </template>
 
 <style scoped>
@@ -114,6 +119,33 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 @keyframes context-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* ── Context info popover content ── */
+
+.context-info {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.context-info__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-l);
+}
+
+.context-info__label {
+  font-size: var(--font-size-s);
+  color: var(--color-chrome-fg-muted);
+}
+
+.context-info__value {
+  font-size: var(--font-size-s);
+  color: var(--color-chrome-fg);
+  margin: 0;
 }
 
 /* Dark surface variants */

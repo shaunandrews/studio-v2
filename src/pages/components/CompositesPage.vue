@@ -7,10 +7,10 @@ import InputChat from '@/components/composites/InputChat.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import PanelToolbar from '@/components/composites/PanelToolbar.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
-import ScreenHeader from '@/components/composites/ScreenHeader.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import SiteToolbar from '@/components/composites/SiteToolbar.vue'
+import ContentSelector from '@/components/composites/ContentSelector.vue'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
 import { cog, chevronDown } from '@wordpress/icons'
@@ -88,6 +88,31 @@ const shortcutsOpen = ref(false)
         { id: '1', conversationId: 'c1', role: 'user', content: 'Can you update the homepage hero?', timestamp: '' },
         { id: '2', conversationId: 'c1', role: 'agent', content: 'Sure! I will update the hero section with a new gradient background.', timestamp: '' },
       ]" />
+    </div>
+  </section>
+
+  <!-- ContentSelector -->
+  <section id="content-selector">
+    <h2>ContentSelector</h2>
+    <p class="section-desc">Inline panel for selecting site content to export or sync. Toggle files and database independently, with optional granular selection via scope dropdowns and tree/table pickers.</p>
+
+    <div class="props-table">
+      <h3>Exposed State</h3>
+      <table>
+        <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>exportType</code></td><td><code>'full' | 'database' | 'files'</code></td><td>Derived from toggle states</td></tr>
+          <tr><td><code>canExport</code></td><td><code>boolean</code></td><td>True when at least one toggle is on</td></tr>
+          <tr><td><code>filesEnabled</code></td><td><code>boolean</code></td><td>Files toggle state</td></tr>
+          <tr><td><code>databaseEnabled</code></td><td><code>boolean</code></td><td>Database toggle state</td></tr>
+          <tr><td><code>reset()</code></td><td><code>function</code></td><td>Reset all selections to defaults</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Preview</h3>
+    <div class="example-section" style="max-width: 480px;">
+      <ContentSelector />
     </div>
   </section>
 
@@ -247,51 +272,16 @@ const shortcutsOpen = ref(false)
     </div>
   </section>
 
-  <!-- ScreenHeader -->
-  <section id="screen-header">
-    <h2>ScreenHeader</h2>
-    <p class="section-desc">Header bar with title, optional subtitle, and right-aligned action slot.</p>
-
-    <div class="props-table">
-      <h3>Props</h3>
-      <table>
-        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Header title</td></tr>
-          <tr><td><code>subtitle</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Optional subtitle text</td></tr>
-        </tbody>
-      </table>
-      <h3>Slots</h3>
-      <table>
-        <thead><tr><th>Slot</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>actions</code></td><td>Right-aligned action buttons</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Preview</h3>
-    <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <ScreenHeader title="Settings" subtitle="Configure your site">
-        <template #actions>
-          <Button variant="primary" label="Save" size="small" />
-        </template>
-      </ScreenHeader>
-    </div>
-  </section>
-
   <!-- ScreenLayout -->
   <section id="screen-layout">
     <h2>ScreenLayout</h2>
-    <p class="section-desc">Full-screen layout combining ScreenHeader with a scrollable body area.</p>
+    <p class="section-desc">Full-screen layout with centered, scrollable body area.</p>
 
     <div class="props-table">
       <h3>Props</h3>
       <table>
         <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Header title</td></tr>
-          <tr><td><code>subtitle</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Optional header subtitle</td></tr>
           <tr><td><code>scrollable</code></td><td><code>boolean</code></td><td><code>undefined</code></td><td>Enable vertical scrolling in body</td></tr>
         </tbody>
       </table>
@@ -299,7 +289,6 @@ const shortcutsOpen = ref(false)
       <table>
         <thead><tr><th>Slot</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>actions</code></td><td>Right-aligned header actions</td></tr>
           <tr><td><code>default</code></td><td>Body content</td></tr>
         </tbody>
       </table>
@@ -307,7 +296,7 @@ const shortcutsOpen = ref(false)
 
     <h3>Preview</h3>
     <div class="example-section" style="height: 200px; border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <ScreenLayout title="Import / Export" :scrollable="true">
+      <ScreenLayout :scrollable="true">
         <div class="p-m">
           <Text color="secondary">Scrollable body content goes here.</Text>
         </div>

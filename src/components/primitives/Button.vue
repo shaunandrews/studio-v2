@@ -87,7 +87,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  border-radius: var(--radius-s);
+  border-radius: var(--radius-m);
   font-family: inherit;
   font-weight: var(--font-weight-medium);
   cursor: pointer;
@@ -199,7 +199,7 @@ onUnmounted(() => {
 .btn--secondary.btn--on-light {
   background: var(--color-frame-bg);
   color: var(--color-frame-fg-muted);
-  border-color: rgba(0, 0, 0, 0.1);
+  border-color: var(--color-frame-border);
 }
 
 .btn--secondary.btn--on-light:hover {

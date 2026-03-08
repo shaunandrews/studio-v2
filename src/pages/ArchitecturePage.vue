@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import '@/pages/dev-docs.css'
 
 const sections = [
@@ -12,6 +13,9 @@ function scrollTo(e: Event, id: string) {
   const el = document.getElementById(id)
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
+
+const sidebarOpen = ref(true)
+const platform = ref<'mac' | 'windows'>('mac')
 </script>
 
 <template>
@@ -34,10 +38,33 @@ function scrollTo(e: Event, id: string) {
         <h2>App Layout</h2>
         <p class="arch-intro">The app is a dark chrome shell containing a sidebar and a content frame.</p>
 
-        <div class="bp">
+        <div class="bp-controls">
+          <button class="bp-toggle" :class="{ 'is-active': sidebarOpen }" @click="sidebarOpen = !sidebarOpen">
+            {{ sidebarOpen ? 'Sidebar open' : 'Sidebar closed' }}
+          </button>
+          <div class="bp-platform-toggle">
+            <button :class="{ 'is-active': platform === 'mac' }" @click="platform = 'mac'">Mac</button>
+            <button :class="{ 'is-active': platform === 'windows' }" @click="platform = 'windows'">Windows</button>
+          </div>
+        </div>
+
+        <div class="bp" :class="[`bp--${platform}`, { 'bp--collapsed': !sidebarOpen }]">
+          <!-- Windows titlebar -->
+          <div v-if="platform === 'windows'" class="bp-titlebar">
+            <div class="bp-titlebar-start">
+              <span class="bp-titlebar-icon">W</span>
+              <span class="bp-titlebar-label">Studio</span>
+              <span class="bp-titlebar-menus">File&ensp;Edit&ensp;View&ensp;Help</span>
+            </div>
+            <div class="bp-titlebar-controls">
+              <span class="bp-win-btn">&#x2013;</span>
+              <span class="bp-win-btn">&#9633;</span>
+              <span class="bp-win-btn bp-win-close">&times;</span>
+            </div>
+          </div>
           <div class="bp-chrome">
-            <div class="bp-sidebar">Sidebar</div>
-            <div class="bp-frame">
+            <div v-if="sidebarOpen" class="bp-sidebar">Sidebar</div>
+            <div class="bp-frame" :class="{ 'bp-frame--full': !sidebarOpen }">
               <div class="bp-toolbar">Toolbar</div>
               <div class="bp-content">
                 <div class="bp-nav">Nav</div>
@@ -65,6 +92,15 @@ function scrollTo(e: Event, id: string) {
 
           <dt class="arch-sub">Detail</dt>
           <dd>Right column. Changes based on the active screen (chat, sync pipeline, previews, etc).</dd>
+        </dl>
+
+        <h3>Platform differences</h3>
+        <dl class="arch-defs">
+          <dt>Mac</dt>
+          <dd>Traffic light buttons (close, minimize, maximize) are integrated into the top-left of the sidebar. The sidebar and frame share a single chrome background with inset padding on all sides.</dd>
+
+          <dt>Windows</dt>
+          <dd>Window controls (minimize, maximize, close) sit in a dedicated titlebar row above the chrome area. The titlebar also holds the app icon, name, and menu bar (File, Edit, View, Help). The sidebar and frame sit below it.</dd>
         </dl>
       </section>
 
@@ -129,7 +165,7 @@ function scrollTo(e: Event, id: string) {
 </template>
 
 <style scoped>
-/* ── Main content area (overrides dev-docs defaults for better spacing) ── */
+/* ── Main content area ── */
 
 .arch-main {
   flex: 1;
@@ -236,21 +272,98 @@ function scrollTo(e: Event, id: string) {
 }
 
 /* ══════════════════════════
-   BLUEPRINT — the one diagram
+   BLUEPRINT CONTROLS
+   ══════════════════════════ */
+
+.bp-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  margin-block-end: var(--space-s);
+}
+
+.bp-toggle {
+  padding: var(--space-xxs) var(--space-s);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-s);
+  background: var(--color-frame-bg);
+  color: var(--color-frame-fg-muted);
+  font-family: inherit;
+  font-size: var(--font-size-s);
+  cursor: pointer;
+  transition: background var(--duration-instant) var(--ease-default),
+    color var(--duration-instant) var(--ease-default);
+}
+
+.bp-toggle:hover {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+}
+
+.bp-toggle.is-active {
+  color: var(--color-frame-fg);
+}
+
+.bp-platform-toggle {
+  display: flex;
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+}
+
+.bp-platform-toggle button {
+  padding: var(--space-xxs) var(--space-s);
+  border: none;
+  background: var(--color-frame-bg);
+  color: var(--color-frame-fg-muted);
+  font-family: inherit;
+  font-size: var(--font-size-s);
+  cursor: pointer;
+  transition: background var(--duration-instant) var(--ease-default),
+    color var(--duration-instant) var(--ease-default);
+}
+
+.bp-platform-toggle button + button {
+  border-inline-start: 1px solid var(--color-frame-border);
+}
+
+.bp-platform-toggle button:hover {
+  background: var(--color-frame-hover);
+}
+
+.bp-platform-toggle button.is-active {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ══════════════════════════
+   BLUEPRINT DIAGRAM
    ══════════════════════════ */
 
 .bp {
   margin-block-end: var(--space-l);
+  border-radius: var(--radius-l);
+  overflow: hidden;
+  transition: height 300ms var(--ease-default);
 }
+
+/* ── Chrome shell ── */
 
 .bp-chrome {
   display: flex;
   gap: var(--space-xs);
   padding: var(--space-xs);
   background: var(--color-chrome-bg);
-  border-radius: var(--radius-l);
   height: 280px;
+  transition: padding 300ms var(--ease-default);
 }
+
+.bp--collapsed .bp-chrome {
+  padding: 0;
+}
+
+/* ── Sidebar ── */
 
 .bp-sidebar {
   width: 80px;
@@ -264,6 +377,8 @@ function scrollTo(e: Event, id: string) {
   letter-spacing: 0.02em;
 }
 
+/* ── Frame ── */
+
 .bp-frame {
   flex: 1;
   background: var(--color-frame-bg);
@@ -271,6 +386,11 @@ function scrollTo(e: Event, id: string) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: border-radius 300ms var(--ease-default);
+}
+
+.bp-frame--full {
+  border-radius: 0;
 }
 
 .bp-toolbar {
@@ -307,5 +427,77 @@ function scrollTo(e: Event, id: string) {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-frame-fg-muted);
+}
+
+/* ══════════════════════════
+   WINDOWS TITLEBAR
+   ══════════════════════════ */
+
+.bp-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  padding: 0 var(--space-xxs) 0 var(--space-s);
+  background: var(--color-chrome-bg);
+  border-block-end: 1px solid var(--color-chrome-border);
+  flex-shrink: 0;
+}
+
+.bp-titlebar-start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.bp-titlebar-icon {
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-chrome-fg);
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-chrome-hover);
+  border-radius: var(--radius-s);
+}
+
+.bp-titlebar-label {
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-chrome-fg);
+}
+
+.bp-titlebar-menus {
+  font-size: var(--font-size-xs);
+  color: var(--color-chrome-fg-muted);
+  margin-inline-start: var(--space-xs);
+}
+
+.bp-titlebar-controls {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+
+.bp-win-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  font-size: 14px;
+  color: var(--color-chrome-fg-muted);
+  cursor: default;
+  transition: background var(--duration-instant) var(--ease-default);
+}
+
+.bp-win-btn:hover {
+  background: var(--color-chrome-hover);
+}
+
+.bp-win-close:hover {
+  background: #c42b1c;
+  color: white;
 }
 </style>

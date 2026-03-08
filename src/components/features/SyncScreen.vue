@@ -72,10 +72,9 @@ const syncDestUrl = computed(() => {
   return pipeline.value.find(s => s.id === syncAction.value!.toStage)?.site?.url
 })
 
-const connectStageLabel = computed(() => {
-  const stage = pipeline.value.find(s => s.id === connectStageId.value)
-  return stage?.label
-})
+const connectStage = computed(() => pipeline.value.find(s => s.id === connectStageId.value))
+const connectStageLabel = computed(() => connectStage.value?.label)
+const connectStageEnvironment = computed(() => connectStage.value?.environment)
 
 const connectedSiteIds = computed(() =>
   pipeline.value.filter(s => s.site).map(s => s.site!.id)
@@ -119,7 +118,9 @@ function handleSyncFromCard(payload: { verb: 'push' | 'pull'; envId: string }) {
     />
     <ConnectSiteModal
       :open="connectModalOpen"
+      :site-name="site?.name"
       :stage-label="connectStageLabel"
+      :stage-environment="connectStageEnvironment"
       :connected-site-ids="connectedSiteIds"
       @close="closeConnectModal"
       @select="handleConnect"

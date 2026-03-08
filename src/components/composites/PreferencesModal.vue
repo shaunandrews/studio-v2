@@ -8,7 +8,10 @@ import Text from '@/components/primitives/Text.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
-import { codingAgents, builtInAgent, thirdPartyAgents } from '@/data/agents'
+import { codingAgents, installAgent } from '@/data/agents'
+import { skills, installSkill, installAllSkills, fetchSkillContent, SKILLS_REPO_URL } from '@/data/skills'
+import Toggle from '@/components/primitives/Toggle.vue'
+import MarkdownText from '@/components/composites/renderers/MarkdownText.vue'
 
 const props = defineProps<{
   open: boolean
@@ -20,14 +23,13 @@ const emit = defineEmits<{
 
 // -- Nav --
 
-type Tab = 'general' | 'agents' | 'skills' | 'account'
+type Tab = 'general' | 'agents' | 'skills'
 const activeTab = ref<Tab>('general')
 
 const tabs: { id: Tab, label: string }[] = [
   { id: 'general', label: 'General' },
   { id: 'agents', label: 'Agents' },
   { id: 'skills', label: 'Skills' },
-  { id: 'account', label: 'Account' },
 ]
 
 // -- Appearance --
@@ -197,6 +199,120 @@ const defaultAgentGroups = computed(() => [
   },
 ])
 
+// -- Agent enabled state --
+
+const AGENT_ENABLED_KEY = 'agent-enabled'
+
+function getAgentEnabledMap(): Record<string, boolean> {
+  try {
+    const stored = localStorage.getItem(AGENT_ENABLED_KEY)
+    return stored ? JSON.parse(stored) : {}
+  } catch {
+    return {}
+  }
+}
+
+const agentEnabled = ref<Record<string, boolean>>(getAgentEnabledMap())
+
+function isAgentEnabled(id: string): boolean {
+  return agentEnabled.value[id] !== false
+}
+
+function toggleAgent(id: string, val: boolean) {
+  agentEnabled.value[id] = val
+  localStorage.setItem(AGENT_ENABLED_KEY, JSON.stringify(agentEnabled.value))
+}
+
+// -- Agent install flow --
+
+type InstallState = 'idle' | 'loading' | 'success' | 'done'
+const installStates = ref<Record<string, InstallState>>({})
+
+function getInstallState(id: string): InstallState {
+  return installStates.value[id] || 'idle'
+}
+
+async function startInstall(id: string) {
+  installStates.value[id] = 'loading'
+  await installAgent(id)
+  installStates.value[id] = 'success'
+  setTimeout(() => {
+    installStates.value[id] = 'done'
+  }, 1500)
+}
+
+function installLabel(id: string): string {
+  const state = getInstallState(id)
+  if (state === 'loading') return 'Installing…'
+  if (state === 'success') return 'Installed!'
+  return 'Install'
+}
+
+// -- Skills install flow --
+
+const skillInstallStates = ref<Record<string, InstallState>>({})
+const installingAll = ref(false)
+const viewingSkill = ref<string | null>(null)
+const skillContent = ref('')
+const skillContentLoading = ref(false)
+
+async function viewSkill(id: string | null) {
+  if (!id || id === viewingSkill.value) {
+    viewingSkill.value = null
+    skillContent.value = ''
+    return
+  }
+  viewingSkill.value = id
+  skillContentLoading.value = true
+  skillContent.value = ''
+  const content = await fetchSkillContent(id)
+  if (viewingSkill.value === id) {
+    skillContent.value = content
+    skillContentLoading.value = false
+  }
+}
+
+const installedSkills = computed(() => skills.filter(s => s.installed))
+const availableSkills = computed(() => skills.filter(s => !s.installed))
+
+function getSkillInstallState(id: string): InstallState {
+  return skillInstallStates.value[id] || 'idle'
+}
+
+async function startSkillInstall(id: string) {
+  skillInstallStates.value[id] = 'loading'
+  await installSkill(id)
+  skillInstallStates.value[id] = 'success'
+  setTimeout(() => {
+    skillInstallStates.value[id] = 'done'
+  }, 1200)
+}
+
+async function startInstallAll() {
+  installingAll.value = true
+  const toInstall = skills.filter(s => !s.installed)
+  for (const s of toInstall) {
+    skillInstallStates.value[s.id] = 'loading'
+  }
+  await installAllSkills()
+  for (const s of toInstall) {
+    skillInstallStates.value[s.id] = 'success'
+  }
+  setTimeout(() => {
+    for (const s of toInstall) {
+      skillInstallStates.value[s.id] = 'done'
+    }
+    installingAll.value = false
+  }, 1200)
+}
+
+function skillInstallLabel(id: string): string {
+  const state = getSkillInstallState(id)
+  if (state === 'loading') return 'Installing…'
+  if (state === 'success') return 'Installed!'
+  return 'Install'
+}
+
 // -- Agent instructions --
 
 const instructionFiles = [
@@ -206,7 +322,7 @@ const instructionFiles = [
 </script>
 
 <template>
-  <Modal :open="open" width="640px" title="Preferences" @close="emit('close')">
+  <Modal :open="open" :width="viewingSkill ? '1080px' : '780px'" title="Preferences" @close="emit('close')">
     <div class="prefs">
       <div class="prefs__body">
         <!-- Nav -->
@@ -216,7 +332,7 @@ const instructionFiles = [
             :key="tab.id"
             :label="tab.label"
             :active="activeTab === tab.id"
-            @click="activeTab = tab.id"
+            @click="activeTab = tab.id; viewingSkill = null"
           />
         </nav>
 
@@ -322,72 +438,7 @@ const instructionFiles = [
                 <Text variant="small" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs__learn-more">Learn more</a></Text>
               </div>
             </div>
-          </template>
 
-          <!-- ═══ Agents ═══ -->
-          <template v-if="activeTab === 'agents'">
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Available agents</Text>
-              <Text variant="caption" color="muted" class="prefs__hint">Coding agents connect to Studio via the Agent Communication Protocol (ACP). WordPress.com is built-in — others can be installed separately.</Text>
-              <div class="prefs__agent-list">
-                <div
-                  v-for="agent in codingAgents"
-                  :key="agent.id"
-                  class="prefs__agent-row"
-                >
-                  <img :src="agent.icon" :alt="agent.label" class="prefs__agent-icon" />
-                  <div class="prefs__agent-info">
-                    <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
-                    <Text variant="caption" color="muted">{{ agent.description }}</Text>
-                    <Text v-if="!agent.installed && agent.installHint" variant="small" color="muted" class="prefs__agent-install">{{ agent.installHint }}</Text>
-                  </div>
-                  <Text v-if="agent.installed" variant="small" color="muted">Installed</Text>
-                  <Button v-else variant="secondary" size="small" label="Install" />
-                </div>
-              </div>
-            </div>
-
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Default agent</Text>
-              <Text variant="caption" color="muted" class="prefs__hint">The agent used for new tasks. Can be changed per-task.</Text>
-              <Dropdown
-                :model-value="defaultAgent"
-                :groups="defaultAgentGroups"
-                :show-chevron="true"
-                class="prefs__dropdown-full"
-                @update:model-value="setAgent"
-              />
-            </div>
-
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Agent instructions</Text>
-              <Text variant="caption" color="muted" class="prefs__hint">Markdown files that configure agent behavior and site context.</Text>
-              <div class="prefs__instructions">
-                <div v-for="file in instructionFiles" :key="file.name" class="prefs__instruction-row">
-                  <div class="prefs__instruction-info">
-                    <WPIcon :icon="fileIcon" :size="16" class="prefs__instruction-icon" />
-                    <div>
-                      <Text variant="caption" weight="medium" class="prefs__instruction-name">{{ file.name }}</Text>
-                      <Text variant="caption" color="muted">{{ file.description }}</Text>
-                    </div>
-                  </div>
-                  <Button variant="tertiary" size="small" label="Open" />
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- ═══ Skills ═══ -->
-          <template v-if="activeTab === 'skills'">
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Agent skills</Text>
-              <Text variant="caption" color="muted" class="prefs__hint">Skills extend what agents can do — adding commands, card types, and specialized behavior.</Text>
-              <Text variant="caption" color="muted" class="prefs__empty-state">No skills installed</Text>
-            </div>
-          </template>
-
-          <!-- ═══ Account ═══ -->
-          <template v-if="activeTab === 'account'">
             <div class="prefs__section">
               <Text variant="caption" weight="semibold" class="prefs__label">Anthropic API key</Text>
               <Text variant="caption" color="muted" class="prefs__hint">Required for AI features. Your key is stored locally in the browser.</Text>
@@ -427,7 +478,180 @@ const instructionFiles = [
             </div>
           </template>
 
+          <!-- ═══ Agents ═══ -->
+          <template v-if="activeTab === 'agents'">
+
+            <!-- Built-in hero card -->
+            <div class="prefs__section">
+              <div class="prefs__agent-hero">
+                <img :src="codingAgents[0].icon" :alt="codingAgents[0].label" class="prefs__agent-hero-icon" />
+                <div class="prefs__agent-hero-info">
+                  <Text variant="caption" weight="semibold">{{ codingAgents[0].label }}</Text>
+                  <Text variant="caption" color="muted">{{ codingAgents[0].description }}</Text>
+                </div>
+                <Toggle :model-value="true" />
+              </div>
+            </div>
+
+            <!-- Third-party agent grid -->
+            <div class="prefs__section">
+              <Text variant="caption" weight="semibold" class="prefs__label">Third-party agents</Text>
+              <div class="prefs__agent-grid">
+                <div
+                  v-for="agent in codingAgents.slice(1)"
+                  :key="agent.id"
+                  class="prefs__agent-card"
+                  :class="{
+                    'is-installed': agent.installed || getInstallState(agent.id) === 'done',
+                  }"
+                >
+                  <div class="prefs__agent-card-toggle">
+                    <Toggle
+                      v-if="agent.installed || getInstallState(agent.id) === 'done'"
+                      :model-value="isAgentEnabled(agent.id)"
+                      @update:model-value="toggleAgent(agent.id, $event)"
+                    />
+                  </div>
+                  <img :src="agent.icon" :alt="agent.label" class="prefs__agent-card-icon" />
+                  <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
+                  <Text variant="small" color="muted" class="prefs__agent-card-desc">{{ agent.description }}</Text>
+                  <div v-if="!agent.installed && getInstallState(agent.id) !== 'done'" class="prefs__agent-card-install">
+                    <Button
+                      :variant="getInstallState(agent.id) === 'success' ? 'primary' : 'secondary'"
+                      size="small"
+                      width="full"
+                      :label="installLabel(agent.id)"
+                      :disabled="getInstallState(agent.id) !== 'idle'"
+                      @click="startInstall(agent.id)"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Default agent -->
+            <div class="prefs__section">
+              <Text variant="caption" weight="semibold" class="prefs__label">Default agent</Text>
+              <Text variant="caption" color="muted" class="prefs__hint">The agent used for new tasks. Can be changed per-task.</Text>
+              <Dropdown
+                :model-value="defaultAgent"
+                :groups="defaultAgentGroups"
+                :show-chevron="true"
+                class="prefs__dropdown-full"
+                @update:model-value="setAgent"
+              />
+            </div>
+
+            <!-- Agent instructions -->
+            <div class="prefs__section">
+              <Text variant="caption" weight="semibold" class="prefs__label">Agent instructions</Text>
+              <Text variant="caption" color="muted" class="prefs__hint">Markdown files that configure agent behavior and site context.</Text>
+              <div class="prefs__instructions">
+                <div v-for="file in instructionFiles" :key="file.name" class="prefs__instruction-row">
+                  <div class="prefs__instruction-info">
+                    <WPIcon :icon="fileIcon" :size="16" class="prefs__instruction-icon" />
+                    <div>
+                      <Text variant="caption" weight="medium" class="prefs__instruction-name">{{ file.name }}</Text>
+                      <Text variant="caption" color="muted">{{ file.description }}</Text>
+                    </div>
+                  </div>
+                  <Button variant="tertiary" size="small" label="Open" />
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- ═══ Skills ═══ -->
+          <template v-if="activeTab === 'skills'">
+
+            <!-- Installed -->
+            <div class="prefs__section">
+              <Text variant="caption" weight="semibold" class="prefs__label">Installed</Text>
+              <div v-if="installedSkills.length" class="prefs__skill-list">
+                <div
+                  v-for="skill in installedSkills"
+                  :key="skill.id"
+                  class="prefs__skill-row"
+                  :class="{ 'is-viewing': viewingSkill === skill.id }"
+                >
+                  <div class="prefs__skill-info">
+                    <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
+                    <Text variant="small" color="muted">{{ skill.description }}</Text>
+                  </div>
+                  <button class="prefs__skill-view" @click="viewSkill(skill.id)">{{ viewingSkill === skill.id ? 'Close' : 'View' }}</button>
+                </div>
+              </div>
+              <Text v-else variant="caption" color="muted" class="prefs__empty-state">No skills installed yet</Text>
+            </div>
+
+            <!-- Available -->
+            <div v-if="availableSkills.length" class="prefs__section">
+              <div class="prefs__section-header">
+                <Text variant="caption" weight="semibold">
+                  Available ({{ availableSkills.length }})
+                </Text>
+                <button
+                  class="prefs__install-all"
+                  :disabled="installingAll"
+                  @click="startInstallAll"
+                >
+                  {{ installingAll ? 'Installing…' : 'Install All' }}
+                </button>
+              </div>
+              <div class="prefs__skill-list">
+                <div
+                  v-for="skill in availableSkills"
+                  :key="skill.id"
+                  class="prefs__skill-row"
+                  :class="{ 'is-viewing': viewingSkill === skill.id }"
+                >
+                  <div class="prefs__skill-info">
+                    <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
+                    <Text variant="small" color="muted">{{ skill.description }}</Text>
+                  </div>
+                  <div class="prefs__skill-actions">
+                    <button class="prefs__skill-view" @click="viewSkill(skill.id)">{{ viewingSkill === skill.id ? 'Close' : 'View' }}</button>
+                    <Button
+                      :variant="getSkillInstallState(skill.id) === 'success' ? 'primary' : 'secondary'"
+                      size="small"
+                      :label="skillInstallLabel(skill.id)"
+                      :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll"
+                      @click="startSkillInstall(skill.id)"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Source attribution -->
+            <div class="prefs__section">
+              <Text variant="small" color="muted">Skills from <a :href="SKILLS_REPO_URL" target="_blank" class="prefs__learn-more">WordPress/agent-skills</a></Text>
+            </div>
+
+          </template>
+
         </div>
+
+        <!-- Skill viewer panel -->
+        <div v-if="viewingSkill" class="prefs__skill-panel">
+          <div class="prefs__skill-panel-header">
+            <Text variant="caption" weight="semibold" class="flex-1 min-w-0">{{ viewingSkill }}</Text>
+            <Button
+              v-if="!skills.find(s => s.id === viewingSkill)?.installed"
+              variant="primary"
+              size="small"
+              :label="skillInstallLabel(viewingSkill)"
+              :disabled="getSkillInstallState(viewingSkill) !== 'idle'"
+              @click="startSkillInstall(viewingSkill!)"
+            />
+            <button class="prefs__skill-panel-close" @click="viewSkill(null)">×</button>
+          </div>
+          <div class="prefs__skill-panel-body">
+            <Text v-if="skillContentLoading" variant="caption" color="muted">Loading…</Text>
+            <MarkdownText v-else-if="skillContent" :text="skillContent" />
+          </div>
+        </div>
+
       </div>
     </div>
     <template #footer>
@@ -448,7 +672,7 @@ const instructionFiles = [
 <style scoped>
 .prefs__body {
   display: flex;
-  height: 460px;
+  height: 520px;
   overflow: hidden;
 }
 
@@ -657,48 +881,30 @@ const instructionFiles = [
   gap: var(--space-xs);
 }
 
-/* -- Agent list -- */
+/* -- Hero agent card (built-in) -- */
 
-.prefs__agent-list {
+.prefs__agent-hero {
   display: flex;
-  flex-direction: column;
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-s);
-  overflow: hidden;
-}
-
-.prefs__agent-row {
-  display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-s);
-  width: 100%;
-  padding: var(--space-s);
-  background: var(--color-frame-bg);
-  cursor: pointer;
-  text-align: start;
+  padding: var(--space-xs) var(--space-s);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-m);
   transition: background var(--duration-instant) var(--ease-default);
 }
 
-.prefs__agent-row + .prefs__agent-row {
-  border-block-start: 1px solid var(--color-frame-border);
-}
-
-.prefs__agent-row:hover {
+.prefs__agent-hero:hover {
   background: var(--color-frame-hover);
 }
 
-.prefs__agent-row.is-selected {
-  background: var(--color-frame-hover);
-}
-
-.prefs__agent-icon {
+.prefs__agent-hero-icon {
   width: 36px;
   height: 36px;
   flex-shrink: 0;
   object-fit: contain;
 }
 
-.prefs__agent-info {
+.prefs__agent-hero-info {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
@@ -706,16 +912,67 @@ const instructionFiles = [
   min-width: 0;
 }
 
-.prefs__agent-install {
-  font-family: var(--font-mono);
-  opacity: 0.7;
+/* -- Agent card grid -- */
+
+.prefs__agent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-xs);
 }
 
-.prefs__agent-check {
-  flex-shrink: 0;
-  color: var(--color-frame-theme);
-  margin-block-start: var(--space-xxs);
+.prefs__agent-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xxxs);
+  padding: var(--space-s) var(--space-xs) var(--space-xs);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-m);
+  text-align: center;
+  opacity: 0.45;
+  transition:
+    opacity var(--duration-fast) var(--ease-default),
+    background var(--duration-instant) var(--ease-default);
 }
+
+.prefs__agent-card:hover {
+  background: var(--color-frame-hover);
+  opacity: 0.75;
+}
+
+.prefs__agent-card.is-installed {
+  opacity: 1;
+}
+
+.prefs__agent-card.is-installed:hover {
+  opacity: 1;
+}
+
+.prefs__agent-card-toggle {
+  position: absolute;
+  inset-block-start: var(--space-xxs);
+  inset-inline-end: var(--space-xxs);
+}
+
+.prefs__agent-card-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.prefs__agent-card-desc {
+  line-height: 1.3;
+}
+
+.prefs__agent-card-install {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-block-start: auto;
+  padding-block-start: var(--space-xxs);
+}
+
 
 /* -- Empty state -- */
 
@@ -757,5 +1014,143 @@ const instructionFiles = [
 
 .prefs__instruction-name {
   font-family: var(--font-mono);
+}
+
+/* -- Skills -- */
+
+.prefs__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: var(--space-xs);
+}
+
+.prefs__install-all {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-frame-theme);
+  font-family: inherit;
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.prefs__install-all:hover {
+  text-decoration: underline;
+}
+
+.prefs__install-all:disabled {
+  opacity: 0.5;
+  cursor: default;
+  text-decoration: none;
+}
+
+.prefs__skill-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+}
+
+.prefs__skill-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-s);
+  padding: var(--space-s);
+  background: var(--color-frame-bg);
+}
+
+.prefs__skill-row + .prefs__skill-row {
+  border-block-start: 1px solid var(--color-frame-border);
+}
+
+.prefs__skill-row.is-viewing {
+  background: var(--color-frame-hover);
+}
+
+.prefs__skill-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxxs);
+}
+
+.prefs__skill-compat {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.prefs__skill-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.prefs__skill-view {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-frame-fg-muted);
+  font-family: inherit;
+  font-size: var(--font-size-s);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.prefs__skill-view:hover {
+  color: var(--color-frame-fg);
+  text-decoration: underline;
+}
+
+/* -- Skill viewer panel -- */
+
+.prefs__skill-panel {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  flex-shrink: 0;
+  border-inline-start: 1px solid var(--color-frame-border);
+  overflow: hidden;
+}
+
+.prefs__skill-panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-s);
+  border-block-end: 1px solid var(--color-frame-border);
+  flex-shrink: 0;
+}
+
+.prefs__skill-panel-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--color-frame-fg-muted);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.prefs__skill-panel-close:hover {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+}
+
+.prefs__skill-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-s);
+  font-size: var(--font-size-s);
+  line-height: 1.5;
 }
 </style>

@@ -4,6 +4,7 @@ import type { Directive } from 'vue'
 import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
+import Toggle from '@/components/primitives/Toggle.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import {
   file as fileIcon,
@@ -13,6 +14,15 @@ import {
   chevronDownSmall,
   closeSmall,
 } from '@wordpress/icons'
+import {
+  useSiteContent,
+  filesScopeGroups,
+  databaseScopeGroups,
+  getNodeState,
+  toggleNode,
+  toggleExpand,
+  type TreeNode,
+} from '@/data/useSiteContent'
 
 export interface SyncEnv {
   id: string
@@ -64,13 +74,13 @@ const resolvedVerb = computed(() => {
 })
 
 // ── Visual card data ──
-// In sync mode: Local is always the first card, remote env is always the second.
+// In sync mode: Studio is always the first card, remote env is always the second.
 // CSS transforms swap their visual position on pull (so remote appears on top).
 // In push mode (from connectors): source/dest come from props, no animation.
 
 const visualTopLabel = computed(() => {
-  if (props.mode === 'push') return props.sourceLabel ?? 'Local'
-  return 'Local'
+  if (props.mode === 'push') return props.sourceLabel ?? 'Studio'
+  return 'Studio'
 })
 
 const visualTopUrl = computed(() => {
@@ -92,122 +102,27 @@ const visualBottomUrl = computed(() => {
 
 const resolvedSourceLabel = computed(() => {
   if (props.mode === 'push') return props.sourceLabel
-  return direction.value === 'push' ? 'Local' : (selectedEnv.value?.label ?? 'Remote')
+  return direction.value === 'push' ? 'Studio' : (selectedEnv.value?.label ?? 'Remote')
 })
 
 const resolvedDestLabel = computed(() => {
   if (props.mode === 'push') return props.destLabel
-  return direction.value === 'push' ? (selectedEnv.value?.label ?? 'Remote') : 'Local'
+  return direction.value === 'push' ? (selectedEnv.value?.label ?? 'Remote') : 'Studio'
 })
 
 // ── Section toggles & scope ──
 
-const filesEnabled = ref(true)
-const databaseEnabled = ref(true)
-const filesScope = ref<'all' | 'selected'>('all')
-const databaseScope = ref<'all' | 'selected'>('all')
-
-const filesScopeGroups = [{ label: '', options: [
-  { value: 'all', label: 'All files and folders' },
-  { value: 'selected', label: 'Selected files and folders' },
-] }]
-
-const databaseScopeGroups = [{ label: '', options: [
-  { value: 'all', label: 'All tables' },
-  { value: 'selected', label: 'Selected tables' },
-] }]
-
-// ── File tree ──
-
-interface TreeNode {
-  id: string
-  label: string
-  type: 'folder' | 'file' | 'theme'
-  children?: TreeNode[]
-  checked: boolean
-  expanded: boolean
-}
-
-function createTree(): TreeNode[] {
-  return [
-    {
-      id: 'wp-content',
-      label: 'wp-content/',
-      type: 'folder',
-      expanded: true,
-      checked: true,
-      children: [
-        {
-          id: 'mu-plugins',
-          label: 'mu-plugins/',
-          type: 'folder',
-          expanded: true,
-          checked: true,
-          children: [
-            { id: 'mu-index', label: 'index.php', type: 'file', checked: true, expanded: false },
-            { id: 'mu-woo', label: 'woocommerce-analytics-proxy-speed-module.php', type: 'file', checked: true, expanded: false },
-          ],
-        },
-        {
-          id: 'themes',
-          label: 'themes/',
-          type: 'folder',
-          expanded: true,
-          checked: true,
-          children: [
-            { id: 'tt4', label: 'twentytwentyfour/', type: 'theme', checked: true, expanded: false },
-            { id: 'tt5', label: 'twentytwentyfive/', type: 'theme', checked: true, expanded: false },
-            { id: 'tt3', label: 'twentytwentythree/', type: 'theme', checked: true, expanded: false },
-            { id: 'themes-index', label: 'index.php', type: 'file', checked: true, expanded: false },
-          ],
-        },
-        { id: 'plugins', label: 'plugins/', type: 'folder', checked: true, expanded: false },
-        { id: 'uploads', label: 'uploads/', type: 'folder', checked: true, expanded: false },
-        { id: 'content-index', label: 'index.php', type: 'file', checked: true, expanded: false },
-      ],
-    },
-  ]
-}
-
-const fileTree = ref<TreeNode[]>(createTree())
-
-// ── Database tables ──
-
-interface TableEntry {
-  id: string
-  label: string
-  checked: boolean
-}
-
-function createTables(): TableEntry[] {
-  return [
-    { id: 'wp-commentmeta', label: 'wp_commentmeta', checked: true },
-    { id: 'wp-comments', label: 'wp_comments', checked: true },
-    { id: 'wp-links', label: 'wp_links', checked: true },
-    { id: 'wp-options', label: 'wp_options', checked: true },
-    { id: 'wp-postmeta', label: 'wp_postmeta', checked: true },
-    { id: 'wp-posts', label: 'wp_posts', checked: true },
-    { id: 'wp-term-relationships', label: 'wp_term_relationships', checked: true },
-    { id: 'wp-term-taxonomy', label: 'wp_term_taxonomy', checked: true },
-    { id: 'wp-termmeta', label: 'wp_termmeta', checked: true },
-    { id: 'wp-terms', label: 'wp_terms', checked: true },
-    { id: 'wp-usermeta', label: 'wp_usermeta', checked: true },
-    { id: 'wp-users', label: 'wp_users', checked: true },
-  ]
-}
-
-const dbTables = ref<TableEntry[]>(createTables())
+const siteContent = useSiteContent()
+const {
+  filesEnabled, databaseEnabled, filesScope, databaseScope,
+  fileTree, dbTables, flatNodes,
+} = siteContent
 
 // ── Reset on open ──
 
 watch(() => props.open, (isOpen) => {
   if (isOpen) {
-    filesEnabled.value = true
-    databaseEnabled.value = true
-    filesScope.value = 'all'
-    databaseScope.value = 'all'
-    fileTree.value = createTree()
-    dbTables.value = createTables()
+    siteContent.reset()
     // Initialize sync mode state
     if (props.mode === 'sync') {
       direction.value = props.verb === 'push' ? 'push' : 'pull'
@@ -215,71 +130,6 @@ watch(() => props.open, (isOpen) => {
       selectedEnvId.value = hasDefault ? props.defaultEnvId! : (props.environments?.[0]?.id ?? '')
     }
   }
-})
-
-// ── Check all when switching to "selected" ──
-
-watch(filesScope, (scope) => {
-  if (scope === 'selected') {
-    fileTree.value.forEach(node => setAllChecked(node, true))
-  }
-})
-
-watch(databaseScope, (scope) => {
-  if (scope === 'selected') {
-    dbTables.value.forEach(t => t.checked = true)
-  }
-})
-
-// ── Tree checkbox logic ──
-
-type CheckState = 'checked' | 'unchecked' | 'indeterminate'
-
-function getNodeState(node: TreeNode): CheckState {
-  if (!node.children?.length) return node.checked ? 'checked' : 'unchecked'
-  const states = node.children.map(getNodeState)
-  if (states.every(s => s === 'checked')) return 'checked'
-  if (states.every(s => s === 'unchecked')) return 'unchecked'
-  return 'indeterminate'
-}
-
-function setAllChecked(node: TreeNode, checked: boolean) {
-  node.checked = checked
-  node.children?.forEach(child => setAllChecked(child, checked))
-}
-
-function toggleNode(node: TreeNode) {
-  if (!node.children?.length) {
-    node.checked = !node.checked
-  } else {
-    const newChecked = getNodeState(node) !== 'checked'
-    setAllChecked(node, newChecked)
-  }
-}
-
-function toggleExpand(node: TreeNode) {
-  node.expanded = !node.expanded
-}
-
-// ── Flat tree for rendering ──
-
-interface FlatNode {
-  node: TreeNode
-  depth: number
-}
-
-const flatNodes = computed((): FlatNode[] => {
-  const result: FlatNode[] = []
-  function walk(nodes: TreeNode[], depth: number) {
-    for (const node of nodes) {
-      result.push({ node, depth })
-      if (node.children?.length && node.expanded) {
-        walk(node.children, depth + 1)
-      }
-    }
-  }
-  walk(fileTree.value, 0)
-  return result
 })
 
 // ── Icon lookup ──
@@ -430,13 +280,7 @@ function onSync() {
         <!-- Files section -->
         <div class="sync-section">
           <div class="sync-section__header">
-            <label class="toggle-label">
-              <span class="toggle">
-                <input type="checkbox" class="toggle__input" v-model="filesEnabled" />
-                <span class="toggle__track" />
-              </span>
-              <span class="sync-section__label">Files and folders</span>
-            </label>
+            <Toggle v-model="filesEnabled" label="Files and folders" />
             <Dropdown
               v-if="filesEnabled"
               v-model="filesScope"
@@ -485,13 +329,7 @@ function onSync() {
         <!-- Database section -->
         <div class="sync-section">
           <div class="sync-section__header">
-            <label class="toggle-label">
-              <span class="toggle">
-                <input type="checkbox" class="toggle__input" v-model="databaseEnabled" />
-                <span class="toggle__track" />
-              </span>
-              <span class="sync-section__label">Database</span>
-            </label>
+            <Toggle v-model="databaseEnabled" label="Database" />
             <Dropdown
               v-if="databaseEnabled"
               v-model="databaseScope"
@@ -745,87 +583,16 @@ function onSync() {
 .sync-section__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
+  gap: var(--space-xs);
+  padding: var(--space-s);
   min-height: 50px;
   box-sizing: border-box;
-}
-
-.sync-section__label {
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-medium);
-  line-height: 20px;
-  color: var(--color-frame-fg);
 }
 
 /* ── Sync scope dropdown ── */
 
 .sync-scope-dropdown {
   flex-shrink: 0;
-}
-
-/* ── Toggle switch ── */
-
-.toggle-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-  cursor: pointer;
-}
-
-.toggle {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.toggle__input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle__track {
-  position: relative;
-  width: 32px;
-  height: 16px;
-  border-radius: var(--radius-full);
-  background: var(--color-frame-bg);
-  border: 1px solid #949494;
-  flex-shrink: 0;
-  transition: all var(--duration-instant) var(--ease-default);
-}
-
-.toggle__input:checked + .toggle__track {
-  background: var(--color-frame-theme);
-  border-color: var(--color-frame-theme);
-}
-
-.toggle__track::before {
-  content: '';
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 8px;
-  background: var(--color-frame-fg);
-  box-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.03),
-    0 1px 2px rgba(0, 0, 0, 0.02),
-    0 3px 3px rgba(0, 0, 0, 0.02),
-    0 4px 4px rgba(0, 0, 0, 0.01);
-  /* Physical inset for toggle knob — UI control chrome */
-  inset-block-start: 1px;
-  inset-inline-start: 1px;
-  transition: all var(--duration-instant) var(--ease-default);
-}
-
-.toggle__input:checked + .toggle__track::before {
-  background: white;
-  inset-inline-start: auto;
-  inset-inline-end: 2px;
 }
 
 /* ── Sync selector (tree / table list) ── */
