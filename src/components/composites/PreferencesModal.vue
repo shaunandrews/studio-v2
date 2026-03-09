@@ -655,16 +655,16 @@ function skillInstallLabel(id: string): string {
 .prefs-traffic-lights {
   position: absolute;
   /* Physical: app chrome edge */
-  left: 12px;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
-  gap: var(--space-xxs);
+  gap: 8px;
 }
 
 .prefs-traffic-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px; /* OS-native size, not on grid — intentional */
+  height: 12px;
   border-radius: 50%;
   border: none;
   padding: 0;
@@ -676,12 +676,10 @@ function skillInstallLabel(id: string): string {
   cursor: pointer;
 }
 
-.prefs-traffic-dot--minimize {
-  background: var(--color-macos-minimize);
-}
-
+.prefs-traffic-dot--minimize,
 .prefs-traffic-dot--maximize {
-  background: var(--color-macos-maximize);
+  background: #dcdcdc;
+  pointer-events: none;
 }
 
 .prefs-title {
