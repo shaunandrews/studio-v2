@@ -11,6 +11,7 @@ import { skills, installSkill, installAllSkills, uninstallSkill } from '@/data/s
 
 const props = defineProps<{
   open: boolean
+  initialTab?: 'general' | 'agents' | 'skills' | 'account'
 }>()
 
 const emit = defineEmits<{
@@ -75,6 +76,7 @@ const keyConfigured = ref(isAIConfigured())
 
 watch(() => props.open, (val) => {
   if (val) {
+    activeTab.value = props.initialTab || 'general'
     apiKey.value = getAPIKey()
     keySaved.value = false
   }
@@ -221,6 +223,13 @@ function handleUninstallSkill(id: string) {
   delete skillInstallStates.value[id]
 }
 
+function skillMenuGroups(id: string) {
+  return [
+    { items: [{ label: 'Open in VS Code', action: () => {} }] },
+    { items: [{ label: 'Uninstall', destructive: true, action: () => handleUninstallSkill(id) }] },
+  ]
+}
+
 // -- Agent lists --
 
 const installedAgents = computed(() => codingAgents.filter(a => a.installed || getInstallState(a.id) === 'done'))
@@ -241,6 +250,26 @@ async function startInstall(id: string) {
   installStates.value[id] = 'success'
   setTimeout(() => {
     installStates.value[id] = 'done'
+  }, 1500)
+}
+
+const installingAllAgents = ref(false)
+
+async function startInstallAllAgents() {
+  installingAllAgents.value = true
+  const toInstall = availableAgents.value.slice()
+  for (const agent of toInstall) {
+    installStates.value[agent.id] = 'loading'
+  }
+  for (const agent of toInstall) {
+    await installAgent(agent.id)
+    installStates.value[agent.id] = 'success'
+  }
+  setTimeout(() => {
+    for (const agent of toInstall) {
+      installStates.value[agent.id] = 'done'
+    }
+    installingAllAgents.value = false
   }, 1500)
 }
 
@@ -350,12 +379,12 @@ function skillInstallLabel(id: string): string {
                         <rect v-if="mode === 'dark'" x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" />
                         <template v-if="mode === 'system'">
                           <defs>
-                            <clipPath id="system-clip">
-                              <rect x="26" y="4" width="109" height="96" rx="4" />
+                            <clipPath id="system-dark-clip">
+                              <polygon points="26,4 135,4 135,53" />
                             </clipPath>
                           </defs>
                           <rect x="26" y="4" width="109" height="96" rx="4" fill="#fff" />
-                          <rect x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" clip-path="url(#system-clip)" style="clip-path: polygon(100% 0, 0 100%, 100% 100%)" />
+                          <rect x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" clip-path="url(#system-dark-clip)" />
                         </template>
                         <!-- Sidebar items -->
                         <rect x="3" y="6" width="15" height="3" rx="1" fill="white" opacity="0.3" />
@@ -381,7 +410,8 @@ function skillInstallLabel(id: string): string {
                   :groups="languageGroups"
                   :show-chevron="true"
                   max-height="320px"
-                  class="prefs-dropdown-full"
+                  variant="field"
+                  width="fill"
                   @update:model-value="(v: string) => { language = v; localStorage.setItem(LANGUAGE_KEY, v) }"
                 />
               </div>
@@ -394,7 +424,8 @@ function skillInstallLabel(id: string): string {
                       :model-value="codeEditor"
                       :groups="editorGroups"
                       :show-chevron="true"
-                      class="prefs-dropdown-full"
+                      variant="field"
+                      width="fill"
                       @update:model-value="(v: string) => { codeEditor = v; localStorage.setItem(EDITOR_KEY, v) }"
                     />
                   </div>
@@ -404,7 +435,8 @@ function skillInstallLabel(id: string): string {
                       :model-value="terminal"
                       :groups="terminalGroups"
                       :show-chevron="true"
-                      class="prefs-dropdown-full"
+                      variant="field"
+                  width="fill"
                       @update:model-value="(v: string) => { terminal = v; localStorage.setItem(TERMINAL_KEY, v) }"
                     />
                   </div>
@@ -429,55 +461,18 @@ function skillInstallLabel(id: string): string {
                 </div>
               </div>
 
-              <div class="prefs-section">
-                <Text variant="body-small" weight="semibold" class="prefs-field-label">Anthropic API key</Text>
-                <Text variant="body-small" color="muted" class="prefs-hint">Required for AI features. Your key is stored locally in the browser.</Text>
-                <div class="prefs-key-row">
-                  <input
-                    v-model="apiKey"
-                    type="password"
-                    class="prefs-input"
-                    placeholder="sk-ant-..."
-                    spellcheck="false"
-                    autocomplete="off"
-                  />
-                  <Button
-                    v-if="apiKey"
-                    variant="primary"
-                    size="small"
-                    :label="keySaved ? 'Saved' : 'Save'"
-                    :disabled="keySaved"
-                    @click="saveKey"
-                  />
-                  <Button
-                    v-if="keyConfigured && !keySaved"
-                    variant="tertiary"
-                    size="small"
-                    label="Clear"
-                    @click="clearKey"
-                  />
-                </div>
-              </div>
-
-              <div class="prefs-section">
-                <Text variant="body-small" weight="semibold" class="prefs-field-label">Data</Text>
-                <div class="prefs-data-row">
-                  <Button variant="secondary" size="small" label="Reset all data" @click="() => { localStorage.clear(); location.reload() }" />
-                  <Text variant="body-small" color="muted">Clears all local storage and reloads the prototype.</Text>
-                </div>
-              </div>
             </template>
 
             <!-- ═══ Agents ═══ -->
             <template v-if="activeTab === 'agents'">
               <Text variant="body-small" color="muted" class="prefs-description">
-                Agents are AI-powered assistants that can perform actions and accomplish tasks for you.
+                AI-powered assistants that can complete tasks for you.
               </Text>
 
               <!-- Installed -->
               <div class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="heading-small" color="muted">INSTALLED</Text>
+                  <Text variant="heading-small" color="muted">Installed</Text>
                 </div>
                 <div class="prefs-list">
                   <div
@@ -490,7 +485,7 @@ function skillInstallLabel(id: string): string {
                       <Text variant="body-small" weight="semibold">{{ agent.label }}</Text>
                       <Text variant="body-small" color="muted">{{ agent.description }}</Text>
                     </div>
-                    <FlyoutMenu v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
+                    <FlyoutMenu surface="dark" v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
                       <template #trigger="{ toggle }">
                         <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
                       </template>
@@ -502,8 +497,14 @@ function skillInstallLabel(id: string): string {
               <!-- Available -->
               <div v-if="availableAgents.length" class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="heading-small" color="muted">AVAILABLE</Text>
-                  <button class="prefs-install-all">Install all</button>
+                  <Text variant="heading-small" color="muted">Available</Text>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    :label="installingAllAgents ? 'Installing…' : 'Install all'"
+                    :disabled="installingAllAgents"
+                    @click="startInstallAllAgents"
+                  />
                 </div>
                 <div class="prefs-list">
                   <div
@@ -520,7 +521,7 @@ function skillInstallLabel(id: string): string {
                       variant="secondary"
                       size="small"
                       :label="installLabel(agent.id)"
-                      :disabled="getInstallState(agent.id) !== 'idle'"
+                      :disabled="getInstallState(agent.id) !== 'idle' || installingAllAgents"
                       @click="startInstall(agent.id)"
                     />
                   </div>
@@ -534,7 +535,8 @@ function skillInstallLabel(id: string): string {
                   :model-value="defaultAgent"
                   :groups="defaultAgentGroups"
                   :show-chevron="true"
-                  class="prefs-dropdown-full"
+                  variant="field"
+                  width="fill"
                   @update:model-value="setAgent"
                 />
                 <Text variant="body-small" color="muted" class="prefs-hint">This is the agent that will be used for all new tasks.</Text>
@@ -544,21 +546,21 @@ function skillInstallLabel(id: string): string {
             <!-- ═══ Skills ═══ -->
             <template v-if="activeTab === 'skills'">
               <Text variant="body-small" color="muted" class="prefs-description">
-                Agents can decide to use skills to help them accomplish specialized tasks.
+                Agents can use skills to help with specialized tasks.
               </Text>
 
               <!-- Installed -->
-              <div class="prefs-group">
+              <div v-if="installedSkills.length" class="prefs-group">
                 <div class="prefs-group-header">
                   <Text variant="heading-small" color="muted">INSTALLED</Text>
                 </div>
-                <div v-if="installedSkills.length" class="prefs-list">
-                  <div v-for="skill in installedSkills" :key="skill.id" class="prefs-list-item">
+                <div class="prefs-list">
+                  <div v-for="skill in installedSkills" :key="skill.id" class="prefs-list-item prefs-list-item--skill">
                     <div class="prefs-list-info">
                       <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
                       <Text variant="body-small" color="muted">{{ skill.description }}</Text>
                     </div>
-                    <FlyoutMenu :groups="itemMenuGroups(skill.name, () => handleUninstallSkill(skill.id))" align="end">
+                    <FlyoutMenu surface="dark" :groups="skillMenuGroups(skill.id)" align="end">
                       <template #trigger="{ toggle }">
                         <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
                       </template>
@@ -571,12 +573,16 @@ function skillInstallLabel(id: string): string {
               <div v-if="availableSkills.length" class="prefs-group">
                 <div class="prefs-group-header">
                   <Text variant="heading-small" color="muted">AVAILABLE</Text>
-                  <button class="prefs-install-all" :disabled="installingAll" @click="startInstallAll">
-                    {{ installingAll ? 'Installing…' : 'Install all' }}
-                  </button>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    :label="installingAll ? 'Installing…' : 'Install all'"
+                    :disabled="installingAll"
+                    @click="startInstallAll"
+                  />
                 </div>
                 <div class="prefs-list">
-                  <div v-for="skill in availableSkills" :key="skill.id" class="prefs-list-item">
+                  <div v-for="skill in availableSkills" :key="skill.id" class="prefs-list-item prefs-list-item--skill">
                     <div class="prefs-list-info">
                       <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
                       <Text variant="body-small" color="muted" class="prefs-list-desc-truncate">{{ skill.description }}</Text>
@@ -597,7 +603,7 @@ function skillInstallLabel(id: string): string {
             <template v-if="activeTab === 'account'">
               <div class="prefs-account">
                 <img
-                  src="https://2.gravatar.com/avatar/?s=80"
+                  src="https://2.gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=80"
                   alt=""
                   class="prefs-account-avatar"
                 />
@@ -605,12 +611,12 @@ function skillInstallLabel(id: string): string {
                   <Text variant="body" weight="semibold">Shaun Andrews</Text>
                   <Text variant="body-small" color="muted">shaun@automattic.com</Text>
                 </div>
-                <Button variant="secondary" size="small" label="Log out" />
+                <Button variant="secondary" label="Log out" />
               </div>
 
               <!-- Usage -->
-              <div class="prefs-section">
-                <Text variant="heading-small" color="muted">USAGE</Text>
+              <div class="prefs-section pt-s">
+                <Text variant="heading-small" color="muted" class="prefs-field-label">USAGE</Text>
                 <div class="prefs-usage-meters">
                   <div class="prefs-meter">
                     <div class="prefs-meter-header">
@@ -636,6 +642,39 @@ function skillInstallLabel(id: string): string {
 
           </div>
         </div>
+
+        <!-- Prototype-only controls (outside the window) -->
+        <div class="proto-controls">
+          <Text variant="heading-small" color="inherit">Prototype</Text>
+          <div class="proto-row">
+            <input
+              v-model="apiKey"
+              type="password"
+              class="proto-input"
+              placeholder="Anthropic API key (sk-ant-...)"
+              spellcheck="false"
+              autocomplete="off"
+            />
+            <Button
+              v-if="apiKey"
+              variant="primary"
+              size="small"
+              surface="dark"
+              :label="keySaved ? 'Saved' : 'Save'"
+              :disabled="keySaved"
+              @click="saveKey"
+            />
+            <Button
+              v-if="keyConfigured && !keySaved"
+              variant="tertiary"
+              size="small"
+              surface="dark"
+              label="Clear"
+              @click="clearKey"
+            />
+          </div>
+          <Button variant="secondary" size="small" surface="dark" label="Reset all data" @click="() => { localStorage.clear(); location.reload() }" />
+        </div>
       </div>
     </Transition>
   </Teleport>
@@ -649,11 +688,13 @@ function skillInstallLabel(id: string): string {
   inset: 0;
   z-index: 9000;
   display: flex;
+  flex-direction: column;
   /* Physical: pinned to top of app window */
-  align-items: flex-start;
-  justify-content: center;
+  align-items: center;
   padding-top: 80px;
+  padding-bottom: var(--space-xl);
   background: rgba(0, 0, 0, 0.35);
+  overflow-y: auto;
 }
 
 .prefs-window {
@@ -962,7 +1003,7 @@ function skillInstallLabel(id: string): string {
   margin-block-start: var(--space-m);
   background: var(--color-frame-fill);
   border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-l);
+  border-radius: var(--radius-m);
   overflow: clip;
 }
 
@@ -973,6 +1014,7 @@ function skillInstallLabel(id: string): string {
 .prefs-group-header {
   display: flex;
   align-items: center;
+  min-height: 42px;
   justify-content: space-between;
   padding-inline: var(--space-m) var(--space-xs);
   padding-block: var(--space-xs);
@@ -981,8 +1023,8 @@ function skillInstallLabel(id: string): string {
 
 .prefs-list {
   background: var(--color-frame-bg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-l);
+  border-top: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-m);
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.07);
   overflow: hidden;
 }
@@ -990,8 +1032,8 @@ function skillInstallLabel(id: string): string {
 .prefs-list-item {
   display: flex;
   align-items: center;
-  gap: var(--space-xxs);
-  padding: var(--space-xs);
+  gap: var(--space-s);
+  padding: var(--space-m) var(--space-s);
 }
 
 .prefs-list-item + .prefs-list-item {
@@ -1005,26 +1047,16 @@ function skillInstallLabel(id: string): string {
   object-fit: contain;
 }
 
+.prefs-list-item--skill {
+  padding-inline-start: var(--space-m);
+}
+
 .prefs-list-info {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
-}
-
-.prefs-install-all {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--color-frame-fg-muted);
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  cursor: pointer;
-}
-
-.prefs-install-all:hover {
-  text-decoration: underline;
 }
 
 .prefs-field-label {
@@ -1038,24 +1070,12 @@ function skillInstallLabel(id: string): string {
   line-height: 1.5;
 }
 
-.prefs-dropdown-full {
-  width: 100%;
-}
-
-.prefs-dropdown-full :deep(.dropdown-trigger) {
-  width: 100%;
-  height: 32px;
-  padding: 0 var(--space-xs);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-s);
-  background: var(--color-frame-bg);
-  justify-content: space-between;
-}
-
 .prefs-list-desc-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 /* -- Account tab -- */
@@ -1109,5 +1129,46 @@ function skillInstallLabel(id: string): string {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
+}
+
+/* -- Prototype controls (outside window, in scrim) -- */
+
+.proto-controls {
+  width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-block-start: 80px;
+  color: rgba(255, 255, 255, 0.5);
+  padding: var(--space-s);
+  background: var(--color-frame-border);
+  border-radius: var(--radius-l);
+}
+
+.proto-row {
+  display: flex;
+  gap: var(--space-xxs);
+  align-items: center;
+}
+
+.proto-input {
+  flex: 1;
+  height: 32px;
+  padding: 0 var(--space-xs);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-s);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  font-family: inherit;
+  font-size: var(--font-size-s);
+}
+
+.proto-input:focus {
+  outline: 1px solid rgba(255, 255, 255, 0.3);
+  outline-offset: -1px;
+}
+
+.proto-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
 }
 </style>

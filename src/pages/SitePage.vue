@@ -11,6 +11,7 @@ import SyncScreen from '@/components/features/SyncScreen.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
+import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import { useSites, ALL_SITES_ID } from '@/data/useSites'
 import { useConversations } from '@/data/useConversations'
@@ -53,9 +54,10 @@ onBeforeUnmount(() => {
 
 // -- Screen state (derived from route) --
 
-type Screen = 'tasks' | 'sync' | 'previews' | 'import-export' | 'settings'
+type Screen = 'overview' | 'tasks' | 'sync' | 'previews' | 'import-export' | 'settings'
 
 const ROUTE_TO_SCREEN: Record<string, Screen> = {
+  'site-overview': 'overview',
   'site-tasks': 'tasks',
   'site-task': 'tasks',
   'site-sync': 'sync',
@@ -65,7 +67,7 @@ const ROUTE_TO_SCREEN: Record<string, Screen> = {
 }
 
 const currentScreen = computed<Screen>(() =>
-  ROUTE_TO_SCREEN[route.name as string] ?? 'tasks'
+  ROUTE_TO_SCREEN[route.name as string] ?? 'overview'
 )
 
 // -- Selection state (derived from route) --
@@ -157,6 +159,7 @@ function onSend(text: string) {
 }
 
 const showPreferences = ref(false)
+const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general')
 
 function onAction(action: ActionButton) {
   if (!selectedConvoId.value) return
@@ -212,7 +215,8 @@ function onAction(action: ActionButton) {
         />
       </div>
       <div class="pane pane-detail">
-        <template v-if="currentScreen === 'tasks' && selectedConvoId">
+        <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" />
+        <template v-else-if="currentScreen === 'tasks' && selectedConvoId">
           <ChatMessageList v-if="!isNewTask" :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" />
           <div ref="inputWrapRef" class="detail-input" :class="{ 'is-new-task': isNewTask }">
             <Transition name="welcome-fade">
@@ -238,7 +242,7 @@ function onAction(action: ActionButton) {
               :actions="inputActions"
               @send="onSend"
               @action="onAction"
-              @manage-agents="showPreferences = true"
+              @manage-agents="preferencesTab = 'agents'; showPreferences = true"
             />
           </div>
         </template>
@@ -252,7 +256,7 @@ function onAction(action: ActionButton) {
       </div>
     </div>
 
-    <PreferencesModal :open="showPreferences" @close="showPreferences = false" />
+    <PreferencesModal :open="showPreferences" :initial-tab="preferencesTab" @close="showPreferences = false; preferencesTab = 'general'" />
   </div>
 </template>
 

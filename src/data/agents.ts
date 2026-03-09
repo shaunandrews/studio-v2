@@ -21,15 +21,15 @@ const installedIds = getInstalledIds()
 export const agents: Agent[] = reactive([
   {
     id: 'wpcom',
-    label: 'WordPress.com',
-    description: 'The default agent. Site editing, content, plugins, and settings.',
+    label: 'Kit by WordPress.com',
+    description: 'Kit can build sites, themes, and blocks, as well as perform actions on your site.',
     icon: '/icons/wpcom.svg',
     installed: true,
   },
   {
     id: 'codex',
     label: 'Codex',
-    description: 'OpenAI\'s terminal agent. Code generation and shell commands via the CLI.',
+    description: 'OpenAI\'s coding agent.',
     icon: '/icons/codex-outline.svg',
     url: 'https://openai.com/index/introducing-codex/',
     installHint: 'Install via npm: npm install -g @openai/codex',
@@ -38,7 +38,7 @@ export const agents: Agent[] = reactive([
   {
     id: 'claude-code',
     label: 'Claude Code',
-    description: 'Anthropic\'s coding agent. Builds features, fixes bugs, and refactors across your codebase.',
+    description: 'Anthropic\'s coding agent.',
     icon: '/icons/claude.svg',
     url: 'https://docs.anthropic.com/en/docs/claude-code',
     installHint: 'Install via npm: npm install -g @anthropic-ai/claude-code',
@@ -46,8 +46,8 @@ export const agents: Agent[] = reactive([
   },
   {
     id: 'cursor',
-    label: 'Cursor',
-    description: 'AI-powered code editor with deep codebase understanding and inline editing.',
+    label: 'Cursor CLI',
+    description: 'Coding agent from Cursor.com. Supports multiple LLM providers.',
     icon: '/icons/cursor.svg',
     url: 'https://cursor.com',
     installHint: 'Download the Cursor editor from cursor.com',
@@ -56,7 +56,7 @@ export const agents: Agent[] = reactive([
   {
     id: 'opencode',
     label: 'OpenCode',
-    description: 'Open-source coding agent. Supports multiple LLM providers and runs in the terminal.',
+    description: 'Open-source coding agent. Supports multiple LLM providers.',
     icon: '/icons/opencode.svg',
     url: 'https://github.com/opencode-ai/opencode',
     installHint: 'Install via npm: npm install -g opencode',

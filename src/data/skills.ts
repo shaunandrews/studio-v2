@@ -15,7 +15,7 @@ const REPO = 'Automattic/agent-skills'
 function getInstalledIds(): Set<string> {
   try {
     const stored = localStorage.getItem(INSTALLED_KEY)
-    return new Set(stored ? JSON.parse(stored) : [])
+    return new Set(stored ? JSON.parse(stored) : ['wordpress-router', 'wp-block-development', 'wp-plugin-development'])
   } catch {
     return new Set()
   }

@@ -17,9 +17,11 @@ const selectedAgentLabel = computed(() =>
   codingAgents.find(a => a.id === selectedAgentId.value)?.label ?? 'WordPress.com'
 )
 
+const installedAgents = computed(() => codingAgents.filter(a => a.installed))
+
 const agentMenuGroups = computed<FlyoutMenuGroup[]>(() => [
   {
-    items: codingAgents.map(agent => ({
+    items: installedAgents.value.map(agent => ({
       label: agent.label,
       iconUrl: agent.icon,
       checked: agent.id === selectedAgentId.value,
