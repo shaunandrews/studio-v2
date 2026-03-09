@@ -5,7 +5,7 @@ import Text from '@/components/primitives/Text.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
 import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
 import { codingAgents, installAgent } from '@/data/agents'
-import { skills, installSkill, installAllSkills, fetchSkillContent, SKILLS_REPO_URL } from '@/data/skills'
+import { skills, installSkill, installAllSkills } from '@/data/skills'
 
 const props = defineProps<{
   open: boolean
@@ -237,26 +237,6 @@ function installLabel(id: string): string {
 
 const skillInstallStates = ref<Record<string, InstallState>>({})
 const installingAll = ref(false)
-const viewingSkill = ref<string | null>(null)
-const skillContent = ref('')
-const skillContentLoading = ref(false)
-
-async function viewSkill(id: string | null) {
-  if (!id || id === viewingSkill.value) {
-    viewingSkill.value = null
-    skillContent.value = ''
-    return
-  }
-  viewingSkill.value = id
-  skillContentLoading.value = true
-  skillContent.value = ''
-  const content = await fetchSkillContent(id)
-  if (viewingSkill.value === id) {
-    skillContent.value = content
-    skillContentLoading.value = false
-  }
-}
-
 const installedSkills = computed(() => skills.filter(s => s.installed))
 const availableSkills = computed(() => skills.filter(s => !s.installed))
 
@@ -539,71 +519,48 @@ function skillInstallLabel(id: string): string {
 
             <!-- ═══ Skills ═══ -->
             <template v-if="activeTab === 'skills'">
+              <Text variant="caption" color="muted" class="prefs-description">
+                Agents can decide to use skills to help them accomplish specialized tasks.
+              </Text>
 
               <!-- Installed -->
-              <div class="prefs__section">
-                <Text variant="caption" weight="semibold" class="prefs__label">Installed</Text>
-                <div v-if="installedSkills.length" class="prefs__skill-list">
-                  <div
-                    v-for="skill in installedSkills"
-                    :key="skill.id"
-                    class="prefs__skill-row"
-                    :class="{ 'is-viewing': viewingSkill === skill.id }"
-                  >
-                    <div class="prefs__skill-info">
+              <div class="prefs-section">
+                <Text variant="small" weight="semibold" color="muted" class="prefs-section-label">INSTALLED</Text>
+                <div v-if="installedSkills.length" class="prefs-list">
+                  <div v-for="skill in installedSkills" :key="skill.id" class="prefs-list-item">
+                    <div class="prefs-list-info">
                       <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
                       <Text variant="small" color="muted">{{ skill.description }}</Text>
                     </div>
-                    <button class="prefs__skill-view" @click="viewSkill(skill.id)">{{ viewingSkill === skill.id ? 'Close' : 'View' }}</button>
+                    <button class="prefs-list-menu">&#x22EE;</button>
                   </div>
                 </div>
-                <Text v-else variant="caption" color="muted" class="prefs__empty-state">No skills installed yet</Text>
               </div>
 
               <!-- Available -->
-              <div v-if="availableSkills.length" class="prefs__section">
-                <div class="prefs__section-header">
-                  <Text variant="caption" weight="semibold">
-                    Available ({{ availableSkills.length }})
-                  </Text>
-                  <button
-                    class="prefs__install-all"
-                    :disabled="installingAll"
-                    @click="startInstallAll"
-                  >
-                    {{ installingAll ? 'Installing…' : 'Install All' }}
+              <div v-if="availableSkills.length" class="prefs-section">
+                <div class="prefs-section-header">
+                  <Text variant="small" weight="semibold" color="muted">AVAILABLE</Text>
+                  <button class="prefs-install-all" :disabled="installingAll" @click="startInstallAll">
+                    {{ installingAll ? 'Installing…' : 'Install all' }}
                   </button>
                 </div>
-                <div class="prefs__skill-list">
-                  <div
-                    v-for="skill in availableSkills"
-                    :key="skill.id"
-                    class="prefs__skill-row"
-                    :class="{ 'is-viewing': viewingSkill === skill.id }"
-                  >
-                    <div class="prefs__skill-info">
+                <div class="prefs-list">
+                  <div v-for="skill in availableSkills" :key="skill.id" class="prefs-list-item">
+                    <div class="prefs-list-info">
                       <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
-                      <Text variant="small" color="muted">{{ skill.description }}</Text>
+                      <Text variant="small" color="muted" class="prefs-list-desc-truncate">{{ skill.description }}</Text>
                     </div>
-                    <div class="prefs__skill-actions">
-                      <button class="prefs__skill-view" @click="viewSkill(skill.id)">{{ viewingSkill === skill.id ? 'Close' : 'View' }}</button>
-                      <Button
-                        :variant="getSkillInstallState(skill.id) === 'success' ? 'primary' : 'secondary'"
-                        size="small"
-                        :label="skillInstallLabel(skill.id)"
-                        :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll"
-                        @click="startSkillInstall(skill.id)"
-                      />
-                    </div>
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      :label="skillInstallLabel(skill.id)"
+                      :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll"
+                      @click="startSkillInstall(skill.id)"
+                    />
                   </div>
                 </div>
               </div>
-
-              <!-- Source attribution -->
-              <div class="prefs__section">
-                <Text variant="small" color="muted">Skills from <a :href="SKILLS_REPO_URL" target="_blank" class="prefs__learn-more">WordPress/agent-skills</a></Text>
-              </div>
-
             </template>
 
           </div>
@@ -1069,99 +1026,9 @@ function skillInstallLabel(id: string): string {
   justify-content: space-between;
 }
 
-/* -- Empty state -- */
-
-.prefs__empty-state {
-  padding: var(--space-s) 0;
-}
-
-/* -- Skills -- */
-
-.prefs__section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-block-end: var(--space-xs);
-}
-
-.prefs__install-all {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--color-frame-theme);
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-}
-
-.prefs__install-all:hover {
-  text-decoration: underline;
-}
-
-.prefs__install-all:disabled {
-  opacity: 0.5;
-  cursor: default;
-  text-decoration: none;
-}
-
-.prefs__skill-list {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-s);
+.prefs-list-desc-truncate {
   overflow: hidden;
-}
-
-.prefs__skill-row {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-s);
-  padding: var(--space-s);
-  background: var(--color-frame-bg);
-}
-
-.prefs__skill-row + .prefs__skill-row {
-  border-block-start: 1px solid var(--color-frame-border);
-}
-
-.prefs__skill-row.is-viewing {
-  background: var(--color-frame-hover);
-}
-
-.prefs__skill-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xxxs);
-}
-
-.prefs__skill-compat {
-  font-style: italic;
-  opacity: 0.7;
-}
-
-.prefs__skill-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  flex-shrink: 0;
-}
-
-.prefs__skill-view {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--color-frame-fg-muted);
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  cursor: pointer;
+  text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.prefs__skill-view:hover {
-  color: var(--color-frame-fg);
-  text-decoration: underline;
 }
 </style>
