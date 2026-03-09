@@ -688,13 +688,12 @@ function skillInstallLabel(id: string): string {
 
 .prefs-tabs {
   display: flex;
-  gap: var(--space-xl);
-  justify-content: center;
   border-block-end: 1px solid var(--color-frame-border);
   flex-shrink: 0;
 }
 
 .prefs-tab {
+  flex: 1;
   padding: var(--space-xs) 0;
   border: none;
   border-block-end: 2px solid transparent;
@@ -703,6 +702,7 @@ function skillInstallLabel(id: string): string {
   font-family: inherit;
   font-size: var(--font-size-m);
   cursor: pointer;
+  text-align: center;
   transition: color var(--duration-instant) var(--ease-default);
 }
 
@@ -712,7 +712,7 @@ function skillInstallLabel(id: string): string {
 
 .prefs-tab.is-active {
   color: var(--color-frame-fg);
-  border-block-end-color: var(--color-frame-fg);
+  border-block-end-color: var(--color-frame-theme);
 }
 
 .prefs-content {
