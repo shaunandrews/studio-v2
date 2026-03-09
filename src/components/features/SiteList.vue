@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { plus, category, globe, copy, desktop, code, settings, backup, trash, external } from '@wordpress/icons'
+import { plus, category } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
 import ContextMenu from '@/components/primitives/ContextMenu.vue'
@@ -21,15 +21,15 @@ function getSiteMenuGroups(site: Site): FlyoutMenuGroup[] {
   return [
     {
       items: [
-        { label: 'Open in Browser', icon: globe, action: () => alert(`Open ${site.url} in browser`) },
-        { label: 'Copy Site URL', icon: copy, action: () => alert(`Copied ${site.url}`) },
+        { label: 'Open in Browser', action: () => alert(`Open ${site.url} in browser`) },
+        { label: 'Copy Site URL', action: () => alert(`Copied ${site.url}`) },
       ],
     },
     {
       items: [
-        { label: 'Open in Finder', icon: desktop, action: () => alert(`Open ${site.name} in Finder`) },
-        { label: 'Open in VS Code', icon: code, action: () => alert(`Open ${site.name} in VS Code`) },
-        { label: 'Open in Terminal', icon: external, action: () => alert(`Open ${site.name} in Terminal`) },
+        { label: 'Open in Finder', action: () => alert(`Open ${site.name} in Finder`) },
+        { label: 'Open in VS Code', action: () => alert(`Open ${site.name} in VS Code`) },
+        { label: 'Open in Terminal', action: () => alert(`Open ${site.name} in Terminal`) },
       ],
     },
     {
@@ -42,13 +42,13 @@ function getSiteMenuGroups(site: Site): FlyoutMenuGroup[] {
             setTimeout(() => setStatus(site.id, target), 1200)
           },
         },
-        { label: 'Site Settings', icon: settings, action: () => alert(`Settings for ${site.name}`) },
-        { label: 'Duplicate Site', icon: backup, action: () => alert(`Duplicate ${site.name}`) },
+        { label: 'Site Settings', action: () => alert(`Settings for ${site.name}`) },
+        { label: 'Duplicate Site', action: () => alert(`Duplicate ${site.name}`) },
       ],
     },
     {
       items: [
-        { label: 'Delete Site', icon: trash, destructive: true, action: () => alert(`Delete ${site.name}`) },
+        { label: 'Delete Site', destructive: true, action: () => alert(`Delete ${site.name}`) },
       ],
     },
   ]

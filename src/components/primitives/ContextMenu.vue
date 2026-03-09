@@ -54,6 +54,7 @@ const hasCheckedItems = computed(() =>
 
 function open(e: MouseEvent) {
   e.preventDefault()
+  e.stopPropagation()
 
   // Close any other open context menu
   if (globalCloseCallback && globalCloseCallback !== close) {

@@ -14,6 +14,7 @@ const categories = [
       { id: 'badge', label: 'Badge' },
       { id: 'button', label: 'Button' },
       { id: 'button-split', label: 'ButtonSplit' },
+      { id: 'context-menu', label: 'ContextMenu' },
       { id: 'context-ring', label: 'ContextRing' },
       { id: 'dropdown', label: 'Dropdown' },
       { id: 'flyout-menu', label: 'FlyoutMenu' },

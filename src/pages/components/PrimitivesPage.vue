@@ -8,11 +8,14 @@ import StatusIndicator from '@/components/primitives/StatusIndicator.vue'
 import Text from '@/components/primitives/Text.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
+import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import Modal from '@/components/primitives/Modal.vue'
 import Badge from '@/components/primitives/Badge.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
+import ContextMenu from '@/components/primitives/ContextMenu.vue'
 import ContextRing from '@/components/primitives/ContextRing.vue'
 import Toggle from '@/components/primitives/Toggle.vue'
+import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import { cog, plus, upload, external, trash, pencil, chevronDown } from '@wordpress/icons'
 import '@/pages/dev-docs.css'
 
@@ -20,6 +23,33 @@ const modalOpen = ref(false)
 const toggleA = ref(false)
 const toggleB = ref(true)
 const toggleC = ref(true)
+
+const contextMenuGroups: FlyoutMenuGroup[] = [
+  {
+    items: [
+      { label: 'Open in Browser', action: () => alert('Open in browser') },
+      { label: 'Copy Site URL', action: () => alert('Copied!') },
+    ],
+  },
+  {
+    items: [
+      { label: 'Open in Finder', action: () => alert('Finder') },
+      { label: 'Open in VS Code', action: () => alert('VS Code') },
+      { label: 'Open in Terminal', action: () => alert('Terminal') },
+    ],
+  },
+  {
+    items: [
+      { label: 'Site Settings', action: () => alert('Settings') },
+      { label: 'Duplicate Site', action: () => alert('Duplicate') },
+    ],
+  },
+  {
+    items: [
+      { label: 'Delete Site', destructive: true, action: () => alert('Delete') },
+    ],
+  },
+]
 
 const icons = Object.entries(wpIcons)
   .filter(([key, val]) => key !== 'Icon' && typeof val === 'object' && val !== null && (val as any)?.props)
@@ -67,7 +97,7 @@ const icons = Object.entries(wpIcons)
         <tbody>
           <tr><td><code>variant</code></td><td><code>'primary' | 'secondary' | 'tertiary'</code></td><td><code>'secondary'</code></td><td>Visual style</td></tr>
           <tr><td><code>surface</code></td><td><code>'light' | 'dark'</code></td><td><code>'light'</code></td><td>Background context the button sits on</td></tr>
-          <tr><td><code>size</code></td><td><code>'default' | 'small'</code></td><td><code>'default'</code></td><td>36px or 28px height</td></tr>
+          <tr><td><code>size</code></td><td><code>'default' | 'small' | 'mini'</code></td><td><code>'default'</code></td><td>32px, 26px, or 22px height</td></tr>
           <tr><td><code>icon</code></td><td><code>WPIcon</code></td><td>—</td><td>WordPress icon object. Icon-only when no label.</td></tr>
           <tr><td><code>label</code></td><td><code>string</code></td><td>—</td><td>Button text. Omit for icon-only.</td></tr>
           <tr><td><code>width</code></td><td><code>'hug' | 'full'</code></td><td><code>'hug'</code></td><td>Hug content or fill container width</td></tr>
@@ -99,6 +129,9 @@ const icons = Object.entries(wpIcons)
         <Button variant="primary" label="Small" size="small" />
         <Button variant="primary" label="Small" size="small" :icon="plus" />
         <Button variant="primary" :icon="plus" size="small" />
+        <Button variant="primary" label="Mini" size="mini" />
+        <Button variant="primary" label="Mini" size="mini" :icon="plus" />
+        <Button variant="primary" :icon="plus" size="mini" />
       </div>
       <h4>Secondary</h4>
       <div class="example-row hstack flex-wrap gap-xxs">
@@ -108,6 +141,9 @@ const icons = Object.entries(wpIcons)
         <Button variant="secondary" label="Small" size="small" />
         <Button variant="secondary" label="Small" size="small" :icon="pencil" />
         <Button variant="secondary" :icon="cog" size="small" />
+        <Button variant="secondary" label="Mini" size="mini" />
+        <Button variant="secondary" label="Mini" size="mini" :icon="pencil" />
+        <Button variant="secondary" :icon="cog" size="mini" />
       </div>
       <h4>Tertiary</h4>
       <div class="example-row hstack flex-wrap gap-xxs">
@@ -117,6 +153,9 @@ const icons = Object.entries(wpIcons)
         <Button variant="tertiary" label="Small" size="small" />
         <Button variant="tertiary" label="Small" size="small" :icon="trash" />
         <Button variant="tertiary" :icon="chevronDown" size="small" />
+        <Button variant="tertiary" label="Mini" size="mini" />
+        <Button variant="tertiary" label="Mini" size="mini" :icon="trash" />
+        <Button variant="tertiary" :icon="chevronDown" size="mini" />
       </div>
     </div>
 
@@ -130,6 +169,9 @@ const icons = Object.entries(wpIcons)
         <Button variant="primary" surface="dark" label="Small" size="small" />
         <Button variant="primary" surface="dark" label="Small" size="small" :icon="plus" />
         <Button variant="primary" surface="dark" :icon="plus" size="small" />
+        <Button variant="primary" surface="dark" label="Mini" size="mini" />
+        <Button variant="primary" surface="dark" label="Mini" size="mini" :icon="plus" />
+        <Button variant="primary" surface="dark" :icon="plus" size="mini" />
       </div>
       <h4>Secondary</h4>
       <div class="example-row hstack flex-wrap gap-xxs">
@@ -139,6 +181,9 @@ const icons = Object.entries(wpIcons)
         <Button variant="secondary" surface="dark" label="Small" size="small" />
         <Button variant="secondary" surface="dark" label="Small" size="small" :icon="pencil" />
         <Button variant="secondary" surface="dark" :icon="cog" size="small" />
+        <Button variant="secondary" surface="dark" label="Mini" size="mini" />
+        <Button variant="secondary" surface="dark" label="Mini" size="mini" :icon="pencil" />
+        <Button variant="secondary" surface="dark" :icon="cog" size="mini" />
       </div>
       <h4>Tertiary</h4>
       <div class="example-row hstack flex-wrap gap-xxs">
@@ -148,6 +193,9 @@ const icons = Object.entries(wpIcons)
         <Button variant="tertiary" surface="dark" label="Small" size="small" />
         <Button variant="tertiary" surface="dark" label="Small" size="small" :icon="trash" />
         <Button variant="tertiary" surface="dark" :icon="chevronDown" size="small" />
+        <Button variant="tertiary" surface="dark" label="Mini" size="mini" />
+        <Button variant="tertiary" surface="dark" label="Mini" size="mini" :icon="trash" />
+        <Button variant="tertiary" surface="dark" :icon="chevronDown" size="mini" />
       </div>
     </div>
   </section>
@@ -183,6 +231,48 @@ const icons = Object.entries(wpIcons)
         <ButtonSplit label="Create site" />
         <ButtonSplit label="Add" :icon="plus" />
       </div>
+    </div>
+  </section>
+
+  <!-- ContextMenu -->
+  <section id="context-menu">
+    <h2>ContextMenu</h2>
+    <p class="section-desc">Right-click context menu that wraps any content. Teleports a menu panel to the cursor position. Reuses FlyoutMenu styling. Singleton — only one open at a time.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>groups</code></td><td><code>FlyoutMenuGroup[]</code></td><td>—</td><td>Menu groups (same as FlyoutMenu)</td></tr>
+          <tr><td><code>surface</code></td><td><code>'light' | 'dark'</code></td><td><code>'light'</code></td><td>Color scheme</td></tr>
+        </tbody>
+      </table>
+      <h3>Slots</h3>
+      <table>
+        <thead><tr><th>Slot</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>default</code></td><td>Content that receives the right-click target</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Light surface</h3>
+    <div class="example-section">
+      <ContextMenu :groups="contextMenuGroups" surface="light">
+        <div style="padding: var(--space-m) var(--space-l); border: 1px dashed var(--color-frame-border); border-radius: var(--radius-m); cursor: context-menu;">
+          Right-click me (light)
+        </div>
+      </ContextMenu>
+    </div>
+
+    <h3>Dark surface</h3>
+    <div class="example-section example-section--dark">
+      <ContextMenu :groups="contextMenuGroups" surface="dark">
+        <div style="padding: var(--space-m) var(--space-l); border: 1px dashed var(--color-chrome-border); border-radius: var(--radius-m); cursor: context-menu; color: var(--color-chrome-fg);">
+          Right-click me (dark)
+        </div>
+      </ContextMenu>
     </div>
   </section>
 
@@ -380,6 +470,76 @@ const icons = Object.entries(wpIcons)
           <Button variant="primary" label="Confirm" @click="modalOpen = false" />
         </template>
       </Modal>
+    </div>
+  </section>
+
+  <!-- SiteIcon -->
+  <section id="site-icon">
+    <h2>SiteIcon</h2>
+    <p class="section-desc">Site favicon with fallback. Shows the real favicon when available, or a dark WP logo on a colored background derived from the site name.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>favicon</code></td><td><code>string</code></td><td>—</td><td>Favicon URL. Falls back to WP logo when omitted.</td></tr>
+          <tr><td><code>siteName</code></td><td><code>string</code></td><td>—</td><td>Site name, used to derive the fallback color.</td></tr>
+          <tr><td><code>size</code></td><td><code>number</code></td><td><code>24</code></td><td>Width and height in px.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Palette</h3>
+    <div class="example-section">
+      <div class="hstack flex-wrap gap-s">
+        <div class="vstack align-center gap-xxs" v-for="item in [
+          { name: 'Beta', label: 'Warm Sand' },
+          { name: 'Yankee', label: 'Sky Blue' },
+          { name: 'Golf', label: 'Soft Lavender' },
+          { name: 'Gamma', label: 'Sage Green' },
+          { name: 'Oscar', label: 'Golden Yellow' },
+          { name: 'India', label: 'Dusty Rose' },
+          { name: 'Alpha', label: 'Mint' },
+          { name: 'Lima', label: 'Clay' },
+          { name: 'Foxtrot', label: 'Periwinkle' },
+          { name: 'Kilo', label: 'Peach' },
+        ]" :key="item.name">
+          <SiteIcon :site-name="item.name" :size="36" />
+          <Text variant="caption" color="muted">{{ item.label }}</Text>
+        </div>
+      </div>
+    </div>
+
+    <h3>Sizes</h3>
+    <div class="example-section">
+      <div class="hstack gap-m align-center">
+        <div class="vstack align-center gap-xxs">
+          <SiteIcon site-name="Downstreet Cafe" :size="16" />
+          <Text variant="caption" color="muted">16</Text>
+        </div>
+        <div class="vstack align-center gap-xxs">
+          <SiteIcon site-name="Downstreet Cafe" :size="24" />
+          <Text variant="caption" color="muted">24</Text>
+        </div>
+        <div class="vstack align-center gap-xxs">
+          <SiteIcon site-name="Downstreet Cafe" :size="32" />
+          <Text variant="caption" color="muted">32</Text>
+        </div>
+        <div class="vstack align-center gap-xxs">
+          <SiteIcon site-name="Downstreet Cafe" :size="48" />
+          <Text variant="caption" color="muted">48</Text>
+        </div>
+      </div>
+    </div>
+
+    <h3>With favicon</h3>
+    <div class="example-section">
+      <div class="hstack gap-m align-center">
+        <SiteIcon site-name="WordPress" favicon="https://s.w.org/favicon.ico" :size="24" />
+        <SiteIcon site-name="WordPress" favicon="https://s.w.org/favicon.ico" :size="36" />
+        <Text variant="caption" color="muted">Real favicon takes precedence over fallback</Text>
+      </div>
     </div>
   </section>
 
