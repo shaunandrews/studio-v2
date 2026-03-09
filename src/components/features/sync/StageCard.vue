@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import Button from '@/components/primitives/Button.vue'
+import SiteIcon from '@/components/primitives/SiteIcon.vue'
 
 const props = withDefaults(defineProps<{
   label: string
   url?: string
   favicon?: string
+  siteName?: string
   connected: boolean
   envColor?: string
   dimmed?: boolean
@@ -61,11 +63,12 @@ const timeSince = computed(() => {
     <div class="sync-env__details" :class="{ 'sync-env__details--connected': connected }">
       <span class="sync-env__badge" :style="envColor ? { background: envColor } : undefined">{{ label }}</span>
       <span v-if="url && connected" class="sync-env__site">
-        <img
-          v-if="favicon"
-          :src="favicon"
+        <SiteIcon
+          v-if="favicon || siteName"
           class="sync-env__favicon"
-          alt=""
+          :favicon="favicon"
+          :site-name="siteName ?? label"
+          :size="16"
         />
         <a
           :href="url.startsWith('http') ? url : `http://${url}`"
@@ -138,9 +141,6 @@ const timeSince = computed(() => {
 }
 
 .sync-env__favicon {
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-s);
   flex-shrink: 0;
 }
 

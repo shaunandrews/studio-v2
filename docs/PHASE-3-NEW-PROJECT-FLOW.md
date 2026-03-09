@@ -134,7 +134,7 @@ The moment the user confirms, the experience should feel like a **seamless hando
 2. **Modal closes.** Fade out backdrop + scale-down modal (`transform: scale(0.95)`, `opacity: 0`, `--duration-slow`). No abrupt disappear.
 
 3. **Sidebar updates.** The new project appears at the top of the sidebar project list with:
-   - Auto-generated favicon (DiceBear `shapes` with the project name as seed, matching existing pattern)
+   - Site icon via `SiteIcon` component (WP logo fallback with color derived from site name)
    - The project name
    - `StatusIndicator` in `"loading"` state (spinning blue ring)
 
@@ -374,7 +374,6 @@ When the user confirms in the modal:
 const newProject: Project = {
   id: generatedId,
   name: brief.name,
-  favicon: `https://api.dicebear.com/9.x/shapes/svg?seed=${encodeURIComponent(brief.name)}`,
   status: 'loading',
   url: '',                    // no URL until build produces something previewable
   createdAt: new Date().toISOString(),

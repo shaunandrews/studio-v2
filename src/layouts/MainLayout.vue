@@ -2,6 +2,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { drawerLeft } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
 import SiteList from '@/components/features/SiteList.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
@@ -17,6 +18,7 @@ const showShortcuts = ref(false)
 const showPreferences = ref(false)
 const showGlobalMenu = ref(false)
 const gravatarRef = ref<HTMLElement | null>(null)
+const toggleRef = ref<HTMLElement | null>(null)
 
 function onGlobalKeydown(e: KeyboardEvent) {
   if ((e.metaKey || e.ctrlKey) && e.key === '/') {
@@ -68,12 +70,16 @@ function handleNewSite() {
     </button>
     <button
       v-show="!shouldShowAddSite"
+      ref="toggleRef"
       class="floating-btn sidebar-toggle"
       :class="{ 'is-sidebar-hidden': hidden }"
       @click="toggleSidebar()"
     >
       <WPIcon :icon="drawerLeft" :size="20" />
     </button>
+    <!-- Tooltips anchored to the absolutely-positioned buttons (hidden from layout) -->
+    <Tooltip text="Account & preferences" placement="top" :delay="300" :anchor="gravatarRef" class="anchored-tooltip" />
+    <Tooltip :text="hidden ? 'Show sidebar' : 'Hide sidebar'" placement="top" :delay="300" :anchor="toggleRef" class="anchored-tooltip" />
 
     <div class="app-body">
       <!-- Add-site surface: lives behind sidebar + frame -->
@@ -354,5 +360,14 @@ function handleNewSite() {
 .sidebar-toggle.is-sidebar-hidden:hover {
   background: var(--color-frame-hover);
   color: var(--color-frame-fg);
+}
+
+/* Anchor-only tooltips: no slot content, remove from layout flow */
+.anchored-tooltip {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 </style>
