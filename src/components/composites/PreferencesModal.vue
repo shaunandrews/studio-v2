@@ -339,7 +339,7 @@ function skillInstallLabel(id: string): string {
               <span class="prefs-traffic-dot prefs-traffic-dot--minimize" />
               <span class="prefs-traffic-dot prefs-traffic-dot--maximize" />
             </div>
-            <Text variant="body-small" weight="semibold" class="prefs-title">Studio Preferences</Text>
+            <Text variant="body-small" weight="semibold" class="prefs-title">Studio Settings</Text>
           </div>
 
           <!-- Tabs -->

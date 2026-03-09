@@ -98,7 +98,7 @@ function openShortcuts() {
           <span class="global-menu__item-shortcut">{{ mod }}/</span>
         </div>
         <div class="global-menu__item" @click="openPreferences">
-          <span class="global-menu__item-label">Preferences</span>
+          <span class="global-menu__item-label">Settings</span>
           <span class="global-menu__item-shortcut">{{ mod }},</span>
         </div>
       </div>

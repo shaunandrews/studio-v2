@@ -78,7 +78,7 @@ function handleNewSite() {
       <WPIcon :icon="drawerLeft" :size="20" />
     </button>
     <!-- Tooltips anchored to the absolutely-positioned buttons (hidden from layout) -->
-    <Tooltip text="Account & preferences" placement="top" :delay="300" :anchor="gravatarRef" class="anchored-tooltip" />
+    <Tooltip text="Account & settings" placement="top" :delay="300" :anchor="gravatarRef" class="anchored-tooltip" />
     <Tooltip :text="hidden ? 'Show sidebar' : 'Hide sidebar'" placement="top" :delay="300" :anchor="toggleRef" class="anchored-tooltip" />
 
     <div class="app-body">
