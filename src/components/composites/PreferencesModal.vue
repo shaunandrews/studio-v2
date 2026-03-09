@@ -607,6 +607,31 @@ function skillInstallLabel(id: string): string {
                 </div>
                 <Button variant="secondary" size="small" label="Log out" />
               </div>
+
+              <!-- Usage -->
+              <div class="prefs-section">
+                <Text variant="small" weight="semibold" color="muted" class="prefs-usage-label">USAGE</Text>
+                <div class="prefs-usage-meters">
+                  <div class="prefs-meter">
+                    <div class="prefs-meter-header">
+                      <Text variant="caption" weight="medium">Preview sites</Text>
+                      <Text variant="small" color="muted">1 of 10</Text>
+                    </div>
+                    <div class="prefs-meter-track">
+                      <div class="prefs-meter-fill" style="width: 10%"></div>
+                    </div>
+                  </div>
+                  <div class="prefs-meter">
+                    <div class="prefs-meter-header">
+                      <Text variant="caption" weight="medium">AI chat</Text>
+                      <Text variant="small" color="muted">0 of 1,000</Text>
+                    </div>
+                    <div class="prefs-meter-track">
+                      <div class="prefs-meter-fill" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </template>
 
           </div>
@@ -1052,6 +1077,42 @@ function skillInstallLabel(id: string): string {
   border-radius: 50%;
   flex-shrink: 0;
   object-fit: cover;
+}
+
+/* -- Usage meters -- */
+
+.prefs-usage-label {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-block-end: var(--space-s);
+}
+
+.prefs-usage-meters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+.prefs-meter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: var(--space-xs);
+}
+
+.prefs-meter-track {
+  height: 4px;
+  background: var(--color-frame-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.prefs-meter-fill {
+  height: 100%;
+  background: var(--color-frame-theme);
+  border-radius: 999px;
+  transition: width var(--duration-moderate) var(--ease-default);
 }
 
 .prefs-account-info {
