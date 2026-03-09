@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
 import Popover from '@/components/primitives/Popover.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
+import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
+
+const isMac = computed(() => navigator.platform.includes('Mac'))
+const mod = computed(() => isMac.value ? '⌘' : 'Ctrl+')
 
 const props = defineProps<{
   open: boolean
@@ -16,6 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const showPreferences = ref(false)
+const showShortcuts = ref(false)
 
 function close() {
   emit('close')
@@ -24,6 +29,11 @@ function close() {
 function openPreferences() {
   close()
   showPreferences.value = true
+}
+
+function openShortcuts() {
+  close()
+  showShortcuts.value = true
 }
 </script>
 
@@ -83,12 +93,18 @@ function openPreferences() {
         <RouterLink to="/dev/architecture" class="global-menu__item" @click="close">
           Architecture
         </RouterLink>
+        <div class="global-menu__item" @click="openShortcuts">
+          <span class="global-menu__item-label">Keyboard shortcuts</span>
+          <span class="global-menu__item-shortcut">{{ mod }}/</span>
+        </div>
         <div class="global-menu__item" @click="openPreferences">
-          Preferences
+          <span class="global-menu__item-label">Preferences</span>
+          <span class="global-menu__item-shortcut">{{ mod }},</span>
         </div>
       </div>
     </div>
   </Popover>
+  <ShortcutsModal :open="showShortcuts" @close="showShortcuts = false" />
   <PreferencesModal :open="showPreferences" @close="showPreferences = false" />
 </template>
 
@@ -219,5 +235,16 @@ function openPreferences() {
 
 .global-menu__item:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.global-menu__item-label {
+  flex: 1;
+}
+
+.global-menu__item-shortcut {
+  flex-shrink: 0;
+  margin-inline-start: var(--space-m);
+  font-size: var(--font-size-xs);
+  opacity: 0.4;
 }
 </style>

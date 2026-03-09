@@ -9,6 +9,7 @@ export interface FlyoutMenuItem {
   detail?: string
   icon?: any
   iconUrl?: string
+  shortcut?: string
   destructive?: boolean
   checked?: boolean
   children?: FlyoutMenuItem[]
@@ -225,6 +226,7 @@ defineExpose({ toggle, close, open })
           <img v-if="item.iconUrl" :src="item.iconUrl" class="flyout-item-icon flyout-item-icon--img" />
           <WPIcon v-else-if="item.icon" :icon="item.icon" :size="18" class="flyout-item-icon" />
           <span class="flyout-item-label">{{ item.label }}</span>
+          <span v-if="item.shortcut" class="flyout-item-shortcut">{{ item.shortcut }}</span>
           <WPIcon
             v-if="hasCheckedItems"
             :icon="check"
@@ -414,6 +416,14 @@ defineExpose({ toggle, close, open })
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.flyout-item-shortcut {
+  flex-shrink: 0;
+  margin-inline-start: var(--space-m);
+  font-size: var(--font-size-xs);
+  opacity: 0.4;
+  letter-spacing: 0.02em;
 }
 
 .flyout-item-detail {
