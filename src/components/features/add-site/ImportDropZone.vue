@@ -112,9 +112,9 @@ function clear() {
   justify-content: center;
   gap: var(--space-xxs);
   padding: var(--space-xxxl) var(--space-m);
-  border: 2px dashed var(--color-frame-border);
+  border: 2px dashed var(--color-chrome-border);
   border-radius: var(--radius-m);
-  background: var(--color-frame-hover);
+  background: var(--color-chrome-hover);
   cursor: pointer;
   transition:
     border-color var(--transition-hover),
@@ -123,36 +123,36 @@ function clear() {
 
 .drop-area:hover,
 .drop-area.is-dragging {
-  border-color: var(--color-frame-theme);
-  background: color-mix(in srgb, var(--color-frame-theme) 5%, var(--color-frame-bg));
+  border-color: var(--color-chrome-theme);
+  background: color-mix(in srgb, var(--color-chrome-theme) 5%, var(--color-chrome-fill));
 }
 
 .drop-icon {
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .drop-label {
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg);
+  color: var(--color-chrome-fg);
 }
 
 .drop-hint {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .drop-formats {
   font-size: var(--font-size-xs);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   margin-block-start: var(--space-xxs);
 }
 
 .selected-file {
   padding: var(--space-s);
-  border: 1px solid var(--color-frame-border);
+  border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-m);
-  background: var(--color-frame-hover);
+  background: var(--color-chrome-hover);
   align-items: center;
   justify-content: space-between;
 }
@@ -160,12 +160,12 @@ function clear() {
 .file-name {
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg);
+  color: var(--color-chrome-fg);
 }
 
 .file-size {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .drop-error {

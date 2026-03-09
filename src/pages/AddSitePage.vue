@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { wordpress, page, download, backup, chevronLeft, close } from '@wordpress/icons'
-import WPIcon from '@/components/primitives/WPIcon.vue'
+import { chevronLeft, close } from '@wordpress/icons'
+import { illustrations } from '@/components/features/add-site/illustrations'
 import Button from '@/components/primitives/Button.vue'
 import SiteDetailsForm from '@/components/features/add-site/SiteDetailsForm.vue'
 import BlueprintPicker from '@/components/features/add-site/BlueprintPicker.vue'
@@ -60,10 +60,10 @@ const heading = computed(() => {
 const canGoBack = computed(() => currentStep.value !== 'choose')
 
 const pathOptions = [
-  { id: 'blank' as Path, icon: wordpress, label: 'Blank site', desc: 'Start fresh with a clean WordPress install' },
-  { id: 'blueprint' as Path, icon: page, label: 'Blueprint', desc: 'Choose a pre-configured site template' },
-  { id: 'pull' as Path, icon: download, label: 'Pull existing', desc: 'Download from WordPress.com or Pressable' },
-  { id: 'import' as Path, icon: backup, label: 'Import backup', desc: 'Import a Jetpack backup or full-site export' },
+  { id: 'blank' as Path, illustration: illustrations.blank, label: 'Blank site', desc: 'Start fresh with a clean WordPress install' },
+  { id: 'blueprint' as Path, illustration: illustrations.blueprint, label: 'Blueprint', desc: 'Choose a pre-configured site template' },
+  { id: 'pull' as Path, illustration: illustrations.pull, label: 'Pull existing', desc: 'Download from WordPress.com or Pressable' },
+  { id: 'import' as Path, illustration: illustrations.import, label: 'Import backup', desc: 'Import a Jetpack backup or full-site export' },
 ]
 
 // Seed data
@@ -138,13 +138,14 @@ async function onSubmit(data: { name: string }) {
           v-if="canGoBack"
           :icon="chevronLeft"
           variant="tertiary"
+          surface="dark"
           tooltip="Back"
           @click="goBack"
         />
       </div>
       <h1 class="page-title">{{ heading }}</h1>
       <div class="header-end">
-        <Button v-if="hasSites" :icon="close" variant="tertiary" tooltip="Close" @click="dismiss" />
+        <Button v-if="hasSites" :icon="close" variant="tertiary" surface="dark" tooltip="Close" @click="dismiss" />
       </div>
     </header>
 
@@ -162,8 +163,8 @@ async function onSubmit(data: { name: string }) {
               :style="{ '--card-index': idx }"
               @click="choosePath(opt.id)"
             >
-              <div class="option-icon">
-                <WPIcon :icon="opt.icon" :size="24" />
+              <div class="option-illustration">
+                <component :is="opt.illustration" />
               </div>
               <div class="option-text vstack gap-xxxs">
                 <span class="option-label">{{ opt.label }}</span>
@@ -177,7 +178,7 @@ async function onSubmit(data: { name: string }) {
         <div v-else-if="currentStep === 'picker' && currentPath === 'blueprint'" key="blueprint" class="step-content step-content--wide">
           <BlueprintPicker :blueprints="blueprints" @select="onBlueprintSelect" />
           <div class="picker-footer hstack gap-xs">
-            <Button label="Continue" variant="primary" :disabled="!selectedBlueprint" @click="onBlueprintContinue" />
+            <Button label="Continue" variant="primary" surface="dark" :disabled="!selectedBlueprint" @click="onBlueprintContinue" />
           </div>
         </div>
 
@@ -190,7 +191,7 @@ async function onSubmit(data: { name: string }) {
             @login="isAuthenticated = true"
           />
           <div v-if="isAuthenticated" class="picker-footer hstack gap-xs">
-            <Button label="Continue" variant="primary" :disabled="!selectedRemoteSite" @click="onRemoteSiteContinue" />
+            <Button label="Continue" variant="primary" surface="dark" :disabled="!selectedRemoteSite" @click="onRemoteSiteContinue" />
           </div>
         </div>
 
@@ -198,7 +199,7 @@ async function onSubmit(data: { name: string }) {
         <div v-else-if="currentStep === 'picker' && currentPath === 'import'" key="import" class="step-content">
           <ImportDropZone @select="onFileSelect" @clear="selectedFile = null" />
           <div class="picker-footer hstack gap-xs">
-            <Button label="Continue" variant="primary" :disabled="!selectedFile" @click="onFileContinue" />
+            <Button label="Continue" variant="primary" surface="dark" :disabled="!selectedFile" @click="onFileContinue" />
           </div>
         </div>
 
@@ -236,7 +237,7 @@ async function onSubmit(data: { name: string }) {
   inset-inline-start: 50%;
   width: 1400px;
   height: 1400px;
-  background: radial-gradient(ellipse at center, var(--color-frame-theme) 0%, transparent 60%);
+  background: radial-gradient(ellipse at center, var(--color-chrome-theme) 0%, transparent 60%);
   opacity: 0.08;
   pointer-events: none;
   z-index: 0;
@@ -323,9 +324,9 @@ async function onSubmit(data: { name: string }) {
 .option-card {
   position: relative;
   padding: var(--space-l);
-  border: 1px solid var(--color-frame-border);
+  border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-m);
-  background: var(--color-frame-bg);
+  background: var(--color-chrome-fill);
   cursor: pointer;
   text-align: start;
   font-family: inherit;
@@ -348,21 +349,17 @@ async function onSubmit(data: { name: string }) {
 }
 
 .option-card:hover {
-  border-color: var(--color-frame-theme);
-  box-shadow: 0 0 0 1px var(--color-frame-theme);
+  border-color: var(--color-chrome-theme);
+  box-shadow: 0 0 0 1px var(--color-chrome-theme);
 }
 
-/* Icon */
+/* Illustration */
 
-.option-icon {
-  width: 44px;
-  height: 44px;
+.option-illustration {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-m);
-  background: color-mix(in srgb, var(--color-frame-theme) 8%, var(--color-frame-bg));
-  color: var(--color-frame-theme);
+  color: var(--color-chrome-fg);
 }
 
 /* Text */
@@ -370,12 +367,12 @@ async function onSubmit(data: { name: string }) {
 .option-label {
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
+  color: var(--color-chrome-fg);
 }
 
 .option-desc {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   line-height: 1.4;
 }
 

@@ -15,17 +15,18 @@ const router = createRouter({
         main: () => import('@/pages/SitePage.vue'),
       },
       meta: { layout: 'main', mode: 'site' },
-      redirect: to => ({ name: 'site-tasks', params: to.params }),
+      redirect: to => ({ name: 'site-overview', params: to.params }),
       beforeEnter: (to) => {
         const { sites } = useSites()
         const exists = sites.value.some(p => p.id === to.params.id)
         if (!exists) {
           const firstSite = sites.value[0]
           if (!firstSite) return '/settings'
-          return { name: 'site-tasks', params: { id: firstSite.id } }
+          return { name: 'site-overview', params: { id: firstSite.id } }
         }
       },
       children: [
+        { name: 'site-overview', path: 'overview', component: { render: () => null } },
         { name: 'site-tasks', path: 'tasks', component: { render: () => null } },
         { name: 'site-task', path: 'tasks/:convoId', component: { render: () => null } },
         { name: 'site-sync', path: 'sync', component: { render: () => null } },

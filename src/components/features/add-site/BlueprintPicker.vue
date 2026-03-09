@@ -76,7 +76,7 @@ function select(bp: Blueprint) {
   inset-inline-start: var(--space-xs);
   inset-block-start: 50%;
   transform: translateY(-50%);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   pointer-events: none;
 }
 
@@ -84,10 +84,10 @@ function select(bp: Blueprint) {
   width: 100%;
   height: 40px;
   padding: 0 var(--space-xs) 0 calc(var(--space-xs) + 24px);
-  border: 1px solid var(--color-frame-border);
+  border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-s);
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
+  background: var(--color-chrome-fill);
+  color: var(--color-chrome-fg);
   font-family: inherit;
   font-size: var(--font-size-m);
   outline: none;
@@ -95,12 +95,12 @@ function select(bp: Blueprint) {
 }
 
 .search-input:focus {
-  border-color: var(--color-frame-theme);
-  box-shadow: 0 0 0 1px var(--color-frame-theme);
+  border-color: var(--color-chrome-theme);
+  box-shadow: 0 0 0 1px var(--color-chrome-theme);
 }
 
 .search-input::placeholder {
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .blueprint-grid {
@@ -112,8 +112,8 @@ function select(bp: Blueprint) {
 .blueprint-card {
   display: flex;
   flex-direction: column;
-  background: var(--color-frame-bg);
-  border: 2px solid var(--color-frame-border);
+  background: var(--color-chrome-fill);
+  border: 2px solid var(--color-chrome-border);
   border-radius: var(--radius-m);
   overflow: hidden;
   cursor: pointer;
@@ -126,17 +126,17 @@ function select(bp: Blueprint) {
 }
 
 .blueprint-card:hover {
-  border-color: var(--color-frame-fg-muted);
+  border-color: var(--color-chrome-fg-muted);
 }
 
 .blueprint-card.is-selected {
-  border-color: var(--color-frame-theme);
-  box-shadow: 0 0 0 1px var(--color-frame-theme);
+  border-color: var(--color-chrome-theme);
+  box-shadow: 0 0 0 1px var(--color-chrome-theme);
 }
 
 .blueprint-thumb {
   aspect-ratio: 16 / 10;
-  background: var(--color-frame-hover);
+  background: var(--color-chrome-hover);
   overflow: hidden;
 }
 
@@ -149,7 +149,7 @@ function select(bp: Blueprint) {
 .blueprint-thumb-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--color-frame-hover) 0%, var(--color-frame-border) 100%);
+  background: linear-gradient(135deg, var(--color-chrome-hover) 0%, var(--color-chrome-border) 100%);
 }
 
 .blueprint-info {
@@ -159,12 +159,12 @@ function select(bp: Blueprint) {
 .blueprint-title {
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg);
+  color: var(--color-chrome-fg);
 }
 
 .blueprint-desc {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

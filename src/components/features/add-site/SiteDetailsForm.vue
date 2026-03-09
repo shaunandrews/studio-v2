@@ -88,6 +88,7 @@ function submit() {
       <Button
         :label="submitLabel ?? 'Create site'"
         variant="primary"
+        surface="dark"
         :disabled="!canSubmit"
         width="full"
         @click="submit"
@@ -105,17 +106,17 @@ function submit() {
 .field-label {
   font-size: var(--font-size-s);
   font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .field-input,
 .field-select {
   height: 40px;
   padding: 0 var(--space-xs);
-  border: 1px solid var(--color-frame-border);
+  border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-s);
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
+  background: var(--color-chrome-fill);
+  color: var(--color-chrome-fg);
   font-family: inherit;
   font-size: var(--font-size-m);
   outline: none;
@@ -124,12 +125,12 @@ function submit() {
 
 .field-input:focus,
 .field-select:focus {
-  border-color: var(--color-frame-theme);
-  box-shadow: 0 0 0 1px var(--color-frame-theme);
+  border-color: var(--color-chrome-theme);
+  box-shadow: 0 0 0 1px var(--color-chrome-theme);
 }
 
 .field-input::placeholder {
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .advanced-toggle {
@@ -141,13 +142,13 @@ function submit() {
   padding: 0;
   font-family: inherit;
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   cursor: pointer;
   transition: color var(--transition-hover);
 }
 
 .advanced-toggle:hover {
-  color: var(--color-frame-fg);
+  color: var(--color-chrome-fg);
 }
 
 .advanced-fields {

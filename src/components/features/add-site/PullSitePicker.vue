@@ -105,20 +105,20 @@ function select(site: RemoteSite) {
 .auth-title {
   font-size: var(--font-size-l);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
+  color: var(--color-chrome-fg);
   margin: 0;
 }
 
 .auth-desc {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   margin: 0;
   line-height: 1.5;
 }
 
 .auth-steps {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   padding-inline-start: var(--space-m);
   margin: 0;
 }
@@ -129,7 +129,7 @@ function select(site: RemoteSite) {
 
 .auth-link {
   font-size: var(--font-size-s);
-  color: var(--color-frame-theme);
+  color: var(--color-chrome-theme);
   text-decoration: none;
 }
 
@@ -148,7 +148,7 @@ function select(site: RemoteSite) {
   inset-inline-start: var(--space-xs);
   inset-block-start: 50%;
   transform: translateY(-50%);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   pointer-events: none;
 }
 
@@ -156,10 +156,10 @@ function select(site: RemoteSite) {
   width: 100%;
   height: 40px;
   padding: 0 var(--space-xs) 0 calc(var(--space-xs) + 24px);
-  border: 1px solid var(--color-frame-border);
+  border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-s);
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
+  background: var(--color-chrome-fill);
+  color: var(--color-chrome-fg);
   font-family: inherit;
   font-size: var(--font-size-m);
   outline: none;
@@ -167,12 +167,12 @@ function select(site: RemoteSite) {
 }
 
 .search-input:focus {
-  border-color: var(--color-frame-theme);
-  box-shadow: 0 0 0 1px var(--color-frame-theme);
+  border-color: var(--color-chrome-theme);
+  box-shadow: 0 0 0 1px var(--color-chrome-theme);
 }
 
 .search-input::placeholder {
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 /* Site list */
@@ -187,7 +187,7 @@ function select(site: RemoteSite) {
   padding: var(--space-xs) var(--space-s);
   border: 2px solid transparent;
   border-radius: var(--radius-s);
-  background: var(--color-frame-bg);
+  background: var(--color-chrome-fill);
   cursor: pointer;
   text-align: start;
   font-family: inherit;
@@ -198,12 +198,12 @@ function select(site: RemoteSite) {
 }
 
 .site-row:hover {
-  background: var(--color-frame-hover);
+  background: var(--color-chrome-hover);
 }
 
 .site-row.is-selected {
-  border-color: var(--color-frame-theme);
-  background: color-mix(in srgb, var(--color-frame-theme) 5%, var(--color-frame-bg));
+  border-color: var(--color-chrome-theme);
+  background: color-mix(in srgb, var(--color-chrome-theme) 5%, var(--color-chrome-fill));
 }
 
 .site-favicon {
@@ -212,7 +212,7 @@ function select(site: RemoteSite) {
   border-radius: var(--radius-s);
   overflow: hidden;
   flex-shrink: 0;
-  background: var(--color-frame-hover);
+  background: var(--color-chrome-hover);
 }
 
 .site-favicon img {
@@ -224,17 +224,17 @@ function select(site: RemoteSite) {
 .site-name {
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg);
+  color: var(--color-chrome-fg);
 }
 
 .site-url {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
 }
 
 .empty-text {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   margin: 0;
 }
 </style>
