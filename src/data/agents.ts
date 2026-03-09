@@ -96,6 +96,16 @@ export function installAgent(id: string): Promise<void> {
   })
 }
 
+/** Uninstall an agent */
+export function uninstallAgent(id: string) {
+  const agent = agents.find(a => a.id === id)
+  if (!agent || id === 'wpcom') return // can't uninstall built-in
+  agent.installed = false
+  const ids = getInstalledIds()
+  ids.delete(id)
+  saveInstalledIds(ids)
+}
+
 /** The coding agents available for the task input picker (order matches menu) */
 const codingAgentOrder = ['wpcom', 'codex', 'claude-code', 'cursor', 'opencode']
 export const codingAgents = agents.filter(a => codingAgentOrder.includes(a.id))

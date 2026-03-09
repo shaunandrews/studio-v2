@@ -6,8 +6,8 @@ import Text from '@/components/primitives/Text.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
-import { codingAgents, installAgent } from '@/data/agents'
-import { skills, installSkill, installAllSkills } from '@/data/skills'
+import { codingAgents, installAgent, uninstallAgent } from '@/data/agents'
+import { skills, installSkill, installAllSkills, uninstallSkill } from '@/data/skills'
 
 const props = defineProps<{
   open: boolean
@@ -208,7 +208,17 @@ const defaultAgentGroups = computed(() => [
 // -- Item menu --
 
 function itemMenuGroups(label: string, onUninstall: () => void) {
-  return [{ items: [{ label: `Uninstall ${label}`, destructive: true, action: onUninstall }] }]
+  return [{ items: [{ label: 'Uninstall', destructive: true, action: onUninstall }] }]
+}
+
+function handleUninstallAgent(id: string) {
+  uninstallAgent(id)
+  delete installStates.value[id]
+}
+
+function handleUninstallSkill(id: string) {
+  uninstallSkill(id)
+  delete skillInstallStates.value[id]
 }
 
 // -- Agent lists --
@@ -480,7 +490,7 @@ function skillInstallLabel(id: string): string {
                       <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
                       <Text variant="small" color="muted">{{ agent.description }}</Text>
                     </div>
-                    <FlyoutMenu :groups="itemMenuGroups(agent.label, () => {})" align="end">
+                    <FlyoutMenu v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
                       <template #trigger="{ toggle }">
                         <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
                       </template>
@@ -548,7 +558,7 @@ function skillInstallLabel(id: string): string {
                       <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
                       <Text variant="small" color="muted">{{ skill.description }}</Text>
                     </div>
-                    <FlyoutMenu :groups="itemMenuGroups(skill.name, () => {})" align="end">
+                    <FlyoutMenu :groups="itemMenuGroups(skill.name, () => handleUninstallSkill(skill.id))" align="end">
                       <template #trigger="{ toggle }">
                         <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
                       </template>

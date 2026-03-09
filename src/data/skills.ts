@@ -137,6 +137,16 @@ export function installSkill(id: string): Promise<void> {
   })
 }
 
+/** Uninstall a skill */
+export function uninstallSkill(id: string) {
+  const skill = skills.find(s => s.id === id)
+  if (!skill) return
+  skill.installed = false
+  const ids = getInstalledIds()
+  ids.delete(id)
+  saveInstalledIds(ids)
+}
+
 /** Install all skills (fake async, staggered) */
 export function installAllSkills(): Promise<void> {
   const uninstalled = skills.filter(s => !s.installed)
