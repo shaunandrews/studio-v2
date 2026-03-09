@@ -4,12 +4,13 @@ export const seedProjects: Site[] = [
   {
     id: 'downstreet-cafe',
     name: 'Downstreet Café',
-    favicon: 'https://api.dicebear.com/9.x/shapes/svg?seed=cafe',
+
     status: 'running',
     url: 'https://downstreet.cafe',
     createdAt: '2025-11-15T10:00:00Z',
     description: 'A cozy neighborhood coffee shop website.',
     mockLayout: 'cafe',
+    themeType: 'block',
     repo: {
       provider: 'github',
       owner: 'downstreet-cafe',
@@ -69,11 +70,67 @@ export const seedProjects: Site[] = [
   {
     id: 'portfolio',
     name: 'Studio Meridian',
-    favicon: 'https://api.dicebear.com/9.x/shapes/svg?seed=meridian',
+
     status: 'running',
     url: 'localhost:3920',
     createdAt: '2026-01-20T09:00:00Z',
     description: 'A design studio portfolio.',
     mockLayout: 'portfolio',
+    themeType: 'block',
+  },
+  {
+    id: 'thread-and-co',
+    name: 'Thread & Co.',
+
+    status: 'running',
+    url: 'localhost:3921',
+    createdAt: '2026-02-10T14:00:00Z',
+    description: 'An online clothing store.',
+    mockLayout: 'store',
+    themeType: 'block',
+    features: ['woocommerce'],
+  },
+  {
+    id: 'arlo-blog',
+    name: 'Arlo Writes',
+    status: 'stopped',
+    url: 'localhost:3922',
+    createdAt: '2026-01-05T08:00:00Z',
+    description: 'A personal blog about design and code.',
+    mockLayout: 'blog',
+    themeType: 'classic',
+  },
+  {
+    id: 'launchpad',
+    name: 'Launchpad',
+
+    status: 'running',
+    url: 'localhost:3923',
+    createdAt: '2026-02-20T11:00:00Z',
+    description: 'SaaS product landing page.',
+    mockLayout: 'landing',
+    themeType: 'block',
+  },
+  {
+    id: 'devref',
+    name: 'DevRef Docs',
+    status: 'stopped',
+    url: 'localhost:3924',
+    createdAt: '2026-03-01T10:00:00Z',
+    description: 'API reference documentation.',
+    mockLayout: 'docs',
+    themeType: 'classic',
+    features: ['jetpack'],
+  },
+  {
+    id: 'wild-lens',
+    name: 'Wild Lens',
+
+    status: 'running',
+    url: 'localhost:3925',
+    createdAt: '2026-02-15T16:00:00Z',
+    description: 'Nature photography portfolio.',
+    mockLayout: 'gallery',
+    themeType: 'block',
   },
 ]

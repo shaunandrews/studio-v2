@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
-import { plus, archive, update, customLink, login, tool } from '@wordpress/icons'
+import { plus, archive, update, customLink, login, tool, home } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
+import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
 import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
+import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
 import { useConversations } from '@/data/useConversations'
 import { useSites } from '@/data/useSites'
 
@@ -79,42 +81,6 @@ function copyToClipboard(text: string, field: string) {
   copiedTimeout = setTimeout(() => { copiedField.value = null }, 1500)
 }
 
-// -- Tilt effect --
-const tiltX = ref(0)
-const tiltY = ref(0)
-const shineX = ref(50)
-const shineY = ref(50)
-const isTilting = ref(false)
-
-const tiltStyle = computed(() => ({
-  transform: isTilting.value
-    ? `perspective(600px) rotateX(${tiltY.value}deg) rotateY(${tiltX.value}deg) scale(1.02)`
-    : 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)',
-}))
-
-const shineStyle = computed(() => ({
-  opacity: isTilting.value ? '1' : '0',
-  background: `radial-gradient(circle at ${shineX.value}% ${shineY.value}%, rgba(255,255,255,0.07) 0%, transparent 60%)`,
-}))
-
-function onThumbMove(e: MouseEvent) {
-  const el = e.currentTarget as HTMLElement
-  const rect = el.getBoundingClientRect()
-  const x = (e.clientX - rect.left) / rect.width
-  const y = (e.clientY - rect.top) / rect.height
-  tiltX.value = (x - 0.5) * 10
-  tiltY.value = (0.5 - y) * 8
-  shineX.value = x * 100
-  shineY.value = y * 100
-  isTilting.value = true
-}
-
-function onThumbLeave() {
-  isTilting.value = false
-  tiltX.value = 0
-  tiltY.value = 0
-}
-
 const archiveMenuRef = ref<InstanceType<typeof FlyoutMenu> | null>(null)
 
 const archivedConvos = computed(() =>
@@ -149,13 +115,13 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     <div v-if="isAllSites" class="site-overview--all">
       <div class="summary__sites">
         <div class="summary__favicons">
-          <img
+          <SiteIcon
             v-for="site in allSites"
             :key="site.id"
             class="summary__favicon"
-            :src="site.favicon"
-            :alt="site.name"
-            :title="site.name"
+            :favicon="site.favicon"
+            :site-name="site.name"
+            :size="24"
           />
         </div>
         <span class="summary__count">{{ allSites.length }} sites</span>
@@ -173,112 +139,27 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     </div>
 
     <!-- Single-site overview -->
-    <div v-else class="site-overview">
+    <div v-else class="site-overview vstack align-center gap-xs px-s pt-l pb-m shrink-0">
       <Tooltip text="Open site in browser" placement="top">
-      <button
-        class="overview__thumb"
-        :style="tiltStyle"
-        @mousemove="onThumbMove"
-        @mouseleave="onThumbLeave"
-        @click="alert('Opening site preview…')"
-      >
-        <div class="overview__thumb-shine" :style="shineStyle" />
-        <!-- Café layout: warm tones, full-width hero, 3 menu cards -->
-        <div v-if="siteLayout === 'cafe'" class="overview__mock mock--cafe">
-          <div class="mock__nav">
-            <span class="mock__logo">{{ siteName || 'My Site' }}</span>
-            <div class="mock__links"><span /><span /><span /></div>
-          </div>
-          <div class="mock__hero">
-            <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&h=400&fit=crop&q=80" alt="" />
-            <div class="mock__hero-overlay"><strong>{{ siteName || 'My Site' }}</strong></div>
-          </div>
-          <div class="mock__grid-3">
-            <div class="mock__card">
-              <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&q=80" alt="" />
-              <div class="mock__card-label" />
-            </div>
-            <div class="mock__card">
-              <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop&q=80" alt="" />
-              <div class="mock__card-label" />
-            </div>
-            <div class="mock__card">
-              <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop&q=80" alt="" />
-              <div class="mock__card-label" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Blog layout: clean white, large featured post with sidebar -->
-        <div v-else-if="siteLayout === 'blog'" class="overview__mock mock--blog">
-          <div class="mock__nav">
-            <span class="mock__logo">{{ siteName || 'My Site' }}</span>
-            <div class="mock__links"><span /><span /><span /><span /></div>
-          </div>
-          <div class="mock__blog-layout">
-            <div class="mock__blog-main">
-              <div class="mock__blog-featured">
-                <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&h=300&fit=crop&q=80" alt="" />
-              </div>
-              <div class="mock__blog-title" />
-              <div class="mock__blog-excerpt" />
-              <div class="mock__blog-excerpt mock__blog-excerpt--short" />
-            </div>
-            <div class="mock__blog-sidebar">
-              <div class="mock__blog-widget">
-                <div class="mock__blog-widget-title" />
-                <div class="mock__blog-widget-line" />
-                <div class="mock__blog-widget-line" />
-                <div class="mock__blog-widget-line mock__blog-widget-line--short" />
-              </div>
-              <div class="mock__blog-widget">
-                <div class="mock__blog-widget-title" />
-                <div class="mock__blog-widget-line" />
-                <div class="mock__blog-widget-line mock__blog-widget-line--short" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Portfolio layout: dark, split hero with text left + image right, project grid -->
-        <div v-else class="overview__mock mock--portfolio">
-          <div class="mock__nav mock__nav--dark">
-            <span class="mock__logo">{{ siteName || 'My Site' }}</span>
-            <div class="mock__links"><span /><span /><span /></div>
-          </div>
-          <div class="mock__split-hero">
-            <div class="mock__split-text">
-              <div class="mock__split-heading" />
-              <div class="mock__split-sub" />
-              <div class="mock__split-sub mock__split-sub--short" />
-              <div class="mock__split-btn" />
-            </div>
-            <div class="mock__split-img">
-              <img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=500&h=400&fit=crop&q=80" alt="" />
-            </div>
-          </div>
-          <div class="mock__grid-2">
-            <div class="mock__site">
-              <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&h=350&fit=crop&q=80" alt="" />
-            </div>
-            <div class="mock__site">
-              <img src="https://images.unsplash.com/photo-1545235617-9465d2a55698?w=500&h=350&fit=crop&q=80" alt="" />
-            </div>
-          </div>
-        </div>
-      </button>
+        <SiteThumbnail :layout="siteLayout" :name="siteName" @click="alert('Opening site preview…')" />
       </Tooltip>
-      <Text variant="body" weight="semibold" class="overview__url">localhost:3920</Text>
-      <span class="overview__creds">
-        <Button variant="tertiary" size="small" label="admin" :tooltip="copiedField === 'user' ? 'Copied!' : 'Copy username'" tooltip-placement="bottom" @click="copyToClipboard('admin', 'user')" />
-        <span class="overview__creds-sep">/</span>
-        <Button variant="tertiary" size="small" label="••••••••" :tooltip="copiedField === 'pass' ? 'Copied!' : 'Copy password'" tooltip-placement="bottom" @click="copyToClipboard('password', 'pass')" />
-      </span>
-      <Button variant="tertiary" size="small" :label="localPath" :tooltip="copiedField === 'path' ? 'Copied!' : 'Copy local path'" tooltip-placement="bottom" @click="copyToClipboard(localPath, 'path')" />
+      <div class="vstack align-center gap-xxxxs">
+        <Text variant="body" weight="semibold" class="overview__url">localhost:3920</Text>
+        <span class="hstack gap-xxxs overview__creds">
+          <Button variant="tertiary" size="mini" label="admin" :tooltip="copiedField === 'user' ? 'Copied!' : 'Copy username'" tooltip-placement="bottom" @click="copyToClipboard('admin', 'user')" />
+          <span class="overview__creds-sep">/</span>
+          <Button variant="tertiary" size="mini" label="••••••••" :tooltip="copiedField === 'pass' ? 'Copied!' : 'Copy password'" tooltip-placement="bottom" @click="copyToClipboard('password', 'pass')" />
+        </span>
+        <Button variant="tertiary" size="mini" :label="localPath" :tooltip="copiedField === 'path' ? 'Copied!' : 'Copy local path'" tooltip-placement="bottom" @click="copyToClipboard(localPath, 'path')" />
+      </div>
     </div>
 
     <!-- Site nav -->
     <nav v-if="!isAllSites" class="site-sections">
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'overview' }" @click="$emit('navigate', 'overview')">
+        <WPIcon :icon="home" :size="20" class="site-sections__icon" />
+        Overview
+      </button>
       <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'sync' }" @click="$emit('navigate', 'sync')">
         <WPIcon :icon="update" :size="20" class="site-sections__icon" />
         Sync
@@ -335,7 +216,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
       <div v-if="sortedConvos.length === 0" class="site-tasks__empty">
         <p class="empty__heading">AI agents that work for you</p>
         <p class="empty__description">Tasks are conversations with AI agents that can edit your site, install plugins, write content, and more.</p>
-        <Button label="Create your first task" variant="primary" size="small" @click="$emit('new-task')" />
+        <Button label="Create your first task" variant="secondary" size="small" @click="$emit('new-task')" />
       </div>
     </div>
 
@@ -358,32 +239,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 /* ── Site overview ── */
 
 .site-overview {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xxxs);
-  padding: var(--space-l) var(--space-s) var(--space-m);
-  flex-shrink: 0;
   border-block-end: 1px solid var(--color-frame-border);
-}
-
-/* Thumbnail */
-.overview__thumb {
-  position: relative;
-  flex-shrink: 0;
-  width: 90%;
-  aspect-ratio: 16 / 10;
-  border-radius: var(--radius-s);
-  border: 1px solid var(--color-frame-border);
-  overflow: hidden;
-  background: white;
-  cursor: pointer;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  transition: transform 120ms var(--ease-default), box-shadow 200ms var(--ease-default);
-  will-change: transform;
-  margin-block-end: var(--space-xs);
 }
 
 /* Override Tooltip's inline-flex trigger so thumb gets full width */
@@ -393,296 +249,6 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   width: 100%;
 }
 
-.overview__thumb:hover {
-  box-shadow: 0 4px 16px var(--color-shadow);
-}
-
-.overview__thumb-shine {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity 120ms var(--ease-default);
-}
-
-/* ── Shared mock styles ── */
-
-.overview__mock {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  width: 1000px;
-  transform-origin: top left;
-  transform: scale(0.313);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  overflow: hidden;
-}
-
-.mock__nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 32px;
-  border-block-end: 1px solid rgba(0, 0, 0, 0.08);
-  background: white;
-}
-
-.mock__nav--dark {
-  background: #1a1a1a;
-  border-block-end-color: rgba(255, 255, 255, 0.08);
-}
-
-.mock__logo {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1a1a;
-}
-
-.mock__nav--dark .mock__logo {
-  color: #fff;
-}
-
-.mock__links {
-  display: flex;
-  gap: 20px;
-}
-
-.mock__links span {
-  display: block;
-  width: 48px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.12);
-}
-
-.mock__nav--dark .mock__links span {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* ── Café layout ── */
-
-.mock--cafe {
-  background: #faf9f7;
-  color: #1a1a1a;
-}
-
-.mock__hero {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
-}
-
-.mock__hero img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.mock__hero-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.35);
-  color: white;
-  font-size: 48px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.mock__grid-3 {
-  display: flex;
-  gap: 14px;
-  padding: 20px;
-}
-
-.mock__card {
-  flex: 1;
-  border-radius: 8px;
-  overflow: hidden;
-  background: white;
-}
-
-.mock__card img {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  display: block;
-}
-
-.mock__card-label {
-  height: 6px;
-  margin: 8px 12px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.08);
-  width: 60%;
-}
-
-/* ── Portfolio layout ── */
-
-.mock--portfolio {
-  background: #111;
-  color: #fff;
-}
-
-.mock__split-hero {
-  display: flex;
-  padding: 40px 32px;
-  gap: 32px;
-  align-items: center;
-}
-
-.mock__split-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.mock__split-heading {
-  height: 28px;
-  width: 70%;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.mock__split-sub {
-  height: 8px;
-  width: 90%;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.mock__split-sub--short {
-  width: 60%;
-}
-
-.mock__split-btn {
-  margin-block-start: 8px;
-  width: 120px;
-  height: 32px;
-  border-radius: 6px;
-  background: #fff;
-}
-
-.mock__split-img {
-  flex: 1;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.mock__split-img img {
-  width: 100%;
-  aspect-ratio: 5 / 4;
-  object-fit: cover;
-  display: block;
-}
-
-.mock__grid-2 {
-  display: flex;
-  gap: 14px;
-  padding: 0 32px 32px;
-}
-
-.mock__site {
-  flex: 1;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.mock__site img {
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
-  display: block;
-}
-
-/* ── Blog layout ── */
-
-.mock--blog {
-  background: #fff;
-  color: #1a1a1a;
-}
-
-.mock__blog-layout {
-  display: flex;
-  gap: 24px;
-  padding: 24px 32px;
-}
-
-.mock__blog-main {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.mock__blog-featured {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.mock__blog-featured img {
-  width: 100%;
-  aspect-ratio: 2 / 1;
-  object-fit: cover;
-  display: block;
-}
-
-.mock__blog-title {
-  height: 18px;
-  width: 75%;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.12);
-}
-
-.mock__blog-excerpt {
-  height: 8px;
-  width: 100%;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.06);
-}
-
-.mock__blog-excerpt--short {
-  width: 65%;
-}
-
-.mock__blog-sidebar {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.mock__blog-widget {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.mock__blog-widget-title {
-  height: 10px;
-  width: 50%;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.12);
-  margin-block-end: 4px;
-}
-
-.mock__blog-widget-line {
-  height: 7px;
-  width: 100%;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.mock__blog-widget-line--short {
-  width: 70%;
-}
-
 .overview__url {
   color: var(--color-frame-theme);
   text-decoration: underline;
@@ -690,12 +256,8 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 }
 
 .overview__creds {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xxxs);
   font-size: var(--font-size-m);
   color: var(--color-frame-fg-muted);
-  margin-block: var(--space-xxs);
 }
 
 .overview__creds-sep {
@@ -937,11 +499,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 }
 
 .summary__favicon {
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-s);
   border: 2px solid var(--color-frame-bg);
-  object-fit: cover;
 }
 
 .summary__favicon + .summary__favicon {

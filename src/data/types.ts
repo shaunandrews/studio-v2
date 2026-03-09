@@ -1,16 +1,20 @@
 export type SiteStatus = 'running' | 'stopped' | 'loading'
 
-export type MockLayout = 'cafe' | 'portfolio' | 'blog'
+export type MockLayout = 'cafe' | 'portfolio' | 'blog' | 'store' | 'landing' | 'docs' | 'gallery'
+
+export type ThemeType = 'block' | 'classic'
 
 export interface Site {
   id: string
   name: string
-  favicon: string
+  favicon?: string
   status: SiteStatus
   url: string
   createdAt: string
   description?: string
   mockLayout?: MockLayout
+  themeType?: ThemeType
+  features?: string[]
   pipeline?: PipelineStage[]
   repo?: GitRepo
   localGit?: LocalGitState

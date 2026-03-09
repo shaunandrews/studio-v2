@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Site } from '@/data/types'
 import StatusIndicator from '@/components/primitives/StatusIndicator.vue'
+import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import { useSites } from '@/data/useSites'
 
 const props = defineProps<{
@@ -27,9 +28,7 @@ function toggleStatus() {
     :class="{ active }"
     @click="$emit('select', site.id)"
   >
-    <div class="site-icon">
-      <img class="site-icon-img" :src="site.favicon" alt="" />
-    </div>
+    <SiteIcon :favicon="site.favicon" :site-name="site.name" :size="24" />
     <span class="site-name">{{ site.name }}</span>
     <StatusIndicator
       class="site-status"
@@ -60,21 +59,6 @@ function toggleStatus() {
 .site-list-item.active {
   background: rgba(255, 255, 255, 0.08);
   color: var(--color-chrome-fg);
-}
-
-.site-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-s);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.site-icon-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 .site-name {

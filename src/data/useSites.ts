@@ -23,7 +23,6 @@ export function useSites() {
     const newSite: Site = {
       id,
       name: 'Untitled site',
-      favicon: `https://api.dicebear.com/9.x/shapes/svg?seed=${encodeURIComponent(id)}`,
       status: 'stopped',
       url: '',
       createdAt: new Date().toISOString(),

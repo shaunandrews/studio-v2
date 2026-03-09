@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { category, chevronDown, moreVertical, wordpress, share, trash, backup, seen, dashboard, desktop, styles, symbolFilled, navigation, layout, page } from '@wordpress/icons'
+import { category, chevronDown, moreVertical, wordpress, share, trash, backup, seen } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
+import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import ButtonSplit from '@/components/primitives/ButtonSplit.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import { useSites } from '@/data/useSites'
+import { useWPAdmin } from '@/data/useWPAdmin'
 
 const openLabel = ref('Browser')
 const openIconUrl = ref('/icons/chrome.svg')
@@ -35,6 +37,11 @@ const emit = defineEmits<{
 
 const { sites } = useSites()
 
+const currentSite = computed(() => sites.value.find(s => s.id === props.siteId))
+const themeType = computed(() => currentSite.value?.themeType ?? 'block')
+const siteFeatures = computed(() => currentSite.value?.features ?? [])
+const { adminLinks } = useWPAdmin(themeType, siteFeatures)
+
 const sitePickerGroups = computed<FlyoutMenuGroup[]>(() => {
   return [{
     items: sites.value.map(p => ({
@@ -59,15 +66,10 @@ const statusTooltip = computed(() => {
 })
 
 const wpMenuGroups = computed<FlyoutMenuGroup[]>(() => [{
-  items: [
-    { label: 'WP admin', icon: dashboard },
-    { label: 'Site Editor', icon: desktop },
-    { label: 'Styles', icon: styles },
-    { label: 'Patterns', icon: symbolFilled },
-    { label: 'Navigation', icon: navigation },
-    { label: 'Templates', icon: layout },
-    { label: 'Pages', icon: page },
-  ],
+  items: adminLinks.value.map(link => ({
+    label: link.label,
+    icon: link.icon,
+  })),
 }])
 
 const openMenuGroups = computed<FlyoutMenuGroup[]>(() => [
@@ -116,7 +118,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
           <button class="site-picker pill pill-with-icon" @click="toggle">
             <span class="pill-icon-start">
               <WPIcon v-if="isAllSites" :icon="category" :size="14" />
-              <img v-else-if="favicon" class="site-picker-favicon" :src="favicon" alt="" />
+              <SiteIcon v-else :favicon="favicon" :site-name="title" :size="14" />
             </span>
             <span class="pill-label">{{ title }}</span>
             <span class="pill-icon-end">
@@ -126,35 +128,33 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         </template>
       </FlyoutMenu>
       <span v-else class="site-title">
-        <img v-if="favicon" class="site-title-favicon" :src="favicon" alt="" />
+        <SiteIcon :favicon="favicon" :site-name="title" :size="28" />
         {{ title }}
       </span>
     </div>
     <div class="toolbar-end">
       <template v-if="!isAllSites">
+        <span class="status-label" :class="status ?? 'stopped'">{{ statusLabel }}</span>
         <Tooltip :text="statusTooltip" placement="bottom">
           <button
-            class="pill status-pill"
+            class="status-btn"
             :class="status ?? 'stopped'"
             :disabled="status === 'loading'"
             @click="emit('toggle-status')"
           >
-            <span class="pill-label">{{ statusLabel }}</span>
-            <span class="pill-icon-end">
-              <svg v-if="status === 'loading'" class="status-spinner" viewBox="0 0 16 16">
-                <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="20 12" />
-              </svg>
-              <svg v-else class="status-shape" viewBox="0 0 10 10">
-                <template v-if="(status ?? 'stopped') === 'stopped'">
-                  <rect class="status-rect" x="1" y="1" width="8" height="8" rx="1.5" />
-                  <path class="status-play" d="M3.5 1.8 L8.5 5 L3.5 8.2Z" />
-                </template>
-                <template v-else>
-                  <circle class="status-circle" cx="5" cy="5" r="4.5" />
-                  <rect class="status-stop" x="1" y="1" width="8" height="8" rx="1.5" />
-                </template>
-              </svg>
-            </span>
+            <svg v-if="status === 'loading'" class="status-spinner" viewBox="0 0 16 16">
+              <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="20 12" />
+            </svg>
+            <svg v-else class="status-shape" viewBox="0 0 10 10">
+              <template v-if="(status ?? 'stopped') === 'stopped'">
+                <rect class="status-rect" x="1" y="1" width="8" height="8" rx="1.5" />
+                <path class="status-play" d="M3.5 1.8 L8.5 5 L3.5 8.2Z" />
+              </template>
+              <template v-else>
+                <circle class="status-circle" cx="5" cy="5" r="4.5" />
+                <rect class="status-stop" x="1" y="1" width="8" height="8" rx="1.5" />
+              </template>
+            </svg>
           </button>
         </Tooltip>
         <FlyoutMenu :groups="wpMenuGroups" surface="dark" align="end">
@@ -231,23 +231,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   white-space: nowrap;
 }
 
-.site-title-favicon {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-s);
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
 /* ── Site picker pill ── */
-
-.site-picker-favicon {
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  object-fit: cover;
-  display: block;
-}
 
 /* ── Toolbar end ── */
 
@@ -299,6 +283,38 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   color: var(--color-frame-fg-muted);
 }
 
+/* ── Status label ── */
+
+.status-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-frame-fg-muted);
+}
+
+.status-label.running {
+  color: var(--color-status-running);
+}
+
+/* ── Status icon button ── */
+
+.status-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-s);
+  background: var(--color-frame-bg);
+  cursor: pointer;
+  transition: background var(--duration-instant) var(--ease-default),
+              border-color var(--duration-instant) var(--ease-default);
+}
+
+.status-btn:hover:not(:disabled) {
+  background: var(--color-frame-hover);
+}
+
 .status-shape {
   width: 10px;
   height: 10px;
@@ -325,8 +341,8 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   opacity: 0;
 }
 
-.status-pill.stopped:hover:not(:disabled) .status-rect { opacity: 0; }
-.status-pill.stopped:hover:not(:disabled) .status-play { opacity: 1; }
+.status-btn.stopped:hover:not(:disabled) .status-rect { opacity: 0; }
+.status-btn.stopped:hover:not(:disabled) .status-play { opacity: 1; }
 
 /* Running: green circle */
 .status-circle {
@@ -339,8 +355,8 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   opacity: 0;
 }
 
-.status-pill.running:hover:not(:disabled) .status-circle { opacity: 0; }
-.status-pill.running:hover:not(:disabled) .status-stop { opacity: 1; }
+.status-btn.running:hover:not(:disabled) .status-circle { opacity: 0; }
+.status-btn.running:hover:not(:disabled) .status-stop { opacity: 1; }
 
 /* Loading: spinner */
 .status-spinner {
@@ -354,16 +370,16 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   to { transform: rotate(360deg); }
 }
 
-.status-pill:disabled {
+.status-btn:disabled {
   cursor: default;
   opacity: 0.7;
 }
 
-.status-pill.running:hover:not(:disabled) {
+.status-btn.running:hover:not(:disabled) {
   border-color: var(--color-status-stop-hover);
 }
 
-.status-pill.stopped:hover:not(:disabled) {
+.status-btn.stopped:hover:not(:disabled) {
   border-color: var(--color-status-running);
 }
 
