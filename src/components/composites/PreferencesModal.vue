@@ -678,7 +678,7 @@ function skillInstallLabel(id: string): string {
 
 .prefs-traffic-dot--minimize,
 .prefs-traffic-dot--maximize {
-  background: #dcdcdc;
+  background: var(--color-frame-fill);
   pointer-events: none;
 }
 
