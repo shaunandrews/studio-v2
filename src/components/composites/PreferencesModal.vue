@@ -313,17 +313,17 @@ function skillInstallLabel(id: string): string {
 
             <!-- ═══ General ═══ -->
             <template v-if="activeTab === 'general'">
-              <div class="prefs__section">
-                <Text variant="caption" weight="semibold" class="prefs__label">Appearance</Text>
-                <div class="prefs__appearance">
+              <div class="prefs-section">
+                <Text variant="caption" weight="semibold" class="prefs-field-label">Appearance</Text>
+                <div class="prefs-appearance">
                   <button
                     v-for="mode in (['system', 'light', 'dark'] as const)"
                     :key="mode"
-                    class="prefs__appearance-btn"
+                    class="prefs-appearance-btn"
                     :class="{ 'is-active': appearance === mode }"
                     @click="setAppearance(mode)"
                   >
-                    <div class="prefs__appearance-preview" :class="`preview--${mode}`">
+                    <div class="prefs-appearance-preview" :class="`preview--${mode}`">
                       <svg viewBox="0 0 139 53" fill="none" xmlns="http://www.w3.org/2000/svg" class="preview__svg">
                         <!-- Dark background -->
                         <rect width="139" height="53" fill="#131313" />
@@ -356,69 +356,69 @@ function skillInstallLabel(id: string): string {
                 </div>
               </div>
 
-              <div class="prefs__section">
-                <Text variant="caption" weight="semibold" class="prefs__label">Language</Text>
+              <div class="prefs-section">
+                <Text variant="caption" weight="semibold" class="prefs-field-label">Language</Text>
                 <Dropdown
                   :model-value="language"
                   :groups="languageGroups"
                   :show-chevron="true"
                   max-height="320px"
-                  class="prefs__dropdown-full"
+                  class="prefs-dropdown-full"
                   @update:model-value="(v: string) => { language = v; localStorage.setItem(LANGUAGE_KEY, v) }"
                 />
               </div>
 
-              <div class="prefs__section">
-                <div class="prefs__hstack">
-                  <div class="prefs__field">
-                    <Text variant="caption" weight="semibold" class="prefs__label">Code editor</Text>
+              <div class="prefs-section">
+                <div class="prefs-hstack">
+                  <div class="prefs-field">
+                    <Text variant="caption" weight="semibold" class="prefs-field-label">Code editor</Text>
                     <Dropdown
                       :model-value="codeEditor"
                       :groups="editorGroups"
                       :show-chevron="true"
-                      class="prefs__dropdown-full"
+                      class="prefs-dropdown-full"
                       @update:model-value="(v: string) => { codeEditor = v; localStorage.setItem(EDITOR_KEY, v) }"
                     />
                   </div>
-                  <div class="prefs__field">
-                    <Text variant="caption" weight="semibold" class="prefs__label">Terminal application</Text>
+                  <div class="prefs-field">
+                    <Text variant="caption" weight="semibold" class="prefs-field-label">Terminal application</Text>
                     <Dropdown
                       :model-value="terminal"
                       :groups="terminalGroups"
                       :show-chevron="true"
-                      class="prefs__dropdown-full"
+                      class="prefs-dropdown-full"
                       @update:model-value="(v: string) => { terminal = v; localStorage.setItem(TERMINAL_KEY, v) }"
                     />
                   </div>
                 </div>
               </div>
 
-              <div class="prefs__section">
-                <div class="prefs__toggle-row">
+              <div class="prefs-section">
+                <div class="prefs-toggle-row">
                   <button
-                    class="prefs__toggle"
+                    class="prefs-toggle"
                     :class="{ 'is-on': cliEnabled }"
                     role="switch"
                     :aria-checked="cliEnabled"
                     @click="cliEnabled = !cliEnabled; localStorage.setItem(CLI_KEY, String(cliEnabled))"
                   >
-                    <span class="prefs__toggle-knob" />
+                    <span class="prefs-toggle-knob" />
                   </button>
                   <Text variant="caption">Studio CLI for terminal</Text>
                 </div>
-                <div class="prefs__toggle-help">
-                  <Text variant="small" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs__learn-more">Learn more</a></Text>
+                <div class="prefs-toggle-help">
+                  <Text variant="small" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs-learn-more">Learn more</a></Text>
                 </div>
               </div>
 
-              <div class="prefs__section">
-                <Text variant="caption" weight="semibold" class="prefs__label">Anthropic API key</Text>
-                <Text variant="caption" color="muted" class="prefs__hint">Required for AI features. Your key is stored locally in the browser.</Text>
-                <div class="prefs__key-row">
+              <div class="prefs-section">
+                <Text variant="caption" weight="semibold" class="prefs-field-label">Anthropic API key</Text>
+                <Text variant="caption" color="muted" class="prefs-hint">Required for AI features. Your key is stored locally in the browser.</Text>
+                <div class="prefs-key-row">
                   <input
                     v-model="apiKey"
                     type="password"
-                    class="prefs__input"
+                    class="prefs-input"
                     placeholder="sk-ant-..."
                     spellcheck="false"
                     autocomplete="off"
@@ -441,9 +441,9 @@ function skillInstallLabel(id: string): string {
                 </div>
               </div>
 
-              <div class="prefs__section">
-                <Text variant="caption" weight="semibold" class="prefs__label">Data</Text>
-                <div class="prefs__data-row">
+              <div class="prefs-section">
+                <Text variant="caption" weight="semibold" class="prefs-field-label">Data</Text>
+                <div class="prefs-data-row">
                   <Button variant="secondary" size="small" label="Reset all data" @click="() => { localStorage.clear(); location.reload() }" />
                   <Text variant="caption" color="muted">Clears all local storage and reloads the prototype.</Text>
                 </div>
@@ -560,6 +560,22 @@ function skillInstallLabel(id: string): string {
                     />
                   </div>
                 </div>
+              </div>
+            </template>
+
+            <!-- ═══ Account ═══ -->
+            <template v-if="activeTab === 'account'">
+              <div class="prefs-account">
+                <img
+                  src="https://2.gravatar.com/avatar/?s=80"
+                  alt=""
+                  class="prefs-account-avatar"
+                />
+                <div class="prefs-account-info">
+                  <Text variant="body" weight="semibold">Shaun Andrews</Text>
+                  <Text variant="caption" color="muted">shaun@automattic.com</Text>
+                </div>
+                <Button variant="secondary" size="small" label="Log out" />
               </div>
             </template>
 
@@ -721,36 +737,15 @@ function skillInstallLabel(id: string): string {
   }
 }
 
-/* -- Tab content (existing styles, kept for later cleanup) -- */
-
-.prefs__section {
-  padding: var(--space-xs) 0;
-}
-
-.prefs__section:first-of-type {
-  padding-block-start: 0;
-}
-
-.prefs__label {
-  display: block;
-  margin-block-end: var(--space-xs);
-}
-
-.prefs__hint {
-  display: block;
-  margin: 0 0 var(--space-xs);
-  line-height: 1.5;
-}
-
 /* -- Appearance picker -- */
 
-.prefs__appearance {
+.prefs-appearance {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-xs);
 }
 
-.prefs__appearance-btn {
+.prefs-appearance-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -761,7 +756,7 @@ function skillInstallLabel(id: string): string {
   cursor: pointer;
 }
 
-.prefs__appearance-preview {
+.prefs-appearance-preview {
   width: 100%;
   border-radius: var(--radius-m);
   border: 1px solid var(--color-frame-border);
@@ -769,13 +764,13 @@ function skillInstallLabel(id: string): string {
   transition: border-color var(--duration-instant) var(--ease-default), outline-color var(--duration-instant) var(--ease-default);
 }
 
-.prefs__appearance-btn.is-active .prefs__appearance-preview {
+.prefs-appearance-btn.is-active .prefs-appearance-preview {
   border-color: transparent;
   outline: 2px solid var(--color-frame-theme);
   outline-offset: 1px;
 }
 
-.prefs__appearance-btn:hover:not(.is-active) .prefs__appearance-preview {
+.prefs-appearance-btn:hover:not(.is-active) .prefs-appearance-preview {
   border-color: var(--color-frame-fg-muted);
 }
 
@@ -787,29 +782,25 @@ function skillInstallLabel(id: string): string {
 
 /* -- Side-by-side fields -- */
 
-.prefs__hstack {
+.prefs-hstack {
   display: flex;
   gap: var(--space-m);
 }
 
-.prefs__field {
+.prefs-field {
   flex: 1;
   min-width: 0;
 }
 
-.prefs__field .prefs__label {
-  margin-block-end: var(--space-xs);
-}
-
 /* -- Toggle control -- */
 
-.prefs__toggle-row {
+.prefs-toggle-row {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
 }
 
-.prefs__toggle {
+.prefs-toggle {
   position: relative;
   width: 32px;
   height: 16px;
@@ -822,12 +813,12 @@ function skillInstallLabel(id: string): string {
   transition: background var(--duration-instant) var(--ease-default), border-color var(--duration-instant) var(--ease-default);
 }
 
-.prefs__toggle.is-on {
+.prefs-toggle.is-on {
   background: var(--color-frame-theme);
   border-color: var(--color-frame-theme);
 }
 
-.prefs__toggle-knob {
+.prefs-toggle-knob {
   position: absolute;
   inset-block-start: 50%;
   inset-inline-start: 1px;
@@ -840,47 +831,31 @@ function skillInstallLabel(id: string): string {
   transition: inset-inline-start var(--duration-instant) var(--ease-default);
 }
 
-.prefs__toggle.is-on .prefs__toggle-knob {
+.prefs-toggle.is-on .prefs-toggle-knob {
   inset-inline-start: 17px;
   background: #fff;
 }
 
-.prefs__toggle-help {
+.prefs-toggle-help {
   padding-inline-start: 40px;
   margin-block-start: var(--space-xxs);
   line-height: 1.4;
 }
 
-.prefs__learn-more {
+.prefs-learn-more {
   color: inherit;
   text-decoration: underline;
 }
 
-/* -- Dropdown full-width -- */
-
-.prefs__dropdown-full {
-  width: 100%;
-}
-
-.prefs__dropdown-full :deep(.dropdown-trigger) {
-  width: 100%;
-  height: 32px;
-  padding: 0 var(--space-xs);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-s);
-  background: var(--color-frame-bg);
-  justify-content: space-between;
-}
-
 /* -- API key row -- */
 
-.prefs__key-row {
+.prefs-key-row {
   display: flex;
   gap: var(--space-xxs);
   align-items: center;
 }
 
-.prefs__input {
+.prefs-input {
   flex: 1;
   height: 32px;
   padding: 0 var(--space-xs);
@@ -892,18 +867,18 @@ function skillInstallLabel(id: string): string {
   font-size: var(--font-size-s);
 }
 
-.prefs__input:focus {
+.prefs-input:focus {
   outline: 2px solid var(--color-frame-theme);
   outline-offset: -1px;
 }
 
-.prefs__input::placeholder {
+.prefs-input::placeholder {
   color: var(--color-frame-fg-muted);
 }
 
 /* -- Data row -- */
 
-.prefs__data-row {
+.prefs-data-row {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
@@ -1030,5 +1005,29 @@ function skillInstallLabel(id: string): string {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* -- Account tab -- */
+
+.prefs-account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+}
+
+.prefs-account-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.prefs-account-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxxs);
 }
 </style>
