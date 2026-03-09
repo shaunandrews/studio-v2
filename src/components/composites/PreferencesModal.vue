@@ -425,7 +425,7 @@ function skillInstallLabel(id: string): string {
                   <Text variant="caption">Studio CLI for terminal</Text>
                 </div>
                 <div class="prefs-toggle-help">
-                  <Text variant="small" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs-learn-more">Learn more</a></Text>
+                  <Text variant="caption" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs-learn-more">Learn more</a></Text>
                 </div>
               </div>
 
@@ -477,7 +477,7 @@ function skillInstallLabel(id: string): string {
               <!-- Installed -->
               <div class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="small" weight="semibold" color="muted" class="prefs-group-label">INSTALLED</Text>
+                  <Text variant="caption" weight="semibold" color="muted" class="prefs-group-label">INSTALLED</Text>
                 </div>
                 <div class="prefs-list">
                   <div
@@ -488,7 +488,7 @@ function skillInstallLabel(id: string): string {
                     <img :src="agent.icon" :alt="agent.label" class="prefs-list-icon" />
                     <div class="prefs-list-info">
                       <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
-                      <Text variant="small" color="muted">{{ agent.description }}</Text>
+                      <Text variant="caption" color="muted">{{ agent.description }}</Text>
                     </div>
                     <FlyoutMenu v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
                       <template #trigger="{ toggle }">
@@ -502,7 +502,7 @@ function skillInstallLabel(id: string): string {
               <!-- Available -->
               <div v-if="availableAgents.length" class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="small" weight="semibold" color="muted" class="prefs-group-label">AVAILABLE</Text>
+                  <Text variant="caption" weight="semibold" color="muted" class="prefs-group-label">AVAILABLE</Text>
                   <button class="prefs-install-all">Install all</button>
                 </div>
                 <div class="prefs-list">
@@ -514,7 +514,7 @@ function skillInstallLabel(id: string): string {
                     <img :src="agent.icon" :alt="agent.label" class="prefs-list-icon" />
                     <div class="prefs-list-info">
                       <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
-                      <Text variant="small" color="muted">{{ agent.description }}</Text>
+                      <Text variant="caption" color="muted">{{ agent.description }}</Text>
                     </div>
                     <Button
                       variant="secondary"
@@ -537,7 +537,7 @@ function skillInstallLabel(id: string): string {
                   class="prefs-dropdown-full"
                   @update:model-value="setAgent"
                 />
-                <Text variant="small" color="muted" class="prefs-hint">This is the agent that will be used for all new tasks.</Text>
+                <Text variant="caption" color="muted" class="prefs-hint">This is the agent that will be used for all new tasks.</Text>
               </div>
             </template>
 
@@ -550,13 +550,13 @@ function skillInstallLabel(id: string): string {
               <!-- Installed -->
               <div class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="small" weight="semibold" color="muted" class="prefs-group-label">INSTALLED</Text>
+                  <Text variant="caption" weight="semibold" color="muted" class="prefs-group-label">INSTALLED</Text>
                 </div>
                 <div v-if="installedSkills.length" class="prefs-list">
                   <div v-for="skill in installedSkills" :key="skill.id" class="prefs-list-item">
                     <div class="prefs-list-info">
                       <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
-                      <Text variant="small" color="muted">{{ skill.description }}</Text>
+                      <Text variant="caption" color="muted">{{ skill.description }}</Text>
                     </div>
                     <FlyoutMenu :groups="itemMenuGroups(skill.name, () => handleUninstallSkill(skill.id))" align="end">
                       <template #trigger="{ toggle }">
@@ -570,7 +570,7 @@ function skillInstallLabel(id: string): string {
               <!-- Available -->
               <div v-if="availableSkills.length" class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="small" weight="semibold" color="muted" class="prefs-group-label">AVAILABLE</Text>
+                  <Text variant="caption" weight="semibold" color="muted" class="prefs-group-label">AVAILABLE</Text>
                   <button class="prefs-install-all" :disabled="installingAll" @click="startInstallAll">
                     {{ installingAll ? 'Installing…' : 'Install all' }}
                   </button>
@@ -579,7 +579,7 @@ function skillInstallLabel(id: string): string {
                   <div v-for="skill in availableSkills" :key="skill.id" class="prefs-list-item">
                     <div class="prefs-list-info">
                       <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
-                      <Text variant="small" color="muted" class="prefs-list-desc-truncate">{{ skill.description }}</Text>
+                      <Text variant="caption" color="muted" class="prefs-list-desc-truncate">{{ skill.description }}</Text>
                     </div>
                     <Button
                       variant="secondary"
@@ -610,12 +610,12 @@ function skillInstallLabel(id: string): string {
 
               <!-- Usage -->
               <div class="prefs-section">
-                <Text variant="small" weight="semibold" color="muted" class="prefs-usage-label">USAGE</Text>
+                <Text variant="caption" weight="semibold" color="muted" class="prefs-usage-label">USAGE</Text>
                 <div class="prefs-usage-meters">
                   <div class="prefs-meter">
                     <div class="prefs-meter-header">
                       <Text variant="caption" weight="medium">Preview sites</Text>
-                      <Text variant="small" color="muted">1 of 10</Text>
+                      <Text variant="caption" color="muted">1 of 10</Text>
                     </div>
                     <div class="prefs-meter-track">
                       <div class="prefs-meter-fill" style="width: 10%"></div>
@@ -624,7 +624,7 @@ function skillInstallLabel(id: string): string {
                   <div class="prefs-meter">
                     <div class="prefs-meter-header">
                       <Text variant="caption" weight="medium">AI chat</Text>
-                      <Text variant="small" color="muted">0 of 1,000</Text>
+                      <Text variant="caption" color="muted">0 of 1,000</Text>
                     </div>
                     <div class="prefs-meter-track">
                       <div class="prefs-meter-fill" style="width: 0%"></div>
@@ -703,7 +703,7 @@ function skillInstallLabel(id: string): string {
 
 .prefs-traffic-dot--minimize,
 .prefs-traffic-dot--maximize {
-  background: var(--color-frame-fill);
+  background: var(--color-frame-border);
   pointer-events: none;
 }
 
@@ -719,7 +719,7 @@ function skillInstallLabel(id: string): string {
 
 .prefs-tab {
   flex: 1;
-  padding: var(--space-xs) 0;
+  padding: var(--space-s) 0;
   border: none;
   border-block-end: 2px solid transparent;
   background: none;
