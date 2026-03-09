@@ -24,6 +24,43 @@ const toggleA = ref(false)
 const toggleB = ref(true)
 const toggleC = ref(true)
 
+// Dropdown demos
+const dropdownBasic = ref('Sonnet 4.5')
+const dropdownSurface = ref('claude-sonnet-4-6')
+const dropdownSize = ref('vscode')
+const dropdownChevron = ref('en')
+
+const modelGroups = [
+  { label: 'Anthropic', options: [
+    { value: 'claude-opus-4-6', label: 'Claude Opus 4.6' },
+    { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6' },
+    { value: 'claude-haiku-4-5', label: 'Claude Haiku 4.5' },
+  ]},
+  { label: 'OpenAI', options: [
+    { value: 'gpt-4.5', label: 'GPT-4.5' },
+    { value: 'gpt-4', label: 'GPT-4' },
+  ]},
+]
+
+const editorGroups = [
+  { label: '', options: [
+    { value: 'vscode', label: 'Visual Studio Code' },
+    { value: 'phpstorm', label: 'PhpStorm' },
+    { value: 'sublime', label: 'Sublime Text' },
+    { value: 'zed', label: 'Zed' },
+  ]},
+]
+
+const languageGroups = [
+  { label: '', options: [
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Español' },
+    { value: 'fr', label: 'Français' },
+    { value: 'de', label: 'Deutsch' },
+    { value: 'ja', label: '日本語' },
+  ]},
+]
+
 const contextMenuGroups: FlyoutMenuGroup[] = [
   {
     items: [
@@ -361,17 +398,117 @@ const icons = Object.entries(wpIcons)
           <tr><td><code>modelValue</code></td><td><code>string</code></td><td>—</td><td>Currently selected value (v-model)</td></tr>
           <tr><td><code>groups</code></td><td><code>{ label, options[] }[]</code></td><td>—</td><td>Grouped options</td></tr>
           <tr><td><code>placement</code></td><td><code>'above' | 'below'</code></td><td><code>'above'</code></td><td>Menu direction</td></tr>
+          <tr><td><code>align</code></td><td><code>'start' | 'center' | 'end'</code></td><td><code>'start'</code></td><td>Menu alignment</td></tr>
+          <tr><td><code>surface</code></td><td><code>'light' | 'dark'</code></td><td><code>'light'</code></td><td>Trigger surface</td></tr>
+          <tr><td><code>menuSurface</code></td><td><code>'light' | 'dark'</code></td><td>Same as surface</td><td>Menu surface (override)</td></tr>
+          <tr><td><code>size</code></td><td><code>'small' | 'default'</code></td><td><code>'small'</code></td><td>Trigger size</td></tr>
+          <tr><td><code>variant</code></td><td><code>'inline' | 'field'</code></td><td><code>'inline'</code></td><td>Trigger style — inline (bare) or field (bordered input)</td></tr>
+          <tr><td><code>width</code></td><td><code>'hug' | 'fill'</code></td><td><code>'hug'</code></td><td>Width behavior — hug content or fill parent</td></tr>
+          <tr><td><code>showChevron</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Show chevron icon</td></tr>
+          <tr><td><code>triggerIcon</code></td><td><code>Icon</code></td><td>—</td><td>Icon-only trigger (hides label)</td></tr>
+          <tr><td><code>tooltip</code></td><td><code>string</code></td><td>—</td><td>Tooltip on trigger</td></tr>
+          <tr><td><code>maxHeight</code></td><td><code>string</code></td><td>—</td><td>Max height for menu panel</td></tr>
         </tbody>
       </table>
     </div>
 
-    <h3>Preview</h3>
-    <div class="example-section">
-      <Dropdown
-        model-value="Sonnet 4.5"
-        :groups="[{ label: 'Anthropic', options: ['Opus 4.6', 'Sonnet 4.5', 'Haiku 4.5'] }, { label: 'OpenAI', options: ['GPT-4.5', 'GPT-4'] }]"
-        placement="below"
-      />
+    <h3>Trigger Variants</h3>
+
+    <div class="example-row">
+      <div class="example-cell">
+        <Text variant="heading-small" color="muted" tag="h4">Default (small, light)</Text>
+        <div class="example-section">
+          <Dropdown
+            v-model="dropdownBasic"
+            :groups="[{ label: 'Anthropic', options: ['Opus 4.6', 'Sonnet 4.5', 'Haiku 4.5'] }, { label: 'OpenAI', options: ['GPT-4.5', 'GPT-4'] }]"
+            placement="below"
+          />
+        </div>
+      </div>
+
+      <div class="example-cell">
+        <Text variant="heading-small" color="muted" tag="h4">No chevron</Text>
+        <div class="example-section">
+          <Dropdown
+            v-model="dropdownBasic"
+            :groups="[{ label: 'Anthropic', options: ['Opus 4.6', 'Sonnet 4.5', 'Haiku 4.5'] }]"
+            :show-chevron="false"
+            placement="below"
+          />
+        </div>
+      </div>
+
+      <div class="example-cell">
+        <Text variant="heading-small" color="muted" tag="h4">Icon-only trigger</Text>
+        <div class="example-section">
+          <Dropdown
+            v-model="dropdownSize"
+            :groups="editorGroups"
+            :trigger-icon="cog"
+            tooltip="Settings"
+            placement="below"
+          />
+        </div>
+      </div>
+    </div>
+
+    <h3>Surfaces</h3>
+
+    <div class="example-row">
+      <div class="example-cell">
+        <Text variant="heading-small" color="muted" tag="h4">Light surface</Text>
+        <div class="example-section">
+          <Dropdown
+            v-model="dropdownSurface"
+            :groups="modelGroups"
+            surface="light"
+            placement="below"
+          />
+        </div>
+      </div>
+
+      <div class="example-cell">
+        <Text variant="heading-small" color="muted" tag="h4">Dark surface</Text>
+        <div class="example-section example-section--dark">
+          <Dropdown
+            v-model="dropdownSurface"
+            :groups="modelGroups"
+            surface="dark"
+            placement="below"
+          />
+        </div>
+      </div>
+    </div>
+
+    <h3>Field variant</h3>
+    <p class="section-desc">Bordered input-like trigger. Use <code>variant="field"</code>. Combine with <code>width="fill"</code> for full-width form controls.</p>
+
+    <div class="example-row">
+      <div class="example-cell" style="max-width: 220px">
+        <Text variant="heading-small" color="muted" tag="h4">Hug (default)</Text>
+        <div class="example-section">
+          <Dropdown
+            v-model="dropdownChevron"
+            :groups="languageGroups"
+            variant="field"
+            placement="below"
+            max-height="240px"
+          />
+        </div>
+      </div>
+
+      <div class="example-cell" style="max-width: 220px">
+        <Text variant="heading-small" color="muted" tag="h4">Fill</Text>
+        <div class="example-section">
+          <Dropdown
+            v-model="dropdownSize"
+            :groups="editorGroups"
+            variant="field"
+            width="fill"
+            placement="below"
+          />
+        </div>
+      </div>
     </div>
   </section>
 
@@ -752,3 +889,4 @@ const icons = Object.entries(wpIcons)
     </div>
   </section>
 </template>
+

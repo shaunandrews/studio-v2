@@ -28,12 +28,16 @@ const props = withDefaults(defineProps<{
   surface?: 'light' | 'dark'
   menuSurface?: 'light' | 'dark'
   size?: 'small' | 'default'
+  variant?: 'inline' | 'field'
+  width?: 'hug' | 'fill'
   tooltip?: string
   maxHeight?: string
 }>(), {
   showChevron: true,
   surface: 'light',
   size: 'small',
+  variant: 'inline',
+  width: 'hug',
 })
 
 const emit = defineEmits<{
@@ -76,11 +80,22 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
     :placement="placement"
     :align="align ?? 'start'"
     :max-height="maxHeight"
+    :class="{ 'dropdown-fill': width === 'fill' }"
   >
     <template #trigger="{ toggle, open }">
-      <div class="dropdown" :class="{ 'surface-dark': surface === 'dark' }">
+      <div class="dropdown" :class="{
+        'surface-dark': surface === 'dark',
+        'dropdown--fill': width === 'fill',
+      }">
         <Tooltip :text="open ? undefined : tooltip">
-          <button class="dropdown-trigger hstack" :class="[`dropdown-trigger--${size}`]" @click="toggle">
+          <button
+            class="dropdown-trigger hstack"
+            :class="[
+              `dropdown-trigger--${size}`,
+              { 'dropdown-trigger--field': variant === 'field' },
+            ]"
+            @click="toggle"
+          >
             <WPIcon v-if="triggerIcon" :icon="currentOption()?.icon || triggerIcon" :size="18" />
             <span v-else class="dropdown-label">{{ currentOption()?.label || modelValue }}</span>
             <WPIcon v-if="showChevron" :icon="chevronDown" :size="16" />
@@ -94,6 +109,18 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
 <style scoped>
 .dropdown {
   position: relative;
+}
+
+.dropdown--fill {
+  width: 100%;
+}
+
+.dropdown--fill :deep(.tooltip-trigger) {
+  display: flex;
+}
+
+.dropdown--fill .dropdown-trigger {
+  width: 100%;
 }
 
 .dropdown-trigger {
@@ -126,6 +153,20 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
   color: var(--color-frame-fg-muted);
 }
 
+/* Field variant — bordered input-like trigger */
+.dropdown-trigger--field {
+  height: 32px;
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-s);
+  background: var(--color-frame-bg);
+  justify-content: space-between;
+}
+
+.dropdown-trigger--field:hover {
+  border-color: var(--color-frame-fg-muted);
+}
+
 /* Dark surface trigger */
 .dropdown.surface-dark .dropdown-trigger {
   color: var(--color-chrome-fg-muted);
@@ -135,4 +176,18 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
   background: var(--color-chrome-hover);
   color: var(--color-chrome-fg);
 }
+
+.dropdown.surface-dark .dropdown-trigger--field {
+  border-color: var(--color-chrome-border);
+  background: var(--color-chrome-bg);
+}
+
+.dropdown.surface-dark .dropdown-trigger--field:hover {
+  border-color: var(--color-chrome-fg-muted);
+}
+</style>
+
+<!-- Unscoped: the fill class falls through to popover-anchor via attrs -->
+<style>
+.dropdown-fill { width: 100%; }
 </style>

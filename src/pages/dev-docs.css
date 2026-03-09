@@ -235,7 +235,14 @@
 }
 
 .example-row {
-  margin-block-end: var(--space-xxxs);
+  display: flex;
+  gap: var(--space-l);
+  margin-block-end: var(--space-m);
+}
+
+.example-cell {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Code block */
