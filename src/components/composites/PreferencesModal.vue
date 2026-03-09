@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { moreVertical } from '@wordpress/icons'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
+import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
 import { codingAgents, installAgent } from '@/data/agents'
 import { skills, installSkill, installAllSkills } from '@/data/skills'
@@ -202,6 +204,12 @@ const defaultAgentGroups = computed(() => [
       .map(a => ({ value: a.id, label: a.label })),
   },
 ])
+
+// -- Item menu --
+
+function itemMenuGroups(label: string, onUninstall: () => void) {
+  return [{ items: [{ label: `Uninstall ${label}`, destructive: true, action: onUninstall }] }]
+}
 
 // -- Agent lists --
 
@@ -457,8 +465,10 @@ function skillInstallLabel(id: string): string {
               </Text>
 
               <!-- Installed -->
-              <div class="prefs-section">
-                <Text variant="small" weight="semibold" color="muted" class="prefs-section-label">INSTALLED</Text>
+              <div class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="small" weight="semibold" color="muted" class="prefs-group-label">INSTALLED</Text>
+                </div>
                 <div class="prefs-list">
                   <div
                     v-for="agent in installedAgents"
@@ -470,15 +480,19 @@ function skillInstallLabel(id: string): string {
                       <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
                       <Text variant="small" color="muted">{{ agent.description }}</Text>
                     </div>
-                    <button class="prefs-list-menu">&#x22EE;</button>
+                    <FlyoutMenu :groups="itemMenuGroups(agent.label, () => {})" align="end">
+                      <template #trigger="{ toggle }">
+                        <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
+                      </template>
+                    </FlyoutMenu>
                   </div>
                 </div>
               </div>
 
               <!-- Available -->
-              <div v-if="availableAgents.length" class="prefs-section">
-                <div class="prefs-section-header">
-                  <Text variant="small" weight="semibold" color="muted">AVAILABLE</Text>
+              <div v-if="availableAgents.length" class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="small" weight="semibold" color="muted" class="prefs-group-label">AVAILABLE</Text>
                   <button class="prefs-install-all">Install all</button>
                 </div>
                 <div class="prefs-list">
@@ -524,23 +538,29 @@ function skillInstallLabel(id: string): string {
               </Text>
 
               <!-- Installed -->
-              <div class="prefs-section">
-                <Text variant="small" weight="semibold" color="muted" class="prefs-section-label">INSTALLED</Text>
+              <div class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="small" weight="semibold" color="muted" class="prefs-group-label">INSTALLED</Text>
+                </div>
                 <div v-if="installedSkills.length" class="prefs-list">
                   <div v-for="skill in installedSkills" :key="skill.id" class="prefs-list-item">
                     <div class="prefs-list-info">
                       <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
                       <Text variant="small" color="muted">{{ skill.description }}</Text>
                     </div>
-                    <button class="prefs-list-menu">&#x22EE;</button>
+                    <FlyoutMenu :groups="itemMenuGroups(skill.name, () => {})" align="end">
+                      <template #trigger="{ toggle }">
+                        <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
+                      </template>
+                    </FlyoutMenu>
                   </div>
                 </div>
               </div>
 
               <!-- Available -->
-              <div v-if="availableSkills.length" class="prefs-section">
-                <div class="prefs-section-header">
-                  <Text variant="small" weight="semibold" color="muted">AVAILABLE</Text>
+              <div v-if="availableSkills.length" class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="small" weight="semibold" color="muted" class="prefs-group-label">AVAILABLE</Text>
                   <button class="prefs-install-all" :disabled="installingAll" @click="startInstallAll">
                     {{ installingAll ? 'Installing…' : 'Install all' }}
                   </button>
@@ -893,6 +913,8 @@ function skillInstallLabel(id: string): string {
   line-height: 1.5;
 }
 
+/* -- Sections (General tab, standalone sections) -- */
+
 .prefs-section {
   margin-block-start: var(--space-m);
 }
@@ -901,31 +923,47 @@ function skillInstallLabel(id: string): string {
   margin-block-start: 0;
 }
 
-.prefs-section-label {
-  display: block;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-block-end: var(--space-xs);
+/* -- Group wrapper (Installed / Available sections) -- */
+
+.prefs-group {
+  margin-block-start: var(--space-m);
+  background: var(--color-frame-fill);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-l);
+  overflow: clip;
 }
 
-.prefs-section-header {
+.prefs-group:first-child {
+  margin-block-start: 0;
+}
+
+.prefs-group-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-block-end: var(--space-xs);
+  height: 42px;
+  padding-inline: var(--space-m) var(--space-xs);
+  padding-block: var(--space-xs);
+}
+
+.prefs-group-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .prefs-list {
+  background: var(--color-frame-bg);
   border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-l);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.07);
   overflow: hidden;
 }
 
 .prefs-list-item {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
-  padding: var(--space-s);
+  gap: var(--space-xxs);
+  padding: var(--space-xs);
 }
 
 .prefs-list-item + .prefs-list-item {
@@ -933,8 +971,8 @@ function skillInstallLabel(id: string): string {
 }
 
 .prefs-list-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   object-fit: contain;
 }
@@ -945,21 +983,6 @@ function skillInstallLabel(id: string): string {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
-}
-
-.prefs-list-menu {
-  padding: var(--space-xxs);
-  border: none;
-  background: none;
-  color: var(--color-frame-fg-muted);
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: var(--radius-s);
-}
-
-.prefs-list-menu:hover {
-  background: var(--color-frame-hover);
-  color: var(--color-frame-fg);
 }
 
 .prefs-install-all {
