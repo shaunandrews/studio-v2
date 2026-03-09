@@ -165,7 +165,7 @@ function onConnect() {
 
     <!-- Suggested match -->
     <div v-if="suggestedSite && !browsing" class="csm__suggestion">
-      <Text variant="caption" color="muted" tag="p" class="csm__suggestion-label">Best match</Text>
+      <Text variant="body-small" color="muted" tag="p" class="csm__suggestion-label">Best match</Text>
       <div class="csm__suggestion-card">
         <div class="csm__site-info">
           <span class="csm__site-name">{{ suggestedSite.name }}</span>

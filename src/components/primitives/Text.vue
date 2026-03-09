@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  variant?: 'body' | 'body-large' | 'caption' | 'label'
+  variant?: 'body' | 'body-large' | 'body-small' | 'heading-small'
   tag?: string
   color?: 'default' | 'secondary' | 'muted' | 'inherit'
   weight?: 'regular' | 'medium' | 'semibold'
@@ -35,12 +35,12 @@ defineProps<{
   line-height: var(--line-height-normal);
 }
 
-.text--caption {
+.text--body-small {
   font-size: var(--font-size-s);
   line-height: var(--line-height-normal);
 }
 
-.text--label {
+.text--heading-small {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;

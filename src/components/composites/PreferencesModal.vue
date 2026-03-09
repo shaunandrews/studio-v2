@@ -310,7 +310,7 @@ function skillInstallLabel(id: string): string {
               <span class="prefs-traffic-dot prefs-traffic-dot--minimize" />
               <span class="prefs-traffic-dot prefs-traffic-dot--maximize" />
             </div>
-            <Text variant="caption" weight="semibold" class="prefs-title">Studio Preferences</Text>
+            <Text variant="body-small" weight="semibold" class="prefs-title">Studio Preferences</Text>
           </div>
 
           <!-- Tabs -->
@@ -332,7 +332,7 @@ function skillInstallLabel(id: string): string {
             <!-- ═══ General ═══ -->
             <template v-if="activeTab === 'general'">
               <div class="prefs-section">
-                <Text variant="caption" weight="semibold" class="prefs-field-label">Appearance</Text>
+                <Text variant="body-small" weight="semibold" class="prefs-field-label">Appearance</Text>
                 <div class="prefs-appearance">
                   <button
                     v-for="mode in (['system', 'light', 'dark'] as const)"
@@ -369,13 +369,13 @@ function skillInstallLabel(id: string): string {
                         <circle cx="22.5" cy="25.5" r="1.5" fill="#1fd15b" />
                       </svg>
                     </div>
-                    <Text variant="caption" :color="appearance === mode ? 'default' : 'muted'" weight="medium">{{ mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark' }}</Text>
+                    <Text variant="body-small" :color="appearance === mode ? 'default' : 'muted'" weight="medium">{{ mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark' }}</Text>
                   </button>
                 </div>
               </div>
 
               <div class="prefs-section">
-                <Text variant="caption" weight="semibold" class="prefs-field-label">Language</Text>
+                <Text variant="body-small" weight="semibold" class="prefs-field-label">Language</Text>
                 <Dropdown
                   :model-value="language"
                   :groups="languageGroups"
@@ -389,7 +389,7 @@ function skillInstallLabel(id: string): string {
               <div class="prefs-section">
                 <div class="prefs-hstack">
                   <div class="prefs-field">
-                    <Text variant="caption" weight="semibold" class="prefs-field-label">Code editor</Text>
+                    <Text variant="body-small" weight="semibold" class="prefs-field-label">Code editor</Text>
                     <Dropdown
                       :model-value="codeEditor"
                       :groups="editorGroups"
@@ -399,7 +399,7 @@ function skillInstallLabel(id: string): string {
                     />
                   </div>
                   <div class="prefs-field">
-                    <Text variant="caption" weight="semibold" class="prefs-field-label">Terminal application</Text>
+                    <Text variant="body-small" weight="semibold" class="prefs-field-label">Terminal application</Text>
                     <Dropdown
                       :model-value="terminal"
                       :groups="terminalGroups"
@@ -422,16 +422,16 @@ function skillInstallLabel(id: string): string {
                   >
                     <span class="prefs-toggle-knob" />
                   </button>
-                  <Text variant="caption">Studio CLI for terminal</Text>
+                  <Text variant="body-small">Studio CLI for terminal</Text>
                 </div>
                 <div class="prefs-toggle-help">
-                  <Text variant="caption" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs-learn-more">Learn more</a></Text>
+                  <Text variant="body-small" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs-learn-more">Learn more</a></Text>
                 </div>
               </div>
 
               <div class="prefs-section">
-                <Text variant="caption" weight="semibold" class="prefs-field-label">Anthropic API key</Text>
-                <Text variant="caption" color="muted" class="prefs-hint">Required for AI features. Your key is stored locally in the browser.</Text>
+                <Text variant="body-small" weight="semibold" class="prefs-field-label">Anthropic API key</Text>
+                <Text variant="body-small" color="muted" class="prefs-hint">Required for AI features. Your key is stored locally in the browser.</Text>
                 <div class="prefs-key-row">
                   <input
                     v-model="apiKey"
@@ -460,24 +460,24 @@ function skillInstallLabel(id: string): string {
               </div>
 
               <div class="prefs-section">
-                <Text variant="caption" weight="semibold" class="prefs-field-label">Data</Text>
+                <Text variant="body-small" weight="semibold" class="prefs-field-label">Data</Text>
                 <div class="prefs-data-row">
                   <Button variant="secondary" size="small" label="Reset all data" @click="() => { localStorage.clear(); location.reload() }" />
-                  <Text variant="caption" color="muted">Clears all local storage and reloads the prototype.</Text>
+                  <Text variant="body-small" color="muted">Clears all local storage and reloads the prototype.</Text>
                 </div>
               </div>
             </template>
 
             <!-- ═══ Agents ═══ -->
             <template v-if="activeTab === 'agents'">
-              <Text variant="caption" color="muted" class="prefs-description">
+              <Text variant="body-small" color="muted" class="prefs-description">
                 Agents are AI-powered assistants that can perform actions and accomplish tasks for you.
               </Text>
 
               <!-- Installed -->
               <div class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="caption" weight="semibold" color="muted" class="prefs-group-label">INSTALLED</Text>
+                  <Text variant="heading-small" color="muted">INSTALLED</Text>
                 </div>
                 <div class="prefs-list">
                   <div
@@ -487,8 +487,8 @@ function skillInstallLabel(id: string): string {
                   >
                     <img :src="agent.icon" :alt="agent.label" class="prefs-list-icon" />
                     <div class="prefs-list-info">
-                      <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
-                      <Text variant="caption" color="muted">{{ agent.description }}</Text>
+                      <Text variant="body-small" weight="semibold">{{ agent.label }}</Text>
+                      <Text variant="body-small" color="muted">{{ agent.description }}</Text>
                     </div>
                     <FlyoutMenu v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
                       <template #trigger="{ toggle }">
@@ -502,7 +502,7 @@ function skillInstallLabel(id: string): string {
               <!-- Available -->
               <div v-if="availableAgents.length" class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="caption" weight="semibold" color="muted" class="prefs-group-label">AVAILABLE</Text>
+                  <Text variant="heading-small" color="muted">AVAILABLE</Text>
                   <button class="prefs-install-all">Install all</button>
                 </div>
                 <div class="prefs-list">
@@ -513,8 +513,8 @@ function skillInstallLabel(id: string): string {
                   >
                     <img :src="agent.icon" :alt="agent.label" class="prefs-list-icon" />
                     <div class="prefs-list-info">
-                      <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
-                      <Text variant="caption" color="muted">{{ agent.description }}</Text>
+                      <Text variant="body-small" weight="semibold">{{ agent.label }}</Text>
+                      <Text variant="body-small" color="muted">{{ agent.description }}</Text>
                     </div>
                     <Button
                       variant="secondary"
@@ -529,7 +529,7 @@ function skillInstallLabel(id: string): string {
 
               <!-- Default agent -->
               <div class="prefs-section">
-                <Text variant="caption" weight="semibold" class="prefs-field-label">Default agent</Text>
+                <Text variant="body-small" weight="semibold" class="prefs-field-label">Default agent</Text>
                 <Dropdown
                   :model-value="defaultAgent"
                   :groups="defaultAgentGroups"
@@ -537,26 +537,26 @@ function skillInstallLabel(id: string): string {
                   class="prefs-dropdown-full"
                   @update:model-value="setAgent"
                 />
-                <Text variant="caption" color="muted" class="prefs-hint">This is the agent that will be used for all new tasks.</Text>
+                <Text variant="body-small" color="muted" class="prefs-hint">This is the agent that will be used for all new tasks.</Text>
               </div>
             </template>
 
             <!-- ═══ Skills ═══ -->
             <template v-if="activeTab === 'skills'">
-              <Text variant="caption" color="muted" class="prefs-description">
+              <Text variant="body-small" color="muted" class="prefs-description">
                 Agents can decide to use skills to help them accomplish specialized tasks.
               </Text>
 
               <!-- Installed -->
               <div class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="caption" weight="semibold" color="muted" class="prefs-group-label">INSTALLED</Text>
+                  <Text variant="heading-small" color="muted">INSTALLED</Text>
                 </div>
                 <div v-if="installedSkills.length" class="prefs-list">
                   <div v-for="skill in installedSkills" :key="skill.id" class="prefs-list-item">
                     <div class="prefs-list-info">
-                      <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
-                      <Text variant="caption" color="muted">{{ skill.description }}</Text>
+                      <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                      <Text variant="body-small" color="muted">{{ skill.description }}</Text>
                     </div>
                     <FlyoutMenu :groups="itemMenuGroups(skill.name, () => handleUninstallSkill(skill.id))" align="end">
                       <template #trigger="{ toggle }">
@@ -570,7 +570,7 @@ function skillInstallLabel(id: string): string {
               <!-- Available -->
               <div v-if="availableSkills.length" class="prefs-group">
                 <div class="prefs-group-header">
-                  <Text variant="caption" weight="semibold" color="muted" class="prefs-group-label">AVAILABLE</Text>
+                  <Text variant="heading-small" color="muted">AVAILABLE</Text>
                   <button class="prefs-install-all" :disabled="installingAll" @click="startInstallAll">
                     {{ installingAll ? 'Installing…' : 'Install all' }}
                   </button>
@@ -578,8 +578,8 @@ function skillInstallLabel(id: string): string {
                 <div class="prefs-list">
                   <div v-for="skill in availableSkills" :key="skill.id" class="prefs-list-item">
                     <div class="prefs-list-info">
-                      <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
-                      <Text variant="caption" color="muted" class="prefs-list-desc-truncate">{{ skill.description }}</Text>
+                      <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                      <Text variant="body-small" color="muted" class="prefs-list-desc-truncate">{{ skill.description }}</Text>
                     </div>
                     <Button
                       variant="secondary"
@@ -603,19 +603,19 @@ function skillInstallLabel(id: string): string {
                 />
                 <div class="prefs-account-info">
                   <Text variant="body" weight="semibold">Shaun Andrews</Text>
-                  <Text variant="caption" color="muted">shaun@automattic.com</Text>
+                  <Text variant="body-small" color="muted">shaun@automattic.com</Text>
                 </div>
                 <Button variant="secondary" size="small" label="Log out" />
               </div>
 
               <!-- Usage -->
               <div class="prefs-section">
-                <Text variant="caption" weight="semibold" color="muted" class="prefs-usage-label">USAGE</Text>
+                <Text variant="heading-small" color="muted">USAGE</Text>
                 <div class="prefs-usage-meters">
                   <div class="prefs-meter">
                     <div class="prefs-meter-header">
-                      <Text variant="caption" weight="medium">Preview sites</Text>
-                      <Text variant="caption" color="muted">1 of 10</Text>
+                      <Text variant="body-small" weight="medium">Preview sites</Text>
+                      <Text variant="body-small" color="muted">1 of 10</Text>
                     </div>
                     <div class="prefs-meter-track">
                       <div class="prefs-meter-fill" style="width: 10%"></div>
@@ -623,8 +623,8 @@ function skillInstallLabel(id: string): string {
                   </div>
                   <div class="prefs-meter">
                     <div class="prefs-meter-header">
-                      <Text variant="caption" weight="medium">AI chat</Text>
-                      <Text variant="caption" color="muted">0 of 1,000</Text>
+                      <Text variant="body-small" weight="medium">AI chat</Text>
+                      <Text variant="body-small" color="muted">0 of 1,000</Text>
                     </div>
                     <div class="prefs-meter-track">
                       <div class="prefs-meter-fill" style="width: 0%"></div>
@@ -974,15 +974,10 @@ function skillInstallLabel(id: string): string {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 42px;
   padding-inline: var(--space-m) var(--space-xs);
   padding-block: var(--space-xs);
 }
 
-.prefs-group-label {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
 
 .prefs-list {
   background: var(--color-frame-bg);
@@ -1080,13 +1075,6 @@ function skillInstallLabel(id: string): string {
 }
 
 /* -- Usage meters -- */
-
-.prefs-usage-label {
-  display: block;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-block-end: var(--space-s);
-}
 
 .prefs-usage-meters {
   display: flex;

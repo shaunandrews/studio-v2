@@ -225,8 +225,8 @@ Use the `<Text>` component for all text rendering. It maps to the tokens above.
 |---------|------------|--------|--------|---------|
 | `body` | `--font-size-l` | regular | — | Default UI text, descriptions |
 | `body-large` | `--font-size-xl` | regular | line-height normal | Input text, longer content |
-| `caption` | `--font-size-s` | regular | — | Secondary info, small labels |
-| `label` | `--font-size-xs` | semibold | uppercase, letter-spacing 0.05em | Section headings, group labels |
+| `body-small` | `--font-size-s` | regular | — | Secondary info, descriptions |
+| `heading-small` | `--font-size-xs` | semibold | uppercase, letter-spacing 0.05em | Section headings, group labels |
 
 #### Colors
 
@@ -302,10 +302,10 @@ Use `tag` prop to control the rendered element: `<Text variant="label" tag="h2">
 - Fixed container size (`--space-m`)
 
 ### Text
-- **Props:** `variant` (body/body-large/caption/label), `tag` (string, default 'span'), `color` (default/secondary/muted/inherit), `weight` (regular/medium/semibold)
+- **Props:** `variant` (body/body-large/body-small/heading-small), `tag` (string, default 'span'), `color` (default/secondary/muted/inherit), `weight` (regular/medium/semibold)
 - Polymorphic — renders as any HTML element via `tag`
 - Use for all UI text; replaces raw font-size/weight in component styles
-- `label` variant includes uppercase + letter-spacing (section headings, group labels)
+- `heading-small` variant includes uppercase + letter-spacing (section headings, group labels)
 
 ### Titlebar
 - **Regions:** `titlebar-start` (traffic lights), `titlebar-center` (app title), `titlebar-end` (settings/help)

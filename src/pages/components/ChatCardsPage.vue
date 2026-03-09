@@ -134,7 +134,7 @@ const cardStates: CardUiState[] = ['default', 'loading', 'complete', 'error', 'd
     <div class="example-section">
       <div class="vstack gap-s">
         <div v-for="s in cardStates" :key="s">
-          <Text variant="caption" color="muted" style="margin-bottom: 4px; display: block;">{{ s }}</Text>
+          <Text variant="body-small" color="muted" style="margin-bottom: 4px; display: block;">{{ s }}</Text>
           <ChatCard :state="s">
             <Text color="secondary">Card content in <strong>{{ s }}</strong> state</Text>
           </ChatCard>

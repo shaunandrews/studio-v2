@@ -306,7 +306,7 @@ const icons = Object.entries(wpIcons)
           cost="$0.08"
           :messages="12"
         />
-        <Text variant="caption" color="muted">Neutral ring color, click for details</Text>
+        <Text variant="body-small" color="muted">Neutral ring color, click for details</Text>
       </div>
     </div>
 
@@ -320,7 +320,7 @@ const icons = Object.entries(wpIcons)
           cost="$0.52"
           :messages="47"
         />
-        <Text variant="caption" color="muted">Red ring at 80% capacity</Text>
+        <Text variant="body-small" color="muted">Red ring at 80% capacity</Text>
       </div>
     </div>
 
@@ -334,7 +334,7 @@ const icons = Object.entries(wpIcons)
           cost="$0.68"
           :messages="63"
         />
-        <Text variant="caption" color="muted">Red pulsing ring at 95% capacity</Text>
+        <Text variant="body-small" color="muted">Red pulsing ring at 95% capacity</Text>
       </div>
     </div>
 
@@ -465,7 +465,7 @@ const icons = Object.entries(wpIcons)
       <Modal :open="modalOpen" title="Modal title" @close="modalOpen = false">
         <Text variant="body" color="secondary">This is a modal dialog. Click the backdrop or press Escape to close.</Text>
         <template #footer>
-          <Text variant="caption" color="muted" class="flex-1">Short helpful text.</Text>
+          <Text variant="body-small" color="muted" class="flex-1">Short helpful text.</Text>
           <Button variant="secondary" label="Cancel" @click="modalOpen = false" />
           <Button variant="primary" label="Confirm" @click="modalOpen = false" />
         </template>
@@ -506,7 +506,7 @@ const icons = Object.entries(wpIcons)
           { name: 'Kilo', label: 'Peach' },
         ]" :key="item.name">
           <SiteIcon :site-name="item.name" :size="36" />
-          <Text variant="caption" color="muted">{{ item.label }}</Text>
+          <Text variant="body-small" color="muted">{{ item.label }}</Text>
         </div>
       </div>
     </div>
@@ -516,19 +516,19 @@ const icons = Object.entries(wpIcons)
       <div class="hstack gap-m align-center">
         <div class="vstack align-center gap-xxs">
           <SiteIcon site-name="Downstreet Cafe" :size="16" />
-          <Text variant="caption" color="muted">16</Text>
+          <Text variant="body-small" color="muted">16</Text>
         </div>
         <div class="vstack align-center gap-xxs">
           <SiteIcon site-name="Downstreet Cafe" :size="24" />
-          <Text variant="caption" color="muted">24</Text>
+          <Text variant="body-small" color="muted">24</Text>
         </div>
         <div class="vstack align-center gap-xxs">
           <SiteIcon site-name="Downstreet Cafe" :size="32" />
-          <Text variant="caption" color="muted">32</Text>
+          <Text variant="body-small" color="muted">32</Text>
         </div>
         <div class="vstack align-center gap-xxs">
           <SiteIcon site-name="Downstreet Cafe" :size="48" />
-          <Text variant="caption" color="muted">48</Text>
+          <Text variant="body-small" color="muted">48</Text>
         </div>
       </div>
     </div>
@@ -538,7 +538,7 @@ const icons = Object.entries(wpIcons)
       <div class="hstack gap-m align-center">
         <SiteIcon site-name="WordPress" favicon="https://s.w.org/favicon.ico" :size="24" />
         <SiteIcon site-name="WordPress" favicon="https://s.w.org/favicon.ico" :size="36" />
-        <Text variant="caption" color="muted">Real favicon takes precedence over fallback</Text>
+        <Text variant="body-small" color="muted">Real favicon takes precedence over fallback</Text>
       </div>
     </div>
   </section>
@@ -595,7 +595,7 @@ const icons = Object.entries(wpIcons)
       <table>
         <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>variant</code></td><td><code>'body' | 'body-large' | 'caption' | 'label'</code></td><td><code>'body'</code></td><td>Text style preset</td></tr>
+          <tr><td><code>variant</code></td><td><code>'body' | 'body-large' | 'body-small' | 'heading-small'</code></td><td><code>'body'</code></td><td>Text style preset</td></tr>
           <tr><td><code>tag</code></td><td><code>string</code></td><td><code>'span'</code></td><td>HTML element to render</td></tr>
           <tr><td><code>color</code></td><td><code>'default' | 'secondary' | 'muted' | 'inherit'</code></td><td>—</td><td>Text color</td></tr>
           <tr><td><code>weight</code></td><td><code>'regular' | 'medium' | 'semibold'</code></td><td>—</td><td>Override font weight</td></tr>
@@ -606,8 +606,8 @@ const icons = Object.entries(wpIcons)
     <h3>Variants</h3>
     <div class="example-section">
       <div class="vstack gap-xxxs">
-        <Text variant="label" color="muted">Label — 11px / 600 / uppercase</Text>
-        <Text variant="caption" color="secondary">Caption — 12px</Text>
+        <Text variant="heading-small" color="muted">Label — 11px / 600 / uppercase</Text>
+        <Text variant="body-small" color="secondary">Caption — 12px</Text>
         <Text variant="body">Body — 14px (default)</Text>
         <Text variant="body-large">Body Large — 16px</Text>
       </div>
@@ -634,9 +634,9 @@ const icons = Object.entries(wpIcons)
     <h3>Polymorphic tag</h3>
     <div class="example-section">
       <div class="vstack gap-xxxs">
-        <Text variant="label" color="muted" tag="h2">Rendered as h2</Text>
+        <Text variant="heading-small" color="muted" tag="h2">Rendered as h2</Text>
         <Text variant="body" tag="p">Rendered as p</Text>
-        <Text variant="caption" tag="small">Rendered as small</Text>
+        <Text variant="body-small" tag="small">Rendered as small</Text>
       </div>
     </div>
   </section>
@@ -662,11 +662,11 @@ const icons = Object.entries(wpIcons)
       <div class="vstack gap-m">
         <div class="hstack gap-m align-center">
           <Toggle v-model="toggleA" />
-          <Text variant="caption" color="muted">Off (no label)</Text>
+          <Text variant="body-small" color="muted">Off (no label)</Text>
         </div>
         <div class="hstack gap-m align-center">
           <Toggle v-model="toggleB" />
-          <Text variant="caption" color="muted">On (no label)</Text>
+          <Text variant="body-small" color="muted">On (no label)</Text>
         </div>
         <Toggle v-model="toggleC" label="Files and folders" />
       </div>

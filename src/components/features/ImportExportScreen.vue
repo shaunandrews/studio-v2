@@ -169,7 +169,7 @@ const importStateKey = computed(() => {
       <div class="ie__section">
         <div class="ie__section-header">
           <Text variant="body" color="muted" tag="h3">Import</Text>
-          <Text variant="caption" color="muted">Restore a site from a backup or migrate from another host.</Text>
+          <Text variant="body-small" color="muted">Restore a site from a backup or migrate from another host.</Text>
         </div>
         <div
           class="ie__dropzone"
@@ -199,7 +199,7 @@ const importStateKey = computed(() => {
               :disabled="importDisabled"
               @click="openFileSelector"
             />
-            <Text variant="caption" color="muted">or drag a file anywhere</Text>
+            <Text variant="body-small" color="muted">or drag a file anywhere</Text>
           </div>
 
           <!-- Confirm state -->
@@ -213,7 +213,7 @@ const importStateKey = computed(() => {
               <span class="ie__file-sep">&mdash;</span>
               <span class="ie__file-size">{{ formatFileSize(importState?.fileSize ?? 0) }}</span>
             </div>
-            <Text variant="caption" color="muted">This will replace the current site.</Text>
+            <Text variant="body-small" color="muted">This will replace the current site.</Text>
             <div class="ie__confirm-actions">
               <Button variant="primary" label="Import" @click="confirmImport" />
               <Button variant="tertiary" label="Cancel" @click="cancelImport" />
@@ -242,7 +242,7 @@ const importStateKey = computed(() => {
                 <span class="ie__step-label">{{ stage.label }}</span>
               </div>
             </div>
-            <Text variant="caption" color="muted">{{ importState?.statusMessage ?? 'Importing...' }}</Text>
+            <Text variant="body-small" color="muted">{{ importState?.statusMessage ?? 'Importing...' }}</Text>
           </div>
 
           <!-- Done state -->
@@ -274,7 +274,7 @@ const importStateKey = computed(() => {
 
       <!-- Error display -->
       <div v-if="fileError" class="ie__error">
-        <Text variant="caption" color="muted">{{ fileError }}</Text>
+        <Text variant="body-small" color="muted">{{ fileError }}</Text>
       </div>
 
       <!-- Hidden file input -->
@@ -291,13 +291,13 @@ const importStateKey = computed(() => {
       <div class="ie__section ie__section--export">
         <div class="ie__section-header">
           <Text variant="body" color="muted" tag="h3">Export</Text>
-          <Text variant="caption" color="muted">Your data, your rules. Take it anywhere.</Text>
+          <Text variant="body-small" color="muted">Your data, your rules. Take it anywhere.</Text>
         </div>
         <div class="ie__export-body">
         <Transition name="ie-fade" mode="out-in">
           <!-- Empty site -->
           <div v-if="isNewSite && !isExporting && !isExportDone" key="export-empty" class="ie__export-empty">
-            <Text variant="caption" color="muted">Nothing to export yet. Start building your site first.</Text>
+            <Text variant="body-small" color="muted">Nothing to export yet. Start building your site first.</Text>
           </div>
 
           <!-- Idle: options panel + button -->
@@ -333,7 +333,7 @@ const importStateKey = computed(() => {
                 <span class="ie__step-label">{{ stage.label }}</span>
               </div>
             </div>
-            <Text variant="caption" color="muted">{{ exportState?.statusMessage ?? 'Exporting...' }}</Text>
+            <Text variant="body-small" color="muted">{{ exportState?.statusMessage ?? 'Exporting...' }}</Text>
           </div>
 
           <!-- Export done -->
@@ -343,7 +343,7 @@ const importStateKey = computed(() => {
               <path d="M11 18 L16 23 L25 13" />
             </svg>
             <Text variant="body" weight="medium">Export complete!</Text>
-            <Text variant="caption" color="muted">{{ exportState?.statusMessage }}</Text>
+            <Text variant="body-small" color="muted">{{ exportState?.statusMessage }}</Text>
             <button class="ie__text-btn" @click="clearExport">Export again</button>
           </div>
         </Transition>

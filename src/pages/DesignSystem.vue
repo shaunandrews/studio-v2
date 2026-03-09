@@ -44,11 +44,11 @@ function scrollTo(e: Event, id: string) {
         <div class="utility-grid mt-xs">
           <div class="utility-item">
             <code>--font-family</code>
-            <Text variant="caption" color="secondary">-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif</Text>
+            <Text variant="body-small" color="secondary">-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif</Text>
           </div>
           <div class="utility-item">
             <code>--font-family-mono</code>
-            <Text variant="caption" color="secondary" style="font-family: var(--font-family-mono)">'SF Mono', 'Fira Code', monospace</Text>
+            <Text variant="body-small" color="secondary" style="font-family: var(--font-family-mono)">'SF Mono', 'Fira Code', monospace</Text>
           </div>
         </div>
       </div>
@@ -69,7 +69,7 @@ function scrollTo(e: Event, id: string) {
             ]" :key="t.token">
               <td><code>{{ t.token }}</code></td>
               <td class="token-val">{{ t.val }}</td>
-              <td><Text variant="caption" color="secondary">{{ t.use }}</Text></td>
+              <td><Text variant="body-small" color="secondary">{{ t.use }}</Text></td>
               <td :style="{ fontSize: `var(${t.token})` }">The quick brown fox</td>
             </tr>
           </tbody>
@@ -81,15 +81,15 @@ function scrollTo(e: Event, id: string) {
         <div class="hstack gap-l mt-xs">
           <div class="vstack gap-xxxs">
             <Text weight="regular">Regular</Text>
-            <Text variant="caption" color="muted">--font-weight-regular (400)</Text>
+            <Text variant="body-small" color="muted">--font-weight-regular (400)</Text>
           </div>
           <div class="vstack gap-xxxs">
             <Text weight="medium">Medium</Text>
-            <Text variant="caption" color="muted">--font-weight-medium (500)</Text>
+            <Text variant="body-small" color="muted">--font-weight-medium (500)</Text>
           </div>
           <div class="vstack gap-xxxs">
             <Text weight="semibold">Semibold</Text>
-            <Text variant="caption" color="muted">--font-weight-semibold (600)</Text>
+            <Text variant="body-small" color="muted">--font-weight-semibold (600)</Text>
           </div>
         </div>
       </div>
@@ -99,11 +99,11 @@ function scrollTo(e: Event, id: string) {
         <div class="utility-grid mt-xs">
           <div class="utility-item">
             <code>--line-height-tight</code>
-            <Text variant="caption" color="secondary">1.2 — labels, single-line</Text>
+            <Text variant="body-small" color="secondary">1.2 — labels, single-line</Text>
           </div>
           <div class="utility-item">
             <code>--line-height-normal</code>
-            <Text variant="caption" color="secondary">1.4 — body text, multi-line</Text>
+            <Text variant="body-small" color="secondary">1.4 — body text, multi-line</Text>
           </div>
         </div>
       </div>
@@ -130,14 +130,14 @@ function scrollTo(e: Event, id: string) {
               <code>caption</code>
               <span class="type-spec">--font-size-s / regular</span>
             </div>
-            <Text variant="caption" color="secondary">The quick brown fox jumps over the lazy dog</Text>
+            <Text variant="body-small" color="secondary">The quick brown fox jumps over the lazy dog</Text>
           </div>
           <div class="type-sample hstack gap-m">
             <div class="type-meta">
               <code>label</code>
               <span class="type-spec">--font-size-xs / semibold / uppercase</span>
             </div>
-            <Text variant="label" color="muted">The quick brown fox jumps over the lazy dog</Text>
+            <Text variant="heading-small" color="muted">The quick brown fox jumps over the lazy dog</Text>
           </div>
         </div>
       </div>
@@ -223,6 +223,11 @@ function scrollTo(e: Event, id: string) {
           <span class="swatch-name">chrome-hover</span>
           <code class="swatch-value">rgba(255,255,255,0.05)</code>
         </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-chrome-fill)"></div>
+          <span class="swatch-name">chrome-fill</span>
+          <code class="swatch-value">rgba(255,255,255,0.02)</code>
+        </div>
       </div>
     </section>
 
@@ -260,6 +265,11 @@ function scrollTo(e: Event, id: string) {
           <div class="swatch-color" style="background: var(--color-frame-hover)"></div>
           <span class="swatch-name">frame-hover</span>
           <code class="swatch-value">rgba(0,0,0,0.05)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-frame-fill)"></div>
+          <span class="swatch-name">frame-fill</span>
+          <code class="swatch-value">rgba(0,0,0,0.02)</code>
         </div>
       </div>
     </section>
@@ -347,11 +357,11 @@ function scrollTo(e: Event, id: string) {
       <div class="utility-grid mt-xs">
         <div class="utility-item">
           <code>.hstack</code>
-          <Text variant="caption" color="secondary">flex + align-items: center</Text>
+          <Text variant="body-small" color="secondary">flex + align-items: center</Text>
         </div>
         <div class="utility-item">
           <code>.vstack</code>
-          <Text variant="caption" color="secondary">flex + flex-direction: column</Text>
+          <Text variant="body-small" color="secondary">flex + flex-direction: column</Text>
         </div>
       </div>
 
@@ -368,23 +378,23 @@ function scrollTo(e: Event, id: string) {
       </div>
 
       <h3>Spacing Utilities</h3>
-      <Text variant="caption" color="secondary" tag="p" class="mt-xs">Padding and margin mapped to space tokens. Pattern: <code>.p-xs</code>, <code>.px-xxs</code>, <code>.py-xxxs</code>, <code>.pt-s</code>, <code>.mb-xs</code>, <code>.me-xxs</code>, <code>.mx-auto</code></Text>
+      <Text variant="body-small" color="secondary" tag="p" class="mt-xs">Padding and margin mapped to space tokens. Pattern: <code>.p-xs</code>, <code>.px-xxs</code>, <code>.py-xxxs</code>, <code>.pt-s</code>, <code>.mb-xs</code>, <code>.me-xxs</code>, <code>.mx-auto</code></Text>
       <div class="utility-grid mt-xs">
         <div class="utility-item">
           <code>.p-{size}</code>
-          <Text variant="caption" color="secondary">Uniform padding</Text>
+          <Text variant="body-small" color="secondary">Uniform padding</Text>
         </div>
         <div class="utility-item">
           <code>.px-{size}</code> / <code>.py-{size}</code>
-          <Text variant="caption" color="secondary">Inline / block axis</Text>
+          <Text variant="body-small" color="secondary">Inline / block axis</Text>
         </div>
         <div class="utility-item">
           <code>.pt-</code> <code>.pb-</code> <code>.ps-</code> <code>.pe-</code>
-          <Text variant="caption" color="secondary">Individual sides</Text>
+          <Text variant="body-small" color="secondary">Individual sides</Text>
         </div>
         <div class="utility-item">
           <code>.m-{size}</code> / <code>.mx-</code> / <code>.my-</code>
-          <Text variant="caption" color="secondary">Margin (same pattern)</Text>
+          <Text variant="body-small" color="secondary">Margin (same pattern)</Text>
         </div>
       </div>
 
@@ -392,19 +402,19 @@ function scrollTo(e: Event, id: string) {
       <div class="utility-grid mt-xs">
         <div class="utility-item">
           <code>.flex-1</code>
-          <Text variant="caption" color="secondary">flex: 1</Text>
+          <Text variant="body-small" color="secondary">flex: 1</Text>
         </div>
         <div class="utility-item">
           <code>.shrink-0</code>
-          <Text variant="caption" color="secondary">flex-shrink: 0</Text>
+          <Text variant="body-small" color="secondary">flex-shrink: 0</Text>
         </div>
         <div class="utility-item">
           <code>.min-w-0</code>
-          <Text variant="caption" color="secondary">min-width: 0</Text>
+          <Text variant="body-small" color="secondary">min-width: 0</Text>
         </div>
         <div class="utility-item">
           <code>.flex-wrap</code>
-          <Text variant="caption" color="secondary">flex-wrap: wrap</Text>
+          <Text variant="body-small" color="secondary">flex-wrap: wrap</Text>
         </div>
       </div>
 
@@ -412,19 +422,19 @@ function scrollTo(e: Event, id: string) {
       <div class="utility-grid mt-xs">
         <div class="utility-item">
           <code>.justify-between</code>
-          <Text variant="caption" color="secondary">space-between</Text>
+          <Text variant="body-small" color="secondary">space-between</Text>
         </div>
         <div class="utility-item">
           <code>.justify-center</code>
-          <Text variant="caption" color="secondary">center</Text>
+          <Text variant="body-small" color="secondary">center</Text>
         </div>
         <div class="utility-item">
           <code>.align-stretch</code>
-          <Text variant="caption" color="secondary">Override hstack's center</Text>
+          <Text variant="body-small" color="secondary">Override hstack's center</Text>
         </div>
         <div class="utility-item">
           <code>.align-center</code>
-          <Text variant="caption" color="secondary">center (for vstack)</Text>
+          <Text variant="body-small" color="secondary">center (for vstack)</Text>
         </div>
       </div>
     </section>
@@ -449,7 +459,7 @@ function scrollTo(e: Event, id: string) {
               <div class="motion-demo-bar" :style="{ transitionDuration: `var(${d.token})` }"></div>
             </div>
             <span class="motion-val">{{ d.val }}</span>
-            <Text variant="caption" color="muted">{{ d.use }}</Text>
+            <Text variant="body-small" color="muted">{{ d.use }}</Text>
           </div>
         </div>
       </div>
@@ -459,19 +469,19 @@ function scrollTo(e: Event, id: string) {
         <div class="utility-grid mt-xs">
           <div class="utility-item">
             <code>--ease-default</code>
-            <Text variant="caption" color="secondary">ease — general purpose</Text>
+            <Text variant="body-small" color="secondary">ease — general purpose</Text>
           </div>
           <div class="utility-item">
             <code>--ease-in-out</code>
-            <Text variant="caption" color="secondary">ease-in-out — symmetrical transitions</Text>
+            <Text variant="body-small" color="secondary">ease-in-out — symmetrical transitions</Text>
           </div>
           <div class="utility-item">
             <code>--ease-out</code>
-            <Text variant="caption" color="secondary">ease-out — elements entering/appearing</Text>
+            <Text variant="body-small" color="secondary">ease-out — elements entering/appearing</Text>
           </div>
           <div class="utility-item">
             <code>--ease-in</code>
-            <Text variant="caption" color="secondary">ease-in — elements leaving/disappearing</Text>
+            <Text variant="body-small" color="secondary">ease-in — elements leaving/disappearing</Text>
           </div>
         </div>
       </div>
@@ -482,7 +492,7 @@ function scrollTo(e: Event, id: string) {
         <div class="utility-grid mt-xs">
           <div class="utility-item">
             <code>--transition-hover</code>
-            <Text variant="caption" color="secondary">150ms ease — hover &amp; active states</Text>
+            <Text variant="body-small" color="secondary">150ms ease — hover &amp; active states</Text>
           </div>
         </div>
       </div>

@@ -18,9 +18,9 @@ import type { Site } from '@/data/types'
 import '@/pages/dev-docs.css'
 
 const sampleSites: Site[] = [
-  { id: '1', name: 'Downstreet Cafe', favicon: 'https://api.dicebear.com/9.x/shapes/svg?seed=cafe', status: 'running', url: 'downstreetcafe.local', createdAt: '2025-01-01', description: 'A cozy cafe site' },
-  { id: '2', name: "Shaun's Blog", favicon: 'https://api.dicebear.com/9.x/shapes/svg?seed=blog', status: 'running', url: 'shaunsblog.local', createdAt: '2025-01-02' },
-  { id: '3', name: 'UI Portfolio', favicon: 'https://api.dicebear.com/9.x/shapes/svg?seed=portfolio', status: 'stopped', url: 'portfolio.local', createdAt: '2025-01-03' },
+  { id: '1', name: 'Downstreet Cafe', status: 'running', url: 'downstreetcafe.local', createdAt: '2025-01-01', description: 'A cozy cafe site' },
+  { id: '2', name: "Shaun's Blog", status: 'running', url: 'shaunsblog.local', createdAt: '2025-01-02' },
+  { id: '3', name: 'UI Portfolio', status: 'stopped', url: 'portfolio.local', createdAt: '2025-01-03' },
 ]
 
 const prefsOpen = ref(false)
@@ -188,7 +188,7 @@ const shortcutsOpen = ref(false)
     <h3>With start and end</h3>
     <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
       <PanelToolbar>
-        <template #start><Text variant="caption" color="secondary">Left content</Text></template>
+        <template #start><Text variant="body-small" color="secondary">Left content</Text></template>
         <template #end><Button variant="tertiary" :icon="cog" size="small" /></template>
       </PanelToolbar>
     </div>
@@ -197,7 +197,7 @@ const shortcutsOpen = ref(false)
     <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
       <PanelToolbar>
         <template #start><Button variant="tertiary" :icon="chevronDown" size="small" /></template>
-        <template #center><Text variant="caption" color="muted">https://example.local</Text></template>
+        <template #center><Text variant="body-small" color="muted">https://example.local</Text></template>
         <template #end><Button variant="tertiary" :icon="cog" size="small" /></template>
       </PanelToolbar>
     </div>
@@ -366,12 +366,12 @@ const shortcutsOpen = ref(false)
 
     <h3>Running site</h3>
     <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <SiteToolbar title="Downstreet Cafe" favicon="https://api.dicebear.com/9.x/shapes/svg?seed=cafe" status="running" />
+      <SiteToolbar title="Downstreet Cafe" status="running" />
     </div>
 
     <h3>Stopped site</h3>
     <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <SiteToolbar title="UI Portfolio" favicon="https://api.dicebear.com/9.x/shapes/svg?seed=portfolio" status="stopped" />
+      <SiteToolbar title="UI Portfolio" status="stopped" />
     </div>
   </section>
 
