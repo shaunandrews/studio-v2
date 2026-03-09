@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { file as fileIcon, check } from '@wordpress/icons'
-import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
-import PrefsNavItem from '@/components/composites/PrefsNavItem.vue'
 import Text from '@/components/primitives/Text.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
@@ -21,15 +19,25 @@ const emit = defineEmits<{
   close: []
 }>()
 
+// -- Escape key --
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') emit('close')
+}
+
+onMounted(() => document.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
+
 // -- Nav --
 
-type Tab = 'general' | 'agents' | 'skills'
+type Tab = 'general' | 'agents' | 'skills' | 'account'
 const activeTab = ref<Tab>('general')
 
 const tabs: { id: Tab, label: string }[] = [
   { id: 'general', label: 'General' },
   { id: 'agents', label: 'Agents' },
   { id: 'skills', label: 'Skills' },
+  { id: 'account', label: 'Account' },
 ]
 
 // -- Appearance --
@@ -322,378 +330,486 @@ const instructionFiles = [
 </script>
 
 <template>
-  <Modal :open="open" :width="viewingSkill ? '1080px' : '780px'" title="Preferences" @close="emit('close')">
-    <div class="prefs">
-      <div class="prefs__body">
-        <!-- Nav -->
-        <nav class="prefs__nav">
-          <PrefsNavItem
-            v-for="tab in tabs"
-            :key="tab.id"
-            :label="tab.label"
-            :active="activeTab === tab.id"
-            @click="activeTab = tab.id; viewingSkill = null"
-          />
-        </nav>
-
-        <!-- Content -->
-        <div class="prefs__content">
-
-          <!-- ═══ General ═══ -->
-          <template v-if="activeTab === 'general'">
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Appearance</Text>
-              <div class="prefs__appearance">
-                <button
-                  v-for="mode in (['system', 'light', 'dark'] as const)"
-                  :key="mode"
-                  class="prefs__appearance-btn"
-                  :class="{ 'is-active': appearance === mode }"
-                  @click="setAppearance(mode)"
-                >
-                  <div class="prefs__appearance-preview" :class="`preview--${mode}`">
-                    <svg viewBox="0 0 139 53" fill="none" xmlns="http://www.w3.org/2000/svg" class="preview__svg">
-                      <!-- Dark background -->
-                      <rect width="139" height="53" fill="#131313" />
-                      <!-- Content panel -->
-                      <rect v-if="mode === 'light'" x="26" y="4" width="109" height="96" rx="4" fill="#fff" />
-                      <rect v-if="mode === 'dark'" x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" />
-                      <template v-if="mode === 'system'">
-                        <defs>
-                          <clipPath id="system-clip">
-                            <rect x="26" y="4" width="109" height="96" rx="4" />
-                          </clipPath>
-                        </defs>
-                        <rect x="26" y="4" width="109" height="96" rx="4" fill="#fff" />
-                        <rect x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" clip-path="url(#system-clip)" style="clip-path: polygon(100% 0, 0 100%, 100% 100%)" />
-                      </template>
-                      <!-- Sidebar items -->
-                      <rect x="3" y="6" width="15" height="3" rx="1" fill="white" opacity="0.3" />
-                      <rect x="3" y="12" width="15" height="3" rx="1" fill="white" opacity="0.3" />
-                      <rect x="3" y="18" width="15" height="3" rx="1" fill="white" opacity="0.3" />
-                      <rect x="3" y="24" width="15" height="3" rx="1" fill="white" opacity="0.3" />
-                      <!-- Status dots -->
-                      <circle cx="22.5" cy="7.5" r="1.5" fill="#1fd15b" />
-                      <circle cx="22.5" cy="13.5" r="1.5" fill="#1fd15b" />
-                      <circle cx="22.5" cy="19.5" r="1.5" fill="white" opacity="0.2" />
-                      <circle cx="22.5" cy="25.5" r="1.5" fill="#1fd15b" />
-                    </svg>
-                  </div>
-                  <Text variant="caption" :color="appearance === mode ? 'default' : 'muted'" weight="medium">{{ mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark' }}</Text>
-                </button>
-              </div>
+  <Teleport to="body">
+    <Transition name="modal">
+      <div v-if="open" class="prefs-scrim" @click.self="emit('close')">
+        <div class="prefs-window">
+          <!-- Window chrome -->
+          <div class="prefs-chrome">
+            <div class="prefs-traffic-lights">
+              <button class="prefs-traffic-dot prefs-traffic-dot--close" @click="emit('close')" />
+              <span class="prefs-traffic-dot prefs-traffic-dot--minimize" />
+              <span class="prefs-traffic-dot prefs-traffic-dot--maximize" />
             </div>
+            <Text variant="caption" weight="semibold" class="prefs-title">Studio Preferences</Text>
+          </div>
 
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Language</Text>
-              <Dropdown
-                :model-value="language"
-                :groups="languageGroups"
-                :show-chevron="true"
-                max-height="320px"
-                class="prefs__dropdown-full"
-                @update:model-value="(v: string) => { language = v; localStorage.setItem(LANGUAGE_KEY, v) }"
-              />
-            </div>
+          <!-- Tabs -->
+          <nav class="prefs-tabs">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              class="prefs-tab"
+              :class="{ 'is-active': activeTab === tab.id }"
+              @click="activeTab = tab.id"
+            >
+              {{ tab.label }}
+            </button>
+          </nav>
 
-            <div class="prefs__section">
-              <div class="prefs__hstack">
-                <div class="prefs__field">
-                  <Text variant="caption" weight="semibold" class="prefs__label">Code editor</Text>
-                  <Dropdown
-                    :model-value="codeEditor"
-                    :groups="editorGroups"
-                    :show-chevron="true"
-                    class="prefs__dropdown-full"
-                    @update:model-value="(v: string) => { codeEditor = v; localStorage.setItem(EDITOR_KEY, v) }"
-                  />
-                </div>
-                <div class="prefs__field">
-                  <Text variant="caption" weight="semibold" class="prefs__label">Terminal application</Text>
-                  <Dropdown
-                    :model-value="terminal"
-                    :groups="terminalGroups"
-                    :show-chevron="true"
-                    class="prefs__dropdown-full"
-                    @update:model-value="(v: string) => { terminal = v; localStorage.setItem(TERMINAL_KEY, v) }"
-                  />
+          <!-- Content (scrollable, variable height) -->
+          <div class="prefs-content">
+
+            <!-- ═══ General ═══ -->
+            <template v-if="activeTab === 'general'">
+              <div class="prefs__section">
+                <Text variant="caption" weight="semibold" class="prefs__label">Appearance</Text>
+                <div class="prefs__appearance">
+                  <button
+                    v-for="mode in (['system', 'light', 'dark'] as const)"
+                    :key="mode"
+                    class="prefs__appearance-btn"
+                    :class="{ 'is-active': appearance === mode }"
+                    @click="setAppearance(mode)"
+                  >
+                    <div class="prefs__appearance-preview" :class="`preview--${mode}`">
+                      <svg viewBox="0 0 139 53" fill="none" xmlns="http://www.w3.org/2000/svg" class="preview__svg">
+                        <!-- Dark background -->
+                        <rect width="139" height="53" fill="#131313" />
+                        <!-- Content panel -->
+                        <rect v-if="mode === 'light'" x="26" y="4" width="109" height="96" rx="4" fill="#fff" />
+                        <rect v-if="mode === 'dark'" x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" />
+                        <template v-if="mode === 'system'">
+                          <defs>
+                            <clipPath id="system-clip">
+                              <rect x="26" y="4" width="109" height="96" rx="4" />
+                            </clipPath>
+                          </defs>
+                          <rect x="26" y="4" width="109" height="96" rx="4" fill="#fff" />
+                          <rect x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" clip-path="url(#system-clip)" style="clip-path: polygon(100% 0, 0 100%, 100% 100%)" />
+                        </template>
+                        <!-- Sidebar items -->
+                        <rect x="3" y="6" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                        <rect x="3" y="12" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                        <rect x="3" y="18" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                        <rect x="3" y="24" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                        <!-- Status dots -->
+                        <circle cx="22.5" cy="7.5" r="1.5" fill="#1fd15b" />
+                        <circle cx="22.5" cy="13.5" r="1.5" fill="#1fd15b" />
+                        <circle cx="22.5" cy="19.5" r="1.5" fill="white" opacity="0.2" />
+                        <circle cx="22.5" cy="25.5" r="1.5" fill="#1fd15b" />
+                      </svg>
+                    </div>
+                    <Text variant="caption" :color="appearance === mode ? 'default' : 'muted'" weight="medium">{{ mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark' }}</Text>
+                  </button>
                 </div>
               </div>
-            </div>
 
-            <div class="prefs__section">
-              <div class="prefs__toggle-row">
-                <button
-                  class="prefs__toggle"
-                  :class="{ 'is-on': cliEnabled }"
-                  role="switch"
-                  :aria-checked="cliEnabled"
-                  @click="cliEnabled = !cliEnabled; localStorage.setItem(CLI_KEY, String(cliEnabled))"
-                >
-                  <span class="prefs__toggle-knob" />
-                </button>
-                <Text variant="caption">Studio CLI for terminal</Text>
-              </div>
-              <div class="prefs__toggle-help">
-                <Text variant="small" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs__learn-more">Learn more</a></Text>
-              </div>
-            </div>
-
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Anthropic API key</Text>
-              <Text variant="caption" color="muted" class="prefs__hint">Required for AI features. Your key is stored locally in the browser.</Text>
-              <div class="prefs__key-row">
-                <input
-                  v-model="apiKey"
-                  type="password"
-                  class="prefs__input"
-                  placeholder="sk-ant-..."
-                  spellcheck="false"
-                  autocomplete="off"
-                />
-                <Button
-                  v-if="apiKey"
-                  variant="primary"
-                  size="small"
-                  :label="keySaved ? 'Saved' : 'Save'"
-                  :disabled="keySaved"
-                  @click="saveKey"
-                />
-                <Button
-                  v-if="keyConfigured && !keySaved"
-                  variant="tertiary"
-                  size="small"
-                  label="Clear"
-                  @click="clearKey"
+              <div class="prefs__section">
+                <Text variant="caption" weight="semibold" class="prefs__label">Language</Text>
+                <Dropdown
+                  :model-value="language"
+                  :groups="languageGroups"
+                  :show-chevron="true"
+                  max-height="320px"
+                  class="prefs__dropdown-full"
+                  @update:model-value="(v: string) => { language = v; localStorage.setItem(LANGUAGE_KEY, v) }"
                 />
               </div>
-            </div>
 
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Data</Text>
-              <div class="prefs__data-row">
-                <Button variant="secondary" size="small" label="Reset all data" @click="() => { localStorage.clear(); location.reload() }" />
-                <Text variant="caption" color="muted">Clears all local storage and reloads the prototype.</Text>
-              </div>
-            </div>
-          </template>
-
-          <!-- ═══ Agents ═══ -->
-          <template v-if="activeTab === 'agents'">
-
-            <!-- Built-in hero card -->
-            <div class="prefs__section">
-              <div class="prefs__agent-hero">
-                <img :src="codingAgents[0].icon" :alt="codingAgents[0].label" class="prefs__agent-hero-icon" />
-                <div class="prefs__agent-hero-info">
-                  <Text variant="caption" weight="semibold">{{ codingAgents[0].label }}</Text>
-                  <Text variant="caption" color="muted">{{ codingAgents[0].description }}</Text>
-                </div>
-                <Toggle :model-value="true" />
-              </div>
-            </div>
-
-            <!-- Third-party agent grid -->
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Third-party agents</Text>
-              <div class="prefs__agent-grid">
-                <div
-                  v-for="agent in codingAgents.slice(1)"
-                  :key="agent.id"
-                  class="prefs__agent-card"
-                  :class="{
-                    'is-installed': agent.installed || getInstallState(agent.id) === 'done',
-                  }"
-                >
-                  <div class="prefs__agent-card-toggle">
-                    <Toggle
-                      v-if="agent.installed || getInstallState(agent.id) === 'done'"
-                      :model-value="isAgentEnabled(agent.id)"
-                      @update:model-value="toggleAgent(agent.id, $event)"
+              <div class="prefs__section">
+                <div class="prefs__hstack">
+                  <div class="prefs__field">
+                    <Text variant="caption" weight="semibold" class="prefs__label">Code editor</Text>
+                    <Dropdown
+                      :model-value="codeEditor"
+                      :groups="editorGroups"
+                      :show-chevron="true"
+                      class="prefs__dropdown-full"
+                      @update:model-value="(v: string) => { codeEditor = v; localStorage.setItem(EDITOR_KEY, v) }"
                     />
                   </div>
-                  <img :src="agent.icon" :alt="agent.label" class="prefs__agent-card-icon" />
-                  <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
-                  <Text variant="small" color="muted" class="prefs__agent-card-desc">{{ agent.description }}</Text>
-                  <div v-if="!agent.installed && getInstallState(agent.id) !== 'done'" class="prefs__agent-card-install">
-                    <Button
-                      :variant="getInstallState(agent.id) === 'success' ? 'primary' : 'secondary'"
-                      size="small"
-                      width="full"
-                      :label="installLabel(agent.id)"
-                      :disabled="getInstallState(agent.id) !== 'idle'"
-                      @click="startInstall(agent.id)"
+                  <div class="prefs__field">
+                    <Text variant="caption" weight="semibold" class="prefs__label">Terminal application</Text>
+                    <Dropdown
+                      :model-value="terminal"
+                      :groups="terminalGroups"
+                      :show-chevron="true"
+                      class="prefs__dropdown-full"
+                      @update:model-value="(v: string) => { terminal = v; localStorage.setItem(TERMINAL_KEY, v) }"
                     />
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Default agent -->
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Default agent</Text>
-              <Text variant="caption" color="muted" class="prefs__hint">The agent used for new tasks. Can be changed per-task.</Text>
-              <Dropdown
-                :model-value="defaultAgent"
-                :groups="defaultAgentGroups"
-                :show-chevron="true"
-                class="prefs__dropdown-full"
-                @update:model-value="setAgent"
-              />
-            </div>
+              <div class="prefs__section">
+                <div class="prefs__toggle-row">
+                  <button
+                    class="prefs__toggle"
+                    :class="{ 'is-on': cliEnabled }"
+                    role="switch"
+                    :aria-checked="cliEnabled"
+                    @click="cliEnabled = !cliEnabled; localStorage.setItem(CLI_KEY, String(cliEnabled))"
+                  >
+                    <span class="prefs__toggle-knob" />
+                  </button>
+                  <Text variant="caption">Studio CLI for terminal</Text>
+                </div>
+                <div class="prefs__toggle-help">
+                  <Text variant="small" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs__learn-more">Learn more</a></Text>
+                </div>
+              </div>
 
-            <!-- Agent instructions -->
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Agent instructions</Text>
-              <Text variant="caption" color="muted" class="prefs__hint">Markdown files that configure agent behavior and site context.</Text>
-              <div class="prefs__instructions">
-                <div v-for="file in instructionFiles" :key="file.name" class="prefs__instruction-row">
-                  <div class="prefs__instruction-info">
-                    <WPIcon :icon="fileIcon" :size="16" class="prefs__instruction-icon" />
-                    <div>
-                      <Text variant="caption" weight="medium" class="prefs__instruction-name">{{ file.name }}</Text>
-                      <Text variant="caption" color="muted">{{ file.description }}</Text>
+              <div class="prefs__section">
+                <Text variant="caption" weight="semibold" class="prefs__label">Anthropic API key</Text>
+                <Text variant="caption" color="muted" class="prefs__hint">Required for AI features. Your key is stored locally in the browser.</Text>
+                <div class="prefs__key-row">
+                  <input
+                    v-model="apiKey"
+                    type="password"
+                    class="prefs__input"
+                    placeholder="sk-ant-..."
+                    spellcheck="false"
+                    autocomplete="off"
+                  />
+                  <Button
+                    v-if="apiKey"
+                    variant="primary"
+                    size="small"
+                    :label="keySaved ? 'Saved' : 'Save'"
+                    :disabled="keySaved"
+                    @click="saveKey"
+                  />
+                  <Button
+                    v-if="keyConfigured && !keySaved"
+                    variant="tertiary"
+                    size="small"
+                    label="Clear"
+                    @click="clearKey"
+                  />
+                </div>
+              </div>
+
+              <div class="prefs__section">
+                <Text variant="caption" weight="semibold" class="prefs__label">Data</Text>
+                <div class="prefs__data-row">
+                  <Button variant="secondary" size="small" label="Reset all data" @click="() => { localStorage.clear(); location.reload() }" />
+                  <Text variant="caption" color="muted">Clears all local storage and reloads the prototype.</Text>
+                </div>
+              </div>
+            </template>
+
+            <!-- ═══ Agents ═══ -->
+            <template v-if="activeTab === 'agents'">
+
+              <!-- Built-in hero card -->
+              <div class="prefs__section">
+                <div class="prefs__agent-hero">
+                  <img :src="codingAgents[0].icon" :alt="codingAgents[0].label" class="prefs__agent-hero-icon" />
+                  <div class="prefs__agent-hero-info">
+                    <Text variant="caption" weight="semibold">{{ codingAgents[0].label }}</Text>
+                    <Text variant="caption" color="muted">{{ codingAgents[0].description }}</Text>
+                  </div>
+                  <Toggle :model-value="true" />
+                </div>
+              </div>
+
+              <!-- Third-party agent grid -->
+              <div class="prefs__section">
+                <Text variant="caption" weight="semibold" class="prefs__label">Third-party agents</Text>
+                <div class="prefs__agent-grid">
+                  <div
+                    v-for="agent in codingAgents.slice(1)"
+                    :key="agent.id"
+                    class="prefs__agent-card"
+                    :class="{
+                      'is-installed': agent.installed || getInstallState(agent.id) === 'done',
+                    }"
+                  >
+                    <div class="prefs__agent-card-toggle">
+                      <Toggle
+                        v-if="agent.installed || getInstallState(agent.id) === 'done'"
+                        :model-value="isAgentEnabled(agent.id)"
+                        @update:model-value="toggleAgent(agent.id, $event)"
+                      />
+                    </div>
+                    <img :src="agent.icon" :alt="agent.label" class="prefs__agent-card-icon" />
+                    <Text variant="caption" weight="semibold">{{ agent.label }}</Text>
+                    <Text variant="small" color="muted" class="prefs__agent-card-desc">{{ agent.description }}</Text>
+                    <div v-if="!agent.installed && getInstallState(agent.id) !== 'done'" class="prefs__agent-card-install">
+                      <Button
+                        :variant="getInstallState(agent.id) === 'success' ? 'primary' : 'secondary'"
+                        size="small"
+                        width="full"
+                        :label="installLabel(agent.id)"
+                        :disabled="getInstallState(agent.id) !== 'idle'"
+                        @click="startInstall(agent.id)"
+                      />
                     </div>
                   </div>
-                  <Button variant="tertiary" size="small" label="Open" />
                 </div>
               </div>
-            </div>
-          </template>
 
-          <!-- ═══ Skills ═══ -->
-          <template v-if="activeTab === 'skills'">
+              <!-- Default agent -->
+              <div class="prefs__section">
+                <Text variant="caption" weight="semibold" class="prefs__label">Default agent</Text>
+                <Text variant="caption" color="muted" class="prefs__hint">The agent used for new tasks. Can be changed per-task.</Text>
+                <Dropdown
+                  :model-value="defaultAgent"
+                  :groups="defaultAgentGroups"
+                  :show-chevron="true"
+                  class="prefs__dropdown-full"
+                  @update:model-value="setAgent"
+                />
+              </div>
 
-            <!-- Installed -->
-            <div class="prefs__section">
-              <Text variant="caption" weight="semibold" class="prefs__label">Installed</Text>
-              <div v-if="installedSkills.length" class="prefs__skill-list">
-                <div
-                  v-for="skill in installedSkills"
-                  :key="skill.id"
-                  class="prefs__skill-row"
-                  :class="{ 'is-viewing': viewingSkill === skill.id }"
-                >
-                  <div class="prefs__skill-info">
-                    <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
-                    <Text variant="small" color="muted">{{ skill.description }}</Text>
+              <!-- Agent instructions -->
+              <div class="prefs__section">
+                <Text variant="caption" weight="semibold" class="prefs__label">Agent instructions</Text>
+                <Text variant="caption" color="muted" class="prefs__hint">Markdown files that configure agent behavior and site context.</Text>
+                <div class="prefs__instructions">
+                  <div v-for="file in instructionFiles" :key="file.name" class="prefs__instruction-row">
+                    <div class="prefs__instruction-info">
+                      <WPIcon :icon="fileIcon" :size="16" class="prefs__instruction-icon" />
+                      <div>
+                        <Text variant="caption" weight="medium" class="prefs__instruction-name">{{ file.name }}</Text>
+                        <Text variant="caption" color="muted">{{ file.description }}</Text>
+                      </div>
+                    </div>
+                    <Button variant="tertiary" size="small" label="Open" />
                   </div>
-                  <button class="prefs__skill-view" @click="viewSkill(skill.id)">{{ viewingSkill === skill.id ? 'Close' : 'View' }}</button>
                 </div>
               </div>
-              <Text v-else variant="caption" color="muted" class="prefs__empty-state">No skills installed yet</Text>
-            </div>
+            </template>
 
-            <!-- Available -->
-            <div v-if="availableSkills.length" class="prefs__section">
-              <div class="prefs__section-header">
-                <Text variant="caption" weight="semibold">
-                  Available ({{ availableSkills.length }})
-                </Text>
-                <button
-                  class="prefs__install-all"
-                  :disabled="installingAll"
-                  @click="startInstallAll"
-                >
-                  {{ installingAll ? 'Installing…' : 'Install All' }}
-                </button>
-              </div>
-              <div class="prefs__skill-list">
-                <div
-                  v-for="skill in availableSkills"
-                  :key="skill.id"
-                  class="prefs__skill-row"
-                  :class="{ 'is-viewing': viewingSkill === skill.id }"
-                >
-                  <div class="prefs__skill-info">
-                    <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
-                    <Text variant="small" color="muted">{{ skill.description }}</Text>
-                  </div>
-                  <div class="prefs__skill-actions">
+            <!-- ═══ Skills ═══ -->
+            <template v-if="activeTab === 'skills'">
+
+              <!-- Installed -->
+              <div class="prefs__section">
+                <Text variant="caption" weight="semibold" class="prefs__label">Installed</Text>
+                <div v-if="installedSkills.length" class="prefs__skill-list">
+                  <div
+                    v-for="skill in installedSkills"
+                    :key="skill.id"
+                    class="prefs__skill-row"
+                    :class="{ 'is-viewing': viewingSkill === skill.id }"
+                  >
+                    <div class="prefs__skill-info">
+                      <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
+                      <Text variant="small" color="muted">{{ skill.description }}</Text>
+                    </div>
                     <button class="prefs__skill-view" @click="viewSkill(skill.id)">{{ viewingSkill === skill.id ? 'Close' : 'View' }}</button>
-                    <Button
-                      :variant="getSkillInstallState(skill.id) === 'success' ? 'primary' : 'secondary'"
-                      size="small"
-                      :label="skillInstallLabel(skill.id)"
-                      :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll"
-                      @click="startSkillInstall(skill.id)"
-                    />
+                  </div>
+                </div>
+                <Text v-else variant="caption" color="muted" class="prefs__empty-state">No skills installed yet</Text>
+              </div>
+
+              <!-- Available -->
+              <div v-if="availableSkills.length" class="prefs__section">
+                <div class="prefs__section-header">
+                  <Text variant="caption" weight="semibold">
+                    Available ({{ availableSkills.length }})
+                  </Text>
+                  <button
+                    class="prefs__install-all"
+                    :disabled="installingAll"
+                    @click="startInstallAll"
+                  >
+                    {{ installingAll ? 'Installing…' : 'Install All' }}
+                  </button>
+                </div>
+                <div class="prefs__skill-list">
+                  <div
+                    v-for="skill in availableSkills"
+                    :key="skill.id"
+                    class="prefs__skill-row"
+                    :class="{ 'is-viewing': viewingSkill === skill.id }"
+                  >
+                    <div class="prefs__skill-info">
+                      <Text variant="caption" weight="semibold">{{ skill.name }}</Text>
+                      <Text variant="small" color="muted">{{ skill.description }}</Text>
+                    </div>
+                    <div class="prefs__skill-actions">
+                      <button class="prefs__skill-view" @click="viewSkill(skill.id)">{{ viewingSkill === skill.id ? 'Close' : 'View' }}</button>
+                      <Button
+                        :variant="getSkillInstallState(skill.id) === 'success' ? 'primary' : 'secondary'"
+                        size="small"
+                        :label="skillInstallLabel(skill.id)"
+                        :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll"
+                        @click="startSkillInstall(skill.id)"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Source attribution -->
-            <div class="prefs__section">
-              <Text variant="small" color="muted">Skills from <a :href="SKILLS_REPO_URL" target="_blank" class="prefs__learn-more">WordPress/agent-skills</a></Text>
-            </div>
+              <!-- Source attribution -->
+              <div class="prefs__section">
+                <Text variant="small" color="muted">Skills from <a :href="SKILLS_REPO_URL" target="_blank" class="prefs__learn-more">WordPress/agent-skills</a></Text>
+              </div>
 
-          </template>
+            </template>
 
-        </div>
-
-        <!-- Skill viewer panel -->
-        <div v-if="viewingSkill" class="prefs__skill-panel">
-          <div class="prefs__skill-panel-header">
-            <Text variant="caption" weight="semibold" class="flex-1 min-w-0">{{ viewingSkill }}</Text>
-            <Button
-              v-if="!skills.find(s => s.id === viewingSkill)?.installed"
-              variant="primary"
-              size="small"
-              :label="skillInstallLabel(viewingSkill)"
-              :disabled="getSkillInstallState(viewingSkill) !== 'idle'"
-              @click="startSkillInstall(viewingSkill!)"
-            />
-            <button class="prefs__skill-panel-close" @click="viewSkill(null)">×</button>
-          </div>
-          <div class="prefs__skill-panel-body">
-            <Text v-if="skillContentLoading" variant="caption" color="muted">Loading…</Text>
-            <MarkdownText v-else-if="skillContent" :text="skillContent" />
           </div>
         </div>
-
       </div>
-    </div>
-    <template #footer>
-      <Button variant="secondary" label="Cancel" @click="emit('close')" />
-      <Button variant="primary" label="Save" @click="emit('close')" />
-    </template>
-  </Modal>
+    </Transition>
+  </Teleport>
 </template>
 
-<style>
-/* Override Modal's scroll — prefs manages its own scrolling */
-.modal-content:has(.prefs) {
-  overflow: hidden;
-  padding: 0;
-}
-</style>
-
 <style scoped>
-.prefs__body {
+/* -- Window shell -- */
+
+.prefs-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
   display: flex;
-  height: 520px;
-  overflow: hidden;
+  /* Physical: pinned to top of app window */
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 80px;
+  background: rgba(0, 0, 0, 0.35);
 }
 
-.prefs__nav {
+.prefs-window {
+  width: 480px;
+  background: var(--color-frame-bg);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-m);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xxxs);
+  max-height: calc(100vh - 120px);
+}
+
+.prefs-chrome {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
   flex-shrink: 0;
-  width: 184px;
-  padding: 0 var(--space-m) 0 var(--space-s);
 }
 
-.prefs__content {
-  flex: 1;
-  min-width: 0;
+.prefs-traffic-lights {
+  position: absolute;
+  /* Physical: app chrome edge */
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: var(--space-xxs);
+}
+
+.prefs-traffic-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: default;
+}
+
+.prefs-traffic-dot--close {
+  background: var(--color-macos-close);
+  cursor: pointer;
+}
+
+.prefs-traffic-dot--minimize {
+  background: var(--color-macos-minimize);
+}
+
+.prefs-traffic-dot--maximize {
+  background: var(--color-macos-maximize);
+}
+
+.prefs-title {
+  user-select: none;
+}
+
+.prefs-tabs {
+  display: flex;
+  gap: var(--space-xl);
+  justify-content: center;
+  border-block-end: 1px solid var(--color-frame-border);
+  flex-shrink: 0;
+}
+
+.prefs-tab {
+  padding: var(--space-xs) 0;
+  border: none;
+  border-block-end: 2px solid transparent;
+  background: none;
+  color: var(--color-frame-fg-muted);
+  font-family: inherit;
+  font-size: var(--font-size-m);
+  cursor: pointer;
+  transition: color var(--duration-instant) var(--ease-default);
+}
+
+.prefs-tab:hover {
+  color: var(--color-frame-fg);
+}
+
+.prefs-tab.is-active {
+  color: var(--color-frame-fg);
+  border-block-end-color: var(--color-frame-fg);
+}
+
+.prefs-content {
   overflow-y: auto;
-  padding-block-end: var(--space-m);
-  padding-inline-end: var(--space-xl);
+  padding: var(--space-m) var(--space-xl) var(--space-xl);
 }
 
-/* -- Sections -- */
+/* -- Transitions -- */
+
+.modal-enter-active {
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.modal-leave-active {
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .prefs-window {
+  animation: prefs-scale-in var(--duration-fast) var(--ease-default);
+}
+
+.modal-leave-active .prefs-window {
+  animation: prefs-scale-out var(--duration-fast) var(--ease-default);
+}
+
+@keyframes prefs-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes prefs-scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* -- Tab content (existing styles, kept for later cleanup) -- */
 
 .prefs__section {
   padding: var(--space-xs) 0;
@@ -973,7 +1089,6 @@ const instructionFiles = [
   padding-block-start: var(--space-xxs);
 }
 
-
 /* -- Empty state -- */
 
 .prefs__empty-state {
@@ -1104,53 +1219,5 @@ const instructionFiles = [
 .prefs__skill-view:hover {
   color: var(--color-frame-fg);
   text-decoration: underline;
-}
-
-/* -- Skill viewer panel -- */
-
-.prefs__skill-panel {
-  display: flex;
-  flex-direction: column;
-  width: 320px;
-  flex-shrink: 0;
-  border-inline-start: 1px solid var(--color-frame-border);
-  overflow: hidden;
-}
-
-.prefs__skill-panel-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-s);
-  border-block-end: 1px solid var(--color-frame-border);
-  flex-shrink: 0;
-}
-
-.prefs__skill-panel-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-s);
-  background: none;
-  color: var(--color-frame-fg-muted);
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.prefs__skill-panel-close:hover {
-  background: var(--color-frame-hover);
-  color: var(--color-frame-fg);
-}
-
-.prefs__skill-panel-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--space-s);
-  font-size: var(--font-size-s);
-  line-height: 1.5;
 }
 </style>
