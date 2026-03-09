@@ -41,10 +41,10 @@ defineProps<{
 }
 
 .text--heading-small {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-xxs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.025em;
   line-height: var(--line-height-tight);
 }
 

@@ -147,13 +147,13 @@ function onItemEnter(item: FlyoutMenuItem, groupIdx: number, itemIdx: number) {
 
 function onItemClick(item: FlyoutMenuItem) {
   if (item.children?.length) return
-  item.action?.()
   close()
+  item.action?.()
 }
 
 function onChildClick(child: FlyoutMenuItem) {
-  child.action?.()
   close()
+  child.action?.()
 }
 
 function setItemRef(key: string, el: any) {
@@ -186,6 +186,7 @@ defineExpose({ toggle, close, open })
     :max-width="maxWidth"
     :max-height="maxHeight"
     bare
+
     :contains-target="containsTarget"
     @close="onPopoverClose"
     @reposition="onPopoverReposition"
@@ -194,9 +195,11 @@ defineExpose({ toggle, close, open })
       <slot name="trigger" :toggle="t" :open="o" />
     </template>
 
+    <template #default="{ resolvedMaxHeight }">
     <div
       class="flyout-menu vstack"
       :class="surfaceClass"
+      :style="resolvedMaxHeight ? { maxHeight: resolvedMaxHeight, overflowY: 'auto' } : {}"
       @mouseleave="scheduleDeactivate"
     >
       <div
@@ -269,6 +272,7 @@ defineExpose({ toggle, close, open })
         </template>
       </template>
     </Teleport>
+    </template>
   </Popover>
 </template>
 

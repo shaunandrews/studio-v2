@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { isWarm, markHide } from './tooltip-state'
 
 const props = withDefaults(defineProps<{
@@ -7,10 +7,12 @@ const props = withDefaults(defineProps<{
   placement?: 'top' | 'bottom' | 'left' | 'right'
   delay?: number
   multiline?: boolean
+  anchor?: HTMLElement | null
 }>(), {
   placement: 'bottom',
   delay: 600,
   multiline: false,
+  anchor: null,
 })
 
 const triggerRef = ref<HTMLElement | null>(null)
@@ -20,8 +22,9 @@ const position = ref({ top: '0px', left: '0px' })
 let showTimeout: ReturnType<typeof setTimeout> | null = null
 
 function updatePosition() {
-  if (!triggerRef.value || !tooltipRef.value) return
-  const trigger = triggerRef.value.getBoundingClientRect()
+  const anchorEl = props.anchor ?? triggerRef.value
+  if (!anchorEl || !tooltipRef.value) return
+  const trigger = anchorEl.getBoundingClientRect()
   const tip = tooltipRef.value.getBoundingClientRect()
   const gap = 6
   const vw = window.innerWidth
@@ -89,6 +92,20 @@ function hide() {
   }
 }
 
+// When anchor prop is provided, bind hover listeners to the anchor element
+watch(() => props.anchor, (el, oldEl) => {
+  if (oldEl) {
+    oldEl.removeEventListener('pointerenter', scheduleShow)
+    oldEl.removeEventListener('pointerleave', hide)
+    oldEl.removeEventListener('pointerdown', hide)
+  }
+  if (el) {
+    el.addEventListener('pointerenter', scheduleShow)
+    el.addEventListener('pointerleave', hide)
+    el.addEventListener('pointerdown', hide)
+  }
+}, { immediate: true })
+
 onMounted(() => {
   // Hide on scroll anywhere
   window.addEventListener('scroll', hide, true)
@@ -97,6 +114,11 @@ onMounted(() => {
 onUnmounted(() => {
   hide()
   window.removeEventListener('scroll', hide, true)
+  if (props.anchor) {
+    props.anchor.removeEventListener('pointerenter', scheduleShow)
+    props.anchor.removeEventListener('pointerleave', hide)
+    props.anchor.removeEventListener('pointerdown', hide)
+  }
 })
 </script>
 

@@ -43,6 +43,7 @@ const open = computed({
 const triggerRef = ref<HTMLElement | null>(null)
 const panelRef = ref<HTMLElement | null>(null)
 const panelStyle = ref<Record<string, string>>({})
+const resolvedMaxHeight = ref<string | null>(null)
 
 const resolvedPlacement = ref<'above' | 'below'>('below')
 
@@ -95,16 +96,23 @@ function positionPanel() {
   if (placeAbove) {
     const bottom = vh - rect.top + GAP
     const cap = Math.min(spaceAbove, propMax)
-    style.maxHeight = `${cap}px`
-    style.overflowY = 'auto'
+    // Bare popovers delegate overflow to children via slot prop
+    if (!props.bare) {
+      style.maxHeight = `${cap}px`
+      style.overflowY = 'auto'
+    }
+    resolvedMaxHeight.value = `${cap}px`
     style.bottom = `${bottom}px`
     style.top = 'auto'
   } else {
     style.top = `${rect.bottom + GAP}px`
     style.bottom = 'auto'
     const cap = Math.min(spaceBelow, propMax)
-    style.maxHeight = `${cap}px`
-    style.overflowY = 'auto'
+    if (!props.bare) {
+      style.maxHeight = `${cap}px`
+      style.overflowY = 'auto'
+    }
+    resolvedMaxHeight.value = `${cap}px`
   }
 
   // Horizontal alignment
@@ -131,6 +139,7 @@ watch(open, (val) => {
     })
   } else {
     panelStyle.value = {}
+    resolvedMaxHeight.value = null
   }
 })
 
@@ -191,7 +200,7 @@ defineExpose({ toggle, close, open, panelRef, reposition })
           }]"
           :style="panelStyle"
         >
-          <slot :close="close" />
+          <slot :close="close" :resolved-max-height="resolvedMaxHeight" />
         </div>
       </Transition>
     </Teleport>
@@ -212,7 +221,7 @@ defineExpose({ toggle, close, open, panelRef, reposition })
           }]"
           :style="panelStyle"
         >
-          <slot :close="close" />
+          <slot :close="close" :resolved-max-height="resolvedMaxHeight" />
         </div>
       </Transition>
     </Teleport>

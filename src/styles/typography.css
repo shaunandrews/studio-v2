@@ -6,6 +6,7 @@
   --font-family-mono: 'SF Mono', 'Fira Code', monospace;
 
   /* Font sizes */
+  --font-size-xxs: 10px;
   --font-size-xs: 11px;    /* labels, shortcut hints */
   --font-size-s: 12px;     /* captions, small controls */
   --font-size-m: 13px;     /* default UI text, buttons */
@@ -15,7 +16,7 @@
   /* Font weights */
   --font-weight-regular: 400;
   --font-weight-medium: 500;
-  --font-weight-semibold: 600;
+  --font-weight-semibold: 550;
 
   /* Line heights */
   --line-height-tight: 1.2;   /* labels, single-line */
