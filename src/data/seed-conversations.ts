@@ -247,11 +247,11 @@ export const seedMessages: Message[] = [
   { id: 'ce-7', conversationId: 'cafe-events', role: 'user', content: "That would be great, yeah.", timestamp: '2026-01-08T13:04:00Z' },
   {
     id: 'ce-8', conversationId: 'cafe-events', role: 'agent', agentId: 'wpcom',
-    content: "Done — each event card has an \"RSVP\" button that opens a lightweight form. Confirmations go to both the guest and you, and there's a small attendee count badge on each event in the admin.",
+    content: "",
     toolCalls: [
       { id: 'tc-ce-6', label: 'Added RSVP form to event cards', status: 'done', toolName: 'add_block', args: 'template: "event", type: "form", fields: ["name", "email", "party_size"]' },
       { id: 'tc-ce-7', label: 'Configured confirmation emails', status: 'done', toolName: 'configure_email', args: 'template: "rsvp-confirmation", recipients: ["guest", "admin"]' },
-      { id: 'tc-ce-8', label: 'Added attendee count badge to admin', status: 'done', toolName: 'edit_file', args: 'path: "includes/event-admin.php"' },
+      { id: 'tc-ce-8', label: 'Adding attendee count badge to admin', status: 'running' },
     ],
     timestamp: '2026-01-08T13:04:30Z',
   },
