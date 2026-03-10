@@ -30,7 +30,9 @@ defineEmits<{
 				<slot name="suffix" />
 			</div>
 		</div>
-		<p v-if="hint" class="text-input__hint">{{ hint }}</p>
+		<div v-if="hint || $slots.hint" class="text-input__hint">
+			<slot name="hint">{{ hint }}</slot>
+		</div>
 	</div>
 </template>
 
@@ -40,7 +42,7 @@ defineEmits<{
 	font-size: var(--font-size-s);
 	font-weight: var(--font-weight-semibold);
 	color: var(--color-frame-fg);
-	margin-block-end: var(--space-xxs);
+	margin-block-end: var(--space-xs);
 }
 
 .text-input__wrapper {
@@ -91,7 +93,7 @@ defineEmits<{
 .text-input__hint {
 	font-size: var(--font-size-xs);
 	color: var(--color-frame-fg-muted);
-	margin: var(--space-xxxs) 0 0;
+	margin: var(--space-xxs) 0 0;
 	line-height: 1.5;
 }
 </style>

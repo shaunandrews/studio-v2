@@ -70,7 +70,10 @@ export interface ToolCall {
   args?: string            // Displayed in detail: 'slug: "jetpack"'
   result?: string          // Success detail: "Jetpack 14.3 installed and activated"
   error?: string           // Error detail: "STRIPE_API_KEY not found"
+  code?: string            // Code output shown in expandable detail (streams when running)
 }
+
+export type ConversationStatus = 'idle' | 'running'
 
 export interface Conversation {
   id: string
@@ -79,6 +82,8 @@ export interface Conversation {
   title?: string
   createdAt: string
   archived?: boolean
+  status?: ConversationStatus
+  unread?: boolean
 }
 
 export interface Message {
