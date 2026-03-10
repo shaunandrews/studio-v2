@@ -368,13 +368,6 @@ const importStateKey = computed(() => {
   gap: var(--space-xl);
 }
 
-@media (min-width: 720px) {
-  .ie {
-    flex-direction: row;
-    align-items: stretch;
-  }
-}
-
 .ie__section {
   display: flex;
   flex-direction: column;
@@ -394,7 +387,7 @@ const importStateKey = computed(() => {
   flex-direction: column;
   gap: var(--space-m);
   flex: 1;
-  background: var(--color-frame-hover);
+  border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
   padding: var(--space-m);
 }

@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 import { useSites } from '@/data/useSites'
 import type { GitRepo } from '@/data/types'
 import Button from '@/components/primitives/Button.vue'
+import Dropdown from '@/components/primitives/Dropdown.vue'
+import TextInput from '@/components/primitives/TextInput.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
 import { seen as seenIcon, unseen as unseenIcon } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
@@ -36,6 +38,9 @@ const enableXdebug = ref(false)
 const enableDebugLog = ref(false)
 const showErrorsInBrowser = ref(false)
 
+const phpVersionOptions = [{ label: '', options: ['8.3', '8.2', '8.1', '8.0', '7.4'] }]
+const wpVersionOptions = [{ label: '', options: ['latest', '6.9.1', '6.8', '6.7', '6.6'] }]
+
 const mockRepos: GitRepo[] = [
   { provider: 'github', owner: 'downstreet-cafe', name: 'downstreet-theme', defaultBranch: 'main', url: 'https://github.com/downstreet-cafe/downstreet-theme' },
   { provider: 'github', owner: 'downstreet-cafe', name: 'downstreet-plugins', defaultBranch: 'main', url: 'https://github.com/downstreet-cafe/downstreet-plugins' },
@@ -45,6 +50,7 @@ const mockRepos: GitRepo[] = [
 const showRepoPicker = ref(false)
 
 const mockBranches = ['main', 'staging', 'develop', 'feature/menu-redesign', 'feature/dark-mode']
+const branchOptions = [{ label: '', options: mockBranches }]
 
 function connectRepo(repo: GitRepo) {
   if (!site.value) return
@@ -79,77 +85,63 @@ function updateStageBranch(stageId: string, branch: string) {
 
 <template>
   <ScreenLayout scrollable>
-      <!-- Editable fields -->
-      <div class="settings__field">
-        <label class="settings__label" for="site-name">Site name</label>
-        <input
-          id="site-name"
-          v-model="siteName"
-          type="text"
-          class="settings__input"
-        />
-      </div>
+      <TextInput
+        id="site-name"
+        v-model="siteName"
+        label="Site name"
+      />
 
       <div class="settings__field-row">
         <div class="settings__field">
-          <label class="settings__label" for="php-version">PHP version</label>
-          <select id="php-version" v-model="phpVersion" class="settings__select">
-            <option value="8.3">8.3</option>
-            <option value="8.2">8.2</option>
-            <option value="8.1">8.1</option>
-            <option value="8.0">8.0</option>
-            <option value="7.4">7.4</option>
-          </select>
-        </div>
-        <div class="settings__field">
-          <label class="settings__label" for="wp-version">WordPress version</label>
-          <select id="wp-version" v-model="wpVersion" class="settings__select">
-            <option value="latest">latest</option>
-            <option value="6.9.1">6.9.1</option>
-            <option value="6.8">6.8</option>
-            <option value="6.7">6.7</option>
-            <option value="6.6">6.6</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="settings__field-row">
-        <div class="settings__field">
-          <label class="settings__label" for="admin-username">Username</label>
-          <input
-            id="admin-username"
-            v-model="adminUsername"
-            type="text"
-            class="settings__input"
+          <label class="settings__label">PHP version</label>
+          <Dropdown
+            v-model="phpVersion"
+            :groups="phpVersionOptions"
+            variant="field"
+            width="fill"
+            :show-chevron="true"
           />
         </div>
         <div class="settings__field">
-          <label class="settings__label" for="admin-password">Password</label>
-          <div class="settings__input-with-action">
-            <input
-              id="admin-password"
-              v-model="adminPassword"
-              :type="showPassword ? 'text' : 'password'"
-              class="settings__input settings__input--has-action"
-            />
-            <button class="settings__input-action" @click="showPassword = !showPassword">
-              <WPIcon :icon="showPassword ? unseenIcon : seenIcon" :size="20" />
-            </button>
-          </div>
+          <label class="settings__label">WordPress version</label>
+          <Dropdown
+            v-model="wpVersion"
+            :groups="wpVersionOptions"
+            variant="field"
+            width="fill"
+            :show-chevron="true"
+          />
         </div>
       </div>
 
-      <div class="settings__field">
-        <label class="settings__label" for="admin-email">Email</label>
-        <input
-          id="admin-email"
-          v-model="adminEmail"
-          type="email"
-          class="settings__input"
-          placeholder="admin@localhost.com"
+      <div class="settings__field-row">
+        <TextInput
+          id="admin-username"
+          v-model="adminUsername"
+          label="Username"
         />
-        <p class="settings__hint">Defaults to admin@localhost.com if not provided.</p>
+        <TextInput
+          id="admin-password"
+          v-model="adminPassword"
+          :type="showPassword ? 'text' : 'password'"
+          label="Password"
+        >
+          <template #suffix>
+            <button class="settings__input-action" @click="showPassword = !showPassword">
+              <WPIcon :icon="showPassword ? unseenIcon : seenIcon" :size="20" />
+            </button>
+          </template>
+        </TextInput>
       </div>
+
+      <TextInput
+        id="admin-email"
+        v-model="adminEmail"
+        type="email"
+        label="Email"
+        placeholder="admin@localhost.com"
+        hint="Defaults to admin@localhost.com if not provided."
+      />
 
       <!-- Toggles -->
       <div class="settings__toggles">
@@ -162,15 +154,13 @@ function updateStageBranch(stageId: string, branch: string) {
 
         <template v-if="useCustomDomain">
           <div class="settings__field settings__field--indented">
-            <label class="settings__label" for="custom-domain">Domain name</label>
-            <input
+            <TextInput
               id="custom-domain"
               v-model="customDomain"
-              type="text"
-              class="settings__input"
+              label="Domain name"
               placeholder="my-site.wp.local"
+              hint="Your system password will be required to set up the domain."
             />
-            <p class="settings__hint">Your system password will be required to set up the domain.</p>
           </div>
         </template>
 
@@ -232,14 +222,14 @@ function updateStageBranch(stageId: string, branch: string) {
               class="settings__branch-row"
             >
               <span class="settings__branch-label">{{ stage.label }}</span>
-              <select
-                :value="stage.branch ?? ''"
-                class="settings__branch-select"
-                @change="updateStageBranch(stage.id, ($event.target as HTMLSelectElement).value)"
-              >
-                <option value="" disabled>Select branch</option>
-                <option v-for="b in mockBranches" :key="b" :value="b">{{ b }}</option>
-              </select>
+              <Dropdown
+                :model-value="stage.branch ?? ''"
+                :groups="branchOptions"
+                variant="field"
+                size="small"
+                :show-chevron="true"
+                @update:model-value="updateStageBranch(stage.id, $event)"
+              />
             </div>
           </div>
         </div>
@@ -274,7 +264,7 @@ function updateStageBranch(stageId: string, branch: string) {
 
 <style scoped>
 
-/* ── Form fields ── */
+/* ── Form layout ── */
 
 .settings__field {
   margin-block-end: var(--space-s);
@@ -295,6 +285,10 @@ function updateStageBranch(stageId: string, branch: string) {
   margin-block-end: 0;
 }
 
+.settings__field-row > .text-input {
+  flex: 1;
+}
+
 .settings__label {
   display: block;
   font-size: var(--font-size-s);
@@ -303,66 +297,30 @@ function updateStageBranch(stageId: string, branch: string) {
   margin-block-end: var(--space-xxs);
 }
 
-.settings__input {
-  display: block;
-  width: 100%;
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg);
-  background: var(--color-frame-bg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-s);
-  padding: var(--space-xs) var(--space-xs);
-  outline: none;
-  transition: border-color var(--duration-instant) var(--ease-default);
-  box-sizing: border-box;
-}
+/* ── Password visibility toggle ── */
 
-.settings__input::placeholder {
+.settings__input-action {
+  background: none;
+  border: none;
   color: var(--color-frame-fg-muted);
-}
-
-.settings__input:hover {
-  border-color: var(--color-frame-fg-muted);
-}
-
-.settings__input:focus-visible {
-  border-color: var(--color-frame-theme);
-  box-shadow: 0 0 0 1px var(--color-frame-theme);
-}
-
-.settings__select {
-  display: block;
-  width: 100%;
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg);
-  background: var(--color-frame-bg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-s);
-  padding: var(--space-xs);
-  padding-inline-end: var(--space-l);
-  outline: none;
   cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23646970' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  transition: border-color var(--duration-instant) var(--ease-default);
-  box-sizing: border-box;
+  padding: var(--space-xxxs);
+  border-radius: var(--radius-s);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--duration-instant) var(--ease-default);
 }
 
-.settings__select:hover {
-  border-color: var(--color-frame-fg-muted);
-}
-
-.settings__select:focus-visible {
-  border-color: var(--color-frame-theme);
-  box-shadow: 0 0 0 1px var(--color-frame-theme);
+.settings__input-action:hover {
+  color: var(--color-frame-fg);
 }
 
 /* ── Checkbox fields ── */
+
+.settings__toggles {
+  margin-block-start: var(--space-m);
+}
 
 .settings__checkbox-field {
   margin-block-end: var(--space-s);
@@ -404,47 +362,6 @@ function updateStageBranch(stageId: string, branch: string) {
 
 .settings__link:hover {
   text-decoration: underline;
-}
-
-/* ── Input with inline action (password visibility) ── */
-
-.settings__input-with-action {
-  position: relative;
-}
-
-.settings__input--has-action {
-  padding-inline-end: var(--space-xl);
-}
-
-.settings__input-action {
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-end: var(--space-xxs);
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--color-frame-fg-muted);
-  cursor: pointer;
-  padding: var(--space-xxxs);
-  border-radius: var(--radius-s);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color var(--duration-instant) var(--ease-default);
-}
-
-.settings__input-action:hover {
-  color: var(--color-frame-fg);
-}
-
-.settings__input-action.is-copied {
-  color: var(--color-frame-theme);
-}
-
-/* ── Toggles ── */
-
-.settings__toggles {
-  margin-block-start: var(--space-m);
 }
 
 /* ── Repository ── */
@@ -543,33 +460,6 @@ function updateStageBranch(stageId: string, branch: string) {
 .settings__branch-value--auto {
   color: var(--color-frame-fg-muted);
   font-style: italic;
-}
-
-.settings__branch-select {
-  font-size: var(--font-size-xs);
-  font-family: monospace;
-  color: var(--color-frame-fg);
-  background: var(--color-frame-bg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-s);
-  padding: var(--space-xxxs) var(--space-xs);
-  padding-inline-end: var(--space-s);
-  cursor: pointer;
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23646970' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 4px center;
-}
-
-.settings__branch-select:hover {
-  border-color: var(--color-frame-fg-muted);
-}
-
-.settings__branch-select:focus-visible {
-  outline: 2px solid var(--color-frame-theme);
-  outline-offset: 1px;
 }
 
 .settings__repo-empty {

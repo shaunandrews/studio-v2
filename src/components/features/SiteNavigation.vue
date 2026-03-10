@@ -5,11 +5,11 @@ import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Button from '@/components/primitives/Button.vue'
-import Text from '@/components/primitives/Text.vue'
+
 import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
-import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
+
 import { useConversations } from '@/data/useConversations'
 import { useSites } from '@/data/useSites'
 
@@ -17,7 +17,6 @@ const props = defineProps<{
   siteId: string
   selectedId: string | null
   activeScreen?: string
-  siteName?: string
   siteFavicon?: string
   isAllSites?: boolean
   sidebarHidden?: boolean
@@ -65,20 +64,6 @@ function getLastTimestamp(convoId: string): string {
 function onArchive(e: Event, convoId: string) {
   e.stopPropagation()
   archiveConversation(convoId)
-}
-
-const currentSite = computed(() => allSites.value.find(p => p.id === props.siteId))
-const siteLayout = computed(() => currentSite.value?.mockLayout ?? 'cafe')
-const localPath = computed(() => `/Users/shaun/Studio/${currentSite.value?.id ?? 'site'}`)
-
-const copiedField = ref<string | null>(null)
-let copiedTimeout: ReturnType<typeof setTimeout> | undefined
-
-function copyToClipboard(text: string, field: string) {
-  navigator.clipboard.writeText(text)
-  copiedField.value = field
-  clearTimeout(copiedTimeout)
-  copiedTimeout = setTimeout(() => { copiedField.value = null }, 1500)
 }
 
 const archiveMenuRef = ref<InstanceType<typeof FlyoutMenu> | null>(null)
@@ -135,22 +120,6 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
           <span class="status-dot stopped" />
           {{ stoppedCount }} stopped
         </span>
-      </div>
-    </div>
-
-    <!-- Single-site overview -->
-    <div v-else class="site-overview vstack align-center gap-xs px-s pt-l pb-m shrink-0">
-      <Tooltip text="Open site in browser" placement="top">
-        <SiteThumbnail :layout="siteLayout" :name="siteName" @click="alert('Opening site preview…')" />
-      </Tooltip>
-      <div class="vstack align-center gap-xxxxs">
-        <Text variant="body" weight="semibold" class="overview__url">localhost:3920</Text>
-        <span class="hstack gap-xxxs overview__creds">
-          <Button variant="tertiary" size="mini" label="admin" :tooltip="copiedField === 'user' ? 'Copied!' : 'Copy username'" tooltip-placement="bottom" @click="copyToClipboard('admin', 'user')" />
-          <span class="overview__creds-sep">/</span>
-          <Button variant="tertiary" size="mini" label="••••••••" :tooltip="copiedField === 'pass' ? 'Copied!' : 'Copy password'" tooltip-placement="bottom" @click="copyToClipboard('password', 'pass')" />
-        </span>
-        <Button variant="tertiary" size="mini" :label="localPath" :tooltip="copiedField === 'path' ? 'Copied!' : 'Copy local path'" tooltip-placement="bottom" @click="copyToClipboard(localPath, 'path')" />
       </div>
     </div>
 
@@ -234,36 +203,6 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 .nav-blur {
   z-index: 1;
-}
-
-/* ── Site overview ── */
-
-.site-overview {
-  border-block-end: 1px solid var(--color-frame-border);
-}
-
-/* Override Tooltip's inline-flex trigger so thumb gets full width */
-.site-overview > :deep(.tooltip-trigger) {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.overview__url {
-  color: var(--color-frame-theme);
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.overview__creds {
-  font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
-}
-
-.overview__creds-sep {
-  color: var(--color-frame-fg-muted);
-  opacity: 0.5;
-  margin: 0 1px;
 }
 
 /* ── Site sections nav ── */

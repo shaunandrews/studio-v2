@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import WPIcon from '@/components/primitives/WPIcon.vue'
+import { computed, ref } from 'vue'
+import Text from '@/components/primitives/Text.vue'
+import Button from '@/components/primitives/Button.vue'
+import Tooltip from '@/components/primitives/Tooltip.vue'
+import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
 import { useSites } from '@/data/useSites'
-import { useWPAdmin } from '@/data/useWPAdmin'
 
 const props = defineProps<{
   siteId: string
@@ -11,11 +13,21 @@ const props = defineProps<{
 const { sites } = useSites()
 const site = computed(() => sites.value.find(s => s.id === props.siteId))
 
-const themeType = computed(() => site.value?.themeType ?? 'block')
+const siteLayout = computed(() => site.value?.mockLayout ?? 'cafe')
+const localPath = computed(() => `/Users/shaun/Studio/${site.value?.id ?? 'site'}`)
+
+const copiedField = ref<string | null>(null)
+let copiedTimeout: ReturnType<typeof setTimeout> | undefined
+
+function copyToClipboard(text: string, field: string) {
+  navigator.clipboard.writeText(text)
+  copiedField.value = field
+  clearTimeout(copiedTimeout)
+  copiedTimeout = setTimeout(() => { copiedField.value = null }, 1500)
+}
+
 const features = computed(() => site.value?.features ?? [])
 const hasWoo = computed(() => features.value.includes('woocommerce'))
-
-const { adminLinks } = useWPAdmin(themeType, features)
 
 interface StatItem {
   value: number
@@ -60,24 +72,24 @@ const contentStats = computed<StatItem[]>(() => {
   <div class="overview">
     <div class="overview__content">
 
-      <!-- Quick admin links -->
-      <section class="overview__section">
-        <span class="section-heading">WordPress</span>
-        <div class="admin-links">
-          <button
-            v-for="link in adminLinks"
-            :key="link.label"
-            class="admin-link"
-          >
-            <WPIcon :icon="link.icon" :size="20" class="admin-link__icon" />
-            <span class="admin-link__label">{{ link.label }}</span>
-          </button>
+      <!-- Site overview -->
+      <div class="site-overview vstack align-center gap-xs">
+        <Tooltip text="Open site in browser" placement="top">
+          <SiteThumbnail :layout="siteLayout" :name="site?.name" @click="alert('Opening site preview…')" />
+        </Tooltip>
+        <div class="vstack align-center gap-xxxxs">
+          <Text variant="body" weight="semibold" class="overview__url">localhost:3920</Text>
+          <span class="hstack gap-xxxs overview__creds">
+            <Button variant="tertiary" size="mini" label="admin" :tooltip="copiedField === 'user' ? 'Copied!' : 'Copy username'" tooltip-placement="bottom" @click="copyToClipboard('admin', 'user')" />
+            <span class="overview__creds-sep">/</span>
+            <Button variant="tertiary" size="mini" label="••••••••" :tooltip="copiedField === 'pass' ? 'Copied!' : 'Copy password'" tooltip-placement="bottom" @click="copyToClipboard('password', 'pass')" />
+          </span>
+          <Button variant="tertiary" size="mini" :label="localPath" :tooltip="copiedField === 'path' ? 'Copied!' : 'Copy local path'" tooltip-placement="bottom" @click="copyToClipboard(localPath, 'path')" />
         </div>
-      </section>
+      </div>
 
       <!-- Content snapshot -->
       <section class="overview__section">
-        <span class="section-heading">Content</span>
         <div class="stats">
           <div v-for="stat in contentStats" :key="stat.label" class="stat">
             <span class="stat__value">{{ stat.value }}</span>
@@ -105,7 +117,41 @@ const contentStats = computed<StatItem[]>(() => {
   align-items: center;
   gap: var(--space-xl);
   width: 100%;
-  max-width: 360px;
+  max-width: 480px;
+}
+
+/* ── Site overview ── */
+
+.site-overview {
+  width: 100%;
+}
+
+/* Override Tooltip's inline-flex trigger so thumb gets full width */
+.site-overview > :deep(.tooltip-trigger) {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.site-overview :deep(.site-thumb) {
+  width: 100%;
+}
+
+.overview__url {
+  color: var(--color-frame-theme);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.overview__creds {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+}
+
+.overview__creds-sep {
+  color: var(--color-frame-fg-muted);
+  opacity: 0.5;
+  margin: 0 1px;
 }
 
 /* ── Sections ── */
@@ -115,6 +161,9 @@ const contentStats = computed<StatItem[]>(() => {
   flex-direction: column;
   gap: var(--space-s);
   width: 100%;
+  background: var(--color-frame-fill);
+  padding: var(--space-s);
+  border-radius: var(--radius-l);
 }
 
 .section-heading {
@@ -123,49 +172,6 @@ const contentStats = computed<StatItem[]>(() => {
   color: var(--color-frame-fg-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-
-/* ── Admin links ── */
-
-.admin-links {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
-}
-
-.admin-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xxs);
-  padding: var(--space-s) var(--space-xs);
-  border: none;
-  border-radius: var(--radius-m);
-  background: none;
-  color: var(--color-frame-fg-muted);
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  cursor: pointer;
-  transition: background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
-}
-
-.admin-link:hover {
-  background: var(--color-frame-hover);
-  color: var(--color-frame-fg);
-}
-
-.admin-link__icon {
-  color: var(--color-frame-fg-muted);
-  transition: color var(--duration-instant) var(--ease-default);
-}
-
-.admin-link:hover .admin-link__icon {
-  color: var(--color-frame-fg);
-}
-
-.admin-link__label {
-  line-height: 1;
 }
 
 /* ── Content stats ── */

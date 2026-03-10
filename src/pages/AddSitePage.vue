@@ -131,22 +131,24 @@ async function onSubmit(data: { name: string }) {
     <!-- Accent glow -->
     <div class="accent-glow" />
 
-    <!-- Header: back (left) + title (center) + close (right, only if sites exist) -->
+    <!-- Header: cancel/back button (left-aligned) -->
     <header class="page-header hstack">
-      <div class="header-start">
-        <Button
-          v-if="canGoBack"
-          :icon="chevronLeft"
-          variant="tertiary"
-          surface="dark"
-          tooltip="Back"
-          @click="goBack"
-        />
-      </div>
-      <h1 class="page-title">{{ heading }}</h1>
-      <div class="header-end">
-        <Button v-if="hasSites" :icon="close" variant="tertiary" surface="dark" tooltip="Close" @click="dismiss" />
-      </div>
+      <Button
+        v-if="canGoBack"
+        :icon="chevronLeft"
+        label="Back"
+        variant="tertiary"
+        surface="dark"
+        @click="goBack"
+      />
+      <Button
+        v-else-if="hasSites"
+        :icon="close"
+        label="Cancel"
+        variant="tertiary"
+        surface="dark"
+        @click="dismiss"
+      />
     </header>
 
     <!-- Content -->
@@ -159,7 +161,7 @@ async function onSubmit(data: { name: string }) {
             <button
               v-for="(opt, idx) in pathOptions"
               :key="opt.id"
-              class="option-card vstack gap-s"
+              class="option-card vstack gap-xl"
               :style="{ '--card-index': idx }"
               @click="choosePath(opt.id)"
             >
@@ -183,7 +185,7 @@ async function onSubmit(data: { name: string }) {
         </div>
 
         <!-- Step: Pull site picker -->
-        <div v-else-if="currentStep === 'picker' && currentPath === 'pull'" key="pull" class="step-content">
+        <div v-else-if="currentStep === 'picker' && currentPath === 'pull'" key="pull" class="step-content step-content--medium">
           <PullSitePicker
             :authenticated="isAuthenticated"
             :sites="remoteSites"
@@ -196,7 +198,7 @@ async function onSubmit(data: { name: string }) {
         </div>
 
         <!-- Step: Import file picker -->
-        <div v-else-if="currentStep === 'picker' && currentPath === 'import'" key="import" class="step-content">
+        <div v-else-if="currentStep === 'picker' && currentPath === 'import'" key="import" class="step-content step-content--medium">
           <ImportDropZone @select="onFileSelect" @clear="selectedFile = null" />
           <div class="picker-footer hstack gap-xs">
             <Button label="Continue" variant="primary" surface="dark" :disabled="!selectedFile" @click="onFileContinue" />
@@ -270,25 +272,6 @@ async function onSubmit(data: { name: string }) {
   align-items: center;
 }
 
-.header-start,
-.header-end {
-  width: 80px;
-  display: flex;
-}
-
-.header-end {
-  justify-content: flex-end;
-}
-
-.page-title {
-  flex: 1;
-  text-align: center;
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-semibold);
-  margin: 0;
-  opacity: 0.6;
-}
-
 /* ── Content ── */
 
 .page-content {
@@ -304,26 +287,28 @@ async function onSubmit(data: { name: string }) {
 
 .step-content {
   width: 100%;
-  max-width: 560px;
+  max-width: 800px;
   display: flex;
   flex-direction: column;
   gap: var(--space-l);
 }
 
-.step-content--wide { max-width: 720px; }
-.step-content--narrow { max-width: 400px; }
+.step-content--wide { max-width: 800px; }
+.step-content--medium { max-width: 480px; }
+.step-content--narrow { max-width: 480px; }
 
 /* ── Options grid ── */
 
 .options-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 380px);
+  justify-content: center;
   gap: var(--space-s);
 }
 
 .option-card {
   position: relative;
-  padding: var(--space-l);
+  padding: var(--space-xl);
   border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-m);
   background: var(--color-chrome-fill);
@@ -357,8 +342,6 @@ async function onSubmit(data: { name: string }) {
 
 .option-illustration {
   display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--color-chrome-fg);
 }
 

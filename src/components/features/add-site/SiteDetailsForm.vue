@@ -58,10 +58,19 @@ function submit() {
       />
     </div>
 
-    <button class="advanced-toggle" @click="showAdvanced = !showAdvanced">
-      <WPIcon :icon="showAdvanced ? chevronUp : chevronDown" :size="20" />
-      <span>Advanced settings</span>
-    </button>
+    <div class="form-actions hstack">
+      <button class="advanced-toggle" @click="showAdvanced = !showAdvanced">
+        <WPIcon :icon="showAdvanced ? chevronUp : chevronDown" :size="20" />
+        <span>Advanced settings</span>
+      </button>
+      <Button
+        :label="submitLabel ?? 'Create site'"
+        variant="primary"
+        surface="dark"
+        :disabled="!canSubmit"
+        @click="submit"
+      />
+    </div>
 
     <div v-if="showAdvanced" class="advanced-fields vstack gap-m">
       <div class="field vstack gap-xxs">
@@ -82,17 +91,6 @@ function submit() {
           <option value="6.5">6.5</option>
         </select>
       </div>
-    </div>
-
-    <div class="form-footer">
-      <Button
-        :label="submitLabel ?? 'Create site'"
-        variant="primary"
-        surface="dark"
-        :disabled="!canSubmit"
-        width="full"
-        @click="submit"
-      />
     </div>
   </div>
 </template>
@@ -162,8 +160,8 @@ function submit() {
   }
 }
 
-.form-footer {
-  justify-content: flex-end;
-  padding-block-start: var(--space-xs);
+.form-actions {
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

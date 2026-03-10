@@ -205,7 +205,6 @@ function onAction(action: ActionButton) {
           :site-id="activeSiteId"
           :selected-id="currentScreen === 'tasks' ? selectedConvoId : null"
           :active-screen="currentScreen"
-          :site-name="isAllSites ? 'All Sites' : currentSite?.name"
           :site-favicon="isAllSites ? undefined : currentSite?.favicon"
           :is-all-sites="isAllSites"
           :sidebar-hidden="sidebarHidden"
@@ -276,7 +275,7 @@ function onAction(action: ActionButton) {
 }
 
 .pane-site-navigation {
-  flex: 0 0 333px;
+  flex: 0 0 275px;
   border-inline-end: 1px solid var(--color-frame-border);
 }
 

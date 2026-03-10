@@ -1,16 +1,18 @@
 import { h, defineComponent } from 'vue'
 
-const SIZE = 120
-
-function svg(children: ReturnType<typeof h>[]) {
+function svg(viewBox: string, children: ReturnType<typeof h>[]) {
+  const [, , w, hh] = viewBox.split(' ').map(Number)
   return h('svg', {
-    width: SIZE,
-    height: SIZE,
-    viewBox: '0 0 120 120',
+    width: w,
+    height: hh,
+    viewBox,
     fill: 'none',
     xmlns: 'http://www.w3.org/2000/svg',
   }, children)
 }
+
+// All content offset by 1px from edges to avoid stroke clipping.
+// viewBox includes 1px padding on all sides.
 
 /**
  * Blank site — empty browser window with a cursor blinking
@@ -18,18 +20,13 @@ function svg(children: ReturnType<typeof h>[]) {
 export const IllustrationBlank = defineComponent({
   name: 'IllustrationBlank',
   setup() {
-    return () => svg([
-      // Browser chrome bar
-      h('rect', { x: 20, y: 24, width: 80, height: 72, rx: 8, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.3 }),
-      // Title bar
-      h('line', { x1: 20, y1: 38, x2: 100, y2: 38, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.15 }),
-      // Three dots
-      h('circle', { cx: 30, cy: 31, r: 2, fill: 'currentColor', opacity: 0.25 }),
-      h('circle', { cx: 37, cy: 31, r: 2, fill: 'currentColor', opacity: 0.25 }),
-      h('circle', { cx: 44, cy: 31, r: 2, fill: 'currentColor', opacity: 0.25 }),
-      // Cursor line blinking
-      h('line', { x1: 36, y1: 52, x2: 36, y2: 64, stroke: 'var(--color-chrome-theme)', 'stroke-width': 2, 'stroke-linecap': 'round', opacity: 0.8 }),
-      h('animateTransform'),
+    return () => svg('-1 -1 82 74', [
+      h('rect', { x: 0, y: 0, width: 80, height: 72, rx: 8, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.3 }),
+      h('line', { x1: 0, y1: 14, x2: 80, y2: 14, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.15 }),
+      h('circle', { cx: 10, cy: 7, r: 2, fill: 'currentColor', opacity: 0.25 }),
+      h('circle', { cx: 17, cy: 7, r: 2, fill: 'currentColor', opacity: 0.25 }),
+      h('circle', { cx: 24, cy: 7, r: 2, fill: 'currentColor', opacity: 0.25 }),
+      h('line', { x1: 16, y1: 28, x2: 16, y2: 40, stroke: 'var(--color-chrome-theme)', 'stroke-width': 2, 'stroke-linecap': 'round', opacity: 0.8 }),
     ])
   },
 })
@@ -40,16 +37,12 @@ export const IllustrationBlank = defineComponent({
 export const IllustrationBlueprint = defineComponent({
   name: 'IllustrationBlueprint',
   setup() {
-    return () => svg([
-      // Outer frame
-      h('rect', { x: 20, y: 24, width: 80, height: 72, rx: 8, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.3 }),
-      // Header block
-      h('rect', { x: 28, y: 32, width: 64, height: 10, rx: 3, fill: 'var(--color-chrome-theme)', opacity: 0.25 }),
-      // Two column blocks
-      h('rect', { x: 28, y: 48, width: 28, height: 20, rx: 3, fill: 'var(--color-chrome-theme)', opacity: 0.15 }),
-      h('rect', { x: 64, y: 48, width: 28, height: 20, rx: 3, fill: 'var(--color-chrome-theme)', opacity: 0.15 }),
-      // Footer block
-      h('rect', { x: 28, y: 74, width: 64, height: 14, rx: 3, fill: 'var(--color-chrome-theme)', opacity: 0.1 }),
+    return () => svg('-1 -1 82 74', [
+      h('rect', { x: 0, y: 0, width: 80, height: 72, rx: 8, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.3 }),
+      h('rect', { x: 8, y: 8, width: 64, height: 10, rx: 3, fill: 'var(--color-chrome-theme)', opacity: 0.25 }),
+      h('rect', { x: 8, y: 24, width: 28, height: 20, rx: 3, fill: 'var(--color-chrome-theme)', opacity: 0.15 }),
+      h('rect', { x: 44, y: 24, width: 28, height: 20, rx: 3, fill: 'var(--color-chrome-theme)', opacity: 0.15 }),
+      h('rect', { x: 8, y: 50, width: 64, height: 14, rx: 3, fill: 'var(--color-chrome-theme)', opacity: 0.1 }),
     ])
   },
 })
@@ -60,82 +53,43 @@ export const IllustrationBlueprint = defineComponent({
 export const IllustrationPull = defineComponent({
   name: 'IllustrationPull',
   setup() {
-    return () => svg([
-      // Globe circle (oversized to match perceived size of square illustrations)
-      h('circle', { cx: 60, cy: 56, r: 38, stroke: 'currentColor', 'stroke-width': 1.5, fill: 'none', opacity: 0.3 }),
-      // Longitude ellipses
-      h('ellipse', { cx: 60, cy: 56, rx: 15, ry: 38, stroke: 'currentColor', 'stroke-width': 1, fill: 'none', opacity: 0.15 }),
-      h('ellipse', { cx: 60, cy: 56, rx: 30, ry: 38, stroke: 'currentColor', 'stroke-width': 1, fill: 'none', opacity: 0.1 }),
-      // Equator
-      h('line', { x1: 22, y1: 56, x2: 98, y2: 56, stroke: 'currentColor', 'stroke-width': 1, opacity: 0.15 }),
-      // Latitude lines
-      h('ellipse', { cx: 60, cy: 40, rx: 33, ry: 8, stroke: 'currentColor', 'stroke-width': 1, fill: 'none', opacity: 0.12 }),
-      h('ellipse', { cx: 60, cy: 72, rx: 33, ry: 8, stroke: 'currentColor', 'stroke-width': 1, fill: 'none', opacity: 0.12 }),
-      // Small accent dot — "you are here"
-      h('circle', { cx: 75, cy: 42, r: 3, fill: 'var(--color-chrome-theme)', opacity: 0.6 }),
+    return () => svg('-1 -1 80 80', [
+      h('circle', { cx: 39, cy: 39, r: 38, stroke: 'currentColor', 'stroke-width': 1.5, fill: 'none', opacity: 0.3 }),
+      h('ellipse', { cx: 39, cy: 39, rx: 15, ry: 38, stroke: 'currentColor', 'stroke-width': 1, fill: 'none', opacity: 0.15 }),
+      h('ellipse', { cx: 39, cy: 39, rx: 30, ry: 38, stroke: 'currentColor', 'stroke-width': 1, fill: 'none', opacity: 0.1 }),
+      h('line', { x1: 1, y1: 39, x2: 77, y2: 39, stroke: 'currentColor', 'stroke-width': 1, opacity: 0.15 }),
+      h('ellipse', { cx: 39, cy: 23, rx: 33, ry: 8, stroke: 'currentColor', 'stroke-width': 1, fill: 'none', opacity: 0.12 }),
+      h('ellipse', { cx: 39, cy: 55, rx: 33, ry: 8, stroke: 'currentColor', 'stroke-width': 1, fill: 'none', opacity: 0.12 }),
+      h('circle', { cx: 54, cy: 25, r: 3, fill: 'var(--color-chrome-theme)', opacity: 0.6 }),
     ])
   },
 })
 
 /**
- * Import backup — isometric open box viewed from front-above
- *
- * Geometry: isometric hexagon with front corner at bottom.
- * Floor diamond at y+30, walls go up 30px.
- * Vertices:
- *   A'(28,44) ── D'(60,30) ── C'(92,44)   ← wall tops / opening rim
- *       │                          │
- *   A (28,74) ── B (60,88) ── C (92,74)   ← wall bottoms
- *                  front corner
+ * Import backup — closed isometric cube with a seal line on top
  */
 export const IllustrationImport = defineComponent({
   name: 'IllustrationImport',
   setup() {
-    return () => svg([
-      // Box outline (hexagon: two walls + bottom edges)
+    return () => svg('-1 -1 84 84', [
       h('path', {
-        d: 'M28 44 L28 74 L60 88 L92 74 L92 44',
+        d: 'M1 21 L1 61 L41 81 L81 61 L81 21 L41 1 Z',
         stroke: 'currentColor',
         'stroke-width': 1.5,
         fill: 'none',
         opacity: 0.3,
         'stroke-linejoin': 'round',
       }),
-      // Front corner vertical edge
-      h('line', { x1: 60, y1: 88, x2: 60, y2: 58, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.3 }),
-      // Top rim to front corner (shows opening shape)
-      h('line', { x1: 28, y1: 44, x2: 60, y2: 58, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.3 }),
-      h('line', { x1: 92, y1: 44, x2: 60, y2: 58, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.3 }),
-      // Back edge of opening
-      h('line', { x1: 28, y1: 44, x2: 60, y2: 30, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.2 }),
-      h('line', { x1: 92, y1: 44, x2: 60, y2: 30, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.2 }),
-      // Inside fill (looking down into the box)
+      h('line', { x1: 41, y1: 81, x2: 41, y2: 41, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.3 }),
+      h('line', { x1: 1, y1: 21, x2: 41, y2: 41, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.25 }),
+      h('line', { x1: 81, y1: 21, x2: 41, y2: 41, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.25 }),
       h('path', {
-        d: 'M28 44 L60 30 L92 44 L60 58 Z',
+        d: 'M1 21 L41 1 L81 21 L41 41 Z',
         fill: 'var(--color-chrome-theme)',
         'fill-opacity': 0.06,
         stroke: 'none',
       }),
-      // Back-left flap (folded open backward)
-      h('path', {
-        d: 'M28 44 L20 26 L52 12 L60 30 Z',
-        stroke: 'currentColor',
-        'stroke-width': 1.5,
-        fill: 'var(--color-chrome-theme)',
-        'fill-opacity': 0.04,
-        opacity: 0.25,
-        'stroke-linejoin': 'round',
-      }),
-      // Back-right flap (folded open backward)
-      h('path', {
-        d: 'M92 44 L100 26 L68 12 L60 30 Z',
-        stroke: 'currentColor',
-        'stroke-width': 1.5,
-        fill: 'var(--color-chrome-theme)',
-        'fill-opacity': 0.04,
-        opacity: 0.25,
-        'stroke-linejoin': 'round',
-      }),
+      h('line', { x1: 21, y1: 11, x2: 61, y2: 31, stroke: 'var(--color-chrome-theme)', 'stroke-width': 1.5, 'stroke-linecap': 'round', opacity: 0.4 }),
     ])
   },
 })
