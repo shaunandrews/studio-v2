@@ -21,6 +21,7 @@ const categories = [
       { id: 'modal', label: 'Modal' },
       { id: 'status-indicator', label: 'StatusIndicator' },
       { id: 'text', label: 'Text' },
+      { id: 'text-input', label: 'TextInput' },
       { id: 'toggle', label: 'Toggle' },
       { id: 'tooltip', label: 'Tooltip' },
       { id: 'wpicon', label: 'WPIcon' },

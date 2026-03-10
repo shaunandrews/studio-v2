@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, useSlots } from 'vue'
+import { computed, ref, watch, nextTick, onMounted, onBeforeUnmount, useSlots } from 'vue'
 import { close } from '@wordpress/icons'
 import Text from '@/components/primitives/Text.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
@@ -38,6 +38,24 @@ onBeforeUnmount(() => {
 
 const hasHeader = computed(() => props.title || slots.header)
 const hasFooter = computed(() => !!slots.footer)
+
+// Scroll border detection
+const contentRef = ref<HTMLElement | null>(null)
+const scrolledTop = ref(false)
+const scrolledBottom = ref(false)
+
+function updateScrollBorders() {
+  const el = contentRef.value
+  if (!el) return
+  scrolledTop.value = el.scrollTop > 0
+  scrolledBottom.value = el.scrollTop + el.clientHeight < el.scrollHeight - 1
+}
+
+watch(() => props.open, (isOpen) => {
+  if (isOpen) {
+    nextTick(() => updateScrollBorders())
+  }
+})
 </script>
 
 <template>
@@ -52,19 +70,19 @@ const hasFooter = computed(() => !!slots.footer)
           </button>
 
           <!-- Header -->
-          <div v-if="hasHeader" class="modal-header hstack">
+          <div v-if="hasHeader" class="modal-header hstack" :class="{ 'modal-header--bordered': scrolledTop }">
             <slot name="header">
               <Text variant="body" weight="semibold" class="flex-1 min-w-0">{{ title }}</Text>
             </slot>
           </div>
 
           <!-- Content -->
-          <div class="modal-content">
+          <div ref="contentRef" class="modal-content" @scroll="updateScrollBorders">
             <slot />
           </div>
 
           <!-- Footer -->
-          <div v-if="hasFooter" class="modal-footer hstack">
+          <div v-if="hasFooter" class="modal-footer hstack" :class="{ 'modal-footer--bordered': scrolledBottom }">
             <slot name="footer" />
           </div>
 
@@ -100,6 +118,12 @@ const hasFooter = computed(() => !!slots.footer)
   padding: var(--space-s) var(--space-xl);
   gap: var(--space-xs);
   flex-shrink: 0;
+  border-block-end: 1px solid transparent;
+  transition: border-color var(--duration-instant) var(--ease-default);
+}
+
+.modal-header--bordered {
+  border-block-end-color: var(--color-frame-border);
 }
 
 /* ── Close button ── */
@@ -145,6 +169,12 @@ const hasFooter = computed(() => !!slots.footer)
   gap: var(--space-xs);
   justify-content: flex-end;
   flex-shrink: 0;
+  border-block-start: 1px solid transparent;
+  transition: border-color var(--duration-instant) var(--ease-default);
+}
+
+.modal-footer--bordered {
+  border-block-start-color: var(--color-frame-border);
 }
 
 /* ── Transitions ── */

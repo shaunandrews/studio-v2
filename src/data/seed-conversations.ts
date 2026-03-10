@@ -3,39 +3,39 @@ import type { Conversation, Message } from './types'
 export const seedConversations: Conversation[] = [
   // All Sites
   { id: 'all-sites-updates', siteId: '__all-sites__', agentId: 'wpcom', title: 'Update WordPress across all sites', createdAt: '2026-02-28T10:00:00Z' },
-  { id: 'all-sites-plugins', siteId: '__all-sites__', agentId: 'wpcom', title: 'Plugin compatibility check', createdAt: '2026-03-01T14:00:00Z' },
+  { id: 'all-sites-plugins', siteId: '__all-sites__', agentId: 'wpcom', title: 'Plugin compatibility check', createdAt: '2026-03-01T14:00:00Z', unread: true },
 
   // Global (home screen)
   { id: 'global-1', siteId: null, agentId: 'wpcom', title: 'Getting started', createdAt: '2026-02-10T08:00:00Z' },
 
-  // Shaun's Blog
-  { id: 'blog-assistant-1', siteId: 'shauns-blog', agentId: 'wpcom', title: 'Hero section redesign', createdAt: '2026-02-12T10:00:00Z' },
-  { id: 'blog-code-1', siteId: 'shauns-blog', agentId: 'wpcom', title: 'Custom block development', createdAt: '2026-02-11T14:00:00Z' },
+  // Arlo Writes
+  { id: 'blog-assistant-1', siteId: 'arlo-blog', agentId: 'wpcom', title: 'Hero section redesign', createdAt: '2026-02-12T10:00:00Z', unread: true },
+  { id: 'blog-code-1', siteId: 'arlo-blog', agentId: 'wpcom', title: 'Custom block development', createdAt: '2026-02-11T14:00:00Z' },
 
   // Downstreet Café
-  { id: 'cafe-onboarding', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Setting up Downstreet Café', createdAt: '2025-11-15T10:00:00Z' },
-  { id: 'cafe-hero-tweak', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Homepage hero updates', createdAt: '2025-11-18T09:00:00Z' },
-  { id: 'cafe-photos', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Menu photo updates', createdAt: '2025-11-22T14:00:00Z' },
-  { id: 'cafe-reservations', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Online reservations', createdAt: '2025-12-03T11:00:00Z' },
-  { id: 'cafe-seo', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'SEO & analytics setup', createdAt: '2025-12-10T10:00:00Z' },
-  { id: 'cafe-events', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Events page', createdAt: '2026-01-08T13:00:00Z' },
+  { id: 'cafe-onboarding', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Setting up Downstreet Café', createdAt: '2026-02-24T10:00:00Z' },
+  { id: 'cafe-hero-tweak', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Homepage hero updates', createdAt: '2026-02-25T09:00:00Z' },
+  { id: 'cafe-photos', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Menu photo updates', createdAt: '2026-02-26T14:00:00Z' },
+  { id: 'cafe-reservations', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Online reservations', createdAt: '2026-02-27T11:00:00Z' },
+  { id: 'cafe-seo', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'SEO & analytics setup', createdAt: '2026-02-28T10:00:00Z' },
+  { id: 'cafe-events', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Events page', createdAt: '2026-03-03T13:00:00Z', status: 'running', unread: true },
 
   // Studio Meridian
   { id: 'portfolio-onboarding', siteId: 'portfolio', agentId: 'wpcom', title: 'Setting up Studio Meridian', createdAt: '2026-01-20T09:00:00Z' },
   { id: 'portfolio-assistant-1', siteId: 'portfolio', agentId: 'wpcom', title: 'Adding Meridian × Oura case study', createdAt: '2026-02-15T14:00:00Z' },
 
-  // Flavor Records
-  { id: 'records-design-1', siteId: 'flavor-records', agentId: 'wpcom', title: 'Album grid layout', createdAt: '2026-02-05T13:00:00Z' },
+  // Wild Lens
+  { id: 'records-design-1', siteId: 'wild-lens', agentId: 'wpcom', title: 'Photo gallery layout', createdAt: '2026-02-05T13:00:00Z' },
 
-  // Mise en Place
-  { id: 'mise-assistant-1', siteId: 'mise-en-place', agentId: 'wpcom', title: 'Recipe card layout', createdAt: '2026-02-08T11:30:00Z' },
+  // Thread & Co
+  { id: 'mise-assistant-1', siteId: 'thread-and-co', agentId: 'wpcom', title: 'Product card layout', createdAt: '2026-02-08T11:30:00Z' },
 
-  // Ledger
-  { id: 'ledger-assistant-1', siteId: 'ledger', agentId: 'wpcom', title: 'Invoice template', createdAt: '2026-02-10T09:30:00Z' },
-  { id: 'ledger-code-1', siteId: 'ledger', agentId: 'wpcom', title: 'Payment status API', createdAt: '2026-02-11T10:00:00Z' },
+  // Launchpad
+  { id: 'ledger-assistant-1', siteId: 'launchpad', agentId: 'wpcom', title: 'Landing page template', createdAt: '2026-02-10T09:30:00Z' },
+  { id: 'ledger-code-1', siteId: 'launchpad', agentId: 'wpcom', title: 'Signup flow API', createdAt: '2026-02-11T10:00:00Z' },
 
-  // Fuego Collective
-  { id: 'fuego-assistant-1', siteId: 'fuego-collective', agentId: 'wpcom', title: 'Setting up the shop', createdAt: '2026-02-14T12:30:00Z' },
+  // DevRef
+  { id: 'fuego-assistant-1', siteId: 'devref', agentId: 'wpcom', title: 'Setting up the docs', createdAt: '2026-02-14T12:30:00Z' },
 ]
 
 export const seedMessages: Message[] = [
@@ -43,11 +43,11 @@ export const seedMessages: Message[] = [
   // Global conversation — no tool calls, just chat
   // ═══════════════════════════════════════════
   { id: 'g1-1', conversationId: 'global-1', role: 'agent', agentId: 'wpcom', content: "Hey! I'm Kit. I can build sites, customize themes, install plugins, write code — you name it. Pick a site from the sidebar or tell me what you want to create.", timestamp: '2026-02-10T08:00:00Z' },
-  { id: 'g1-2', conversationId: 'global-1', role: 'user', content: 'I want to create a new site for a record label.', timestamp: '2026-02-10T08:01:00Z' },
-  { id: 'g1-3', conversationId: 'global-1', role: 'agent', agentId: 'wpcom', content: 'A record label — nice. I\'ll set up a new project called "Flavor Records" with a starter theme that works well for music and media. Give me a sec…', timestamp: '2026-02-10T08:01:30Z' },
+  { id: 'g1-2', conversationId: 'global-1', role: 'user', content: 'I want to create a new site for a photography portfolio.', timestamp: '2026-02-10T08:01:00Z' },
+  { id: 'g1-3', conversationId: 'global-1', role: 'agent', agentId: 'wpcom', content: 'A photography portfolio — nice. I\'ll set up a new project called "Wild Lens" with a starter theme that works well for image-heavy sites. Give me a sec…', timestamp: '2026-02-10T08:01:30Z' },
 
   // ═══════════════════════════════════════════
-  // Shaun's Blog — hero section redesign
+  // Arlo Writes — hero section redesign
   // ═══════════════════════════════════════════
   { id: 'ba1-1', conversationId: 'blog-assistant-1', role: 'user', content: 'I want to change the hero section on my homepage to have a gradient background and bigger text.', timestamp: '2026-02-12T10:00:00Z' },
   { id: 'ba1-2', conversationId: 'blog-assistant-1', role: 'agent', agentId: 'wpcom', content: "I'll update your hero with a gradient and bump the heading size. One moment.", timestamp: '2026-02-12T10:00:30Z' },
@@ -71,7 +71,7 @@ export const seedMessages: Message[] = [
   },
 
   // ═══════════════════════════════════════════
-  // Shaun's Blog — custom block development
+  // Arlo Writes — custom block development
   // ═══════════════════════════════════════════
   { id: 'bc1-1', conversationId: 'blog-code-1', role: 'user', content: "I need a custom 'project showcase' block that displays a grid of portfolio items with images and descriptions.", timestamp: '2026-02-11T14:00:00Z' },
   { id: 'bc1-2', conversationId: 'blog-code-1', role: 'agent', agentId: 'wpcom', content: "I'll scaffold a custom block called `project-showcase` — `block.json` registration, `InnerBlocks` for flexible card content, and a responsive CSS Grid layout. Let me generate the files.", timestamp: '2026-02-11T14:00:30Z' },
@@ -91,23 +91,23 @@ export const seedMessages: Message[] = [
   // ═══════════════════════════════════════════
   // Downstreet Café — onboarding (Q&A then build)
   // ═══════════════════════════════════════════
-  { id: 'co-1', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Hi! I'm Kit, your AI assistant.", timestamp: '2025-11-15T10:00:00Z' },
-  { id: 'co-2', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "I can design and build just about anything — stores, blogs, portfolios, apps. Just describe what you want and I'll make it happen.", timestamp: '2025-11-15T10:00:10Z' },
-  { id: 'co-3', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "So, what are we making?", timestamp: '2025-11-15T10:00:15Z' },
-  { id: 'co-4', conversationId: 'cafe-onboarding', role: 'user', content: "Restaurant", timestamp: '2025-11-15T10:00:30Z' },
-  { id: 'co-5', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Nice — what's the restaurant called?", timestamp: '2025-11-15T10:00:35Z' },
-  { id: 'co-6', conversationId: 'cafe-onboarding', role: 'user', content: "Downstreet Café", timestamp: '2025-11-15T10:01:00Z' },
-  { id: 'co-7', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Describe it in a sentence. What kind of food, what's the vibe?", timestamp: '2025-11-15T10:01:05Z' },
-  { id: 'co-8', conversationId: 'cafe-onboarding', role: 'user', content: "A warm neighborhood café in Portland, Maine. Specialty coffee, fresh pastries, and a community hub — been open since 2018.", timestamp: '2025-11-15T10:01:40Z' },
-  { id: 'co-9', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "How do you want the site to look and feel? Any vibe, mood, or style you have in mind?", timestamp: '2025-11-15T10:01:45Z' },
-  { id: 'co-10', conversationId: 'cafe-onboarding', role: 'user', content: "Warm and editorial, like a well-designed indie coffee shop zine. Serif headings, earthy tones, nothing flashy.", timestamp: '2025-11-15T10:02:20Z' },
-  { id: 'co-11', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Are there any sites you really like, or want to use as inspiration?", timestamp: '2025-11-15T10:02:25Z' },
-  { id: 'co-12', conversationId: 'cafe-onboarding', role: 'user', content: "bluebottlecoffee.com", timestamp: '2025-11-15T10:02:45Z' },
-  { id: 'co-13', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Let me design **Downstreet Café** for you. I'll create a few design directions to choose from.", timestamp: '2025-11-15T10:02:50Z' },
-  { id: 'co-14', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Crafting design briefs…", timestamp: '2025-11-15T10:02:55Z' },
-  { id: 'co-15', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Here are 3 directions for **Downstreet Café**. Pick the one that feels right:", timestamp: '2025-11-15T10:03:40Z' },
-  { id: 'co-16', conversationId: 'cafe-onboarding', role: 'user', content: "Warm Editorial", timestamp: '2025-11-15T10:04:10Z' },
-  { id: 'co-17', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "**Warm Editorial** — great choice. Inviting editorial warmth with serif headings and a muted earthy palette. Playfair Display + Source Sans Pro. Building it now.", timestamp: '2025-11-15T10:04:15Z' },
+  { id: 'co-1', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Hi! I'm Kit, your AI assistant.", timestamp: '2026-02-24T10:00:00Z' },
+  { id: 'co-2', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "I can design and build just about anything — stores, blogs, portfolios, apps. Just describe what you want and I'll make it happen.", timestamp: '2026-02-24T10:00:04Z' },
+  { id: 'co-3', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "So, what are we making?", timestamp: '2026-02-24T10:00:06Z' },
+  { id: 'co-4', conversationId: 'cafe-onboarding', role: 'user', content: "Restaurant", timestamp: '2026-02-24T10:00:18Z' },
+  { id: 'co-5', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Nice — what's the restaurant called?", timestamp: '2026-02-24T10:00:22Z' },
+  { id: 'co-6', conversationId: 'cafe-onboarding', role: 'user', content: "Downstreet Café", timestamp: '2026-02-24T10:00:38Z' },
+  { id: 'co-7', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Describe it in a sentence. What kind of food, what's the vibe?", timestamp: '2026-02-24T10:00:42Z' },
+  { id: 'co-8', conversationId: 'cafe-onboarding', role: 'user', content: "A warm neighborhood café in Portland, Maine. Specialty coffee, fresh pastries, and a community hub — been open since 2018.", timestamp: '2026-02-24T10:01:51Z' },
+  { id: 'co-9', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "How do you want the site to look and feel? Any vibe, mood, or style you have in mind?", timestamp: '2026-02-24T10:01:56Z' },
+  { id: 'co-10', conversationId: 'cafe-onboarding', role: 'user', content: "Warm and editorial, like a well-designed indie coffee shop zine. Serif headings, earthy tones, nothing flashy.", timestamp: '2026-02-24T10:02:44Z' },
+  { id: 'co-11', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Are there any sites you really like, or want to use as inspiration?", timestamp: '2026-02-24T10:02:49Z' },
+  { id: 'co-12', conversationId: 'cafe-onboarding', role: 'user', content: "bluebottlecoffee.com", timestamp: '2026-02-24T10:03:12Z' },
+  { id: 'co-13', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Let me design **Downstreet Café** for you. I'll create a few design directions to choose from.", timestamp: '2026-02-24T10:03:18Z' },
+  { id: 'co-14', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Crafting design briefs…", timestamp: '2026-02-24T10:03:20Z' },
+  { id: 'co-15', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "Here are 3 directions for **Downstreet Café**. Pick the one that feels right:", timestamp: '2026-02-24T10:04:48Z' },
+  { id: 'co-16', conversationId: 'cafe-onboarding', role: 'user', content: "Warm Editorial", timestamp: '2026-02-24T10:06:02Z' },
+  { id: 'co-17', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "**Warm Editorial** — great choice. Inviting editorial warmth with serif headings and a muted earthy palette. Playfair Display + Source Sans Pro. Building it now.", timestamp: '2026-02-24T10:06:08Z' },
   {
     id: 'co-18', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom',
     content: "",
@@ -124,16 +124,16 @@ export const seedMessages: Message[] = [
       { id: 'tc-co-10', label: 'Built About — Story & Team', status: 'done', toolName: 'create_section', args: 'page: "about", section: "content"' },
       { id: 'tc-co-11', label: 'Built About — Footer', status: 'done', toolName: 'create_section', args: 'page: "about", section: "footer"' },
     ],
-    timestamp: '2025-11-15T10:04:20Z',
+    timestamp: '2026-02-24T10:06:12Z',
   },
-  { id: 'co-19', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "**Downstreet Café** is ready! 3 pages, 11 sections. Take a look and let me know if you want to tweak anything.", timestamp: '2025-11-15T10:06:00Z' },
+  { id: 'co-19', conversationId: 'cafe-onboarding', role: 'agent', agentId: 'wpcom', content: "**Downstreet Café** is ready! 3 pages, 11 sections. Take a look and let me know if you want to tweak anything.", timestamp: '2026-02-24T10:10:45Z' },
 
   // ═══════════════════════════════════════════
   // Downstreet Café — homepage hero tweak
   // ═══════════════════════════════════════════
-  { id: 'ch-1', conversationId: 'cafe-hero-tweak', role: 'user', content: "The hero tagline says \"Coffee crafted with intention\" which is fine, but I want to add our actual hours underneath it. Mon–Fri 7am–5pm, Weekends 8am–6pm.", timestamp: '2025-11-18T09:00:00Z' },
-  { id: 'ch-2', conversationId: 'cafe-hero-tweak', role: 'agent', agentId: 'wpcom', content: "I'll add the hours below the tagline — smaller text, slightly muted so they don't compete with the headline. Also, want me to change the headline? You mentioned it feels a bit pretentious.", timestamp: '2025-11-18T09:00:30Z' },
-  { id: 'ch-3', conversationId: 'cafe-hero-tweak', role: 'user', content: "Yeah, change it to \"Your neighborhood coffee shop\" — much more us.", timestamp: '2025-11-18T09:01:15Z' },
+  { id: 'ch-1', conversationId: 'cafe-hero-tweak', role: 'user', content: "The hero tagline says \"Coffee crafted with intention\" which is fine, but I want to add our actual hours underneath it. Mon–Fri 7am–5pm, Weekends 8am–6pm.", timestamp: '2026-02-25T09:00:00Z' },
+  { id: 'ch-2', conversationId: 'cafe-hero-tweak', role: 'agent', agentId: 'wpcom', content: "I'll add the hours below the tagline — smaller text, slightly muted so they don't compete with the headline. Also, want me to change the headline? You mentioned it feels a bit pretentious.", timestamp: '2026-02-25T09:00:06Z' },
+  { id: 'ch-3', conversationId: 'cafe-hero-tweak', role: 'user', content: "Yeah, change it to \"Your neighborhood coffee shop\" — much more us.", timestamp: '2026-02-25T09:00:28Z' },
   {
     id: 'ch-4', conversationId: 'cafe-hero-tweak', role: 'agent', agentId: 'wpcom',
     content: "Done. The headline is warmer now and the hours sit underneath in a secondary color at a smaller size. Much more Downstreet.",
@@ -142,15 +142,15 @@ export const seedMessages: Message[] = [
       { id: 'tc-ch-2', label: 'Added hours display below tagline', status: 'done', toolName: 'add_block', args: 'page: "home", after: "hero-tagline", type: "paragraph"' },
       { id: 'tc-ch-3', label: 'Styled hours in muted secondary text', status: 'done', toolName: 'update_styles', args: 'font-size: "14px", color: "secondary"' },
     ],
-    timestamp: '2025-11-18T09:01:45Z',
+    timestamp: '2026-02-25T09:01:02Z',
   },
 
   // ═══════════════════════════════════════════
   // Downstreet Café — menu photo updates
   // ═══════════════════════════════════════════
-  { id: 'cp-1', conversationId: 'cafe-photos', role: 'user', content: "The menu page still has placeholder images. I've got real photos now — can you swap them in? I'll upload them to the media library.", timestamp: '2025-11-22T14:00:00Z' },
-  { id: 'cp-2', conversationId: 'cafe-photos', role: 'agent', agentId: 'wpcom', content: "Go for it — upload them and I'll place them. Are these for specific menu sections, or more general food photography?", timestamp: '2025-11-22T14:00:30Z' },
-  { id: 'cp-3', conversationId: 'cafe-photos', role: 'user', content: "Both. Hero shots for each of the three menu sections (coffee, pastries, lunch) plus individual item photos for the featured items on the homepage.", timestamp: '2025-11-22T14:01:15Z' },
+  { id: 'cp-1', conversationId: 'cafe-photos', role: 'user', content: "The menu page still has placeholder images. I've got real photos now — can you swap them in? I'll upload them to the media library.", timestamp: '2026-02-26T14:00:00Z' },
+  { id: 'cp-2', conversationId: 'cafe-photos', role: 'agent', agentId: 'wpcom', content: "Go for it — upload them and I'll place them. Are these for specific menu sections, or more general food photography?", timestamp: '2026-02-26T14:00:05Z' },
+  { id: 'cp-3', conversationId: 'cafe-photos', role: 'user', content: "Both. Hero shots for each of the three menu sections (coffee, pastries, lunch) plus individual item photos for the featured items on the homepage.", timestamp: '2026-02-26T14:00:42Z' },
   {
     id: 'cp-4', conversationId: 'cafe-photos', role: 'agent', agentId: 'wpcom',
     content: "All photos are placed. Section heroes at the top of each menu category, featured items updated on the homepage. Everything's converted to WebP with responsive srcset for fast mobile loading.",
@@ -161,24 +161,24 @@ export const seedMessages: Message[] = [
       { id: 'tc-cp-4', label: 'Updated homepage featured items with photos', status: 'done', toolName: 'replace_image', args: 'page: "home", section: "featured-items"', result: '4 images replaced' },
       { id: 'tc-cp-5', label: 'Optimized all images for web', status: 'done', toolName: 'optimize_media', args: 'format: "webp", srcset: true', result: '7 images converted, avg 68% smaller' },
     ],
-    timestamp: '2025-11-22T14:02:00Z',
+    timestamp: '2026-02-26T14:02:18Z',
   },
-  { id: 'cp-5', conversationId: 'cafe-photos', role: 'user', content: "Looks great. The lavender latte photo is a little dark though — can you bump the brightness?", timestamp: '2025-11-22T14:03:00Z' },
+  { id: 'cp-5', conversationId: 'cafe-photos', role: 'user', content: "Looks great. The lavender latte photo is a little dark though — can you bump the brightness?", timestamp: '2026-02-26T14:03:05Z' },
   {
     id: 'cp-6', conversationId: 'cafe-photos', role: 'agent', agentId: 'wpcom',
     content: "Brightened it up with a slight exposure boost and warmed the white balance so the lavender color reads better.",
     toolCalls: [
       { id: 'tc-cp-6', label: 'Adjusted brightness and white balance on lavender latte', status: 'done', toolName: 'edit_image', args: 'exposure: "+0.3", warmth: "+5"' },
     ],
-    timestamp: '2025-11-22T14:03:30Z',
+    timestamp: '2026-02-26T14:03:28Z',
   },
 
   // ═══════════════════════════════════════════
   // Downstreet Café — online reservations
   // ═══════════════════════════════════════════
-  { id: 'cr-1', conversationId: 'cafe-reservations', role: 'user', content: "We want to start taking table reservations online. What's the best way to do that?", timestamp: '2025-12-03T11:00:00Z' },
-  { id: 'cr-2', conversationId: 'cafe-reservations', role: 'agent', agentId: 'wpcom', content: "For a café your size, I'd go with **Simply Schedule Appointments**. It's lightweight, handles time slots well, and sends email confirmations automatically. I can set up slots matching your hours with 30-minute blocks and a max party size. Want me to install it?", timestamp: '2025-12-03T11:00:30Z' },
-  { id: 'cr-3', conversationId: 'cafe-reservations', role: 'user', content: "Yeah, do it. Max 4 people per reservation, and block off the last hour of each day for walk-ins only.", timestamp: '2025-12-03T11:01:15Z' },
+  { id: 'cr-1', conversationId: 'cafe-reservations', role: 'user', content: "We want to start taking table reservations online. What's the best way to do that?", timestamp: '2026-02-27T11:00:00Z' },
+  { id: 'cr-2', conversationId: 'cafe-reservations', role: 'agent', agentId: 'wpcom', content: "For a café your size, I'd go with **Simply Schedule Appointments**. It's lightweight, handles time slots well, and sends email confirmations automatically. I can set up slots matching your hours with 30-minute blocks and a max party size. Want me to install it?", timestamp: '2026-02-27T11:00:08Z' },
+  { id: 'cr-3', conversationId: 'cafe-reservations', role: 'user', content: "Yeah, do it. Max 4 people per reservation, and block off the last hour of each day for walk-ins only.", timestamp: '2026-02-27T11:00:34Z' },
   {
     id: 'cr-4', conversationId: 'cafe-reservations', role: 'agent', agentId: 'wpcom',
     content: "All set. Last hour of each day is blocked off for walk-ins. There's a new Reservations page linked from the header. Customers get an email confirmation, you get a notification too.",
@@ -190,24 +190,24 @@ export const seedMessages: Message[] = [
       { id: 'tc-cr-5', label: 'Created Reservations page with booking form', status: 'done', toolName: 'create_page', args: 'title: "Reservations", slug: "/reservations"' },
       { id: 'tc-cr-6', label: 'Added "Reserve a Table" to header navigation', status: 'done', toolName: 'update_navigation', args: 'menu: "primary", label: "Reserve a Table", url: "/reservations"' },
     ],
-    timestamp: '2025-12-03T11:02:00Z',
+    timestamp: '2026-02-27T11:03:48Z',
   },
-  { id: 'cr-5', conversationId: 'cafe-reservations', role: 'user', content: "Can we also add a note field so people can mention allergies or special requests?", timestamp: '2025-12-03T11:03:00Z' },
+  { id: 'cr-5', conversationId: 'cafe-reservations', role: 'user', content: "Can we also add a note field so people can mention allergies or special requests?", timestamp: '2026-02-27T11:04:22Z' },
   {
     id: 'cr-6', conversationId: 'cafe-reservations', role: 'agent', agentId: 'wpcom',
     content: "Done — optional \"Special requests\" textarea on the form. Shows up in both the confirmation email and your admin notification. Kept it optional so it doesn't slow down bookings.",
     toolCalls: [
       { id: 'tc-cr-7', label: 'Added optional "Special requests" field to booking form', status: 'done', toolName: 'edit_form', args: 'form: "reservation", field: "textarea", label: "Special requests"' },
     ],
-    timestamp: '2025-12-03T11:03:30Z',
+    timestamp: '2026-02-27T11:04:50Z',
   },
 
   // ═══════════════════════════════════════════
   // Downstreet Café — SEO & analytics
   // ═══════════════════════════════════════════
-  { id: 'cs-1', conversationId: 'cafe-seo', role: 'user', content: 'I want us to show up when people search "coffee shop Portland Maine." And I need some kind of analytics to see how many people visit the site.', timestamp: '2025-12-10T10:00:00Z' },
-  { id: 'cs-2', conversationId: 'cafe-seo', role: 'agent', agentId: 'wpcom', content: "Jetpack handles both. **SEO tools** for meta titles, descriptions, and sitemaps. **Jetpack Stats** for visitor analytics right in your dashboard — no Google account needed. I'll also add structured data so Google shows your address and hours in search results.", timestamp: '2025-12-10T10:00:30Z' },
-  { id: 'cs-3', conversationId: 'cafe-seo', role: 'user', content: "Yep, go ahead.", timestamp: '2025-12-10T10:01:00Z' },
+  { id: 'cs-1', conversationId: 'cafe-seo', role: 'user', content: 'I want us to show up when people search "coffee shop Portland Maine." And I need some kind of analytics to see how many people visit the site.', timestamp: '2026-02-28T10:00:00Z' },
+  { id: 'cs-2', conversationId: 'cafe-seo', role: 'agent', agentId: 'wpcom', content: "Jetpack handles both. **SEO tools** for meta titles, descriptions, and sitemaps. **Jetpack Stats** for visitor analytics right in your dashboard — no Google account needed. I'll also add structured data so Google shows your address and hours in search results.", timestamp: '2026-02-28T10:00:07Z' },
+  { id: 'cs-3', conversationId: 'cafe-seo', role: 'user', content: "Yep, go ahead.", timestamp: '2026-02-28T10:00:19Z' },
   {
     id: 'cs-4', conversationId: 'cafe-seo', role: 'agent', agentId: 'wpcom',
     content: "Jetpack is live. Stats will start showing visitor data right away. All pages have meta descriptions and your business info is in the structured data — 142 Downstreet Ave, Portland ME 04101, hours, phone number. Sitemap is at `/sitemap_index.xml`.",
@@ -219,17 +219,17 @@ export const seedMessages: Message[] = [
       { id: 'tc-cs-5', label: 'Set meta descriptions for all pages', status: 'done', toolName: 'update_meta', args: 'Updated 5 pages: Home, Menu, About, Reservations, Events' },
       { id: 'tc-cs-6', label: 'Generated XML sitemap', status: 'done', toolName: 'generate_sitemap', result: '/sitemap_index.xml (5 URLs)' },
     ],
-    timestamp: '2025-12-10T10:01:30Z',
+    timestamp: '2026-02-28T10:03:32Z',
   },
-  { id: 'cs-5', conversationId: 'cafe-seo', role: 'user', content: "Should I also set up a Google Business Profile?", timestamp: '2025-12-10T10:02:30Z' },
-  { id: 'cs-6', conversationId: 'cafe-seo', role: 'agent', agentId: 'wpcom', content: "Absolutely — that's the single biggest thing for local search. Claim your listing at business.google.com, add your hours, photos, and menu link. The schema markup I just added will sync with it so Google shows rich results. I can't create the listing for you (Google requires account verification), but everything on the WordPress side is ready.", timestamp: '2025-12-10T10:03:00Z' },
+  { id: 'cs-5', conversationId: 'cafe-seo', role: 'user', content: "Should I also set up a Google Business Profile?", timestamp: '2026-02-28T10:04:10Z' },
+  { id: 'cs-6', conversationId: 'cafe-seo', role: 'agent', agentId: 'wpcom', content: "Absolutely — that's the single biggest thing for local search. Claim your listing at business.google.com, add your hours, photos, and menu link. The schema markup I just added will sync with it so Google shows rich results. I can't create the listing for you (Google requires account verification), but everything on the WordPress side is ready.", timestamp: '2026-02-28T10:04:17Z' },
 
   // ═══════════════════════════════════════════
   // Downstreet Café — events page
   // ═══════════════════════════════════════════
-  { id: 'ce-1', conversationId: 'cafe-events', role: 'user', content: "I want a dedicated Events page. We do open mic nights, art shows, and coffee cupping workshops.", timestamp: '2026-01-08T13:00:00Z' },
-  { id: 'ce-2', conversationId: 'cafe-events', role: 'agent', agentId: 'wpcom', content: "The homepage community section can tease upcoming events, but the full listing deserves its own page. Should I keep the homepage section as a \"what's next\" preview linking to the full Events page?", timestamp: '2026-01-08T13:00:30Z' },
-  { id: 'ce-3', conversationId: 'cafe-events', role: 'user', content: "Keep it — just make it show the next 3 upcoming events and link to the full page for everything else.", timestamp: '2026-01-08T13:01:15Z' },
+  { id: 'ce-1', conversationId: 'cafe-events', role: 'user', content: "I want a dedicated Events page. We do open mic nights, art shows, and coffee cupping workshops.", timestamp: '2026-03-03T13:00:00Z' },
+  { id: 'ce-2', conversationId: 'cafe-events', role: 'agent', agentId: 'wpcom', content: "The homepage community section can tease upcoming events, but the full listing deserves its own page. Should I keep the homepage section as a \"what's next\" preview linking to the full Events page?", timestamp: '2026-03-03T13:00:06Z' },
+  { id: 'ce-3', conversationId: 'cafe-events', role: 'user', content: "Keep it — just make it show the next 3 upcoming events and link to the full page for everything else.", timestamp: '2026-03-03T13:00:33Z' },
   {
     id: 'ce-4', conversationId: 'cafe-events', role: 'agent', agentId: 'wpcom',
     content: "Events page is live with all three event types listed. Each event shows date, time, description, and location. The homepage section now pulls the next 3 upcoming events dynamically with a \"View all events →\" link.",
@@ -240,20 +240,102 @@ export const seedMessages: Message[] = [
       { id: 'tc-ce-4', label: 'Added "View all events" link to homepage', status: 'done', toolName: 'add_block', args: 'page: "home", type: "link", href: "/events"' },
       { id: 'tc-ce-5', label: 'Added Events to header navigation', status: 'done', toolName: 'update_navigation', args: 'menu: "primary", label: "Events", url: "/events"' },
     ],
-    timestamp: '2026-01-08T13:02:00Z',
+    timestamp: '2026-03-03T13:02:48Z',
   },
-  { id: 'ce-5', conversationId: 'cafe-events', role: 'user', content: "Love it. Can people RSVP to events?", timestamp: '2026-01-08T13:03:00Z' },
-  { id: 'ce-6', conversationId: 'cafe-events', role: 'agent', agentId: 'wpcom', content: "Not yet, but since you already have Simply Schedule Appointments, I can add an RSVP form — name, email, party size — with confirmation emails. Want me to set that up?", timestamp: '2026-01-08T13:03:30Z' },
-  { id: 'ce-7', conversationId: 'cafe-events', role: 'user', content: "That would be great, yeah.", timestamp: '2026-01-08T13:04:00Z' },
+  { id: 'ce-5', conversationId: 'cafe-events', role: 'user', content: "Love it. Can people RSVP to events?", timestamp: '2026-03-03T13:03:24Z' },
+  { id: 'ce-6', conversationId: 'cafe-events', role: 'agent', agentId: 'wpcom', content: "Not yet, but since you already have Simply Schedule Appointments, I can add an RSVP form — name, email, party size — with confirmation emails. Want me to set that up?", timestamp: '2026-03-03T13:03:31Z' },
+  { id: 'ce-7', conversationId: 'cafe-events', role: 'user', content: "That would be great, yeah.", timestamp: '2026-03-03T13:03:48Z' },
   {
     id: 'ce-8', conversationId: 'cafe-events', role: 'agent', agentId: 'wpcom',
     content: "",
     toolCalls: [
       { id: 'tc-ce-6', label: 'Added RSVP form to event cards', status: 'done', toolName: 'add_block', args: 'template: "event", type: "form", fields: ["name", "email", "party_size"]' },
       { id: 'tc-ce-7', label: 'Configured confirmation emails', status: 'done', toolName: 'configure_email', args: 'template: "rsvp-confirmation", recipients: ["guest", "admin"]' },
-      { id: 'tc-ce-8', label: 'Adding attendee count badge to admin', status: 'running' },
+      { id: 'tc-ce-8', label: 'Adding attendee count badge to admin', status: 'running', toolName: 'edit_theme_file', code: `// functions.php — register RSVP post type and admin columns
+
+register_post_type( 'event_rsvp', array(
+\t'labels' => array(
+\t\t'name'          => __( 'RSVPs', 'flavor-press' ),
+\t\t'singular_name' => __( 'RSVP', 'flavor-press' ),
+\t\t'add_new_item'  => __( 'Add New RSVP', 'flavor-press' ),
+\t\t'edit_item'     => __( 'Edit RSVP', 'flavor-press' ),
+\t),
+\t'public'       => false,
+\t'show_ui'      => true,
+\t'show_in_menu' => 'edit.php?post_type=event',
+\t'supports'     => array( 'title', 'custom-fields' ),
+) );
+
+// Add attendee count column to event list table
+add_filter( 'manage_event_posts_columns', function ( $columns ) {
+\t$new = array();
+\tforeach ( $columns as $key => $label ) {
+\t\t$new[ $key ] = $label;
+\t\tif ( 'title' === $key ) {
+\t\t\t$new['attendee_count'] = __( 'RSVPs', 'flavor-press' );
+\t\t}
+\t}
+\treturn $new;
+} );
+
+add_action( 'manage_event_posts_custom_column', function ( $column, $post_id ) {
+\tif ( 'attendee_count' !== $column ) return;
+
+\t$count = get_post_meta( $post_id, '_rsvp_count', true );
+\t$max   = get_post_meta( $post_id, '_rsvp_max', true );
+
+\tif ( $max ) {
+\t\tprintf(
+\t\t\t'<span class="rsvp-badge %s">%s / %s</span>',
+\t\t\t$count >= $max ? 'rsvp-badge--full' : '',
+\t\t\tesc_html( $count ?: '0' ),
+\t\t\tesc_html( $max )
+\t\t);
+\t} else {
+\t\tprintf(
+\t\t\t'<span class="rsvp-badge">%s</span>',
+\t\t\tesc_html( $count ?: '0' )
+\t\t);
+\t}
+}, 10, 2 );
+
+// Make the column sortable
+add_filter( 'manage_edit-event_sortable_columns', function ( $columns ) {
+\t$columns['attendee_count'] = 'attendee_count';
+\treturn $columns;
+} );
+
+add_action( 'pre_get_posts', function ( $query ) {
+\tif ( ! is_admin() || ! $query->is_main_query() ) return;
+\tif ( 'attendee_count' === $query->get( 'orderby' ) ) {
+\t\t$query->set( 'meta_key', '_rsvp_count' );
+\t\t$query->set( 'orderby', 'meta_value_num' );
+\t}
+} );
+
+// Badge styles for the admin list table
+add_action( 'admin_head', function () {
+\tif ( get_current_screen()->post_type !== 'event' ) return;
+\techo '<style>
+\t\t.rsvp-badge {
+\t\t\tdisplay: inline-flex;
+\t\t\talign-items: center;
+\t\t\tjustify-content: center;
+\t\t\tmin-width: 28px;
+\t\t\tpadding: 2px 8px;
+\t\t\tbackground: #f0f0f1;
+\t\t\tborder-radius: 12px;
+\t\t\tfont-size: 13px;
+\t\t\tfont-weight: 500;
+\t\t}
+\t\t.rsvp-badge--full {
+\t\t\tbackground: #fcf0f1;
+\t\t\tcolor: #cc1818;
+\t\t}
+\t</style>';
+} );` },
     ],
-    timestamp: '2026-01-08T13:04:30Z',
+    timestamp: '2026-03-03T13:04:22Z',
   },
 
   // ═══════════════════════════════════════════
@@ -323,94 +405,94 @@ export const seedMessages: Message[] = [
   },
 
   // ═══════════════════════════════════════════
-  // Flavor Records — design discussion (no tool calls)
+  // Wild Lens — photo gallery layout (no tool calls)
   // ═══════════════════════════════════════════
-  { id: 'rd1-1', conversationId: 'records-design-1', role: 'user', content: 'Think vinyl-era nostalgia meets modern minimal. Dark backgrounds, bold type, album art as the hero element.', timestamp: '2026-02-05T13:00:00Z' },
-  { id: 'rd1-2', conversationId: 'records-design-1', role: 'agent', agentId: 'wpcom', content: 'Love it. I\'m thinking off-black (#1A1A1A) background, warm white (#F5F0EB) text, and a large album grid as the homepage centerpiece. Heavy sans-serif for headings — that punchy label feel. Let me draft the layout.', timestamp: '2026-02-05T13:01:00Z' },
-  { id: 'rd1-3', conversationId: 'records-design-1', role: 'agent', agentId: 'wpcom', content: "Here's the palette I've put together:\n\n**Color Palette**\n- Charcoal: #1A1A1A\n- Parchment: #F5F0EB\n- Electric Red: #E63946\n- Slate: #2A2A2A\n- Muted: #999999\n\nThe homepage leads with a featured release hero, then a grid of recent albums. Bold uppercase headings with weight 900. Check the preview — want to tweak anything?", timestamp: '2026-02-05T13:02:00Z' },
+  { id: 'rd1-1', conversationId: 'records-design-1', role: 'user', content: 'I want a full-bleed photo gallery as the homepage. Moody, editorial — the photos should do the talking. Minimal UI.', timestamp: '2026-02-05T13:00:00Z' },
+  { id: 'rd1-2', conversationId: 'records-design-1', role: 'agent', agentId: 'wpcom', content: "Love it. I'm thinking a masonry grid that fills the viewport — no gutters, photos edge-to-edge. Click to open a lightbox with EXIF data and caption. Dark chrome so the images pop. Let me draft the layout.", timestamp: '2026-02-05T13:01:00Z' },
+  { id: 'rd1-3', conversationId: 'records-design-1', role: 'agent', agentId: 'wpcom', content: "Here's the direction:\n\n**Layout**\n- Full-bleed masonry grid, no gutters\n- Hover: subtle zoom + title overlay\n- Lightbox with EXIF, caption, and prev/next\n\n**Palette**\n- Background: #0A0A0A\n- Text: #F5F0EB\n- Accent: #E8E0D6\n\nThe homepage is all photos. About page and contact are minimal — just text on dark. Check the preview — want to tweak anything?", timestamp: '2026-02-05T13:02:00Z' },
 
   // ═══════════════════════════════════════════
-  // Mise en Place — recipe card layout
+  // Thread & Co — product card layout
   // ═══════════════════════════════════════════
-  { id: 'ma1-1', conversationId: 'mise-assistant-1', role: 'user', content: 'The recipe cards on the dashboard need a better layout. I want to show cook time and difficulty more prominently.', timestamp: '2026-02-08T11:30:00Z' },
+  { id: 'ma1-1', conversationId: 'mise-assistant-1', role: 'user', content: 'The product cards need a better layout. I want to show price and available sizes more prominently.', timestamp: '2026-02-08T11:30:00Z' },
   {
     id: 'ma1-2', conversationId: 'mise-assistant-1', role: 'agent', agentId: 'wpcom',
-    content: "Redesigned the recipe cards — cook time and difficulty now sit in a meta bar at the bottom with subtle icons, and the cuisine tag is a pill badge overlaying the image. Cards also have a hover lift effect now. Take a look.",
+    content: "Redesigned the product cards — price and sizes now sit in a meta bar at the bottom, and the category tag is a pill badge overlaying the image. Cards also have a hover lift effect now. Take a look.",
     toolCalls: [
-      { id: 'tc-ma-1', label: 'Updated card layout with bottom meta bar', status: 'done', toolName: 'edit_template', args: 'template: "recipe-card", section: "meta"' },
-      { id: 'tc-ma-2', label: 'Added cook time and difficulty icons', status: 'done', toolName: 'add_block', args: 'template: "recipe-card", type: "icon-meta"', result: 'Clock icon + difficulty dots' },
-      { id: 'tc-ma-3', label: 'Added cuisine pill badge on image', status: 'done', toolName: 'update_styles', args: 'element: ".cuisine-tag", position: "overlay", style: "pill"' },
+      { id: 'tc-ma-1', label: 'Updated card layout with bottom meta bar', status: 'done', toolName: 'edit_template', args: 'template: "product-card", section: "meta"' },
+      { id: 'tc-ma-2', label: 'Added price and size selector display', status: 'done', toolName: 'add_block', args: 'template: "product-card", type: "price-meta"', result: 'Price + size pills' },
+      { id: 'tc-ma-3', label: 'Added category pill badge on image', status: 'done', toolName: 'update_styles', args: 'element: ".category-tag", position: "overlay", style: "pill"' },
     ],
     timestamp: '2026-02-08T11:31:30Z',
   },
 
   // ═══════════════════════════════════════════
-  // Ledger — invoice template
+  // Launchpad — landing page template
   // ═══════════════════════════════════════════
-  { id: 'la1-1', conversationId: 'ledger-assistant-1', role: 'user', content: 'I need an invoice detail page. Should show line items, totals, and have buttons to send reminders or mark as paid.', timestamp: '2026-02-10T09:30:00Z' },
+  { id: 'la1-1', conversationId: 'ledger-assistant-1', role: 'user', content: 'I need a landing page template. Hero with headline + CTA, features grid, testimonials, and a pricing section.', timestamp: '2026-02-10T09:30:00Z' },
   {
     id: 'la1-2', conversationId: 'ledger-assistant-1', role: 'agent', agentId: 'wpcom',
-    content: "Invoice detail page is ready — clean two-column header (from/to), line items table with subtotal, tax, and total, plus action buttons for Send Reminder, Mark as Paid, and Download PDF. The status badge updates based on payment state.",
+    content: "Landing page template is ready — bold hero with gradient background, 3-column features grid with icons, testimonial carousel, and a two-tier pricing table with a highlighted \"Popular\" plan. All sections are reusable block patterns.",
     toolCalls: [
-      { id: 'tc-la-1', label: 'Created invoice page template', status: 'done', toolName: 'create_page', args: 'title: "Invoice Detail", slug: "/invoice"' },
-      { id: 'tc-la-2', label: 'Added line items table with calculations', status: 'done', toolName: 'create_section', args: 'page: "invoice", section: "line-items"', result: 'Subtotal, tax rate, total calculated' },
-      { id: 'tc-la-3', label: 'Added from/to header and status badge', status: 'done', toolName: 'create_section', args: 'page: "invoice", section: "header"' },
-      { id: 'tc-la-4', label: 'Added action buttons (Send, Mark Paid, PDF)', status: 'done', toolName: 'add_block', args: 'page: "invoice", type: "button-group"' },
+      { id: 'tc-la-1', label: 'Created landing page template', status: 'done', toolName: 'create_page', args: 'title: "Landing Page", slug: "/launch"' },
+      { id: 'tc-la-2', label: 'Added hero section with gradient and CTA', status: 'done', toolName: 'create_section', args: 'page: "launch", section: "hero"', result: 'Headline, subhead, two CTA buttons' },
+      { id: 'tc-la-3', label: 'Added 3-column features grid with icons', status: 'done', toolName: 'create_section', args: 'page: "launch", section: "features"' },
+      { id: 'tc-la-4', label: 'Added pricing table with two tiers', status: 'done', toolName: 'add_block', args: 'page: "launch", type: "pricing-table"' },
     ],
     timestamp: '2026-02-10T09:31:30Z',
   },
 
   // ═══════════════════════════════════════════
-  // Ledger — payment status API
+  // Launchpad — signup flow API
   // ═══════════════════════════════════════════
-  { id: 'lc1-1', conversationId: 'ledger-code-1', role: 'user', content: 'I need a REST endpoint that returns invoice status — paid, pending, or overdue based on the due date.', timestamp: '2026-02-11T10:00:00Z' },
+  { id: 'lc1-1', conversationId: 'ledger-code-1', role: 'user', content: 'I need a REST endpoint for the signup flow — accepts email, creates an account, and returns an auth token.', timestamp: '2026-02-11T10:00:00Z' },
   {
     id: 'lc1-2', conversationId: 'ledger-code-1', role: 'agent', agentId: 'wpcom',
-    content: "The endpoint is live at `GET /api/invoices/:id/status`. Returns `{ status: 'paid' | 'pending' | 'overdue', daysUntilDue: number, amountDue: number }`. Overdue is calculated automatically from the due date. Want me to add webhook notifications for status changes?",
+    content: "The endpoint is live at `POST /api/signup`. Accepts `{ email, password, name }`, creates a WordPress user, and returns `{ token, userId, expiresAt }`. Passwords are hashed with wp_hash_password. Want me to add email verification?",
     toolCalls: [
-      { id: 'tc-lc-1', label: 'Created invoice status model', status: 'done', toolName: 'create_file', args: 'path: "models/invoice-status.php"' },
-      { id: 'tc-lc-2', label: 'Added GET /api/invoices/:id/status route', status: 'done', toolName: 'create_file', args: 'path: "routes/invoice-status.php"' },
-      { id: 'tc-lc-3', label: 'Implemented overdue detection logic', status: 'done', toolName: 'edit_file', args: 'path: "models/invoice-status.php"', result: 'Compares due_date against current date' },
-      { id: 'tc-lc-4', label: 'Added response schema validation', status: 'done', toolName: 'edit_file', args: 'path: "routes/invoice-status.php"', result: 'Validates status, daysUntilDue, amountDue fields' },
+      { id: 'tc-lc-1', label: 'Created signup handler', status: 'done', toolName: 'create_file', args: 'path: "includes/api/signup.php"' },
+      { id: 'tc-lc-2', label: 'Added POST /api/signup route', status: 'done', toolName: 'create_file', args: 'path: "includes/api/routes.php"' },
+      { id: 'tc-lc-3', label: 'Implemented token generation', status: 'done', toolName: 'edit_file', args: 'path: "includes/api/signup.php"', result: 'JWT token with 24h expiry' },
+      { id: 'tc-lc-4', label: 'Added input validation and rate limiting', status: 'done', toolName: 'edit_file', args: 'path: "includes/api/signup.php"', result: 'Email format, password strength, 5 req/min' },
     ],
     timestamp: '2026-02-11T10:01:30Z',
   },
 
   // ═══════════════════════════════════════════
-  // Fuego Collective — shop setup (includes ERROR)
+  // DevRef — docs setup (includes ERROR)
   // ═══════════════════════════════════════════
-  { id: 'fc1-1', conversationId: 'fuego-assistant-1', role: 'user', content: 'I need product pages for each sauce, a shop page, and checkout. We have 8 sauces ranging from mild to "sign a waiver" hot.', timestamp: '2026-02-14T12:30:00Z' },
-  { id: 'fc1-2', conversationId: 'fuego-assistant-1', role: 'agent', agentId: 'wpcom', content: "Let me get WooCommerce set up with your shop, checkout, and payment processing. Then we'll add the sauces.", timestamp: '2026-02-14T12:30:30Z' },
+  { id: 'fc1-1', conversationId: 'fuego-assistant-1', role: 'user', content: 'I need a docs site — API reference, guides section, and a search that actually works. Maybe 20-30 pages to start.', timestamp: '2026-02-14T12:30:00Z' },
+  { id: 'fc1-2', conversationId: 'fuego-assistant-1', role: 'agent', agentId: 'wpcom', content: "I'll set up a docs structure with sidebar navigation, versioned API reference, and full-text search. Let me get the foundation in.", timestamp: '2026-02-14T12:30:30Z' },
   {
     id: 'fc1-3', conversationId: 'fuego-assistant-1', role: 'agent', agentId: 'wpcom',
-    content: "WooCommerce is installed and shipping is configured for glass bottles, but I couldn't connect Stripe — you'll need to add your API key in **WooCommerce → Settings → Payments** first. Once that's done, I can finish the payment setup.",
+    content: "The docs structure is in place and search is working, but I couldn't connect to Algolia — you'll need to add your API key in **Settings → Search** first. The built-in WordPress search will work in the meantime.",
     toolCalls: [
-      { id: 'tc-fc-1', label: 'Installed WooCommerce', status: 'done', toolName: 'install_plugin', args: 'slug: "woocommerce"', result: 'WooCommerce 9.5.1 installed and activated' },
-      { id: 'tc-fc-2', label: 'Created Shop, Cart, and Checkout pages', status: 'done', toolName: 'create_pages', args: 'pages: ["Shop", "Cart", "Checkout"]' },
-      { id: 'tc-fc-3', label: 'Failed to connect Stripe — API key not configured', status: 'error', toolName: 'configure_payments', args: 'gateway: "stripe"', error: 'STRIPE_API_KEY not found in environment' },
-      { id: 'tc-fc-4', label: 'Configured shipping for glass bottles', status: 'done', toolName: 'configure_shipping', args: 'fragile: true, weight_based: true' },
+      { id: 'tc-fc-1', label: 'Installed docs theme with sidebar navigation', status: 'done', toolName: 'install_theme', args: 'slug: "developer-docs"', result: 'Theme installed with code syntax highlighting' },
+      { id: 'tc-fc-2', label: 'Created page structure (Getting Started, API Reference, Guides)', status: 'done', toolName: 'create_pages', args: 'pages: ["Getting Started", "API Reference", "Guides"]' },
+      { id: 'tc-fc-3', label: 'Failed to connect Algolia — API key not configured', status: 'error', toolName: 'configure_search', args: 'provider: "algolia"', error: 'ALGOLIA_API_KEY not found in environment' },
+      { id: 'tc-fc-4', label: 'Configured sidebar navigation with sections', status: 'done', toolName: 'configure_navigation', args: 'menu: "docs-sidebar", sections: 3' },
     ],
     timestamp: '2026-02-14T12:31:30Z',
   },
-  { id: 'fc1-4', conversationId: 'fuego-assistant-1', role: 'user', content: "I'll add the Stripe key later. Start with Smoky Habanero — it's our flagship. $14, 5oz bottle. Then add the rest. And I want a heat level rating on each product page.", timestamp: '2026-02-14T12:32:30Z' },
+  { id: 'fc1-4', conversationId: 'fuego-assistant-1', role: 'user', content: "I'll add the Algolia key later. Start with the API Reference section — I need endpoints for Users, Projects, and Webhooks. Each endpoint should show method, URL, params, and example response.", timestamp: '2026-02-14T12:32:30Z' },
   {
     id: 'fc1-5', conversationId: 'fuego-assistant-1', role: 'agent', agentId: 'wpcom',
-    content: "Smoky Habanero is up — $14, 5oz, with Scoville rating, ingredient list, and suggested pairings. I've added a custom \"Heat Level\" field that shows a \u{1F336}\u{FE0F} scale from 1-5 on every product page. Adding the rest of the lineup now.",
+    content: "Users API reference is up with all CRUD endpoints documented. Each one shows method, URL, parameters table, and a collapsible example response with syntax highlighting. Building Projects and Webhooks next.",
     toolCalls: [
-      { id: 'tc-fc-5', label: 'Created "Smoky Habanero" product', status: 'done', toolName: 'create_product', args: 'name: "Smoky Habanero", price: 14.00, weight: "5oz"' },
-      { id: 'tc-fc-6', label: 'Added custom Heat Level field via ACF', status: 'done', toolName: 'install_plugin', args: 'slug: "advanced-custom-fields"' },
-      { id: 'tc-fc-7', label: 'Created heat level display (1-5 scale)', status: 'done', toolName: 'edit_template', args: 'template: "single-product", field: "heat_level"' },
+      { id: 'tc-fc-5', label: 'Created Users API reference page', status: 'done', toolName: 'create_page', args: 'title: "Users API", parent: "API Reference"' },
+      { id: 'tc-fc-6', label: 'Added code block patterns for endpoints', status: 'done', toolName: 'create_block_pattern', args: 'name: "api-endpoint", fields: ["method", "url", "params", "response"]' },
+      { id: 'tc-fc-7', label: 'Documented 5 Users endpoints with examples', status: 'done', toolName: 'edit_content', args: 'page: "users-api", endpoints: ["list", "get", "create", "update", "delete"]' },
     ],
     timestamp: '2026-02-14T12:33:30Z',
   },
-  { id: 'fc1-6', conversationId: 'fuego-assistant-1', role: 'user', content: "Can we also set up a subscription box? Monthly hot sauce club — 3 bottles for $36.", timestamp: '2026-02-14T12:34:30Z' },
+  { id: 'fc1-6', conversationId: 'fuego-assistant-1', role: 'user', content: "Can we add a changelog page too? I want to log API changes by version.", timestamp: '2026-02-14T12:34:30Z' },
   {
     id: 'fc1-7', conversationId: 'fuego-assistant-1', role: 'agent', agentId: 'wpcom',
-    content: "All 8 sauces are live with heat ratings, and the \"Fuego Club\" subscription is set up — $36/month for 3 rotating bottles with free shipping for subscribers.",
+    content: "All three API sections are documented and the changelog is live. Each version entry shows date, breaking changes (red), new features (green), and deprecations (amber). The sidebar now has all sections linked.",
     toolCalls: [
-      { id: 'tc-fc-8', label: 'Added remaining 7 sauce products', status: 'done', toolName: 'create_product', args: 'count: 7, prices: "$12-$18"', result: 'All products have heat levels, ingredients, pairings' },
-      { id: 'tc-fc-9', label: 'Installed WooCommerce Subscriptions', status: 'done', toolName: 'install_plugin', args: 'slug: "woocommerce-subscriptions"' },
-      { id: 'tc-fc-10', label: 'Created "Fuego Club" subscription product', status: 'done', toolName: 'create_product', args: 'name: "Fuego Club", type: "subscription", price: "$36/month"', result: '3 rotating bottles, free shipping' },
+      { id: 'tc-fc-8', label: 'Created Projects and Webhooks API pages', status: 'done', toolName: 'create_pages', args: 'titles: ["Projects API", "Webhooks API"], parent: "API Reference"', result: '10 endpoints documented across both' },
+      { id: 'tc-fc-9', label: 'Created Changelog page with version template', status: 'done', toolName: 'create_page', args: 'title: "Changelog", slug: "/changelog"' },
+      { id: 'tc-fc-10', label: 'Added version entry block pattern', status: 'done', toolName: 'create_block_pattern', args: 'name: "changelog-entry", fields: ["version", "date", "changes"]', result: 'Color-coded by change type' },
     ],
     timestamp: '2026-02-14T12:35:30Z',
   },

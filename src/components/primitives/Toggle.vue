@@ -98,16 +98,16 @@ defineEmits<{
 .toggle__label-text {
 	font-size: var(--font-size-m);
 	font-weight: var(--font-weight-medium);
-	line-height: 20px;
+	line-height: 22px;
 	color: var(--color-frame-fg);
 }
 
 .toggle-field--small .toggle__label-text {
-	font-size: var(--font-size-s);
+	font-size: var(--font-size-m);
 }
 
 .toggle__hint {
-	font-size: var(--font-size-xs);
+	font-size: var(--font-size-s);
 	color: var(--color-frame-fg-muted);
 	line-height: 1.5;
 	padding-inline-start: calc(36px + var(--space-s));

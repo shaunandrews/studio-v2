@@ -172,9 +172,15 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         :class="{ 'is-selected': convo.id === selectedId }"
         @click="$emit('select', convo.id)"
       >
+        <span v-if="convo.unread" class="site-tasks__unread-dot" />
         <span class="site-tasks__item-title">{{ convo.title || 'New task' }}</span>
         <span class="site-tasks__item-end">
-          <span class="site-tasks__time">{{ formatTime(getLastTimestamp(convo.id) || convo.createdAt) }}</span>
+          <template v-if="convo.status === 'running'">
+            <svg class="site-tasks__spinner" width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="24 12" fill="none" />
+            </svg>
+          </template>
+          <span v-else class="site-tasks__time">{{ formatTime(getLastTimestamp(convo.id) || convo.createdAt) }}</span>
           <Tooltip text="Archive" placement="right" :delay="300">
             <button class="site-tasks__archive" @click="onArchive($event, convo.id)">
               <WPIcon :icon="archive" :size="16" />
@@ -335,6 +341,14 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   color: var(--color-frame-fg);
 }
 
+.site-tasks__unread-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-frame-theme);
+  flex-shrink: 0;
+}
+
 .site-tasks__item-title {
   flex: 1;
   min-width: 0;
@@ -379,12 +393,23 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   color: var(--color-frame-fg);
 }
 
+.site-tasks__spinner {
+  color: var(--color-frame-theme);
+  flex-shrink: 0;
+  animation: task-spin 0.8s linear infinite;
+}
+
+@keyframes task-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Hide time, show archive on end-area hover */
 .site-tasks__archive {
   display: none;
 }
 
-.site-tasks__item-end:hover .site-tasks__time {
+.site-tasks__item-end:hover .site-tasks__time,
+.site-tasks__item-end:hover .site-tasks__spinner {
   display: none;
 }
 

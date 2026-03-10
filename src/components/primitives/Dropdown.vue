@@ -155,8 +155,8 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
 
 /* Field variant — bordered input-like trigger */
 .dropdown-trigger--field {
-  height: 32px;
-  padding: 0 var(--space-xs);
+  height: 40px;
+  padding: 0 var(--space-xs) 0 var(--space-s);
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-s);
   background: var(--color-frame-bg);

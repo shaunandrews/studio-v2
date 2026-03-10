@@ -7,11 +7,13 @@ const props = withDefaults(defineProps<{
   placement?: 'top' | 'bottom' | 'left' | 'right'
   delay?: number
   multiline?: boolean
+  block?: boolean
   anchor?: HTMLElement | null
 }>(), {
   placement: 'bottom',
   delay: 600,
   multiline: false,
+  block: false,
   anchor: null,
 })
 
@@ -126,6 +128,7 @@ onUnmounted(() => {
   <span
     ref="triggerRef"
     class="tooltip-trigger"
+    :class="{ 'tooltip-trigger--block': block }"
     @pointerenter="scheduleShow"
     @pointerleave="hide"
     @pointerdown="hide"
@@ -153,6 +156,10 @@ onUnmounted(() => {
 <style scoped>
 .tooltip-trigger {
   display: inline-flex;
+}
+
+.tooltip-trigger--block {
+  display: flex;
 }
 
 .tooltip {

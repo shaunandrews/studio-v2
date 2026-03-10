@@ -34,7 +34,7 @@ function toggleStatus() {
   setStatus(currentSite.value.id, 'loading')
   setTimeout(() => setStatus(currentSite.value!.id, target), 1200)
 }
-const { conversations, getConversations, getMessages, sendMessage, streamAgentMessage, ensureConversation, generateTaskTitle } = useConversations()
+const { conversations, getConversations, getMessages, sendMessage, streamAgentMessage, ensureConversation, generateTaskTitle, markRead } = useConversations()
 
 const currentSite = computed(() =>
   sites.value.find(p => p.id === activeSiteId.value)
@@ -124,6 +124,7 @@ function onSelectChat(convoId: string) {
   const id = activeSiteId.value
   if (!id) return
   draft.value = ''
+  markRead(convoId)
   router.push({ name: 'site-task', params: { id, convoId } })
   nextTick(() => inputChatRef.value?.focus())
 }
@@ -225,7 +226,7 @@ const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general
         <SyncScreen v-else-if="!isAllSites && currentScreen === 'sync'" :site-id="activeSiteId!" />
         <PreviewsScreen v-else-if="!isAllSites && currentScreen === 'previews'" :site-id="activeSiteId!" />
         <ImportExportScreen v-else-if="!isAllSites && currentScreen === 'import-export'" :site-id="activeSiteId!" />
-        <SiteSettingsScreen v-else-if="!isAllSites && currentScreen === 'settings'" :site-id="activeSiteId!" />
+        <SiteSettingsScreen v-else-if="!isAllSites && currentScreen === 'settings'" :site-id="activeSiteId!" @manage-global-skills="preferencesTab = 'skills'; showPreferences = true" />
         <div v-else class="detail-empty">
           <span class="detail-empty__text">Select a task or start a new one</span>
         </div>

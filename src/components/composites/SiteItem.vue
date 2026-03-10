@@ -7,6 +7,7 @@ import { useSites } from '@/data/useSites'
 const props = defineProps<{
   site: Site
   active?: boolean
+  unreadCount?: number
 }>()
 
 defineEmits<{
@@ -29,6 +30,7 @@ function toggleStatus() {
     @click="$emit('select', site.id)"
   >
     <SiteIcon :favicon="site.favicon" :site-name="site.name" :size="24" />
+    <span v-if="unreadCount" class="site-unread-count">{{ unreadCount }}</span>
     <span class="site-name">{{ site.name }}</span>
     <StatusIndicator
       class="site-status"
@@ -59,6 +61,20 @@ function toggleStatus() {
 .site-list-item.active {
   background: rgba(255, 255, 255, 0.08);
   color: var(--color-chrome-fg);
+}
+
+.site-unread-count {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--color-frame-theme);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 16px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .site-name {

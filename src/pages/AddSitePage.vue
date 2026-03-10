@@ -20,7 +20,7 @@ const props = defineProps<{
 }>()
 
 type Path = 'blank' | 'blueprint' | 'pull' | 'import'
-type Step = 'choose' | 'picker' | 'details'
+type Step = 'choose' | 'picker' | 'details' | 'building'
 
 const { createUntitledSite, updateSite } = useSites()
 const { navigateToSite } = useSiteTransition('site')
@@ -28,6 +28,11 @@ const { closeAddSite } = useAddSite()
 
 const currentPath = ref<Path | null>(null)
 const currentStep = ref<Step>('choose')
+
+// Building step state
+const buildingSiteName = ref('')
+const buildingProgress = ref(0)
+const buildingStatus = ref('')
 
 // Path-specific state
 const selectedBlueprint = ref<Blueprint | null>(null)
@@ -115,11 +120,35 @@ function initialName(): string | undefined {
   return undefined
 }
 
+const buildSteps: { progress: number; status: string; duration: number }[] = [
+  { progress: 15, status: 'Setting up site directory…', duration: 600 },
+  { progress: 35, status: 'Downloading WordPress…', duration: 900 },
+  { progress: 55, status: 'Configuring PHP runtime…', duration: 700 },
+  { progress: 75, status: 'Starting WordPress server and applying Blueprint…', duration: 1200 },
+  { progress: 90, status: 'Running initial setup…', duration: 500 },
+  { progress: 100, status: 'Ready!', duration: 400 },
+]
+
 async function onSubmit(data: { name: string }) {
   const site = createUntitledSite()
   updateSite(site.id, { name: data.name })
+
+  // Transition to building step
+  buildingSiteName.value = data.name
+  buildingProgress.value = 0
+  buildingStatus.value = 'Preparing…'
+  currentStep.value = 'building'
+
+  // Walk through simulated build steps
+  for (const step of buildSteps) {
+    await new Promise(r => setTimeout(r, step.duration))
+    buildingProgress.value = step.progress
+    buildingStatus.value = step.status
+  }
+
+  // Brief pause on "Ready!" then navigate
+  await new Promise(r => setTimeout(r, 600))
   closeAddSite()
-  // Small delay so chrome slides back before navigating
   setTimeout(async () => {
     await navigateToSite(site.id)
   }, 100)
@@ -132,7 +161,7 @@ async function onSubmit(data: { name: string }) {
     <div class="accent-glow" />
 
     <!-- Header: cancel/back button (left-aligned) -->
-    <header class="page-header hstack">
+    <header v-if="currentStep !== 'building'" class="page-header hstack">
       <Button
         v-if="canGoBack"
         :icon="chevronLeft"
@@ -211,6 +240,15 @@ async function onSubmit(data: { name: string }) {
             :initial-name="initialName()"
             @submit="onSubmit"
           />
+        </div>
+
+        <!-- Step: Building / setup -->
+        <div v-else-if="currentStep === 'building'" key="building" class="step-content step-content--narrow building-step">
+          <h2 class="building-site-name">{{ buildingSiteName }}</h2>
+          <div class="building-progress-track">
+            <div class="building-progress-bar" :style="{ width: buildingProgress + '%' }" />
+          </div>
+          <p class="building-status">{{ buildingStatus }}</p>
         </div>
 
       </Transition>
@@ -379,5 +417,42 @@ async function onSubmit(data: { name: string }) {
 .step-fade-enter-from,
 .step-fade-leave-to {
   opacity: 0;
+}
+
+/* ── Building step ── */
+
+.building-step {
+  align-items: center;
+  text-align: center;
+  gap: var(--space-s);
+}
+
+.building-site-name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-chrome-fg);
+  margin: 0;
+}
+
+.building-progress-track {
+  width: 100%;
+  max-width: 320px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-chrome-border);
+  overflow: hidden;
+}
+
+.building-progress-bar {
+  height: 100%;
+  background: var(--color-chrome-fg);
+  border-radius: 2px;
+  transition: width 400ms var(--ease-out);
+}
+
+.building-status {
+  font-size: var(--font-size-s);
+  color: var(--color-chrome-fg-muted);
+  margin: 0;
 }
 </style>

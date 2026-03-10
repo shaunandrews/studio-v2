@@ -35,6 +35,7 @@ defineProps<{
             :args="tc.args"
             :result="tc.result"
             :error="tc.error"
+            :code="tc.code"
           />
         </div>
         <MarkdownText

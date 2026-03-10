@@ -203,6 +203,11 @@ export function useConversations() {
     if (idx !== -1) messages.value.splice(idx, 1)
   }
 
+  function markRead(id: string) {
+    const conv = conversations.value.find(c => c.id === id)
+    if (conv) conv.unread = false
+  }
+
   function archiveConversation(id: string) {
     const conv = conversations.value.find(c => c.id === id)
     if (conv) conv.archived = true
@@ -224,6 +229,7 @@ export function useConversations() {
     postMessage,
     removeMessage,
     streamAgentMessage,
+    markRead,
     archiveConversation,
     unarchiveConversation,
     generateTaskTitle,

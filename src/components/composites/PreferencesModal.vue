@@ -412,6 +412,7 @@ function skillInstallLabel(id: string): string {
                   max-height="320px"
                   variant="field"
                   width="fill"
+                  menu-surface="dark"
                   @update:model-value="(v: string) => { language = v; localStorage.setItem(LANGUAGE_KEY, v) }"
                 />
               </div>
@@ -426,6 +427,7 @@ function skillInstallLabel(id: string): string {
                       :show-chevron="true"
                       variant="field"
                       width="fill"
+                      menu-surface="dark"
                       @update:model-value="(v: string) => { codeEditor = v; localStorage.setItem(EDITOR_KEY, v) }"
                     />
                   </div>
@@ -436,7 +438,8 @@ function skillInstallLabel(id: string): string {
                       :groups="terminalGroups"
                       :show-chevron="true"
                       variant="field"
-                  width="fill"
+                      width="fill"
+                      menu-surface="dark"
                       @update:model-value="(v: string) => { terminal = v; localStorage.setItem(TERMINAL_KEY, v) }"
                     />
                   </div>

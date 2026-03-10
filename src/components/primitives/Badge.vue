@@ -1,7 +1,7 @@
 <script setup lang="ts">
 withDefaults(defineProps<{
   label: string
-  variant?: 'default' | 'success' | 'warning' | 'error'
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'global' | 'site'
 }>(), {
   variant: 'default',
 })
@@ -41,5 +41,15 @@ withDefaults(defineProps<{
 .badge--error {
   background: rgba(255, 95, 87, 0.1);
   color: #d63638;
+}
+
+.badge--global {
+  background: rgba(242, 215, 107, 0.35);
+  color: var(--color-frame-fg-muted);
+}
+
+.badge--site {
+  background: rgba(184, 230, 191, 0.45);
+  color: var(--color-frame-fg-muted);
 }
 </style>

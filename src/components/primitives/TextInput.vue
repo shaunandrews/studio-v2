@@ -6,6 +6,7 @@ defineProps<{
 	placeholder?: string
 	hint?: string
 	id?: string
+	disabled?: boolean
 }>()
 
 defineEmits<{
@@ -22,6 +23,7 @@ defineEmits<{
 				:value="modelValue"
 				:type="type ?? 'text'"
 				:placeholder="placeholder"
+				:disabled="disabled"
 				class="text-input__field"
 				:class="{ 'text-input__field--has-suffix': $slots.suffix }"
 				@input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
@@ -37,6 +39,11 @@ defineEmits<{
 </template>
 
 <style scoped>
+.text-input {
+	min-width: 0;
+	flex: 1;
+}
+
 .text-input__label {
 	display: block;
 	font-size: var(--font-size-s);
@@ -53,12 +60,13 @@ defineEmits<{
 	display: block;
 	width: 100%;
 	font-family: inherit;
-	font-size: var(--font-size-s);
+	font-size: var(--font-size-m);
 	color: var(--color-frame-fg);
 	background: var(--color-frame-bg);
 	border: 1px solid var(--color-frame-border);
 	border-radius: var(--radius-s);
-	padding: var(--space-xs);
+	height: 40px;
+	padding: 0 var(--space-s);
 	outline: none;
 	transition: border-color var(--duration-instant) var(--ease-default);
 	box-sizing: border-box;
@@ -68,8 +76,10 @@ defineEmits<{
 	color: var(--color-frame-fg-muted);
 }
 
-.text-input__field:hover {
-	border-color: var(--color-frame-fg-muted);
+.text-input__field:disabled {
+	color: var(--color-frame-fg-muted);
+	background: var(--color-frame-fill);
+	cursor: default;
 }
 
 .text-input__field:focus-visible {
@@ -84,7 +94,7 @@ defineEmits<{
 .text-input__suffix {
 	position: absolute;
 	inset-block-start: 50%;
-	inset-inline-end: var(--space-xxs);
+	inset-inline-end: var(--space-xs);
 	transform: translateY(-50%);
 	display: flex;
 	align-items: center;
@@ -93,7 +103,7 @@ defineEmits<{
 .text-input__hint {
 	font-size: var(--font-size-xs);
 	color: var(--color-frame-fg-muted);
-	margin: var(--space-xxs) 0 0;
+	margin: var(--space-xs) 0 0;
 	line-height: 1.5;
 }
 </style>

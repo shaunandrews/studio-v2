@@ -14,6 +14,7 @@ import Badge from '@/components/primitives/Badge.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import ContextMenu from '@/components/primitives/ContextMenu.vue'
 import ContextRing from '@/components/primitives/ContextRing.vue'
+import TextInput from '@/components/primitives/TextInput.vue'
 import Toggle from '@/components/primitives/Toggle.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import { cog, plus, upload, external, trash, pencil, chevronDown } from '@wordpress/icons'
@@ -23,6 +24,13 @@ const modalOpen = ref(false)
 const toggleA = ref(false)
 const toggleB = ref(true)
 const toggleC = ref(true)
+
+// TextInput demos
+const inputBasic = ref('')
+const inputWithLabel = ref('')
+const inputWithHint = ref('hello@example.com')
+const inputDisabled = ref('Read-only value')
+const inputWithSuffix = ref('')
 
 // Dropdown demos
 const dropdownBasic = ref('Sonnet 4.5')
@@ -775,6 +783,65 @@ const icons = Object.entries(wpIcons)
         <Text variant="body" tag="p">Rendered as p</Text>
         <Text variant="body-small" tag="small">Rendered as small</Text>
       </div>
+    </div>
+  </section>
+
+  <!-- TextInput -->
+  <section id="text-input">
+    <h2>TextInput</h2>
+    <p class="section-desc">Form text field with optional label, hint, suffix slot, and disabled state. Supports <code>v-model</code> binding.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>modelValue</code></td><td><code>string</code></td><td>—</td><td>Input value (v-model)</td></tr>
+          <tr><td><code>label</code></td><td><code>string</code></td><td>—</td><td>Label text above the field</td></tr>
+          <tr><td><code>type</code></td><td><code>'text' | 'email' | 'password' | 'url'</code></td><td><code>'text'</code></td><td>Input type</td></tr>
+          <tr><td><code>placeholder</code></td><td><code>string</code></td><td>—</td><td>Placeholder text</td></tr>
+          <tr><td><code>hint</code></td><td><code>string</code></td><td>—</td><td>Helper text below the field</td></tr>
+          <tr><td><code>id</code></td><td><code>string</code></td><td>—</td><td>Input element ID (links label via <code>for</code>)</td></tr>
+          <tr><td><code>disabled</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Disables the input</td></tr>
+        </tbody>
+      </table>
+      <h3>Slots</h3>
+      <table>
+        <thead><tr><th>Slot</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>suffix</code></td><td>Content anchored to the inline-end of the field (e.g. icon button)</td></tr>
+          <tr><td><code>hint</code></td><td>Rich hint content (overrides the <code>hint</code> prop)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Basic</h3>
+    <div class="example-section" style="max-width: 320px;">
+      <TextInput v-model="inputBasic" placeholder="Enter site name…" />
+    </div>
+
+    <h3>With label</h3>
+    <div class="example-section" style="max-width: 320px;">
+      <TextInput v-model="inputWithLabel" label="Site name" placeholder="My awesome site" />
+    </div>
+
+    <h3>With hint</h3>
+    <div class="example-section" style="max-width: 320px;">
+      <TextInput v-model="inputWithHint" label="Email" type="email" hint="We'll send a confirmation to this address." />
+    </div>
+
+    <h3>Disabled</h3>
+    <div class="example-section" style="max-width: 320px;">
+      <TextInput v-model="inputDisabled" label="Read-only field" disabled />
+    </div>
+
+    <h3>With suffix slot</h3>
+    <div class="example-section" style="max-width: 320px;">
+      <TextInput v-model="inputWithSuffix" placeholder="Search…">
+        <template #suffix>
+          <Button variant="tertiary" :icon="cog" size="mini" />
+        </template>
+      </TextInput>
     </div>
   </section>
 

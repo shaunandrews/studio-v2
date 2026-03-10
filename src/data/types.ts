@@ -16,6 +16,7 @@ export interface Site {
   themeType?: ThemeType
   features?: string[]
   pipeline?: PipelineStage[]
+  skillOverrides?: Record<string, 'enabled' | 'disabled'>
 }
 
 export type EnvironmentType = 'staging' | 'qa' | 'review' | 'production' | 'custom'

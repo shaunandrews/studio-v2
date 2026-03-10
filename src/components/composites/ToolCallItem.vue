@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
+import StreamingCode from '@/components/composites/StreamingCode.vue'
 import { chevronRight } from '@wordpress/icons'
 import type { ToolCallStatus } from '@/data/types'
 
@@ -11,12 +12,12 @@ defineProps<{
   args?: string
   result?: string
   error?: string
+  code?: string
 }>()
 
 const expanded = ref(false)
 
-function toggle(status: ToolCallStatus) {
-  if (status === 'running') return
+function toggle() {
   expanded.value = !expanded.value
 }
 </script>
@@ -28,7 +29,7 @@ function toggle(status: ToolCallStatus) {
       `tool-call-item--${status}`,
       { 'is-expanded': expanded },
     ]"
-    @click="toggle(status)"
+    @click="toggle()"
   >
     <div class="tool-call-item__row hstack gap-xxs">
       <!-- Running: spinner leads -->
@@ -54,9 +55,7 @@ function toggle(status: ToolCallStatus) {
 
       <span class="tool-call-item__label">{{ label }}</span>
 
-      <!-- Done/Error: trailing chevron -->
       <WPIcon
-        v-if="status !== 'running'"
         :icon="chevronRight"
         :size="14"
         class="tool-call-item__chevron"
@@ -64,12 +63,18 @@ function toggle(status: ToolCallStatus) {
     </div>
 
     <!-- Expanded detail (grid-row trick for animated height) -->
-    <div v-if="status !== 'running'" class="tool-call-item__detail-wrapper">
-      <div class="tool-call-item__detail">
+    <div class="tool-call-item__detail-wrapper">
+      <div class="tool-call-item__detail" :class="{ 'tool-call-item__detail--code-only': code && !toolName && !args && !result && !error }">
         <div v-if="toolName" class="tool-call-detail__name">{{ toolName }}</div>
         <div v-if="args" class="tool-call-detail__args">{{ args }}</div>
         <div v-if="result" class="tool-call-detail__result">{{ result }}</div>
         <div v-if="error" class="tool-call-detail__error">{{ error }}</div>
+        <StreamingCode
+          v-if="code"
+          :code="code"
+          :active="expanded"
+          :class="{ 'tool-call-detail__stream': true, 'tool-call-detail__stream--solo': !toolName && !args && !result && !error }"
+        />
       </div>
     </div>
   </div>
@@ -80,10 +85,6 @@ function toggle(status: ToolCallStatus) {
   cursor: pointer;
   user-select: none;
   margin-block-end: var(--space-m);
-}
-
-.tool-call-item--running {
-  cursor: default;
 }
 
 .tool-call-item__row {
@@ -138,6 +139,14 @@ function toggle(status: ToolCallStatus) {
   border-color: var(--color-frame-border);
   margin-block-start: var(--space-xs);
   opacity: 1;
+}
+
+.tool-call-detail__stream {
+  margin-block-start: var(--space-xs);
+}
+
+.tool-call-detail__stream--solo {
+  margin-block-start: 0;
 }
 
 .tool-call-detail__name {
