@@ -63,12 +63,14 @@ function toggle(status: ToolCallStatus) {
       />
     </div>
 
-    <!-- Expanded detail -->
-    <div v-if="expanded && status !== 'running'" class="tool-call-item__detail">
-      <div v-if="toolName" class="tool-call-detail__name">{{ toolName }}</div>
-      <div v-if="args" class="tool-call-detail__args">{{ args }}</div>
-      <div v-if="result" class="tool-call-detail__result">{{ result }}</div>
-      <div v-if="error" class="tool-call-detail__error">{{ error }}</div>
+    <!-- Expanded detail (grid-row trick for animated height) -->
+    <div v-if="status !== 'running'" class="tool-call-item__detail-wrapper">
+      <div class="tool-call-item__detail">
+        <div v-if="toolName" class="tool-call-detail__name">{{ toolName }}</div>
+        <div v-if="args" class="tool-call-detail__args">{{ args }}</div>
+        <div v-if="result" class="tool-call-detail__result">{{ result }}</div>
+        <div v-if="error" class="tool-call-detail__error">{{ error }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -77,6 +79,7 @@ function toggle(status: ToolCallStatus) {
 .tool-call-item {
   cursor: pointer;
   user-select: none;
+  margin-block-end: var(--space-m);
 }
 
 .tool-call-item--running {
@@ -93,7 +96,7 @@ function toggle(status: ToolCallStatus) {
 }
 
 .tool-call-item__chevron {
-  color: var(--color-frame-border);
+  color: var(--color-frame-fg-muted);
   flex-shrink: 0;
   transition: transform var(--duration-fast) var(--ease-default);
 }
@@ -102,18 +105,45 @@ function toggle(status: ToolCallStatus) {
   transform: rotate(90deg);
 }
 
-/* Detail panel */
+/* Detail panel — animated expand/collapse */
+.tool-call-item__detail-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-moderate) var(--ease-default);
+  overflow: hidden;
+}
+
+.tool-call-item.is-expanded .tool-call-item__detail-wrapper {
+  grid-template-rows: 1fr;
+}
+
 .tool-call-item__detail {
-  padding: var(--space-xxs) 0 var(--space-xs) var(--space-xxxs);
-  margin-inline-start: 0;
-  border-inline-start: 2px solid var(--color-frame-border);
+  min-height: 0;
+  padding: 0 var(--space-m);
   padding-inline-start: var(--space-s);
+  border: 1px solid transparent;
+  border-radius: var(--radius-m);
+  margin-block-start: 0;
+  opacity: 0;
+  transition:
+    opacity var(--duration-fast) var(--ease-default),
+    padding var(--duration-moderate) var(--ease-default),
+    margin var(--duration-moderate) var(--ease-default),
+    border-color var(--duration-moderate) var(--ease-default);
+}
+
+.tool-call-item.is-expanded .tool-call-item__detail {
+  padding: var(--space-s) var(--space-m);
+  padding-inline-start: var(--space-s);
+  border-color: var(--color-frame-border);
+  margin-block-start: var(--space-xs);
+  opacity: 1;
 }
 
 .tool-call-detail__name {
   font-size: var(--font-size-xs);
   font-family: var(--font-family-mono);
-  color: var(--color-frame-border);
+  color: var(--color-frame-fg-muted);
   margin-block-end: var(--space-xxxs);
 }
 
@@ -126,7 +156,7 @@ function toggle(status: ToolCallStatus) {
 
 .tool-call-detail__result {
   font-size: var(--font-size-s);
-  color: var(--color-status-running);
+  color: var(--color-frame-fg-muted);
   margin-block-start: var(--space-xxxs);
 }
 
