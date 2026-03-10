@@ -47,7 +47,7 @@ export interface PipelineStage {
   aheadCount?: number
 }
 
-export type AgentId = 'wpcom' | 'claude-code' | 'codex' | 'cursor' | 'opencode' | 'assistant' | 'code' | 'design'
+export type AgentId = 'wpcom' | 'claude-code' | 'codex' | 'cursor' | 'opencode'
 
 export interface Agent {
   id: AgentId
@@ -58,6 +58,18 @@ export interface Agent {
   installed?: boolean
   url?: string
   installHint?: string
+}
+
+export type ToolCallStatus = 'running' | 'done' | 'error'
+
+export interface ToolCall {
+  id: string
+  label: string            // Human-readable: "Installed Jetpack plugin"
+  status: ToolCallStatus
+  toolName?: string        // Technical name: "install_plugin" (shown on expand)
+  args?: string            // Displayed in detail: 'slug: "jetpack"'
+  result?: string          // Success detail: "Jetpack 14.3 installed and activated"
+  error?: string           // Error detail: "STRIPE_API_KEY not found"
 }
 
 export interface Conversation {
@@ -75,6 +87,7 @@ export interface Message {
   role: 'user' | 'agent'
   agentId?: AgentId
   content: string
+  toolCalls?: ToolCall[]   // Rendered inline above text content
   timestamp: string
 }
 
