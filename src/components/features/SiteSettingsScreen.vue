@@ -96,48 +96,73 @@ const wpVersionOptions = [
       <!-- General -->
       <section class="settings__section">
         <h3 class="settings__section-title">General</h3>
-        <div class="settings__card">
-          <TextInput
-            id="site-name"
-            v-model="siteName"
-            label="Site name"
-          />
-          <TextInput
-            id="local-path"
-            v-model="localPath"
-            label="Local path"
-            hint="Set when the site is created and cannot be changed."
-            disabled
-          >
-            <template #suffix>
-              <Tooltip :text="pathCopied ? 'Copied!' : 'Copy path'" placement="top">
-                <button class="settings__input-action" @click="copyPath">
-                  <WPIcon :icon="pathCopied ? checkIcon : copyIcon" :size="20" />
-                </button>
-              </Tooltip>
-            </template>
-          </TextInput>
-          <div class="settings__field-row">
-            <div class="settings__field">
-              <label class="settings__label">PHP version</label>
-              <Dropdown
-                v-model="phpVersion"
-                :groups="phpVersionOptions"
-                variant="field"
-                width="fill"
-                menu-surface="dark"
-              />
+        <div class="settings__card settings__card--grouped">
+          <div class="settings__group">
+            <TextInput
+              id="site-name"
+              v-model="siteName"
+              label="Site name"
+            />
+            <TextInput
+              id="local-path"
+              v-model="localPath"
+              label="Local path"
+              hint="Set when the site is created and cannot be changed."
+              disabled
+            >
+              <template #suffix>
+                <Tooltip :text="pathCopied ? 'Copied!' : 'Copy path'" placement="top">
+                  <button class="settings__input-action" @click="copyPath">
+                    <WPIcon :icon="pathCopied ? checkIcon : copyIcon" :size="20" />
+                  </button>
+                </Tooltip>
+              </template>
+            </TextInput>
+            <div class="settings__field-row">
+              <div class="settings__field">
+                <label class="settings__label">PHP version</label>
+                <Dropdown
+                  v-model="phpVersion"
+                  :groups="phpVersionOptions"
+                  variant="field"
+                  width="fill"
+                  menu-surface="dark"
+                />
+              </div>
+              <div class="settings__field">
+                <label class="settings__label">WordPress version</label>
+                <Dropdown
+                  v-model="wpVersion"
+                  :groups="wpVersionOptions"
+                  variant="field"
+                  width="fill"
+                  menu-surface="dark"
+                  max-height="320px"
+                />
+              </div>
             </div>
-            <div class="settings__field">
-              <label class="settings__label">WordPress version</label>
-              <Dropdown
-                v-model="wpVersion"
-                :groups="wpVersionOptions"
-                variant="field"
-                width="fill"
-                menu-surface="dark"
-                max-height="320px"
-              />
+          </div>
+          <div class="settings__group">
+            <Toggle v-model="useCustomDomain" label="Use a custom domain" hint="Access this site from a nicer URL" />
+            <div v-if="useCustomDomain" class="settings__toggle-indent">
+              <TextInput
+                id="custom-domain"
+                v-model="customDomain"
+                label="Domain name"
+                placeholder="my-site.local"
+                hint="You'll be asked for your system password to update."
+              >
+                <template #suffix>
+                  <Tooltip :text="domainCopied ? 'Copied!' : 'Copy domain'" placement="top">
+                    <button class="settings__input-action" @click="copyDomain">
+                      <WPIcon :icon="domainCopied ? checkIcon : copyIcon" :size="20" />
+                    </button>
+                  </Tooltip>
+                </template>
+              </TextInput>
+              <div v-if="domainDirty">
+                <Button variant="primary" label="Update domain" @click="saveDomain" />
+              </div>
             </div>
           </div>
         </div>
@@ -147,6 +172,13 @@ const wpVersionOptions = [
       <section class="settings__section">
         <h3 class="settings__section-title">wp-admin</h3>
         <div class="settings__card">
+          <TextInput
+            id="admin-email"
+            v-model="adminEmail"
+            type="email"
+            label="Email"
+            placeholder="admin@localhost.com"
+          />
           <div class="settings__field-row">
             <TextInput
               id="admin-username"
@@ -168,42 +200,6 @@ const wpVersionOptions = [
               </template>
             </TextInput>
           </div>
-          <TextInput
-            id="admin-email"
-            v-model="adminEmail"
-            type="email"
-            label="Email"
-            placeholder="admin@localhost.com"
-          />
-        </div>
-      </section>
-
-      <!-- Local domain -->
-      <section class="settings__section">
-        <h3 class="settings__section-title">Local domain</h3>
-        <div class="settings__card">
-          <Toggle v-model="useCustomDomain" label="Use a custom domain" hint="Access this site from a nicer URL" />
-
-          <template v-if="useCustomDomain">
-            <TextInput
-              id="custom-domain"
-              v-model="customDomain"
-              label="Domain name"
-              placeholder="my-site.local"
-              hint="You'll be asked for your system password to update."
-            >
-              <template #suffix>
-                <Tooltip :text="domainCopied ? 'Copied!' : 'Copy domain'" placement="top">
-                  <button class="settings__input-action" @click="copyDomain">
-                    <WPIcon :icon="domainCopied ? checkIcon : copyIcon" :size="20" />
-                  </button>
-                </Tooltip>
-              </template>
-            </TextInput>
-            <div v-if="domainDirty">
-              <Button variant="primary" label="Update domain" @click="saveDomain" />
-            </div>
-          </template>
         </div>
       </section>
 
@@ -224,30 +220,58 @@ const wpVersionOptions = [
       <!-- Skills -->
       <section class="settings__section">
         <h3 class="settings__section-title">Site skills</h3>
-        <div class="settings__card">
-          <Text variant="body-small" color="muted">
-            Your task agents make use of skills you've installed in <button class="settings__link-btn" @click="emit('manage-global-skills')">Studio Settings</button>.<template v-if="overrideEntries.length"> This site has the following skill overrides:</template><template v-else> You can override global skills for this site.</template>
-          </Text>
+        <div class="settings__card" :class="{ 'settings__card--skills-empty': !overrideEntries.length }">
+          <div class="skills__content">
+            <Text variant="body-small" color="muted">
+              Your task agents make use of skills you've installed in <button class="settings__link-btn" @click="emit('manage-global-skills')">Studio Settings</button>.<template v-if="overrideEntries.length"> This site has the following skill overrides:</template><template v-else> You can override global skills for this site.</template>
+            </Text>
 
-          <div v-if="overrideEntries.length" class="skills__overrides">
-            <Tooltip
-              v-for="entry in overrideEntries"
-              :key="entry.id"
-              :text="entry.state === 'enabled' ? 'Installed on this site' : 'Uninstalled on this site'"
-            >
-              <span
-                class="skills__override-pill"
-                :class="entry.state === 'enabled' ? 'skills__override-pill--added' : 'skills__override-pill--removed'"
+            <div v-if="overrideEntries.length" class="skills__overrides">
+              <Tooltip
+                v-for="entry in overrideEntries"
+                :key="entry.id"
+                :text="entry.state === 'enabled' ? 'Installed on this site' : 'Uninstalled on this site'"
               >
-                {{ entry.name }}
-              </span>
-            </Tooltip>
+                <span
+                  class="skills__override-pill"
+                  :class="entry.state === 'enabled' ? 'skills__override-pill--added' : 'skills__override-pill--removed'"
+                >
+                  {{ entry.name }}
+                </span>
+              </Tooltip>
+            </div>
+
+            <div class="skills__actions">
+              <Button variant="secondary" size="small" label="Manage site skills" @click="showSkillsModal = true" />
+              <Button v-if="overrideEntries.length" variant="tertiary" size="small" label="Reset to global" @click="resetSkillOverrides" />
+            </div>
           </div>
 
-          <div class="skills__actions">
-            <Button variant="secondary" size="small" label="Manage site skills" @click="showSkillsModal = true" />
-            <Button v-if="overrideEntries.length" variant="tertiary" size="small" label="Reset to global" @click="resetSkillOverrides" />
-          </div>
+          <!-- Empty state illustration — floating skill pills -->
+          <svg v-if="!overrideEntries.length" class="skills__illustration" width="110" height="80" viewBox="0 0 110 80" fill="none" aria-hidden="true">
+            <!-- Scattered pills at varying angles, sizes, and opacities -->
+            <g transform="rotate(-3 40 14)">
+              <rect x="8" y="8" width="40" height="14" rx="7" fill="#b8e6bf" opacity="0.5" />
+            </g>
+            <g transform="rotate(4 88 12)">
+              <rect x="56" y="4" width="32" height="14" rx="7" fill="#f2d76b" opacity="0.35" />
+              <line x1="62" y1="11" x2="82" y2="11" stroke="var(--color-frame-fg)" stroke-width="1" opacity="0.15" stroke-linecap="round" />
+            </g>
+            <g transform="rotate(2 24 36)">
+              <rect x="0" y="30" width="34" height="14" rx="7" fill="#f2d76b" opacity="0.3" />
+              <line x1="6" y1="37" x2="28" y2="37" stroke="var(--color-frame-fg)" stroke-width="1" opacity="0.12" stroke-linecap="round" />
+            </g>
+            <g transform="rotate(-2 68 36)">
+              <rect x="40" y="28" width="44" height="14" rx="7" fill="#b8e6bf" opacity="0.55" />
+            </g>
+            <g transform="rotate(5 30 58)">
+              <rect x="14" y="52" width="36" height="14" rx="7" fill="#b8e6bf" opacity="0.35" />
+            </g>
+            <g transform="rotate(-4 82 58)">
+              <rect x="58" y="50" width="40" height="14" rx="7" fill="#f2d76b" opacity="0.25" />
+              <line x1="64" y1="57" x2="92" y2="57" stroke="var(--color-frame-fg)" stroke-width="1" opacity="0.1" stroke-linecap="round" />
+            </g>
+          </svg>
         </div>
       </section>
 
@@ -294,6 +318,22 @@ const wpVersionOptions = [
   gap: var(--space-s);
 }
 
+.settings__card--grouped {
+  padding: 0;
+  gap: 0;
+}
+
+.settings__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding: var(--space-m);
+}
+
+.settings__group + .settings__group {
+  border-block-start: 1px solid var(--color-frame-border);
+}
+
 /* ── Form layout ── */
 
 .settings__field {
@@ -316,6 +356,15 @@ const wpVersionOptions = [
   font-weight: var(--font-weight-semibold);
   color: var(--color-frame-fg);
   margin-block-end: var(--space-xs);
+}
+
+/* ── Toggle-aligned indent ── */
+
+.settings__toggle-indent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding-inline-start: calc(32px + var(--space-s));
 }
 
 /* ── Password visibility toggle ── */
@@ -349,6 +398,24 @@ const wpVersionOptions = [
 }
 
 /* ── Skills ── */
+
+.settings__card--skills-empty {
+  flex-direction: row;
+  align-items: center;
+}
+
+.skills__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  flex: 1;
+  min-width: 0;
+}
+
+.skills__illustration {
+  flex-shrink: 0;
+  margin-inline-start: var(--space-m);
+}
 
 .settings__link-btn {
   background: none;

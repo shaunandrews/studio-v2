@@ -64,35 +64,38 @@ defineEmits<{
 
 .toggle__track {
 	position: relative;
-	width: 36px;
-	height: 22px;
+	width: 32px;
+	height: 16px;
 	border-radius: var(--radius-full);
-	background: var(--color-frame-border);
+	background: var(--color-frame-fill);
+	box-shadow: 0 0 0 1px var(--color-frame-fg-muted);
 	flex-shrink: 0;
 	transition: background var(--duration-fast) var(--ease-default);
 }
 
 .toggle__input:checked + .toggle__track {
 	background: var(--color-frame-theme);
+	box-shadow: 0 0 0 1px var(--color-frame-theme);
 }
 
 .toggle__track::before {
 	content: '';
 	position: absolute;
-	width: 16px;
-	height: 16px;
+	width: 14px;
+	height: 14px;
 	border-radius: 50%;
-	background: var(--color-frame-bg);
+	background: var(--color-frame-fg-muted);
 	box-shadow:
 		0 1px 2px rgba(0, 0, 0, 0.1),
 		0 1px 3px rgba(0, 0, 0, 0.06);
-	inset-block-start: 3px;
-	inset-inline-start: 3px;
+	inset-block-start: 1px;
+	inset-inline-start: 1px;
 	transition: inset-inline-start var(--duration-fast) var(--ease-default);
 }
 
 .toggle__input:checked + .toggle__track::before {
 	inset-inline-start: 17px;
+	background: var(--color-frame-bg);
 }
 
 .toggle__label-text {
@@ -110,6 +113,6 @@ defineEmits<{
 	font-size: var(--font-size-s);
 	color: var(--color-frame-fg-muted);
 	line-height: 1.5;
-	padding-inline-start: calc(36px + var(--space-s));
+	padding-inline-start: calc(32px + var(--space-s));
 }
 </style>
