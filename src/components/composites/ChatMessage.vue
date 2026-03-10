@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import MarkdownText from '@/components/composites/renderers/MarkdownText.vue'
-import type { AgentId } from '@/data/types'
+import ToolCallItem from '@/components/composites/ToolCallItem.vue'
+import type { AgentId, ToolCall } from '@/data/types'
 
 defineProps<{
   role: 'user' | 'agent'
   content: string
+  toolCalls?: ToolCall[]
   agentId?: AgentId
   siteId?: string
 }>()
@@ -21,11 +23,26 @@ defineProps<{
         <span class="thinking-dot" />
         <span class="thinking-dot" />
       </div>
-      <MarkdownText
-        v-else
-        class="chat-message-text"
-        :text="content"
-      />
+      <template v-else>
+        <!-- Tool calls render above text content -->
+        <div v-if="toolCalls?.length" class="tool-calls-group">
+          <ToolCallItem
+            v-for="tc in toolCalls"
+            :key="tc.id"
+            :label="tc.label"
+            :status="tc.status"
+            :tool-name="tc.toolName"
+            :args="tc.args"
+            :result="tc.result"
+            :error="tc.error"
+          />
+        </div>
+        <MarkdownText
+          v-if="content"
+          class="chat-message-text"
+          :text="content"
+        />
+      </template>
     </div>
   </div>
 </template>
@@ -91,5 +108,9 @@ defineProps<{
 @keyframes thinking-pulse {
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
   40% { opacity: 1; transform: scale(1); }
+}
+
+.tool-calls-group {
+  padding: var(--space-xxs) 0;
 }
 </style>

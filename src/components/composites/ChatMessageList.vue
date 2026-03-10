@@ -61,6 +61,7 @@ onBeforeUnmount(() => {
         :key="msg.id"
         :role="msg.role"
         :content="msg.content"
+        :tool-calls="msg.toolCalls"
         :agent-id="msg.agentId"
         :site-id="siteId"
       />
