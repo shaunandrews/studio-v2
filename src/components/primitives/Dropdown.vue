@@ -163,10 +163,6 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
   justify-content: space-between;
 }
 
-.dropdown-trigger--field:hover {
-  border-color: var(--color-frame-fg-muted);
-}
-
 /* Dark surface trigger */
 .dropdown.surface-dark .dropdown-trigger {
   color: var(--color-chrome-fg-muted);
@@ -183,7 +179,7 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
 }
 
 .dropdown.surface-dark .dropdown-trigger--field:hover {
-  border-color: var(--color-chrome-fg-muted);
+  border-color: var(--color-chrome-border);
 }
 </style>
 
