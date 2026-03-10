@@ -11,24 +11,6 @@ export const seedProjects: Site[] = [
     description: 'A cozy neighborhood coffee shop website.',
     mockLayout: 'cafe',
     themeType: 'block',
-    repo: {
-      provider: 'github',
-      owner: 'downstreet-cafe',
-      name: 'downstreet-theme',
-      defaultBranch: 'main',
-      url: 'https://github.com/downstreet-cafe/downstreet-theme',
-    },
-    localGit: {
-      branch: 'feature/menu-redesign',
-      uncommittedChanges: 2,
-      latestCommit: {
-        sha: 'f3a8b21',
-        message: 'Add seasonal menu section',
-        author: 'shaun',
-        timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-      },
-      aheadOfStaging: 3,
-    },
     pipeline: [
       {
         id: 'stage-staging',

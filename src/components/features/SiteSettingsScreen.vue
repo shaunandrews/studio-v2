@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useSites } from '@/data/useSites'
-import type { GitRepo } from '@/data/types'
-import Button from '@/components/primitives/Button.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
 import TextInput from '@/components/primitives/TextInput.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
@@ -40,47 +38,6 @@ const showErrorsInBrowser = ref(false)
 
 const phpVersionOptions = [{ label: '', options: ['8.3', '8.2', '8.1', '8.0', '7.4'] }]
 const wpVersionOptions = [{ label: '', options: ['latest', '6.9.1', '6.8', '6.7', '6.6'] }]
-
-const mockRepos: GitRepo[] = [
-  { provider: 'github', owner: 'downstreet-cafe', name: 'downstreet-theme', defaultBranch: 'main', url: 'https://github.com/downstreet-cafe/downstreet-theme' },
-  { provider: 'github', owner: 'downstreet-cafe', name: 'downstreet-plugins', defaultBranch: 'main', url: 'https://github.com/downstreet-cafe/downstreet-plugins' },
-  { provider: 'github', owner: 'studio-meridian', name: 'meridian-theme', defaultBranch: 'main', url: 'https://github.com/studio-meridian/meridian-theme' },
-]
-
-const showRepoPicker = ref(false)
-
-const mockBranches = ['main', 'staging', 'develop', 'feature/menu-redesign', 'feature/dark-mode']
-const branchOptions = [{ label: '', options: mockBranches }]
-
-function connectRepo(repo: GitRepo) {
-  if (!site.value) return
-  site.value.repo = repo
-  showRepoPicker.value = false
-  if (site.value.pipeline) {
-    const prod = site.value.pipeline.find(s => s.environment === 'production')
-    const staging = site.value.pipeline.find(s => s.environment === 'staging')
-    if (prod && !prod.branch) prod.branch = repo.defaultBranch
-    if (staging && !staging.branch) staging.branch = 'staging'
-  }
-}
-
-function disconnectRepo() {
-  if (!site.value) return
-  site.value.repo = undefined
-  site.value.localGit = undefined
-  if (site.value.pipeline) {
-    site.value.pipeline.forEach(s => {
-      s.branch = undefined
-      s.deployedCommit = undefined
-      s.aheadCount = undefined
-    })
-  }
-}
-
-function updateStageBranch(stageId: string, branch: string) {
-  const stage = site.value?.pipeline?.find(s => s.id === stageId)
-  if (stage) stage.branch = branch
-}
 </script>
 
 <template>
@@ -195,70 +152,6 @@ function updateStageBranch(stageId: string, branch: string) {
         </div>
       </div>
 
-      <!-- Repository -->
-      <div class="settings__repo">
-        <div v-if="site?.repo" class="settings__repo-connected">
-          <div class="settings__repo-row">
-            <div class="settings__repo-info">
-              <span class="settings__repo-provider">GitHub</span>
-              <a :href="site.repo.url" target="_blank" rel="noopener" class="settings__repo-name">
-                {{ site.repo.owner }}/{{ site.repo.name }} &#8599;
-              </a>
-            </div>
-            <button class="settings__disconnect" @click="disconnectRepo">Disconnect</button>
-          </div>
-
-          <div v-if="site.pipeline?.length" class="settings__branches">
-            <div class="settings__branches-title">Branch mapping</div>
-            <div class="settings__branch-row">
-              <span class="settings__branch-label">Local</span>
-              <span class="settings__branch-value settings__branch-value--auto">
-                {{ site.localGit?.branch ?? 'auto-detected' }}
-              </span>
-            </div>
-            <div
-              v-for="stage in site.pipeline"
-              :key="stage.id"
-              class="settings__branch-row"
-            >
-              <span class="settings__branch-label">{{ stage.label }}</span>
-              <Dropdown
-                :model-value="stage.branch ?? ''"
-                :groups="branchOptions"
-                variant="field"
-                size="small"
-                :show-chevron="true"
-                @update:model-value="updateStageBranch(stage.id, $event)"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div v-else class="settings__repo-empty">
-          <p class="settings__repo-hint">Connect a GitHub repository to track branches and deployments across your pipeline stages.</p>
-          <Button
-            v-if="!showRepoPicker"
-            variant="secondary"
-            label="Connect GitHub repo"
-            @click="showRepoPicker = true"
-          />
-
-          <div v-if="showRepoPicker" class="settings__repo-picker">
-            <div class="settings__picker-title">Select a repository</div>
-            <button
-              v-for="repo in mockRepos"
-              :key="repo.url"
-              class="settings__picker-item"
-              @click="connectRepo(repo)"
-            >
-              <span class="settings__picker-owner">{{ repo.owner }}</span>
-              <span class="settings__picker-slash">/</span>
-              <span class="settings__picker-name">{{ repo.name }}</span>
-            </button>
-            <button class="settings__picker-cancel" @click="showRepoPicker = false">Cancel</button>
-          </div>
-        </div>
-      </div>
   </ScreenLayout>
 </template>
 
@@ -287,6 +180,14 @@ function updateStageBranch(stageId: string, branch: string) {
 
 .settings__field-row > .text-input {
   flex: 1;
+}
+
+.text-input {
+  margin-block-end: var(--space-s);
+}
+
+.settings__field-row > .text-input {
+  margin-block-end: 0;
 }
 
 .settings__label {
@@ -364,183 +265,4 @@ function updateStageBranch(stageId: string, branch: string) {
   text-decoration: underline;
 }
 
-/* ── Repository ── */
-
-.settings__repo {
-  margin-block-start: var(--space-l);
-}
-
-.settings__repo-connected {
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  padding: var(--space-s) var(--space-m);
-  background: var(--color-frame-bg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-}
-
-.settings__repo-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.settings__repo-info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xxs);
-}
-
-.settings__repo-provider {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg-muted);
-}
-
-.settings__repo-name {
-  font-size: var(--font-size-s);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-frame-theme);
-  text-decoration: none;
-}
-
-.settings__repo-name:hover {
-  text-decoration: underline;
-}
-
-.settings__disconnect {
-  font-size: var(--font-size-xs);
-  color: var(--color-frame-fg-muted);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font-family: inherit;
-  transition: color var(--duration-instant) var(--ease-default);
-}
-
-.settings__disconnect:hover {
-  color: var(--color-frame-fg);
-}
-
-.settings__branches {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xxs);
-}
-
-.settings__branches-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-block-end: var(--space-xxxs);
-}
-
-.settings__branch-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 36px;
-}
-
-.settings__branch-label {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg);
-}
-
-.settings__branch-value {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg);
-  font-family: monospace;
-}
-
-.settings__branch-value--auto {
-  color: var(--color-frame-fg-muted);
-  font-style: italic;
-}
-
-.settings__repo-empty {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-}
-
-.settings__repo-hint {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
-  margin: 0;
-  line-height: 1.5;
-}
-
-.settings__repo-picker {
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  background: var(--color-frame-bg);
-  overflow: hidden;
-}
-
-.settings__picker-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: var(--space-s) var(--space-m) var(--space-xxs);
-}
-
-.settings__picker-item {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  width: 100%;
-  padding: var(--space-xxs) var(--space-m);
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: monospace;
-  font-size: var(--font-size-s);
-  text-align: start;
-  transition: background var(--duration-instant) var(--ease-default);
-}
-
-.settings__picker-item:hover {
-  background: var(--color-frame-hover);
-}
-
-.settings__picker-owner {
-  color: var(--color-frame-fg-muted);
-}
-
-.settings__picker-slash {
-  color: var(--color-frame-fg-muted);
-}
-
-.settings__picker-name {
-  color: var(--color-frame-fg);
-  font-weight: var(--font-weight-medium);
-}
-
-.settings__picker-cancel {
-  display: block;
-  width: 100%;
-  padding: var(--space-xxs) var(--space-m);
-  border: none;
-  border-block-start: 1px solid var(--color-frame-border);
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: var(--font-size-xs);
-  color: var(--color-frame-fg-muted);
-  text-align: center;
-  transition: background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
-}
-
-.settings__picker-cancel:hover {
-  background: var(--color-frame-hover);
-  color: var(--color-frame-fg);
-}
 </style>

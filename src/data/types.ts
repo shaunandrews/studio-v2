@@ -16,8 +16,6 @@ export interface Site {
   themeType?: ThemeType
   features?: string[]
   pipeline?: PipelineStage[]
-  repo?: GitRepo
-  localGit?: LocalGitState
 }
 
 export type EnvironmentType = 'staging' | 'qa' | 'review' | 'production' | 'custom'
@@ -36,21 +34,6 @@ export interface DeployedCommit {
   message: string
   author: string
   timestamp: string
-}
-
-export interface GitRepo {
-  provider: 'github' | 'gitlab' | 'bitbucket'
-  owner: string
-  name: string
-  defaultBranch: string
-  url: string
-}
-
-export interface LocalGitState {
-  branch: string
-  uncommittedChanges: number
-  latestCommit?: DeployedCommit
-  aheadOfStaging?: number
 }
 
 export interface PipelineStage {
