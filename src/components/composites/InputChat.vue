@@ -2,13 +2,12 @@
 import { ref, computed } from 'vue'
 import { plus, arrowUp, chevronDown } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
-import Button from '@/components/primitives/Button.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import ContextRing from '@/components/primitives/ContextRing.vue'
 import { codingAgents } from '@/data/agents'
-import type { ActionButton, AgentId } from '@/data/types'
+import type { AgentId } from '@/data/types'
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const selectedAgentId = ref<AgentId>('wpcom')
@@ -38,19 +37,16 @@ const props = withDefaults(defineProps<{
   siteId?: string | null
   modelValue?: string
   placeholder?: string
-  actions?: ActionButton[]
   elevated?: boolean
 }>(), {
   surface: 'light',
   modelValue: '',
   placeholder: 'Ask anything...',
-  actions: () => [],
 })
 
 const emit = defineEmits<{
   send: [message: string]
   'update:modelValue': [value: string]
-  action: [action: ActionButton]
   'manage-agents': []
 }>()
 
@@ -58,8 +54,6 @@ const message = computed({
   get: () => props.modelValue,
   set: (val: string) => emit('update:modelValue', val),
 })
-
-const hasCardActions = computed(() => props.actions.some(a => a.card))
 
 const canSend = computed(() => message.value.trim().length > 0)
 
@@ -78,15 +72,6 @@ function onKeydown(e: KeyboardEvent) {
     return
   }
 
-  // Number keys (1-9, 0) trigger actions when the input is empty
-  if (props.actions.length && !message.value.trim() && e.key >= '0' && e.key <= '9') {
-    const idx = e.key === '0' ? 9 : Number(e.key) - 1
-    const action = props.actions[idx]
-    if (action) {
-      e.preventDefault()
-      emit('action', action)
-    }
-  }
 }
 
 function focus() {
@@ -102,53 +87,10 @@ function focusInput(e: MouseEvent) {
   textareaRef.value?.focus()
 }
 
-function buttonVariant(variant?: ActionButton['variant']): 'primary' | 'secondary' | 'tertiary' {
-  if (variant === 'primary') return 'primary'
-  if (variant === 'destructive') return 'tertiary'
-  return 'secondary'
-}
-
-function actionLabel(idx: number): string {
-  return `${idx < 9 ? idx + 1 : 0}`
-}
 </script>
 
 <template>
   <div class="input-chat" :class="[`surface-${props.surface}`, { 'has-content': canSend, 'is-elevated': props.elevated }]" @click="focusInput">
-
-    <!-- Card actions: caller controls all styling and content -->
-    <div v-if="hasCardActions" class="input-actions-cards hstack gap-xs">
-      <button
-        v-for="(action, idx) in actions"
-        :key="action.id"
-        class="action-card action-enter"
-        :style="{ ...action.card?.style, animationDelay: `${idx * 60}ms` }"
-        :aria-label="action.label"
-        @click="$emit('action', action)"
-      >
-        <span class="action-card__badge">{{ actionLabel(idx) }}</span>
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <span v-if="action.card" v-html="action.card.content" />
-      </button>
-    </div>
-
-    <!-- Regular text actions -->
-    <div v-else-if="actions.length" class="input-actions hstack gap-xxs flex-wrap">
-      <span
-        v-for="(action, idx) in actions"
-        :key="action.id"
-        class="action-enter"
-        :style="{ animationDelay: `${idx * 30}ms` }"
-      >
-        <Button
-          :label="`${actionLabel(idx)}. ${action.label}`"
-          :icon="action.icon"
-          :variant="buttonVariant(action.variant)"
-          size="small"
-          @click="$emit('action', action)"
-        />
-      </span>
-    </div>
 
     <div class="input-body">
       <textarea
@@ -373,67 +315,4 @@ function actionLabel(idx: number): string {
   color: var(--color-chrome-bg);
 }
 
-
-/* ── Actions above input ── */
-
-.input-actions-cards,
-.input-actions {
-  padding: var(--space-xs) var(--space-xs) 0;
-}
-
-/* Staggered action entrance */
-.action-enter {
-  animation: action-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes action-pop {
-  from {
-    opacity: 0;
-    transform: translateY(4px) scale(0.95);
-  }
-}
-
-/* Card actions — InputChat provides the container, caller controls everything else */
-.input-actions-cards {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
-  align-items: stretch;
-}
-
-.action-card {
-  position: relative;
-  flex: 1 1 0;
-  min-width: 140px;
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-s);
-  padding: var(--space-xs) var(--space-s);
-  text-align: start;
-  cursor: pointer;
-  scroll-snap-align: start;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  transition: transform 0.15s ease;
-}
-
-.action-card:hover {
-  transform: scale(1.02);
-}
-
-.action-card:active {
-  transform: scale(0.98);
-}
-
-.action-card__badge {
-  position: absolute;
-  inset-block-start: var(--space-xxxs);
-  inset-inline-end: var(--space-xxxs);
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1;
-  opacity: 0.4;
-}
 </style>

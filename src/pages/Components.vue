@@ -56,19 +56,6 @@ const categories = [
       { id: 'add-site', label: 'Add Site' },
     ],
   },
-  {
-    label: 'Chat Cards',
-    route: '/dev/components/chat-cards',
-    items: [
-      { id: 'chat-card', label: 'ChatCard' },
-      { id: 'plugin-card', label: 'PluginCard' },
-      { id: 'settings-card', label: 'SettingsCard' },
-      { id: 'progress-card', label: 'ProgressCard' },
-      { id: 'page-card', label: 'PageCard' },
-      { id: 'post-draft-card', label: 'PostDraftCard' },
-      { id: 'markdown-text', label: 'MarkdownText' },
-    ],
-  },
 ]
 
 function handleNavClick(e: Event, catRoute: string, itemId: string) {

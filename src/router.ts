@@ -68,7 +68,6 @@ const router = createRouter({
             { name: 'dev-components-primitives', path: 'primitives', component: () => import('@/pages/components/PrimitivesPage.vue') },
             { name: 'dev-components-composites', path: 'composites', component: () => import('@/pages/components/CompositesPage.vue') },
             { name: 'dev-components-features', path: 'features', component: () => import('@/pages/components/FeaturesPage.vue') },
-            { name: 'dev-components-chat-cards', path: 'chat-cards', component: () => import('@/pages/components/ChatCardsPage.vue') },
           ],
         },
         { name: 'dev-architecture', path: 'architecture', component: () => import('@/pages/ArchitecturePage.vue') },

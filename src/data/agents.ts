@@ -62,22 +62,6 @@ export const agents: Agent[] = reactive([
     installHint: 'Install via npm: npm install -g opencode',
     installed: installedIds.has('opencode'),
   },
-  // Legacy agents (kept for backward compat with seed data)
-  {
-    id: 'assistant',
-    label: 'Site Assistant',
-    description: 'General WordPress help — content, settings, plugins, troubleshooting.',
-  },
-  {
-    id: 'code',
-    label: 'Code Agent',
-    description: 'Theme and plugin development, custom code, PHP/JS/CSS.',
-  },
-  {
-    id: 'design',
-    label: 'Design Agent',
-    description: 'Visual design, layout, typography, colors, block styling.',
-  },
 ])
 
 /** Install an agent (fake async flow) */

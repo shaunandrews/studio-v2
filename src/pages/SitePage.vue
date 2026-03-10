@@ -15,8 +15,7 @@ import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import { useSites, ALL_SITES_ID } from '@/data/useSites'
 import { useConversations } from '@/data/useConversations'
-import { useInputActions } from '@/data/useInputActions'
-import type { ActionButton, Conversation } from '@/data/types'
+import type { Conversation } from '@/data/types'
 
 defineProps<{
   sidebarHidden?: boolean
@@ -36,7 +35,6 @@ function toggleStatus() {
   setTimeout(() => setStatus(currentSite.value!.id, target), 1200)
 }
 const { conversations, getConversations, getMessages, sendMessage, streamAgentMessage, ensureConversation, generateTaskTitle } = useConversations()
-const { getActions, clearActions } = useInputActions()
 
 const currentSite = computed(() =>
   sites.value.find(p => p.id === activeSiteId.value)
@@ -93,8 +91,6 @@ watch(
 )
 
 const currentMessages = getMessages(selectedConvoId)
-const inputActions = getActions(selectedConvoId)
-
 const isNewTask = computed(() =>
   selectedConvoId.value != null && currentMessages.value.length === 0
 )
@@ -150,8 +146,7 @@ function onNewChat() {
 function onSend(text: string) {
   if (!selectedConvoId.value) return
   const isFirst = isNewTask.value
-  clearActions(selectedConvoId.value)
-  sendMessage(selectedConvoId.value, 'user', text, undefined, { source: 'typed' })
+  sendMessage(selectedConvoId.value, text)
   draft.value = ''
   if (isFirst) {
     generateTaskTitle(selectedConvoId.value, text)
@@ -161,22 +156,6 @@ function onSend(text: string) {
 const showPreferences = ref(false)
 const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general')
 
-function onAction(action: ActionButton) {
-  if (!selectedConvoId.value) return
-  clearActions(selectedConvoId.value)
-  sendMessage(
-    selectedConvoId.value,
-    'user',
-    action.action.message,
-    undefined,
-    {
-      source: 'action',
-      actionId: action.id,
-      cardRef: action.action.cardRef,
-      payload: action.action.payload,
-    },
-  )
-}
 </script>
 
 <template>
@@ -238,9 +217,7 @@ function onAction(action: ActionButton) {
               :site-id="activeSiteId"
               :elevated="isScrolledUp"
               :placeholder="isNewTask ? 'Describe what this task should do...' : 'Ask anything...'"
-              :actions="inputActions"
               @send="onSend"
-              @action="onAction"
               @manage-agents="preferencesTab = 'agents'; showPreferences = true"
             />
           </div>

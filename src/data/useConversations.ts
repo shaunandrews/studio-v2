@@ -2,65 +2,24 @@ import { ref, computed, type Ref, unref } from 'vue'
 import Anthropic from '@anthropic-ai/sdk'
 import { seedConversations, seedMessages } from './seed-conversations'
 import { isAIConfigured, getAPIKey, streamAI } from './ai-service'
-import { AI_SYSTEM_PROMPT } from './ai-system-prompt'
-import type { Conversation, Message, AgentId, ContentBlock, MessageContext } from './types'
+import type { Conversation, Message, AgentId } from './types'
 
 // Module-level state (singleton)
-function cloneContentBlock(block: ContentBlock): ContentBlock {
-  if (block.type === 'text') return { ...block }
-  if (block.type === 'actions') {
-    return {
-      ...block,
-      actions: block.actions.map(action => ({
-        ...action,
-        action: {
-          ...action.action,
-          payload: action.action.payload ? { ...action.action.payload } : undefined,
-        },
-      })),
-    }
-  }
-  return { ...block }
-}
-
-function cloneMessage(message: Message): Message {
-  return {
-    ...message,
-    content: message.content.map(cloneContentBlock),
-    messageContext: message.messageContext
-      ? {
-          ...message.messageContext,
-          payload: message.messageContext.payload ? { ...message.messageContext.payload } : undefined,
-        }
-      : undefined,
-  }
-}
-
-const conversations = ref<Conversation[]>(seedConversations.map(conversation => ({ ...conversation })))
-const messages = ref<Message[]>(seedMessages.map(cloneMessage))
-
-function textBlocks(text: string): ContentBlock[] {
-  return [{ type: 'text', text }]
-}
-
-function normalizeContent(content: string | ContentBlock[]): ContentBlock[] {
-  return typeof content === 'string' ? textBlocks(content) : content
-}
+const conversations = ref<Conversation[]>(seedConversations.map(c => ({ ...c })))
+const messages = ref<Message[]>(seedMessages.map(m => ({ ...m })))
 
 function appendMessage(
   conversationId: string,
   role: 'user' | 'agent',
-  content: string | ContentBlock[],
+  content: string,
   agentId?: AgentId,
-  messageContext?: MessageContext,
 ) {
   messages.value.push({
     id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     conversationId,
     role,
     agentId,
-    content: normalizeContent(content),
-    messageContext,
+    content,
     timestamp: new Date().toISOString(),
   })
 }
@@ -69,12 +28,12 @@ function getConversationAgent(conversationId: string): AgentId | undefined {
   return conversations.value.find(c => c.id === conversationId)?.agentId
 }
 
-function queueAgentResponse(conversationId: string, text: string) {
+function queueAgentResponse(conversationId: string) {
   const agentId = getConversationAgent(conversationId)
-  sendToAIWithIndicator(conversationId, text, agentId)
+  sendToAI(conversationId, agentId)
 }
 
-async function sendToAIWithIndicator(conversationId: string, text: string, agentId?: AgentId) {
+async function sendToAI(conversationId: string, agentId?: AgentId) {
   if (!isAIConfigured()) {
     window.setTimeout(() => {
       appendMessage(
@@ -94,7 +53,7 @@ async function sendToAIWithIndicator(conversationId: string, text: string, agent
     conversationId,
     role: 'agent',
     agentId,
-    content: [{ type: 'text', text: '' }],
+    content: '',
     timestamp: new Date().toISOString(),
   }
   messages.value.push(streamingMsg)
@@ -105,17 +64,13 @@ async function sendToAIWithIndicator(conversationId: string, text: string, agent
     .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
     .map(m => ({
       role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
-      content: m.content
-        .filter((b): b is { type: 'text'; text: string } => b.type === 'text')
-        .map(b => b.text)
-        .join('\n') || '(card response)',
+      content: m.content,
     }))
 
-  await streamAI(history, (blocks) => {
-    // Update the message content in place — Vue reactivity handles re-render
+  await streamAI(history, (text) => {
     const idx = messages.value.findIndex(m => m.id === streamingId)
     if (idx !== -1) {
-      messages.value[idx]!.content = blocks
+      messages.value[idx]!.content = text
     }
   })
 }
@@ -181,29 +136,13 @@ export function useConversations() {
     return conv
   }
 
-  function sendMessage(
-    conversationId: string,
-    role: 'user' | 'agent',
-    content: string | ContentBlock[],
-    agentId?: AgentId,
-    messageContext?: MessageContext,
-  ) {
-    appendMessage(conversationId, role, content, agentId, messageContext)
-
-    if (role === 'user') {
-      const text = typeof content === 'string'
-        ? content
-        : content
-          .filter(block => block.type === 'text')
-          .map(block => block.text)
-          .join('\n')
-      queueAgentResponse(conversationId, text)
-    }
+  function sendMessage(conversationId: string, content: string) {
+    appendMessage(conversationId, 'user', content)
+    queueAgentResponse(conversationId)
   }
 
   /**
-   * Push an agent message that "types in" over ~400ms, matching the look
-   * of real AI streaming. Returns a promise that resolves when done.
+   * Push an agent message that "types in" over ~400ms.
    */
   function streamAgentMessage(
     conversationId: string,
@@ -216,7 +155,7 @@ export function useConversations() {
       conversationId,
       role: 'agent',
       agentId,
-      content: [{ type: 'text', text: '' }],
+      content: '',
       timestamp: new Date().toISOString(),
     }
     messages.value.push(msg)
@@ -224,12 +163,11 @@ export function useConversations() {
     return new Promise(resolve => {
       const chars = [...text]
       const total = chars.length
-      const duration = Math.min(400, total * 8) // cap at 400ms
+      const duration = Math.min(400, total * 8)
       const interval = duration / total
       let i = 0
 
       function tick() {
-        // Write a few characters per tick for longer messages
         const chunkSize = Math.max(1, Math.ceil(total / 50))
         const end = Math.min(i + chunkSize, total)
         const partial = chars.slice(0, end).join('')
@@ -237,7 +175,7 @@ export function useConversations() {
 
         const idx = messages.value.findIndex(m => m.id === msgId)
         if (idx !== -1) {
-          messages.value[idx]!.content = [{ type: 'text', text: partial }]
+          messages.value[idx]!.content = partial
         }
 
         if (i < total) {
@@ -247,7 +185,6 @@ export function useConversations() {
         }
       }
 
-      // Start after a brief pause (feels more natural)
       setTimeout(tick, 80)
     })
   }
@@ -255,11 +192,10 @@ export function useConversations() {
   function postMessage(
     conversationId: string,
     role: 'user' | 'agent',
-    content: string | ContentBlock[],
+    content: string,
     agentId?: AgentId,
-    messageContext?: MessageContext,
   ) {
-    appendMessage(conversationId, role, content, agentId, messageContext)
+    appendMessage(conversationId, role, content, agentId)
   }
 
   function removeMessage(messageId: string) {

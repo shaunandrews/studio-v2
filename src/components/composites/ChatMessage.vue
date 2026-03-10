@@ -1,23 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import MarkdownText from '@/components/composites/renderers/MarkdownText.vue'
-import PluginCard from '@/components/composites/chat-cards/PluginCard.vue'
-import SettingsCard from '@/components/composites/chat-cards/SettingsCard.vue'
-import ProgressCard from '@/components/composites/chat-cards/ProgressCard.vue'
-import PageCard from '@/components/composites/chat-cards/PageCard.vue'
-import PostDraftCard from '@/components/composites/chat-cards/PostDraftCard.vue'
-import type { ContentBlock, AgentId } from '@/data/types'
+import type { AgentId } from '@/data/types'
 
-const props = defineProps<{
+defineProps<{
   role: 'user' | 'agent'
-  content: string | ContentBlock[]
+  content: string
   agentId?: AgentId
   siteId?: string
 }>()
-
-const normalizedContent = computed<ContentBlock[]>(() =>
-  typeof props.content === 'string' ? [{ type: 'text', text: props.content }] : props.content,
-)
 </script>
 
 <template>
@@ -26,56 +16,16 @@ const normalizedContent = computed<ContentBlock[]>(() =>
     :class="`chat-message--${role}`"
   >
     <div class="chat-message-body vstack gap-xxs">
-      <div
-        v-for="(block, idx) in normalizedContent"
-        :key="`${idx}-${block.type}`"
-        class="content-block"
-      >
-        <div v-if="block.type === 'text' && block.text === '...'" class="thinking-dots">
-          <span class="thinking-dot" />
-          <span class="thinking-dot" />
-          <span class="thinking-dot" />
-        </div>
-        <MarkdownText
-          v-else-if="block.type === 'text'"
-          class="chat-message-text"
-          :text="block.text"
-        />
-
-        <PluginCard
-          v-else-if="block.type === 'card' && block.card === 'plugin'"
-          :data="block.data"
-          :state="block.state"
-        />
-
-        <SettingsCard
-          v-else-if="block.type === 'card' && block.card === 'settings'"
-          :data="block.data"
-          :compact="block.compact"
-          :state="block.state"
-        />
-
-        <ProgressCard
-          v-else-if="block.type === 'card' && block.card === 'progress'"
-          :data="block.data"
-          :compact="block.compact"
-          :state="block.state"
-        />
-
-        <PageCard
-          v-else-if="block.type === 'card' && block.card === 'page'"
-          :data="block.data"
-          :state="block.state"
-        />
-
-        <PostDraftCard
-          v-else-if="block.type === 'card' && block.card === 'postDraft'"
-          :data="block.data"
-          :compact="block.compact"
-          :state="block.state"
-        />
-
+      <div v-if="content === '...'" class="thinking-dots">
+        <span class="thinking-dot" />
+        <span class="thinking-dot" />
+        <span class="thinking-dot" />
       </div>
+      <MarkdownText
+        v-else
+        class="chat-message-text"
+        :text="content"
+      />
     </div>
   </div>
 </template>
