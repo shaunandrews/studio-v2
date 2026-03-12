@@ -246,15 +246,6 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
           </template>
         </FlyoutMenu>
       </template>
-      <FlyoutMenu :groups="moreMenuGroups" surface="dark" align="end">
-        <template #trigger="{ toggle, open: menuOpen }">
-          <Tooltip text="More options" placement="bottom">
-            <button class="kebab" :class="{ 'is-active': menuOpen }" @click="toggle">
-              <WPIcon :icon="moreVertical" :size="20" />
-            </button>
-          </Tooltip>
-        </template>
-      </FlyoutMenu>
     </div>
   </div>
 </template>

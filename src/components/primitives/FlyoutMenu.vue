@@ -399,7 +399,7 @@ defineExpose({ toggle, close, open })
   align-items: center;
   gap: var(--space-xs);
   height: 30px;
-  padding: 0 var(--space-s);
+  padding: 0 var(--space-xs);
   background: none;
   border: none;
   border-radius: var(--radius-s);

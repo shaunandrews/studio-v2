@@ -14,6 +14,7 @@ const props = defineProps<{
   shortcut?: string
   active?: boolean
   activeRotate?: boolean
+  destructive?: boolean
   disabled?: boolean
   tooltip?: string
   tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right'
@@ -69,7 +70,7 @@ onUnmounted(() => {
         `btn--${size || 'default'}`,
         `btn--on-${surface || 'light'}`,
         `btn--${width || 'hug'}`,
-        { 'btn--icon-only': icon && !label, 'btn--active': active, 'btn--active-rotate': active && activeRotate }
+        { 'btn--icon-only': icon && !label, 'btn--active': active, 'btn--active-rotate': active && activeRotate, 'btn--destructive': destructive }
       ]"
       :disabled="disabled"
     >
@@ -303,6 +304,36 @@ onUnmounted(() => {
 
 .btn--tertiary.btn--on-dark:focus-visible {
   outline-color: var(--color-chrome-border);
+}
+
+/* ── Destructive modifier ── */
+
+.btn--destructive.btn--secondary.btn--on-light {
+  color: var(--color-frame-fg);
+}
+
+.btn--destructive.btn--secondary.btn--on-light:hover {
+  color: #d63638;
+  border-color: #d63638;
+  background: rgba(214, 54, 56, 0.06);
+}
+
+.btn--destructive.btn--secondary.btn--on-dark:hover {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.btn--destructive.btn--primary.btn--on-light,
+.btn--destructive.btn--primary.btn--on-dark {
+  background: #d63638;
+  color: #fff;
+  border-color: transparent;
+}
+
+.btn--destructive.btn--primary.btn--on-light:hover,
+.btn--destructive.btn--primary.btn--on-dark:hover {
+  background: #b32d2e;
 }
 
 /* ── Icon rotation for active state ── */
