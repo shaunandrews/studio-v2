@@ -7,6 +7,7 @@ import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import InputChat from '@/components/composites/InputChat.vue'
 import Text from '@/components/primitives/Text.vue'
 import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
+import ResizeHandle from '@/components/primitives/ResizeHandle.vue'
 import SyncScreen from '@/components/features/SyncScreen.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
@@ -14,6 +15,7 @@ import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import { useSites, ALL_SITES_ID } from '@/data/useSites'
+import { useResizablePane } from '@/data/useResizablePane'
 import { useConversations } from '@/data/useConversations'
 import type { Conversation } from '@/data/types'
 
@@ -154,6 +156,13 @@ function onSend(text: string) {
   }
 }
 
+const { width: navWidth, isDragging: isResizing, onPointerDown: onResizeStart, resetWidth: resetNavWidth } = useResizablePane({
+  defaultWidth: 275,
+  minWidth: 180,
+  maxWidth: 480,
+  storageKey: 'studio-nav-width',
+})
+
 const showPreferences = ref(false)
 const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general')
 
@@ -179,8 +188,8 @@ const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general
       }"
       @navigate-all-sites="router.push({ name: 'all-sites' })"
     />
-    <div class="panes">
-      <div class="pane pane-site-navigation">
+    <div class="panes" :class="{ 'is-resizing': isResizing }">
+      <div class="pane pane-site-navigation" :style="{ width: navWidth + 'px' }">
         <SiteNavigation
           v-if="activeSiteId"
           :site-id="activeSiteId"
@@ -194,6 +203,7 @@ const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general
           @navigate="onNavigate"
         />
       </div>
+      <ResizeHandle :is-dragging="isResizing" @pointerdown="onResizeStart" @dblclick="resetNavWidth" />
       <div class="pane pane-detail">
         <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" />
         <template v-else-if="currentScreen === 'tasks' && selectedConvoId">
@@ -254,8 +264,12 @@ const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general
 }
 
 .pane-site-navigation {
-  flex: 0 0 275px;
-  border-inline-end: 1px solid var(--color-frame-border);
+  flex: 0 0 auto;
+}
+
+.panes.is-resizing {
+  user-select: none;
+  cursor: col-resize;
 }
 
 .pane-detail {
