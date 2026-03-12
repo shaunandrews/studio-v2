@@ -9,6 +9,8 @@ const props = withDefaults(defineProps<{
   width?: string
   title?: string
   closable?: boolean
+  /** Render inline without Teleport/scrim — for design overviews */
+  embedded?: boolean
 }>(), {
   width: '480px',
   closable: true,
@@ -56,10 +58,36 @@ watch(() => props.open, (isOpen) => {
     nextTick(() => updateScrollBorders())
   }
 })
+
+// For embedded mode, check scroll borders after mount
+onMounted(() => {
+  if (props.embedded) {
+    nextTick(() => updateScrollBorders())
+  }
+})
 </script>
 
 <template>
-  <Teleport to="body">
+  <!-- Embedded: render panel inline, no Teleport/scrim -->
+  <div v-if="embedded" class="modal-panel modal-panel--embedded vstack" :style="{ width }">
+    <button v-if="closable" class="modal-close" disabled>
+      <WPIcon :icon="close" :size="20" />
+    </button>
+    <div v-if="hasHeader" class="modal-header hstack" :class="{ 'modal-header--bordered': scrolledTop }">
+      <slot name="header">
+        <Text variant="body" weight="semibold" class="flex-1 min-w-0">{{ title }}</Text>
+      </slot>
+    </div>
+    <div ref="contentRef" class="modal-content" @scroll="updateScrollBorders">
+      <slot />
+    </div>
+    <div v-if="hasFooter" class="modal-footer hstack" :class="{ 'modal-footer--bordered': scrolledBottom }">
+      <slot name="footer" />
+    </div>
+  </div>
+
+  <!-- Normal: Teleport with scrim -->
+  <Teleport v-else to="body">
     <Transition name="modal">
       <div v-if="open" class="modal-scrim" @click="onScrimClick">
         <div class="modal-panel vstack" :style="{ width }">
@@ -90,6 +118,7 @@ watch(() => props.open, (isOpen) => {
       </div>
     </Transition>
   </Teleport>
+
 </template>
 
 <style>
@@ -111,6 +140,11 @@ watch(() => props.open, (isOpen) => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   max-height: 80vh;
   overflow: hidden;
+}
+
+.modal-panel--embedded {
+  box-shadow: var(--shadow-m);
+  max-height: none;
 }
 
 /* ── Header ── */

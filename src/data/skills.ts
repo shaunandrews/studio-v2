@@ -7,6 +7,8 @@ export interface Skill {
   compatibility: string
   installed: boolean
   content?: string
+  custom?: boolean
+  source?: string
 }
 
 const INSTALLED_KEY = 'installed-skills'
@@ -191,3 +193,84 @@ export async function fetchSkillContent(id: string): Promise<string> {
 }
 
 export const SKILLS_REPO_URL = `https://github.com/${REPO}`
+
+// -- Custom skills --
+
+const CUSTOM_SKILLS_KEY = 'custom-skills'
+
+function getStoredCustomSkills(): Skill[] {
+  try {
+    const stored = localStorage.getItem(CUSTOM_SKILLS_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+function saveCustomSkills(customs: Skill[]) {
+  localStorage.setItem(CUSTOM_SKILLS_KEY, JSON.stringify(customs))
+}
+
+// Hydrate custom skills into the main array on load
+const storedCustom = getStoredCustomSkills()
+for (const cs of storedCustom) {
+  if (!skills.find(s => s.id === cs.id)) {
+    skills.push({ ...cs, installed: true })
+  }
+}
+
+/** Add a custom skill from a filename (upload). Returns the skill id. */
+export function addCustomSkillFromFile(filename: string): string | undefined {
+  const name = filename.replace(/\.(md|zip)$/i, '')
+  const id = `custom-${name.toLowerCase().replace(/[^a-z0-9-]/g, '-')}`
+  if (skills.find(s => s.id === id)) return undefined
+
+  const skill: Skill = {
+    id,
+    name,
+    description: `Custom skill uploaded from ${filename}`,
+    compatibility: 'User-provided',
+    installed: true,
+    custom: true,
+    source: filename,
+  }
+  skills.push(skill)
+
+  const customs = getStoredCustomSkills()
+  customs.push(skill)
+  saveCustomSkills(customs)
+  return id
+}
+
+/** Add a custom skill from a URL. Returns the skill id. */
+export function addCustomSkillFromURL(url: string): string | undefined {
+  const segments = url.replace(/\/+$/, '').split('/')
+  const name = segments[segments.length - 1].replace(/\.(md|zip)$/i, '') || 'unknown-skill'
+  const id = `custom-${name.toLowerCase().replace(/[^a-z0-9-]/g, '-')}`
+  if (skills.find(s => s.id === id)) return undefined
+
+  const skill: Skill = {
+    id,
+    name,
+    description: `Custom skill from ${url}`,
+    compatibility: 'User-provided',
+    installed: true,
+    custom: true,
+    source: url,
+  }
+  skills.push(skill)
+
+  const customs = getStoredCustomSkills()
+  customs.push(skill)
+  saveCustomSkills(customs)
+  return id
+}
+
+/** Remove a custom skill */
+export function removeCustomSkill(id: string) {
+  const idx = skills.findIndex(s => s.id === id)
+  if (idx !== -1) skills.splice(idx, 1)
+
+  const customs = getStoredCustomSkills().filter(s => s.id !== id)
+  saveCustomSkills(customs)
+}

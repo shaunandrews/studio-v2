@@ -74,6 +74,13 @@ const router = createRouter({
         { name: 'dev-jtbd', path: 'jtbd', component: () => import('@/pages/JtbdPage.vue') },
       ],
     },
+    // Design overviews — bare layout, no app chrome
+    {
+      name: 'overviews',
+      path: '/overviews',
+      component: () => import('@/pages/DesignOverviewsPage.vue'),
+      meta: { layout: 'bare' },
+    },
     // Catch-all
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],

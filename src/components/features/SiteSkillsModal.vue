@@ -11,6 +11,8 @@ import Text from '@/components/primitives/Text.vue'
 const props = defineProps<{
   open: boolean
   siteId: string
+  /** Render inline without scrim — for design overviews */
+  embedded?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -96,7 +98,7 @@ function save() {
 </script>
 
 <template>
-  <Modal :open="open" title="Site skills" width="560px" @close="emit('close')">
+  <Modal :open="open" :embedded="embedded" title="Site skills" width="560px" @close="emit('close')">
     <!-- Site identity -->
     <div class="site-skills__site">
       <img v-if="site?.favicon" class="site-skills__favicon" :src="site.favicon" :alt="site.name" />

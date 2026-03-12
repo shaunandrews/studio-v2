@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { moreVertical } from '@wordpress/icons'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
@@ -7,7 +7,11 @@ import Dropdown from '@/components/primitives/Dropdown.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
 import { codingAgents, installAgent, uninstallAgent } from '@/data/agents'
-import { skills, installSkill, installAllSkills, uninstallSkill } from '@/data/skills'
+import { skills, installSkill, installAllSkills, uninstallSkill, removeCustomSkill } from '@/data/skills'
+import SkillInstaller from '@/components/composites/SkillInstaller.vue'
+import Badge from '@/components/primitives/Badge.vue'
+import { wordpress } from '@wordpress/icons'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 
 const props = defineProps<{
@@ -17,6 +21,8 @@ const props = defineProps<{
   embedded?: boolean
   /** Lock to a specific tab (hides tab interaction) */
   lockedTab?: 'general' | 'agents' | 'skills' | 'account'
+  /** Override the OS chrome per-instance (for design overviews) */
+  osOverride?: 'macos' | 'windows'
 }>()
 
 const emit = defineEmits<{
@@ -75,7 +81,8 @@ applyAppearance(appearance.value)
 
 // -- Operating System --
 
-const { os, isWindows, setOS } = useOperatingSystem()
+const { os, isWindows: globalIsWindows, setOS } = useOperatingSystem()
+const isWindows = computed(() => props.osOverride ? props.osOverride === 'windows' : globalIsWindows.value)
 
 // -- API Key --
 
@@ -238,6 +245,12 @@ function handleUninstallSkill(id: string) {
 }
 
 function skillMenuGroups(id: string) {
+  const skill = skills.find(s => s.id === id)
+  if (skill?.custom) {
+    return [
+      { items: [{ label: 'Remove', destructive: true, action: () => removeCustomSkill(id) }] },
+    ]
+  }
   return [
     { items: [{ label: 'Open in VS Code', action: () => {} }] },
     { items: [{ label: 'Uninstall', destructive: true, action: () => handleUninstallSkill(id) }] },
@@ -294,12 +307,60 @@ function installLabel(id: string): string {
   return 'Install'
 }
 
+// -- Config files (AGENTS.md / CLAUDE.md) --
+
+type ConfigFile = { id: string; name: string; description: string }
+const configFiles: ConfigFile[] = [
+  { id: 'agents-md', name: 'AGENTS.md', description: 'Instructions and rules for all coding agents on this site.' },
+  { id: 'claude-md', name: 'CLAUDE.md', description: 'Project context and conventions for Claude.' },
+]
+
+const CONFIG_FILES_KEY = 'installed-config-files'
+
+function getInstalledConfigFiles(): Set<string> {
+  try {
+    const stored = localStorage.getItem(CONFIG_FILES_KEY)
+    return new Set(stored ? JSON.parse(stored) : [])
+  } catch {
+    return new Set()
+  }
+}
+
+const installedConfigFiles = ref(getInstalledConfigFiles())
+
+function installConfigFile(id: string) {
+  installedConfigFiles.value.add(id)
+  localStorage.setItem(CONFIG_FILES_KEY, JSON.stringify([...installedConfigFiles.value]))
+}
+
+function uninstallConfigFile(id: string) {
+  installedConfigFiles.value.delete(id)
+  localStorage.setItem(CONFIG_FILES_KEY, JSON.stringify([...installedConfigFiles.value]))
+}
+
+function configFileMenuGroups(id: string) {
+  return [
+    { items: [{ label: 'Open in VS Code', action: () => {} }] },
+    { items: [{ label: 'Remove', destructive: true, action: () => uninstallConfigFile(id) }] },
+  ]
+}
+
 // -- Skills install flow --
 
 const skillInstallStates = ref<Record<string, InstallState>>({})
 const installingAll = ref(false)
 const installedSkills = computed(() => skills.filter(s => s.installed))
 const availableSkills = computed(() => skills.filter(s => !s.installed))
+
+function scrollToSkill(skillId: string) {
+  nextTick(() => {
+    const el = document.querySelector(`[data-skill-id="${skillId}"]`) as HTMLElement | null
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    el.classList.add('prefs-list-item--highlight')
+    setTimeout(() => el.classList.remove('prefs-list-item--highlight'), 1500)
+  })
+}
 
 function getSkillInstallState(id: string): InstallState {
   return skillInstallStates.value[id] || 'idle'
@@ -343,15 +404,33 @@ function skillInstallLabel(id: string): string {
 
 <template>
   <!-- Embedded mode: render window inline, no Teleport/scrim -->
-  <div v-if="embedded" class="prefs-window prefs-window--embedded">
-          <!-- Window chrome -->
-          <div class="prefs-chrome">
+  <div v-if="embedded" class="prefs-window prefs-window--embedded" :class="{ 'is-windows': isWindows }">
+          <!-- Window chrome: macOS -->
+          <div v-if="!isWindows" class="prefs-chrome">
             <div class="prefs-traffic-lights">
               <span class="prefs-traffic-dot prefs-traffic-dot--close" />
               <span class="prefs-traffic-dot prefs-traffic-dot--minimize" />
               <span class="prefs-traffic-dot prefs-traffic-dot--maximize" />
             </div>
             <Text variant="body-small" weight="semibold" class="prefs-title">Studio Settings</Text>
+          </div>
+          <!-- Window chrome: Windows -->
+          <div v-else class="prefs-chrome prefs-chrome--windows">
+            <div class="prefs-win-start">
+              <WPIcon :icon="wordpress" :size="16" />
+              <Text variant="body-small" weight="semibold" color="inherit">Studio Settings</Text>
+            </div>
+            <div class="prefs-win-controls">
+              <span class="prefs-win-btn">
+                <svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor" /></svg>
+              </span>
+              <span class="prefs-win-btn">
+                <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1" /></svg>
+              </span>
+              <span class="prefs-win-btn prefs-win-btn--close">
+                <svg width="10" height="10" viewBox="0 0 10 10"><path d="M0 0L10 10M10 0L0 10" stroke="currentColor" stroke-width="1.2" /></svg>
+              </span>
+            </div>
           </div>
 
           <!-- Tabs -->
@@ -513,6 +592,26 @@ function skillInstallLabel(id: string): string {
                   </div>
                 </div>
               </div>
+              <!-- Configuration files -->
+              <div class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="heading-small" color="muted">Configuration files</Text>
+                </div>
+                <div class="prefs-list">
+                  <div v-for="cf in configFiles" :key="cf.id" class="prefs-list-item prefs-list-item--skill">
+                    <div class="prefs-list-info">
+                      <Text variant="body-small" weight="semibold">{{ cf.name }}</Text>
+                      <Text variant="body-small" color="muted">{{ cf.description }}</Text>
+                    </div>
+                    <FlyoutMenu v-if="installedConfigFiles.has(cf.id)" surface="dark" :groups="configFileMenuGroups(cf.id)" align="end">
+                      <template #trigger="{ toggle }">
+                        <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
+                      </template>
+                    </FlyoutMenu>
+                    <Button v-else variant="secondary" size="small" label="Install" @click="installConfigFile(cf.id)" />
+                  </div>
+                </div>
+              </div>
               <div class="prefs-section">
                 <Text variant="body-small" weight="semibold" class="prefs-field-label">Default agent</Text>
                 <Dropdown :model-value="defaultAgent" :groups="defaultAgentGroups" :show-chevron="true" variant="field" width="fill" @update:model-value="setAgent" />
@@ -520,19 +619,24 @@ function skillInstallLabel(id: string): string {
               </div>
             </template>
 
-            <!-- ═══ Skills ═══ -->
+            <!-- ═══ Skills (embedded) — kept in sync with modal version ═══ -->
             <template v-if="activeTab === 'skills'">
               <Text variant="body-small" color="muted" class="prefs-description">
                 Agents can use skills to help with specialized tasks.
               </Text>
+
+              <!-- Installed -->
               <div v-if="installedSkills.length" class="prefs-group">
                 <div class="prefs-group-header">
                   <Text variant="heading-small" color="muted">INSTALLED</Text>
                 </div>
                 <div class="prefs-list">
-                  <div v-for="skill in installedSkills" :key="skill.id" class="prefs-list-item prefs-list-item--skill">
+                  <div v-for="skill in installedSkills" :key="skill.id" :data-skill-id="skill.id" class="prefs-list-item prefs-list-item--skill">
                     <div class="prefs-list-info">
-                      <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                      <div class="prefs-list-name-row">
+                        <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                        <Badge v-if="skill.custom" label="Custom" variant="custom" />
+                      </div>
                       <Text variant="body-small" color="muted">{{ skill.description }}</Text>
                     </div>
                     <FlyoutMenu surface="dark" :groups="skillMenuGroups(skill.id)" align="end">
@@ -543,6 +647,8 @@ function skillInstallLabel(id: string): string {
                   </div>
                 </div>
               </div>
+
+              <!-- Available -->
               <div v-if="availableSkills.length" class="prefs-group">
                 <div class="prefs-group-header">
                   <Text variant="heading-small" color="muted">AVAILABLE</Text>
@@ -557,6 +663,11 @@ function skillInstallLabel(id: string): string {
                     <Button variant="secondary" size="small" :label="skillInstallLabel(skill.id)" :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll" @click="startSkillInstall(skill.id)" />
                   </div>
                 </div>
+              </div>
+
+              <!-- Custom skill installer -->
+              <div class="prefs-group">
+                <SkillInstaller @added="scrollToSkill" />
               </div>
             </template>
 
@@ -602,15 +713,33 @@ function skillInstallLabel(id: string): string {
   <Teleport v-else to="body">
     <Transition name="modal">
       <div v-if="open" class="prefs-scrim" @click.self="emit('close')">
-        <div class="prefs-window">
-          <!-- Window chrome -->
-          <div class="prefs-chrome">
+        <div class="prefs-window" :class="{ 'is-windows': isWindows }">
+          <!-- Window chrome: macOS -->
+          <div v-if="!isWindows" class="prefs-chrome">
             <div class="prefs-traffic-lights">
               <button class="prefs-traffic-dot prefs-traffic-dot--close" @click="emit('close')" />
               <span class="prefs-traffic-dot prefs-traffic-dot--minimize" />
               <span class="prefs-traffic-dot prefs-traffic-dot--maximize" />
             </div>
             <Text variant="body-small" weight="semibold" class="prefs-title">Studio Settings</Text>
+          </div>
+          <!-- Window chrome: Windows -->
+          <div v-else class="prefs-chrome prefs-chrome--windows">
+            <div class="prefs-win-start">
+              <WPIcon :icon="wordpress" :size="16" />
+              <Text variant="body-small" weight="semibold" color="inherit">Studio Settings</Text>
+            </div>
+            <div class="prefs-win-controls">
+              <span class="prefs-win-btn">
+                <svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor" /></svg>
+              </span>
+              <span class="prefs-win-btn">
+                <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1" /></svg>
+              </span>
+              <span class="prefs-win-btn prefs-win-btn--close" @click="emit('close')">
+                <svg width="10" height="10" viewBox="0 0 10 10"><path d="M0 0L10 10M10 0L0 10" stroke="currentColor" stroke-width="1.2" /></svg>
+              </span>
+            </div>
           </div>
 
           <!-- Tabs -->
@@ -802,6 +931,27 @@ function skillInstallLabel(id: string): string {
                 </div>
               </div>
 
+              <!-- Configuration files -->
+              <div class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="heading-small" color="muted">Configuration files</Text>
+                </div>
+                <div class="prefs-list">
+                  <div v-for="cf in configFiles" :key="cf.id" class="prefs-list-item prefs-list-item--skill">
+                    <div class="prefs-list-info">
+                      <Text variant="body-small" weight="semibold">{{ cf.name }}</Text>
+                      <Text variant="body-small" color="muted">{{ cf.description }}</Text>
+                    </div>
+                    <FlyoutMenu v-if="installedConfigFiles.has(cf.id)" surface="dark" :groups="configFileMenuGroups(cf.id)" align="end">
+                      <template #trigger="{ toggle }">
+                        <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
+                      </template>
+                    </FlyoutMenu>
+                    <Button v-else variant="secondary" size="small" label="Install" @click="installConfigFile(cf.id)" />
+                  </div>
+                </div>
+              </div>
+
               <!-- Default agent -->
               <div class="prefs-section">
                 <Text variant="body-small" weight="semibold" class="prefs-field-label">Default agent</Text>
@@ -829,9 +979,12 @@ function skillInstallLabel(id: string): string {
                   <Text variant="heading-small" color="muted">INSTALLED</Text>
                 </div>
                 <div class="prefs-list">
-                  <div v-for="skill in installedSkills" :key="skill.id" class="prefs-list-item prefs-list-item--skill">
+                  <div v-for="skill in installedSkills" :key="skill.id" :data-skill-id="skill.id" class="prefs-list-item prefs-list-item--skill">
                     <div class="prefs-list-info">
-                      <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                      <div class="prefs-list-name-row">
+                        <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                        <Badge v-if="skill.custom" label="Custom" variant="custom" />
+                      </div>
                       <Text variant="body-small" color="muted">{{ skill.description }}</Text>
                     </div>
                     <FlyoutMenu surface="dark" :groups="skillMenuGroups(skill.id)" align="end">
@@ -870,6 +1023,11 @@ function skillInstallLabel(id: string): string {
                     />
                   </div>
                 </div>
+              </div>
+
+              <!-- Custom skill installer -->
+              <div class="prefs-group">
+                <SkillInstaller @added="scrollToSkill" />
               </div>
             </template>
 
@@ -1042,6 +1200,60 @@ function skillInstallLabel(id: string): string {
 
 .prefs-title {
   user-select: none;
+}
+
+/* -- Windows chrome -- */
+
+.prefs-chrome--windows {
+  justify-content: space-between;
+  background: var(--color-chrome-bg);
+  color: var(--color-chrome-fg);
+  padding-inline-start: var(--space-xs);
+  border-radius: var(--radius-l) var(--radius-l) 0 0;
+}
+
+.prefs-win-start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.prefs-win-controls {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+
+.prefs-win-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  color: var(--color-chrome-fg-muted);
+  cursor: pointer;
+  transition: background var(--duration-instant) var(--ease-default),
+    color var(--duration-instant) var(--ease-default);
+}
+
+.prefs-win-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-chrome-fg);
+}
+
+.prefs-win-btn--close:hover {
+  background: #e81123;
+  color: white;
+}
+
+.prefs-window.is-windows {
+  border-radius: 0;
+  border: none;
+  overflow: hidden;
+}
+
+.prefs-window.is-windows .prefs-chrome--windows {
+  border-radius: 0;
 }
 
 .prefs-tabs {
@@ -1351,12 +1563,27 @@ function skillInstallLabel(id: string): string {
   padding-inline-start: var(--space-m);
 }
 
+.prefs-list-item--highlight {
+  animation: skill-highlight 1.5s var(--ease-out);
+}
+
+@keyframes skill-highlight {
+  0%, 20% { background: rgba(160, 160, 230, 0.2); }
+  100% { background: transparent; }
+}
+
 .prefs-list-info {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
+}
+
+.prefs-list-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
 .prefs-field-label {
