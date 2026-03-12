@@ -147,7 +147,6 @@ function onItemEnter(item: FlyoutMenuItem, groupIdx: number, itemIdx: number) {
 }
 
 function onItemClick(item: FlyoutMenuItem) {
-  if (item.children?.length) return
   close()
   item.action?.()
 }
@@ -174,6 +173,10 @@ const surfaceClass = computed(() => props.surface === 'dark' ? 'flyout--dark' : 
 const hasCheckedItems = computed(() =>
   props.groups.some(g => g.items.some(i => i.checked !== undefined))
 )
+
+function childrenHaveChecks(children?: FlyoutMenuItem[]): boolean {
+  return children?.some(c => c.checked !== undefined) ?? false
+}
 
 defineExpose({ toggle, close, open })
 </script>
@@ -268,6 +271,13 @@ defineExpose({ toggle, close, open })
                 <img v-if="child.iconUrl" :src="child.iconUrl" class="flyout-item-icon flyout-item-icon--img" />
                 <WPIcon v-else-if="child.icon" :icon="child.icon" :size="18" class="flyout-item-icon" />
                 <span class="flyout-item-label">{{ child.label }}</span>
+                <WPIcon
+                  v-if="childrenHaveChecks(item.children)"
+                  :icon="check"
+                  :size="18"
+                  class="flyout-item-check"
+                  :class="{ 'flyout-item-check--hidden': !child.checked }"
+                />
               </button>
             </div>
           </Transition>
@@ -288,6 +298,10 @@ defineExpose({ toggle, close, open })
   border-radius: var(--radius-m);
   padding: 1px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.flyout-submenu {
+  padding: var(--space-xxxs);
 }
 
 /* ── Group ── */

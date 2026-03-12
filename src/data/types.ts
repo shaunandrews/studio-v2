@@ -50,6 +50,11 @@ export interface PipelineStage {
 
 export type AgentId = 'wpcom' | 'claude-code' | 'codex' | 'cursor' | 'opencode'
 
+export interface AgentModel {
+  id: string
+  label: string
+}
+
 export interface Agent {
   id: AgentId
   label: string
@@ -59,6 +64,7 @@ export interface Agent {
   installed?: boolean
   url?: string
   installHint?: string
+  models?: AgentModel[]
 }
 
 export type ToolCallStatus = 'running' | 'done' | 'error'

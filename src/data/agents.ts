@@ -25,6 +25,11 @@ export const agents: Agent[] = reactive([
     description: 'Kit can build sites, themes, and blocks, as well as perform actions on your site.',
     icon: '/icons/wpcom.svg',
     installed: true,
+    models: [
+      { id: 'claude-sonnet-4-6', label: 'Sonnet 4.6' },
+      { id: 'claude-opus-4-6', label: 'Opus 4.6' },
+      { id: 'claude-haiku-4-5', label: 'Haiku 4.5' },
+    ],
   },
   {
     id: 'codex',
@@ -34,6 +39,11 @@ export const agents: Agent[] = reactive([
     url: 'https://openai.com/index/introducing-codex/',
     installHint: 'Install via npm: npm install -g @openai/codex',
     installed: installedIds.has('codex'),
+    models: [
+      { id: 'gpt-4.1', label: 'GPT-4.1' },
+      { id: 'o3', label: 'o3' },
+      { id: 'o4-mini', label: 'o4-mini' },
+    ],
   },
   {
     id: 'claude-code',
@@ -43,6 +53,11 @@ export const agents: Agent[] = reactive([
     url: 'https://docs.anthropic.com/en/docs/claude-code',
     installHint: 'Install via npm: npm install -g @anthropic-ai/claude-code',
     installed: installedIds.has('claude-code'),
+    models: [
+      { id: 'claude-sonnet-4-6', label: 'Sonnet 4.6' },
+      { id: 'claude-opus-4-6', label: 'Opus 4.6' },
+      { id: 'claude-haiku-4-5', label: 'Haiku 4.5' },
+    ],
   },
   {
     id: 'cursor',
@@ -52,6 +67,11 @@ export const agents: Agent[] = reactive([
     url: 'https://cursor.com',
     installHint: 'Download the Cursor editor from cursor.com',
     installed: installedIds.has('cursor'),
+    models: [
+      { id: 'claude-sonnet-4-6', label: 'Sonnet 4.6' },
+      { id: 'gpt-4.1', label: 'GPT-4.1' },
+      { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+    ],
   },
   {
     id: 'opencode',
@@ -61,6 +81,11 @@ export const agents: Agent[] = reactive([
     url: 'https://github.com/opencode-ai/opencode',
     installHint: 'Install via npm: npm install -g opencode',
     installed: installedIds.has('opencode'),
+    models: [
+      { id: 'claude-sonnet-4-6', label: 'Sonnet 4.6' },
+      { id: 'gpt-4.1', label: 'GPT-4.1' },
+      { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+    ],
   },
 ])
 

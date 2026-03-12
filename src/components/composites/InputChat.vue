@@ -3,20 +3,60 @@ import { ref, computed } from 'vue'
 import { plus, arrowUp, chevronDown } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
-import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
+import type { FlyoutMenuGroup, FlyoutMenuItem } from '@/components/primitives/FlyoutMenu.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import ContextRing from '@/components/primitives/ContextRing.vue'
 import { codingAgents } from '@/data/agents'
-import type { AgentId } from '@/data/types'
+import type { AgentId, Agent } from '@/data/types'
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const selectedAgentId = ref<AgentId>('wpcom')
+const selectedModelId = ref<string>(getStoredModel('wpcom'))
+
+/** Get the stored model for an agent, falling back to its first model */
+function getStoredModel(agentId: AgentId): string {
+  const agent = codingAgents.find(a => a.id === agentId)
+  const fallback = agent?.models?.[0]?.id ?? ''
+  return localStorage.getItem(`model-for-${agentId}`) || fallback
+}
+
+/** Persist the selected model for the current agent */
+function saveModel(agentId: AgentId, modelId: string) {
+  localStorage.setItem(`model-for-${agentId}`, modelId)
+}
+
+/** Select an agent, restoring its last-used model */
+function selectAgent(agentId: AgentId) {
+  selectedAgentId.value = agentId
+  selectedModelId.value = getStoredModel(agentId)
+}
+
+/** Select a specific model (and its agent) */
+function selectModel(agentId: AgentId, modelId: string) {
+  selectedAgentId.value = agentId
+  selectedModelId.value = modelId
+  saveModel(agentId, modelId)
+}
 
 const selectedAgentLabel = computed(() =>
   codingAgents.find(a => a.id === selectedAgentId.value)?.label ?? 'WordPress.com'
 )
 
+const selectedModelLabel = computed(() => {
+  const agent = codingAgents.find(a => a.id === selectedAgentId.value)
+  return agent?.models?.find(m => m.id === selectedModelId.value)?.label ?? ''
+})
+
 const installedAgents = computed(() => codingAgents.filter(a => a.installed))
+
+function buildModelChildren(agent: Agent): FlyoutMenuItem[] | undefined {
+  if (!agent.models?.length) return undefined
+  return agent.models.map(model => ({
+    label: model.label,
+    checked: agent.id === selectedAgentId.value && model.id === selectedModelId.value,
+    action: () => selectModel(agent.id, model.id),
+  }))
+}
 
 const agentMenuGroups = computed<FlyoutMenuGroup[]>(() => [
   {
@@ -24,7 +64,8 @@ const agentMenuGroups = computed<FlyoutMenuGroup[]>(() => [
       label: agent.label,
       iconUrl: agent.icon,
       checked: agent.id === selectedAgentId.value,
-      action: () => { selectedAgentId.value = agent.id },
+      children: buildModelChildren(agent),
+      action: () => selectAgent(agent.id),
     })),
   },
   {
@@ -122,7 +163,7 @@ function focusInput(e: MouseEvent) {
         <div class="input-toolbar__end gap-xs">
           <ContextRing
             :percent="42"
-            model="Claude Sonnet 4"
+            :model="selectedModelLabel"
             tokens="12.4k / 200k"
             cost="$0.03"
             :messages="8"
@@ -157,6 +198,10 @@ function focusInput(e: MouseEvent) {
 .input-chat:focus-within {
   border-color: var(--color-frame-theme);
   box-shadow: 0 0 0 1px var(--color-frame-theme);
+}
+
+.input-chat.is-elevated:focus-within {
+  box-shadow: 0 0 0 1px var(--color-frame-theme), var(--shadow-m);
 }
 
 /* ── Input body: textarea + toolbar ── */
