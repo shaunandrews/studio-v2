@@ -8,6 +8,7 @@ const props = defineProps<{
   site: Site
   active?: boolean
   unreadCount?: number
+  surface?: 'chrome' | 'frame'
 }>()
 
 defineEmits<{
@@ -26,7 +27,7 @@ function toggleStatus() {
 <template>
   <div
     class="site-list-item"
-    :class="{ active }"
+    :class="{ active, 'surface-frame': surface === 'frame' }"
     @click="$emit('select', site.id)"
   >
     <SiteIcon :favicon="site.favicon" :site-name="site.name" :size="24" />
@@ -89,5 +90,20 @@ function toggleStatus() {
 
 .site-status {
   opacity: 1;
+}
+
+/* ── Frame surface variant (light background) ── */
+.site-list-item.surface-frame {
+  color: var(--color-frame-fg-muted);
+}
+
+.site-list-item.surface-frame:hover {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+}
+
+.site-list-item.surface-frame.active {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
 }
 </style>

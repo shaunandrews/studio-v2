@@ -177,6 +177,7 @@ const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general
         const screen = currentScreen === 'tasks' ? 'site-tasks' : `site-${currentScreen}`
         router.push({ name: screen, params: { id } })
       }"
+      @navigate-all-sites="router.push({ name: 'all-sites' })"
     />
     <div class="panes">
       <div class="pane pane-site-navigation">
@@ -270,7 +271,7 @@ const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general
   inset-block-end: 0;
   inset-inline: 0;
   width: 100%;
-  padding: var(--space-m) 0;
+  padding: var(--space-xl) 0 var(--space-m);
   z-index: 1;
   display: flex;
   flex-direction: column;

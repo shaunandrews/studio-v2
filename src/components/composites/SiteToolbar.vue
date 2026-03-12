@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { category, chevronDown, moreVertical, wordpress, share, trash, backup, seen } from '@wordpress/icons'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { category, chevronDown, moreVertical, wordpress, share, trash, backup, seen, plus } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
+import SiteItem from '@/components/composites/SiteItem.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import ButtonSplit from '@/components/primitives/ButtonSplit.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import { useSites } from '@/data/useSites'
+import { useConversations } from '@/data/useConversations'
+import { useAddSite } from '@/data/useAddSite'
 import { useWPAdmin } from '@/data/useWPAdmin'
 
 const openLabel = ref('Browser')
@@ -31,27 +34,60 @@ const props = defineProps<{
 const emit = defineEmits<{
   'toggle-status': []
   'switch-site': [id: string]
+  'navigate-all-sites': []
+  'add-site': []
   'duplicate': []
   'delete': []
 }>()
 
 const { sites } = useSites()
+const { conversations } = useConversations()
+const { openAddSite } = useAddSite()
 
 const currentSite = computed(() => sites.value.find(s => s.id === props.siteId))
 const themeType = computed(() => currentSite.value?.themeType ?? 'block')
 const siteFeatures = computed(() => currentSite.value?.features ?? [])
 const { adminLinks } = useWPAdmin(themeType, siteFeatures)
 
-const sitePickerGroups = computed<FlyoutMenuGroup[]>(() => {
-  return [{
-    items: sites.value.map(p => ({
-      label: p.name,
-      iconUrl: p.favicon,
-      checked: p.name === props.title,
-      action: () => emit('switch-site', p.id),
-    })),
-  }]
-})
+/* ── Site picker panel ── */
+const sitePickerOpen = ref(false)
+const sitePickerEl = ref<HTMLElement | null>(null)
+
+function toggleSitePicker() {
+  sitePickerOpen.value = !sitePickerOpen.value
+}
+
+function closeSitePicker() {
+  sitePickerOpen.value = false
+}
+
+function onPickerClickOutside(e: MouseEvent) {
+  if (sitePickerEl.value && !sitePickerEl.value.contains(e.target as Node)) {
+    closeSitePicker()
+  }
+}
+
+onMounted(() => document.addEventListener('pointerdown', onPickerClickOutside))
+onBeforeUnmount(() => document.removeEventListener('pointerdown', onPickerClickOutside))
+
+function getUnreadCount(siteId: string): number {
+  return conversations.value.filter(c => c.siteId === siteId && c.unread && !c.archived).length
+}
+
+function selectSite(id: string) {
+  closeSitePicker()
+  emit('switch-site', id)
+}
+
+function goAllSites() {
+  closeSitePicker()
+  emit('navigate-all-sites')
+}
+
+function addSite() {
+  closeSitePicker()
+  openAddSite()
+}
 
 const statusLabel = computed(() => {
   if (props.status === 'running') return 'Running'
@@ -112,21 +148,47 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 <template>
   <div class="site-toolbar" :class="{ 'has-lights': sidebarHidden }">
     <div class="toolbar-start">
-      <!-- Site picker pill when sidebar hidden -->
-      <FlyoutMenu v-if="sidebarHidden" :groups="sitePickerGroups" surface="dark" align="start">
-        <template #trigger="{ toggle }">
-          <button class="site-picker pill pill-with-icon" @click="toggle">
-            <span class="pill-icon-start">
-              <WPIcon v-if="isAllSites" :icon="category" :size="14" />
-              <SiteIcon v-else :favicon="favicon" :site-name="title" :size="14" />
-            </span>
-            <span class="pill-label">{{ title }}</span>
-            <span class="pill-icon-end">
-              <WPIcon :icon="chevronDown" :size="14" />
-            </span>
-          </button>
-        </template>
-      </FlyoutMenu>
+      <!-- Site picker pill + dropdown panel when sidebar hidden -->
+      <div v-if="sidebarHidden" ref="sitePickerEl" class="site-picker-anchor">
+        <button class="site-picker pill pill-with-icon" @click="toggleSitePicker">
+          <span class="pill-icon-start">
+            <WPIcon v-if="isAllSites" :icon="category" :size="14" />
+            <SiteIcon v-else :favicon="favicon" :site-name="title" :size="14" />
+          </span>
+          <span class="pill-label">{{ title }}</span>
+          <span class="pill-icon-end">
+            <WPIcon :icon="chevronDown" :size="14" />
+          </span>
+        </button>
+        <Transition name="picker">
+          <div v-if="sitePickerOpen" class="site-picker-panel">
+            <button class="picker-row picker-all-sites" :class="{ active: isAllSites }" @click="goAllSites">
+              <span class="picker-all-sites-icon">
+                <WPIcon :icon="category" :size="20" />
+              </span>
+              <span class="picker-row-label">All Sites</span>
+            </button>
+            <div class="picker-divider" />
+            <div class="picker-sites">
+              <SiteItem
+                v-for="site in sites"
+                :key="site.id"
+                :site="site"
+                :active="site.id === siteId"
+                :unread-count="getUnreadCount(site.id)"
+                @select="selectSite"
+              />
+            </div>
+            <div class="picker-divider" />
+            <button class="picker-row picker-add-site" @click="addSite">
+              <span class="picker-add-site-icon">
+                <WPIcon :icon="plus" :size="16" />
+              </span>
+              <span class="picker-row-label">Add site</span>
+            </button>
+          </div>
+        </Transition>
+      </div>
       <span v-else class="site-title">
         <SiteIcon :favicon="favicon" :site-name="title" :size="28" />
         {{ title }}
@@ -200,7 +262,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 8px 8px 16px;
+  padding: var(--space-xs);
   flex-shrink: 0;
   border-block-end: 1px solid var(--color-frame-border);
 }
@@ -213,7 +275,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 .toolbar-start {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-xs);
   flex: 1;
   min-width: 0;
 }
@@ -238,7 +300,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 .toolbar-end {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-xs);
 }
 
 /* ── Pills ── */
@@ -281,6 +343,103 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   height: 20px;
   flex-shrink: 0;
   color: var(--color-frame-fg-muted);
+}
+
+/* ── Site picker panel ── */
+
+.site-picker-anchor {
+  position: relative;
+}
+
+.site-picker-panel {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-xxs));
+  inset-inline-start: 0;
+  min-width: 220px;
+  max-width: 280px;
+  padding: var(--space-xxs);
+  border-radius: var(--radius-m);
+  background: var(--color-chrome-bg);
+  border: 1px solid var(--color-chrome-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-sites {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 4px;
+  border: none;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--color-chrome-fg-muted);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  cursor: pointer;
+  text-align: start;
+  transition: background var(--duration-instant) var(--ease-default),
+    color var(--duration-instant) var(--ease-default);
+}
+
+.picker-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-chrome-fg);
+}
+
+.picker-row.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-chrome-fg);
+}
+
+.picker-all-sites-icon,
+.picker-add-site-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.picker-row-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-block: var(--space-xxxs);
+}
+
+/* Transition */
+.picker-enter-active {
+  transition: opacity var(--duration-quick) var(--ease-default),
+    transform var(--duration-quick) var(--ease-default);
+}
+.picker-leave-active {
+  transition: opacity var(--duration-instant) var(--ease-default),
+    transform var(--duration-instant) var(--ease-default);
+}
+.picker-enter-from,
+.picker-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 /* ── Status label ── */
