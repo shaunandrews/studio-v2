@@ -8,10 +8,15 @@ import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
 import { codingAgents, installAgent, uninstallAgent } from '@/data/agents'
 import { skills, installSkill, installAllSkills, uninstallSkill } from '@/data/skills'
+import { useOperatingSystem } from '@/data/useOperatingSystem'
 
 const props = defineProps<{
   open: boolean
   initialTab?: 'general' | 'agents' | 'skills' | 'account'
+  /** Render inline (no Teleport/scrim) — for design overviews */
+  embedded?: boolean
+  /** Lock to a specific tab (hides tab interaction) */
+  lockedTab?: 'general' | 'agents' | 'skills' | 'account'
 }>()
 
 const emit = defineEmits<{
@@ -68,6 +73,10 @@ function setAppearance(mode: AppearanceMode) {
 // Apply on load
 applyAppearance(appearance.value)
 
+// -- Operating System --
+
+const { os, isWindows, setOS } = useOperatingSystem()
+
 // -- API Key --
 
 const apiKey = ref('')
@@ -76,11 +85,16 @@ const keyConfigured = ref(isAIConfigured())
 
 watch(() => props.open, (val) => {
   if (val) {
-    activeTab.value = props.initialTab || 'general'
+    activeTab.value = props.lockedTab || props.initialTab || 'general'
     apiKey.value = getAPIKey()
     keySaved.value = false
   }
 })
+
+// For embedded mode, set initial tab immediately
+if (props.embedded) {
+  activeTab.value = props.lockedTab || props.initialTab || 'general'
+}
 
 function saveKey() {
   setAPIKey(apiKey.value)
@@ -328,7 +342,264 @@ function skillInstallLabel(id: string): string {
 </script>
 
 <template>
-  <Teleport to="body">
+  <!-- Embedded mode: render window inline, no Teleport/scrim -->
+  <div v-if="embedded" class="prefs-window prefs-window--embedded">
+          <!-- Window chrome -->
+          <div class="prefs-chrome">
+            <div class="prefs-traffic-lights">
+              <span class="prefs-traffic-dot prefs-traffic-dot--close" />
+              <span class="prefs-traffic-dot prefs-traffic-dot--minimize" />
+              <span class="prefs-traffic-dot prefs-traffic-dot--maximize" />
+            </div>
+            <Text variant="body-small" weight="semibold" class="prefs-title">Studio Settings</Text>
+          </div>
+
+          <!-- Tabs -->
+          <nav class="prefs-tabs">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              class="prefs-tab"
+              :class="{ 'is-active': activeTab === tab.id }"
+              @click="!lockedTab && (activeTab = tab.id)"
+            >
+              {{ tab.label }}
+            </button>
+          </nav>
+
+          <!-- Content (scrollable, variable height) -->
+          <div class="prefs-content">
+
+            <!-- ═══ General ═══ -->
+            <template v-if="activeTab === 'general'">
+              <div class="prefs-section">
+                <Text variant="body-small" weight="semibold" class="prefs-field-label">Appearance</Text>
+                <div class="prefs-appearance">
+                  <button
+                    v-for="mode in (['system', 'light', 'dark'] as const)"
+                    :key="mode"
+                    class="prefs-appearance-btn"
+                    :class="{ 'is-active': appearance === mode }"
+                    @click="setAppearance(mode)"
+                  >
+                    <div class="prefs-appearance-preview" :class="`preview--${mode}`">
+                      <svg viewBox="0 0 139 53" fill="none" xmlns="http://www.w3.org/2000/svg" class="preview__svg">
+                        <rect width="139" height="53" fill="#131313" />
+                        <rect v-if="mode === 'light'" x="26" y="4" width="109" height="96" rx="4" fill="#fff" />
+                        <rect v-if="mode === 'dark'" x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" />
+                        <template v-if="mode === 'system'">
+                          <defs>
+                            <clipPath id="system-dark-clip">
+                              <polygon points="26,4 135,4 135,53" />
+                            </clipPath>
+                          </defs>
+                          <rect x="26" y="4" width="109" height="96" rx="4" fill="#fff" />
+                          <rect x="26" y="4" width="109" height="96" rx="4" fill="#2f2f2f" clip-path="url(#system-dark-clip)" />
+                        </template>
+                        <rect x="3" y="6" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                        <rect x="3" y="12" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                        <rect x="3" y="18" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                        <rect x="3" y="24" width="15" height="3" rx="1" fill="white" opacity="0.3" />
+                        <circle cx="22.5" cy="7.5" r="1.5" fill="#1fd15b" />
+                        <circle cx="22.5" cy="13.5" r="1.5" fill="#1fd15b" />
+                        <circle cx="22.5" cy="19.5" r="1.5" fill="white" opacity="0.2" />
+                        <circle cx="22.5" cy="25.5" r="1.5" fill="#1fd15b" />
+                      </svg>
+                    </div>
+                    <Text variant="body-small" :color="appearance === mode ? 'default' : 'muted'" weight="medium">{{ mode === 'system' ? 'System' : mode === 'light' ? 'Light' : 'Dark' }}</Text>
+                  </button>
+                </div>
+              </div>
+
+              <div class="prefs-section">
+                <Text variant="body-small" weight="semibold" class="prefs-field-label">Language</Text>
+                <Dropdown
+                  :model-value="language"
+                  :groups="languageGroups"
+                  :show-chevron="true"
+                  max-height="320px"
+                  variant="field"
+                  width="fill"
+                  menu-surface="dark"
+                  @update:model-value="(v: string) => { language = v; localStorage.setItem(LANGUAGE_KEY, v) }"
+                />
+              </div>
+
+              <div class="prefs-section">
+                <div class="prefs-hstack">
+                  <div class="prefs-field">
+                    <Text variant="body-small" weight="semibold" class="prefs-field-label">Code editor</Text>
+                    <Dropdown
+                      :model-value="codeEditor"
+                      :groups="editorGroups"
+                      :show-chevron="true"
+                      variant="field"
+                      width="fill"
+                      menu-surface="dark"
+                      @update:model-value="(v: string) => { codeEditor = v; localStorage.setItem(EDITOR_KEY, v) }"
+                    />
+                  </div>
+                  <div class="prefs-field">
+                    <Text variant="body-small" weight="semibold" class="prefs-field-label">Terminal application</Text>
+                    <Dropdown
+                      :model-value="terminal"
+                      :groups="terminalGroups"
+                      :show-chevron="true"
+                      variant="field"
+                      width="fill"
+                      menu-surface="dark"
+                      @update:model-value="(v: string) => { terminal = v; localStorage.setItem(TERMINAL_KEY, v) }"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="prefs-section">
+                <div class="prefs-toggle-row">
+                  <button
+                    class="prefs-toggle"
+                    :class="{ 'is-on': cliEnabled }"
+                    role="switch"
+                    :aria-checked="cliEnabled"
+                    @click="cliEnabled = !cliEnabled; localStorage.setItem(CLI_KEY, String(cliEnabled))"
+                  >
+                    <span class="prefs-toggle-knob" />
+                  </button>
+                  <Text variant="body-small">Studio CLI for terminal</Text>
+                </div>
+                <div class="prefs-toggle-help">
+                  <Text variant="body-small" color="muted">Use the <code class="prefs-code">studio</code> command in any terminal to manage sites, run WP-CLI commands, and control your local environment. <a href="#" class="prefs-learn-more">Learn more</a></Text>
+                </div>
+              </div>
+            </template>
+
+            <!-- ═══ Agents ═══ -->
+            <template v-if="activeTab === 'agents'">
+              <Text variant="body-small" color="muted" class="prefs-description">
+                AI-powered assistants that can complete tasks for you.
+              </Text>
+              <div class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="heading-small" color="muted">Installed</Text>
+                </div>
+                <div class="prefs-list">
+                  <div v-for="agent in installedAgents" :key="agent.id" class="prefs-list-item">
+                    <img :src="agent.icon" :alt="agent.label" class="prefs-list-icon" />
+                    <div class="prefs-list-info">
+                      <Text variant="body-small" weight="semibold">{{ agent.label }}</Text>
+                      <Text variant="body-small" color="muted">{{ agent.description }}</Text>
+                    </div>
+                    <FlyoutMenu surface="dark" v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
+                      <template #trigger="{ toggle }">
+                        <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
+                      </template>
+                    </FlyoutMenu>
+                  </div>
+                </div>
+              </div>
+              <div v-if="availableAgents.length" class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="heading-small" color="muted">Available</Text>
+                  <Button variant="secondary" size="small" :label="installingAllAgents ? 'Installing…' : 'Install all'" :disabled="installingAllAgents" @click="startInstallAllAgents" />
+                </div>
+                <div class="prefs-list">
+                  <div v-for="agent in availableAgents" :key="agent.id" class="prefs-list-item">
+                    <img :src="agent.icon" :alt="agent.label" class="prefs-list-icon" />
+                    <div class="prefs-list-info">
+                      <Text variant="body-small" weight="semibold">{{ agent.label }}</Text>
+                      <Text variant="body-small" color="muted">{{ agent.description }}</Text>
+                    </div>
+                    <Button variant="secondary" size="small" :label="installLabel(agent.id)" :disabled="getInstallState(agent.id) !== 'idle' || installingAllAgents" @click="startInstall(agent.id)" />
+                  </div>
+                </div>
+              </div>
+              <div class="prefs-section">
+                <Text variant="body-small" weight="semibold" class="prefs-field-label">Default agent</Text>
+                <Dropdown :model-value="defaultAgent" :groups="defaultAgentGroups" :show-chevron="true" variant="field" width="fill" @update:model-value="setAgent" />
+                <Text variant="body-small" color="muted" class="prefs-hint">This is the agent that will be used for all new tasks.</Text>
+              </div>
+            </template>
+
+            <!-- ═══ Skills ═══ -->
+            <template v-if="activeTab === 'skills'">
+              <Text variant="body-small" color="muted" class="prefs-description">
+                Agents can use skills to help with specialized tasks.
+              </Text>
+              <div v-if="installedSkills.length" class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="heading-small" color="muted">INSTALLED</Text>
+                </div>
+                <div class="prefs-list">
+                  <div v-for="skill in installedSkills" :key="skill.id" class="prefs-list-item prefs-list-item--skill">
+                    <div class="prefs-list-info">
+                      <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                      <Text variant="body-small" color="muted">{{ skill.description }}</Text>
+                    </div>
+                    <FlyoutMenu surface="dark" :groups="skillMenuGroups(skill.id)" align="end">
+                      <template #trigger="{ toggle }">
+                        <Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" />
+                      </template>
+                    </FlyoutMenu>
+                  </div>
+                </div>
+              </div>
+              <div v-if="availableSkills.length" class="prefs-group">
+                <div class="prefs-group-header">
+                  <Text variant="heading-small" color="muted">AVAILABLE</Text>
+                  <Button variant="secondary" size="small" :label="installingAll ? 'Installing…' : 'Install all'" :disabled="installingAll" @click="startInstallAll" />
+                </div>
+                <div class="prefs-list">
+                  <div v-for="skill in availableSkills" :key="skill.id" class="prefs-list-item prefs-list-item--skill">
+                    <div class="prefs-list-info">
+                      <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                      <Text variant="body-small" color="muted" class="prefs-list-desc-truncate">{{ skill.description }}</Text>
+                    </div>
+                    <Button variant="secondary" size="small" :label="skillInstallLabel(skill.id)" :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll" @click="startSkillInstall(skill.id)" />
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- ═══ Account ═══ -->
+            <template v-if="activeTab === 'account'">
+              <div class="prefs-account">
+                <img src="https://2.gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=80" alt="" class="prefs-account-avatar" />
+                <div class="prefs-account-info">
+                  <Text variant="body" weight="semibold">Shaun Andrews</Text>
+                  <Text variant="body-small" color="muted">shaun@automattic.com</Text>
+                </div>
+                <Button variant="secondary" label="Log out" />
+              </div>
+              <div class="prefs-section pt-s">
+                <Text variant="heading-small" color="muted" class="prefs-field-label">USAGE</Text>
+                <div class="prefs-usage-meters">
+                  <div class="prefs-meter">
+                    <div class="prefs-meter-header">
+                      <Text variant="body-small" weight="medium">Preview sites</Text>
+                      <Text variant="body-small" color="muted">1 of 10</Text>
+                    </div>
+                    <div class="prefs-meter-track">
+                      <div class="prefs-meter-fill" style="width: 10%"></div>
+                    </div>
+                  </div>
+                  <div class="prefs-meter">
+                    <div class="prefs-meter-header">
+                      <Text variant="body-small" weight="medium">AI chat</Text>
+                      <Text variant="body-small" color="muted">0 of 1,000</Text>
+                    </div>
+                    <div class="prefs-meter-track">
+                      <div class="prefs-meter-fill" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+          </div>
+  </div>
+
+  <!-- Modal mode: Teleport with scrim -->
+  <Teleport v-else to="body">
     <Transition name="modal">
       <div v-if="open" class="prefs-scrim" @click.self="emit('close')">
         <div class="prefs-window">
@@ -649,6 +920,18 @@ function skillInstallLabel(id: string): string {
         <!-- Prototype-only controls (outside the window) -->
         <div class="proto-controls">
           <Text variant="heading-small" color="inherit">Prototype</Text>
+          <div class="prefs-toggle-row proto-toggle-row">
+            <button
+              class="prefs-toggle"
+              :class="{ 'is-on': isWindows }"
+              role="switch"
+              :aria-checked="isWindows"
+              @click="setOS(isWindows ? 'macos' : 'windows')"
+            >
+              <span class="prefs-toggle-knob" />
+            </button>
+            <Text variant="body-small" color="inherit">Windows mode</Text>
+          </div>
           <div class="proto-row">
             <input
               v-model="apiKey"
@@ -681,6 +964,7 @@ function skillInstallLabel(id: string): string {
       </div>
     </Transition>
   </Teleport>
+
 </template>
 
 <style scoped>
@@ -710,6 +994,11 @@ function skillInstallLabel(id: string): string {
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 120px);
+}
+
+.prefs-window--embedded {
+  max-height: none;
+  box-shadow: var(--shadow-m);
 }
 
 .prefs-chrome {

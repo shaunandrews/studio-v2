@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
 import Popover from '@/components/primitives/Popover.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
+import { useOperatingSystem } from '@/data/useOperatingSystem'
 
-const isMac = computed(() => navigator.platform.includes('Mac'))
-const mod = computed(() => isMac.value ? '⌘' : 'Ctrl+')
+const { mod } = useOperatingSystem()
 
 const props = defineProps<{
   open: boolean
@@ -84,6 +84,9 @@ function openShortcuts() {
 
       <!-- Links -->
       <div class="global-menu__section global-menu__nav">
+        <RouterLink to="/overviews" class="global-menu__item" @click="close">
+          Design Overviews
+        </RouterLink>
         <RouterLink to="/dev/design-system" class="global-menu__item" @click="close">
           Design System
         </RouterLink>

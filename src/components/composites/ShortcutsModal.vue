@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Modal from '@/components/primitives/Modal.vue'
+import { useOperatingSystem } from '@/data/useOperatingSystem'
 
 defineProps<{
   open: boolean
@@ -10,8 +11,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const isMac = computed(() => navigator.platform.includes('Mac'))
-const mod = computed(() => isMac.value ? '⌘' : 'Ctrl')
+const { modKey: mod } = useOperatingSystem()
 
 interface Shortcut {
   label: string

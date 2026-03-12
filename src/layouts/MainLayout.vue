@@ -8,10 +8,13 @@ import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
 import AddSitePage from '@/pages/AddSitePage.vue'
+import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
 import { useSidebarCollapse } from '@/data/useSidebarCollapse'
 import { useAddSite } from '@/data/useAddSite'
+import { useOperatingSystem } from '@/data/useOperatingSystem'
 
 const { hidden, toggle: toggleSidebar } = useSidebarCollapse()
+const { isWindows } = useOperatingSystem()
 const { shouldShowAddSite, hasSites, openAddSite } = useAddSite()
 
 const showShortcuts = ref(false)
@@ -50,9 +53,12 @@ function handleNewSite() {
 </script>
 
 <template>
-  <div class="main-layout">
-    <!-- Traffic lights: fixed window position, UI moves around them -->
-    <div v-show="!shouldShowAddSite" class="traffic-lights">
+  <div class="main-layout" :class="{ 'is-windows': isWindows }">
+    <!-- Windows titlebar -->
+    <WindowsTitlebar v-if="isWindows" />
+
+    <!-- Traffic lights: fixed window position, UI moves around them (macOS only) -->
+    <div v-if="!isWindows" v-show="!shouldShowAddSite" class="traffic-lights">
       <span class="light close"></span>
       <span class="light minimize"></span>
       <span class="light maximize"></span>
@@ -369,5 +375,21 @@ function handleNewSite() {
   height: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+/* ── Windows overrides ── */
+
+.main-layout.is-windows {
+  display: flex;
+  flex-direction: column;
+}
+
+.main-layout.is-windows .app-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.main-layout.is-windows .sidebar {
+  padding-block-start: 0;
 }
 </style>

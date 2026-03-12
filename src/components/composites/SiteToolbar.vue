@@ -8,6 +8,7 @@ import Tooltip from '@/components/primitives/Tooltip.vue'
 import ButtonSplit from '@/components/primitives/ButtonSplit.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
+import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useSites } from '@/data/useSites'
 import { useConversations } from '@/data/useConversations'
 import { useAddSite } from '@/data/useAddSite'
@@ -40,6 +41,7 @@ const emit = defineEmits<{
   'delete': []
 }>()
 
+const { isMac } = useOperatingSystem()
 const { sites } = useSites()
 const { conversations } = useConversations()
 const { openAddSite } = useAddSite()
@@ -146,7 +148,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 </script>
 
 <template>
-  <div class="site-toolbar" :class="{ 'has-lights': sidebarHidden }">
+  <div class="site-toolbar" :class="{ 'has-lights': sidebarHidden && isMac }">
     <div class="toolbar-start">
       <!-- Site picker pill + dropdown panel when sidebar hidden -->
       <div v-if="sidebarHidden" ref="sitePickerEl" class="site-picker-anchor">
