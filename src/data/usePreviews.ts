@@ -17,7 +17,7 @@ function daysAgo(days: number): string {
   return d.toISOString()
 }
 
-const PREVIEW_LIFETIME_DAYS = 7
+const PREVIEW_LIFETIME_DAYS = 30
 
 const ADJECTIVES = [
   'calm', 'bright', 'swift', 'gentle', 'bold',
@@ -84,6 +84,19 @@ const seedPreviews: PreviewSite[] = [
     views: 10293,
     uniqueVisitors: 3339,
     lastVisitedAt: daysAgo(7),
+    invites: [],
+  },
+  {
+    id: 'prev-cafe-4',
+    siteId: 'downstreet-cafe',
+    name: 'Preview',
+    url: 'downstreet-cafe-quiet-owl.wp.build',
+    createdAt: daysAgo(60),
+    updatedAt: daysAgo(45),
+    status: 'active',
+    views: 487,
+    uniqueVisitors: 82,
+    lastVisitedAt: daysAgo(35),
     invites: [],
   },
 ]
@@ -336,11 +349,12 @@ export function usePreviews() {
     }
   }
 
-  function extendPreview(previewId: string) {
+  function extendPreview(previewId: string, days = 30) {
     const preview = previews.value.find(p => p.id === previewId)
     if (preview) {
-      // Reset the expiry clock by bumping updatedAt to now
-      preview.updatedAt = new Date().toISOString()
+      const d = new Date()
+      d.setDate(d.getDate() + days - PREVIEW_LIFETIME_DAYS)
+      preview.updatedAt = d.toISOString()
     }
   }
 

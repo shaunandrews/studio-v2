@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { plus } from '@wordpress/icons'
+import { moreVertical } from '@wordpress/icons'
 import { useSites } from '@/data/useSites'
 import { usePreviews } from '@/data/usePreviews'
 import Button from '@/components/primitives/Button.vue'
+import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
+import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
 import PreviewsEmptyState from './previews/PreviewsEmptyState.vue'
 import PreviewCard from './previews/PreviewCard.vue'
@@ -15,17 +17,64 @@ const props = defineProps<{
 const { sites } = useSites()
 const {
   getPreviews,
+  getExpiration,
   activeOperation,
   createPreview,
   deletePreview,
   clearPreview,
-  extendPreview,
 } = usePreviews()
 
 const previews = getPreviews(props.siteId)
 const createOp = computed(() => activeOperation(props.siteId).value)
 const site = computed(() => sites.value.find(p => p.id === props.siteId))
 const hasPreviews = computed(() => previews.value.length > 0)
+
+// --- List options ---
+
+const showExpired = ref(true)
+const sortNewestFirst = ref(true)
+
+const filteredPreviews = computed(() => {
+  let list = previews.value
+  if (!showExpired.value) {
+    list = list.filter(p => {
+      if (p.status === 'deleted') return false
+      return !getExpiration(p.updatedAt).isExpired
+    })
+  }
+  return [...list].sort((a, b) => {
+    const aExpiry = new Date(getExpiration(a.updatedAt).expiresAt).getTime()
+    const bExpiry = new Date(getExpiration(b.updatedAt).expiresAt).getTime()
+    return sortNewestFirst.value ? bExpiry - aExpiry : aExpiry - bExpiry
+  })
+})
+
+const optionsMenuGroups = computed<FlyoutMenuGroup[]>(() => [
+  {
+    items: [
+      {
+        label: 'Show expired',
+        checked: showExpired.value,
+        action: () => { showExpired.value = !showExpired.value },
+      },
+    ],
+  },
+  {
+    label: 'Sort',
+    items: [
+      {
+        label: 'Newest first',
+        checked: sortNewestFirst.value,
+        action: () => { sortNewestFirst.value = true },
+      },
+      {
+        label: 'Oldest first',
+        checked: !sortNewestFirst.value,
+        action: () => { sortNewestFirst.value = false },
+      },
+    ],
+  },
+])
 
 // --- Celebration ---
 
@@ -73,10 +122,6 @@ function handleDelete(previewId: string) {
   deletePreview(previewId)
 }
 
-function handleExtend(previewId: string) {
-  extendPreview(previewId)
-}
-
 function handleClear(previewId: string) {
   clearPreview(previewId)
 }
@@ -86,26 +131,39 @@ function handleClear(previewId: string) {
   <PreviewsEmptyState v-if="!hasPreviews" @create="handleCreate" />
 
   <ScreenLayout v-else>
-    <div class="previews-list__header">
-      <Button
-        variant="primary"
-        :icon="plus"
-        label="New preview"
-        size="small"
-        :disabled="!!createOp"
-        @click="handleCreate"
-      />
+    <div class="previews-list__header ps-xl pe-s mb-xl">
+      <span class="previews-list__description">Share your site with collaborators and clients</span>
+      <div class="hstack gap-xxs">
+        <Button
+          variant="primary"
+          label="New preview"
+          size="small"
+          :disabled="!!createOp"
+          @click="handleCreate"
+        />
+        <FlyoutMenu :groups="optionsMenuGroups" align="end">
+          <template #trigger="{ toggle }">
+            <Button
+              variant="tertiary"
+              :icon="moreVertical"
+              icon-only
+              size="small"
+              tooltip="List options"
+              @click="toggle"
+            />
+          </template>
+        </FlyoutMenu>
+      </div>
     </div>
 
     <div class="previews-list vstack gap-xxl">
       <PreviewCard
-        v-for="preview in previews"
+        v-for="preview in filteredPreviews"
         :key="preview.id"
         :preview="preview"
         :site-id="siteId"
         @created="onCreated"
         @delete="handleDelete(preview.id)"
-        @extend="handleExtend(preview.id)"
         @clear="handleClear(preview.id)"
       />
 
@@ -133,8 +191,13 @@ function handleClear(previewId: string) {
 <style scoped>
 .previews-list__header {
   display: flex;
-  justify-content: flex-end;
-  margin-block-end: var(--space-m);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.previews-list__description {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
 }
 
 .previews-list {

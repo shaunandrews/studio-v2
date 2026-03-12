@@ -2,7 +2,10 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { moreVertical } from '@wordpress/icons'
 import Button from '@/components/primitives/Button.vue'
+import Badge from '@/components/primitives/Badge.vue'
+import TextInput from '@/components/primitives/TextInput.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
+import Modal from '@/components/primitives/Modal.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import type { PreviewSite } from '@/data/types'
@@ -15,12 +18,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   delete: []
-  extend: []
   clear: []
   created: [url: string]
 }>()
 
-const { getExpiration, relativeTime, operationForPreview, updateNote, addInvite, removeInvite } = usePreviews()
+const { getExpiration, relativeTime, operationForPreview, updateNote, addInvite, removeInvite, extendPreview } = usePreviews()
 
 const operation = computed(() => operationForPreview(props.preview.id).value)
 
@@ -94,16 +96,14 @@ function saveNote() {
   isEditingNote.value = false
 }
 
-// --- Invites ---
+// --- Invite modal ---
 
-const isInviting = ref(false)
+const showInviteModal = ref(false)
 const inviteInput = ref('')
-const inviteInputRef = ref<HTMLInputElement | null>(null)
 
-function startInviting() {
+function openInviteModal() {
   inviteInput.value = ''
-  isInviting.value = true
-  nextTick(() => inviteInputRef.value?.focus())
+  showInviteModal.value = true
 }
 
 function submitInvite() {
@@ -112,8 +112,29 @@ function submitInvite() {
     addInvite(props.preview.id, email)
     inviteInput.value = ''
   }
-  isInviting.value = false
 }
+
+function submitInviteAndClose() {
+  submitInvite()
+  showInviteModal.value = false
+}
+
+// --- Extend modal ---
+
+const showExtendModal = ref(false)
+const selectedExtension = ref(30)
+
+function openExtendModal() {
+  selectedExtension.value = 30
+  showExtendModal.value = true
+}
+
+function confirmExtend() {
+  extendPreview(props.preview.id, selectedExtension.value)
+  showExtendModal.value = false
+}
+
+// --- Computed text ---
 
 const expiresText = computed(() => {
   if (props.preview.status === 'deleted') return 'Deleted'
@@ -140,12 +161,19 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
   if (isInactive.value) {
     return [{ items: [{ label: 'Clear', action: () => emit('clear') }] }]
   }
-  return [{
-    items: [
-      { label: 'Extend deadline', action: () => emit('extend') },
-      { label: 'Delete', destructive: true, action: () => emit('delete') },
-    ],
-  }]
+  return [
+    {
+      items: [
+        { label: 'Invite people', action: openInviteModal },
+        { label: 'Extend deadline', action: openExtendModal },
+      ],
+    },
+    {
+      items: [
+        { label: 'Delete', destructive: true, action: () => emit('delete') },
+      ],
+    },
+  ]
 })
 </script>
 
@@ -187,8 +215,8 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
         <!-- Actions (hidden during creation) -->
         <div v-if="!isCreating" class="preview-card__actions hstack gap-xxs shrink-0">
           <template v-if="!isInactive">
-            <Button variant="secondary" label="Copy" size="small" @click="handleCopy" />
-            <Button variant="secondary" label="View" size="small" @click="handleView" />
+            <Button variant="secondary" label="Copy" size="small" tooltip="Copy preview URL" @click="handleCopy" />
+            <Button variant="secondary" label="View" size="small" tooltip="Open preview in browser" @click="handleView" />
           </template>
           <FlyoutMenu :groups="menuGroups" align="end">
             <template #trigger="{ toggle }">
@@ -197,6 +225,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
                 :icon="moreVertical"
                 icon-only
                 size="small"
+                tooltip="More actions"
                 @click="toggle"
               />
             </template>
@@ -233,27 +262,12 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
 
       <!-- Invites (active only) -->
-      <div v-if="!isCreating && !isInactive && (preview.invites.length > 0 || isInviting)" class="hstack flex-wrap gap-xxs">
-        <span
+      <div v-if="!isCreating && !isInactive && preview.invites.length > 0" class="preview-card__invites hstack flex-wrap gap-xxs">
+        <span class="preview-card__invites-label">Invited</span>
+        <Badge
           v-for="invite in preview.invites"
           :key="invite.email"
-          class="preview-card__invite-pill"
-          :class="{ 'is-visited': invite.visitedAt }"
-        >
-          <span class="preview-card__invite-dot" />
-          {{ invite.email }}
-          <button class="preview-card__invite-remove" @click="removeInvite(preview.id, invite.email)">&times;</button>
-        </span>
-        <input
-          v-if="isInviting"
-          ref="inviteInputRef"
-          v-model="inviteInput"
-          class="preview-card__invite-input"
-          placeholder="email@example.com"
-          type="email"
-          @blur="submitInvite"
-          @keydown.enter="submitInvite"
-          @keydown.escape="isInviting = false"
+          :label="invite.email"
         />
       </div>
     </div>
@@ -284,6 +298,75 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
       </template>
     </div>
   </div>
+
+  <!-- Invite modal -->
+  <Modal :open="showInviteModal" title="Invite people" @close="showInviteModal = false">
+    <div class="vstack gap-s">
+      <p class="invite-modal__description">Share this preview with collaborators by adding their email addresses.</p>
+      <div class="hstack gap-xxs invite-modal__add-row">
+        <TextInput
+          :model-value="inviteInput"
+          type="email"
+          placeholder="name@example.com"
+          @update:model-value="inviteInput = $event"
+          @keydown.enter="submitInvite"
+        />
+        <Button variant="primary" label="Add" size="large" :disabled="!inviteInput.trim() || !inviteInput.includes('@')" @click="submitInvite" />
+      </div>
+      <div v-if="preview.invites.length > 0" class="vstack gap-xxs">
+        <div
+          v-for="invite in preview.invites"
+          :key="invite.email"
+          class="invite-modal__person hstack gap-xs"
+        >
+          <span class="invite-modal__email flex-1 min-w-0">{{ invite.email }}</span>
+          <Button variant="tertiary" label="Remove" size="small" @click="removeInvite(preview.id, invite.email)" />
+        </div>
+      </div>
+    </div>
+    <template #footer>
+      <Button variant="secondary" label="Done" @click="showInviteModal = false" />
+    </template>
+  </Modal>
+
+  <!-- Extend deadline modal -->
+  <Modal :open="showExtendModal" title="Extend deadline" width="400px" @close="showExtendModal = false">
+    <div class="vstack gap-m">
+      <p class="extend-modal__description">Choose how long to extend this preview.</p>
+      <div class="vstack gap-xxs">
+        <label
+          v-for="days in [30, 60, 90]"
+          :key="days"
+          class="extend-modal__option hstack gap-xs"
+          :class="{ 'is-selected': selectedExtension === days }"
+        >
+          <input
+            v-model="selectedExtension"
+            type="radio"
+            name="extend-days"
+            :value="days"
+            class="extend-modal__radio"
+          />
+          <span class="extend-modal__label">{{ days }} days</span>
+        </label>
+        <label class="extend-modal__option extend-modal__option--upsell hstack gap-xs">
+          <input
+            type="radio"
+            name="extend-days"
+            disabled
+            class="extend-modal__radio"
+          />
+          <span class="extend-modal__label">No expiration</span>
+          <Badge label="Business plan" variant="global" />
+        </label>
+        <p class="extend-modal__upgrade-hint">Upgrade to the Business plan to remove expiration limits.</p>
+      </div>
+    </div>
+    <template #footer>
+      <Button variant="secondary" label="Cancel" @click="showExtendModal = false" />
+      <Button variant="primary" label="Extend" @click="confirmExtend" />
+    </template>
+  </Modal>
 </template>
 
 <style scoped>
@@ -318,7 +401,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 .preview-card__url {
   flex: 1;
   font-size: var(--font-size-l);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-tight);
   color: var(--color-frame-fg);
   white-space: nowrap;
@@ -412,58 +495,14 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 /* ── Invites ── */
 
-.preview-card__invite-pill {
-  display: inline-flex;
+.preview-card__invites {
+  margin-block-start: var(--space-xs);
   align-items: center;
-  gap: var(--space-xxs);
-  padding: 2px var(--space-xs);
-  font-size: var(--font-size-xs);
-  color: var(--color-frame-fg-muted);
-  background: var(--color-frame-hover);
-  border-radius: var(--radius-full);
 }
 
-.preview-card__invite-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-frame-fg-muted);
-  flex-shrink: 0;
-}
-
-.preview-card__invite-pill.is-visited .preview-card__invite-dot {
-  background: var(--color-status-running);
-}
-
-.preview-card__invite-remove {
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  opacity: 0;
-  transition: opacity var(--duration-instant) var(--ease-default);
-}
-
-.preview-card__invite-pill:hover .preview-card__invite-remove {
-  opacity: 1;
-}
-
-.preview-card__invite-input {
-  font-family: inherit;
-  font-size: var(--font-size-xs);
-  color: var(--color-frame-fg);
-  background: none;
-  border: none;
-  outline: none;
-  padding: 2px 0;
-  width: 160px;
-}
-
-.preview-card__invite-input::placeholder {
+.preview-card__invites-label {
+  font-size: var(--font-size-m);
+  font-weight: var(--font-weight-regular);
   color: var(--color-frame-fg-muted);
 }
 
@@ -522,7 +561,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
   text-decoration: line-through;
   opacity: 0.6;
   color: var(--color-frame-fg-muted);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
 }
 
 .preview-card--inactive .preview-card__url:hover {
@@ -538,6 +577,82 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 .preview-card__detail {
   font-size: var(--font-size-s);
   color: var(--color-frame-fg-muted);
+}
+
+/* ── Invite modal ── */
+
+.invite-modal__description {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  margin: 0;
+}
+
+.invite-modal__add-row {
+  align-items: flex-end;
+}
+
+.invite-modal__person {
+  padding: var(--space-xxs) 0;
+  border-block-end: 1px solid var(--color-frame-border);
+}
+
+.invite-modal__person:last-child {
+  border-block-end: none;
+}
+
+.invite-modal__email {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Extend modal ── */
+
+.extend-modal__description {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  margin: 0;
+}
+
+.extend-modal__option {
+  padding: var(--space-xs) var(--space-s);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition: background var(--duration-instant) var(--ease-default);
+}
+
+.extend-modal__option:hover {
+  background: var(--color-frame-hover);
+}
+
+.extend-modal__option.is-selected {
+  background: var(--color-frame-hover);
+}
+
+.extend-modal__radio {
+  accent-color: var(--color-frame-theme);
+}
+
+.extend-modal__label {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg);
+}
+
+.extend-modal__option--upsell {
+  cursor: default;
+}
+
+.extend-modal__option--upsell .extend-modal__label {
+  flex: 1;
+}
+
+.extend-modal__upgrade-hint {
+  font-size: var(--font-size-s);
+  color: var(--color-frame-fg-muted);
+  margin: 0;
+  padding-inline-start: var(--space-s);
 }
 
 /* ── Utilities ── */
