@@ -28,16 +28,16 @@ defineProps<{
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-}
-
-.screen-layout__body.is-scrollable {
-  justify-content: flex-start;
 }
 
 .screen-layout__content {
   width: 100%;
   max-width: 680px;
   padding: var(--space-m) var(--space-l) var(--space-l);
+  margin-block: auto;
+}
+
+.screen-layout__body.is-scrollable .screen-layout__content {
+  margin-block: 0;
 }
 </style>
