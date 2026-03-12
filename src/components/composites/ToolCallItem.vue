@@ -84,7 +84,7 @@ function toggle() {
 .tool-call-item {
   cursor: pointer;
   user-select: none;
-  margin-block-end: var(--space-m);
+  margin-block-end: var(--space-xs);
 }
 
 .tool-call-item__row {

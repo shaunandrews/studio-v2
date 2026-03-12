@@ -181,8 +181,8 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
             </svg>
           </template>
           <span v-else class="site-tasks__time">{{ formatTime(getLastTimestamp(convo.id) || convo.createdAt) }}</span>
-          <Tooltip text="Archive" placement="right" :delay="300">
-            <button class="site-tasks__archive" @click="onArchive($event, convo.id)">
+          <Tooltip text="Archive" placement="right" :delay="300" class="site-tasks__archive-wrap">
+            <button class="site-tasks__archive" @click.stop="onArchive($event, convo.id)">
               <WPIcon :icon="archive" :size="16" />
             </button>
           </Tooltip>
@@ -311,18 +311,18 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 .site-tasks__list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-xxxs);
   flex: 1;
   overflow-y: auto;
-  padding: 0 8px 48px;
+  padding: 0 var(--space-xs) var(--space-xxxl);
 }
 
 .site-tasks__item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 8px 0 12px;
+  gap: var(--space-xs);
+  height: var(--space-xxl);
+  padding: 0 var(--space-xxs) 0 var(--space-s);
   border-radius: var(--radius-s);
   cursor: pointer;
   flex-shrink: 0;
@@ -403,17 +403,17 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   to { transform: rotate(360deg); }
 }
 
-/* Hide time, show archive on end-area hover */
-.site-tasks__archive {
+/* Hide archive by default, show on row hover */
+.site-tasks__archive-wrap {
   display: none;
 }
 
-.site-tasks__item-end:hover .site-tasks__time,
-.site-tasks__item-end:hover .site-tasks__spinner {
+.site-tasks__item:hover .site-tasks__time,
+.site-tasks__item:hover .site-tasks__spinner {
   display: none;
 }
 
-.site-tasks__item-end:hover .site-tasks__archive {
+.site-tasks__item:hover .site-tasks__archive-wrap {
   display: flex;
 }
 
