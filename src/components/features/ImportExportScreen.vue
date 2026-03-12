@@ -163,14 +163,13 @@ const importStateKey = computed(() => {
 </script>
 
 <template>
-  <ScreenLayout title="Import / Export" class="ie-screen">
+  <ScreenLayout title="Import / Export" scrollable class="ie-screen">
     <div class="ie">
       <!-- ── Import Section ── -->
-      <div class="ie__section">
-        <div class="ie__section-header">
-          <Text variant="body" color="muted" tag="h3">Import</Text>
+      <section class="ie__section">
+        <h3 class="ie__section-title">Import</h3>
+        <div class="ie__card">
           <Text variant="body-small" color="muted">Restore a site from a backup or migrate from another host.</Text>
-        </div>
         <div
           class="ie__dropzone"
           :class="{
@@ -285,15 +284,14 @@ const importStateKey = computed(() => {
         class="ie__file-input"
         @change="onFileSelected"
       />
-      </div>
+        </div>
+      </section>
 
       <!-- ── Export Section ── -->
-      <div class="ie__section ie__section--export">
-        <div class="ie__section-header">
-          <Text variant="body" color="muted" tag="h3">Export</Text>
+      <section class="ie__section">
+        <h3 class="ie__section-title">Export</h3>
+        <div class="ie__card">
           <Text variant="body-small" color="muted">Your data, your rules. Take it anywhere.</Text>
-        </div>
-        <div class="ie__export-body">
         <Transition name="ie-fade" mode="out-in">
           <!-- Empty site -->
           <div v-if="isNewSite && !isExporting && !isExportDone" key="export-empty" class="ie__export-empty">
@@ -348,47 +346,45 @@ const importStateKey = computed(() => {
           </div>
         </Transition>
         </div>
-      </div>
+      </section>
     </div>
   </ScreenLayout>
 </template>
 
 <style scoped>
-/* ── Screen override ── */
-
-.ie-screen :deep(.screen-layout__content) {
-  max-width: 960px;
-}
-
 /* ── Layout ── */
 
 .ie {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--space-m);
 }
 
 .ie__section {
+  background: var(--color-frame-fill);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-m);
+  overflow: clip;
+}
+
+.ie__section-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+  padding: var(--space-s) var(--space-m);
+}
+
+.ie__card {
   display: flex;
   flex-direction: column;
   gap: var(--space-s);
-  flex: 1;
-  min-width: 0;
-}
-
-.ie__section-header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xxxs);
-}
-
-.ie__export-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-m);
-  flex: 1;
-  border: 1px solid var(--color-frame-border);
+  background: var(--color-frame-bg);
+  border-block-start: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.07);
   padding: var(--space-m);
 }
 
