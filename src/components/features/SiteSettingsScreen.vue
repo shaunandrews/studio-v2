@@ -203,20 +203,6 @@ const wpVersionOptions = [
         </div>
       </section>
 
-      <!-- Debugging -->
-      <section class="settings__section">
-        <h3 class="settings__section-title">Debugging</h3>
-        <div class="settings__card">
-          <Toggle v-model="showErrorsInBrowser" label="Show errors in browsers" size="small" hint="Display PHP errors and warnings directly in the browser by setting the WP_DEBUG_DISPLAY constant." />
-          <Toggle v-model="enableDebugLog" label="Debug log" size="small" hint="Log PHP errors and warnings to a debug.log file in your site's wp-content directory by setting the WP_DEBUG_LOG constant." />
-          <Toggle v-model="enableXdebug" label="Xdebug" size="small">
-            <template #hint>
-              Enable PHP debugging with Xdebug. Can only be enabled on one site, and may cause slower performance. <a href="https://developer.wordpress.com/docs/developer-tools/studio/xdebug/" target="_blank" rel="noopener" class="settings__link">Learn more</a>
-            </template>
-          </Toggle>
-        </div>
-      </section>
-
       <!-- Skills -->
       <section class="settings__section">
         <h3 class="settings__section-title">Site skills</h3>
@@ -272,6 +258,20 @@ const wpVersionOptions = [
               <line x1="64" y1="57" x2="92" y2="57" stroke="var(--color-frame-fg)" stroke-width="1" opacity="0.1" stroke-linecap="round" />
             </g>
           </svg>
+        </div>
+      </section>
+
+      <!-- Debugging -->
+      <section class="settings__section">
+        <h3 class="settings__section-title">Debugging</h3>
+        <div class="settings__card">
+          <Toggle v-model="showErrorsInBrowser" label="Show errors in browsers" size="small" hint="Display PHP errors and warnings directly in the browser by setting the WP_DEBUG_DISPLAY constant." />
+          <Toggle v-model="enableDebugLog" label="Debug log" size="small" hint="Log PHP errors and warnings to a debug.log file in your site's wp-content directory by setting the WP_DEBUG_LOG constant." />
+          <Toggle v-model="enableXdebug" label="Xdebug" size="small">
+            <template #hint>
+              Enable PHP debugging with Xdebug. Can only be enabled on one site, and may cause slower performance. <a href="https://developer.wordpress.com/docs/developer-tools/studio/xdebug/" target="_blank" rel="noopener" class="settings__link">Learn more</a>
+            </template>
+          </Toggle>
         </div>
       </section>
 

@@ -186,7 +186,7 @@ const terminalGroups = [
 // -- CLI toggle --
 
 const CLI_KEY = 'pref-studio-cli'
-const cliEnabled = ref(localStorage.getItem(CLI_KEY) === 'true')
+const cliEnabled = ref(localStorage.getItem(CLI_KEY) !== 'false')
 
 // -- Default Agent --
 
@@ -460,7 +460,7 @@ function skillInstallLabel(id: string): string {
                   <Text variant="body-small">Studio CLI for terminal</Text>
                 </div>
                 <div class="prefs-toggle-help">
-                  <Text variant="body-small" color="muted">You will be asked for admin privileges to install or uninstall the Studio CLI for use in the terminal. <a href="#" class="prefs-learn-more">Learn more</a></Text>
+                  <Text variant="body-small" color="muted">Use the <code class="prefs-code">studio</code> command in any terminal to manage sites, run WP-CLI commands, and control your local environment. <a href="#" class="prefs-learn-more">Learn more</a></Text>
                 </div>
               </div>
 
@@ -937,6 +937,14 @@ function skillInstallLabel(id: string): string {
   padding-inline-start: 40px;
   margin-block-start: var(--space-xxs);
   line-height: 1.4;
+}
+
+.prefs-code {
+  font-family: var(--font-family-mono, ui-monospace, SFMono-Regular, monospace);
+  font-size: 0.9em;
+  padding: 1px var(--space-xxs);
+  background: var(--color-frame-hover);
+  border-radius: var(--radius-s);
 }
 
 .prefs-learn-more {
