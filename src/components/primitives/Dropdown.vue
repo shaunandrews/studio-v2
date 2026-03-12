@@ -175,7 +175,12 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
 
 .dropdown.surface-dark .dropdown-trigger--field {
   border-color: var(--color-chrome-border);
-  background: var(--color-chrome-bg);
+  background: var(--color-chrome-fill);
+  color: var(--color-chrome-fg);
+}
+
+.dropdown.surface-dark .dropdown-trigger--field .dropdown-label {
+  color: var(--color-chrome-fg);
 }
 
 .dropdown.surface-dark .dropdown-trigger--field:hover {

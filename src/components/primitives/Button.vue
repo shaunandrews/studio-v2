@@ -8,7 +8,7 @@ const props = defineProps<{
   label?: string
   variant?: 'primary' | 'secondary' | 'tertiary'
   surface?: 'light' | 'dark'
-  size?: 'mini' | 'small' | 'default'
+  size?: 'mini' | 'small' | 'default' | 'large'
   iconOnly?: boolean
   width?: 'hug' | 'full'
   shortcut?: string
@@ -73,7 +73,7 @@ onUnmounted(() => {
       ]"
       :disabled="disabled"
     >
-      <WPIcon v-if="icon" :icon="icon" :size="size === 'mini' ? 14 : size === 'small' ? 16 : 20" />
+      <WPIcon v-if="icon" :icon="icon" :size="size === 'mini' ? 14 : size === 'small' ? 16 : size === 'large' ? 22 : 20" />
       <span v-if="label" class="btn__label">{{ label }}</span>
       <span v-if="shortcut" class="btn__shortcut">{{ formatShortcut(shortcut) }}</span>
       <slot v-if="!icon && !label && !shortcut" />
@@ -105,6 +105,15 @@ onUnmounted(() => {
 
 /* ── Sizes ── */
 
+.btn--large {
+  height: 40px;
+  padding: 0 16px;
+  gap: 6px;
+  font-size: var(--font-size-m);
+  line-height: 20px;
+  min-width: 70px;
+}
+
 .btn--default {
   height: 32px;
   padding: 0 12px;
@@ -132,6 +141,12 @@ onUnmounted(() => {
 }
 
 /* ── Icon-only (ButtonIcon pattern) ── */
+
+.btn--icon-only.btn--large {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+}
 
 .btn--icon-only.btn--default {
   width: 32px;

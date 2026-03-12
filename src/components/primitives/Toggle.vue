@@ -4,8 +4,10 @@ withDefaults(defineProps<{
 	label?: string
 	hint?: string
 	size?: 'default' | 'small'
+	surface?: 'light' | 'dark'
 }>(), {
 	size: 'default',
+	surface: 'light',
 })
 
 defineEmits<{
@@ -14,7 +16,7 @@ defineEmits<{
 </script>
 
 <template>
-	<div class="toggle-field" :class="`toggle-field--${size}`">
+	<div class="toggle-field" :class="[`toggle-field--${size}`, { 'surface-dark': surface === 'dark' }]">
 		<label class="toggle-label">
 			<span class="toggle">
 				<input
@@ -114,5 +116,33 @@ defineEmits<{
 	color: var(--color-frame-fg-muted);
 	line-height: 1.5;
 	padding-inline-start: calc(32px + var(--space-s));
+}
+
+/* ── Dark surface ── */
+
+.toggle-field.surface-dark .toggle__label-text {
+	color: var(--color-chrome-fg);
+}
+
+.toggle-field.surface-dark .toggle__track {
+	background: var(--color-chrome-hover);
+	box-shadow: 0 0 0 1px var(--color-chrome-fg-muted);
+}
+
+.toggle-field.surface-dark .toggle__input:checked + .toggle__track {
+	background: var(--color-chrome-theme);
+	box-shadow: 0 0 0 1px var(--color-chrome-theme);
+}
+
+.toggle-field.surface-dark .toggle__track::before {
+	background: var(--color-chrome-fg-muted);
+}
+
+.toggle-field.surface-dark .toggle__input:checked + .toggle__track::before {
+	background: var(--color-chrome-fg);
+}
+
+.toggle-field.surface-dark .toggle__hint {
+	color: var(--color-chrome-fg-muted);
 }
 </style>

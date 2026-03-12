@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{
+withDefaults(defineProps<{
 	modelValue: string
 	label?: string
 	type?: 'text' | 'email' | 'password' | 'url'
@@ -7,7 +7,10 @@ defineProps<{
 	hint?: string
 	id?: string
 	disabled?: boolean
-}>()
+	surface?: 'light' | 'dark'
+}>(), {
+	surface: 'light',
+})
 
 defineEmits<{
 	'update:modelValue': [value: string]
@@ -15,7 +18,7 @@ defineEmits<{
 </script>
 
 <template>
-	<div class="text-input">
+	<div class="text-input" :class="{ 'surface-dark': surface === 'dark' }">
 		<label v-if="label" class="text-input__label" :for="id">{{ label }}</label>
 		<div class="text-input__wrapper">
 			<input
@@ -105,5 +108,36 @@ defineEmits<{
 	color: var(--color-frame-fg-muted);
 	margin: var(--space-xs) 0 0;
 	line-height: 1.5;
+}
+
+/* ── Dark surface ── */
+
+.text-input.surface-dark .text-input__label {
+	color: var(--color-chrome-fg);
+}
+
+.text-input.surface-dark .text-input__field {
+	color: var(--color-chrome-fg);
+	background: var(--color-chrome-fill);
+	border-color: var(--color-chrome-border);
+}
+
+.text-input.surface-dark .text-input__field::placeholder {
+	color: rgba(255, 255, 255, 0.35);
+}
+
+.text-input.surface-dark .text-input__field:disabled {
+	color: rgba(255, 255, 255, 0.4);
+	background: var(--color-chrome-hover);
+	border-style: dashed;
+}
+
+.text-input.surface-dark .text-input__field:focus-visible {
+	border-color: var(--color-chrome-theme);
+	box-shadow: 0 0 0 1px var(--color-chrome-theme);
+}
+
+.text-input.surface-dark .text-input__hint {
+	color: var(--color-chrome-fg-muted);
 }
 </style>
