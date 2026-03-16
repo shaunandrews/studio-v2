@@ -1,10 +1,13 @@
 <script setup lang="ts">
-defineProps<{
+withDefaults(defineProps<{
   variant?: 'body' | 'body-large' | 'body-small' | 'heading-small'
   tag?: string
   color?: 'default' | 'secondary' | 'muted' | 'inherit'
   weight?: 'regular' | 'medium' | 'semibold'
-}>()
+  surface?: 'light' | 'dark'
+}>(), {
+  surface: 'light',
+})
 </script>
 
 <template>
@@ -15,6 +18,7 @@ defineProps<{
       `text--${variant || 'body'}`,
       color ? `text--${color}` : '',
       weight ? `text--${weight}` : '',
+      { 'surface-dark': surface === 'dark' },
     ]"
   >
     <slot />
@@ -58,4 +62,9 @@ defineProps<{
 .text--regular { font-weight: var(--font-weight-regular); }
 .text--medium { font-weight: var(--font-weight-medium); }
 .text--semibold { font-weight: var(--font-weight-semibold); }
+
+/* ── Dark surface ── */
+.surface-dark.text--default { color: var(--color-chrome-fg); }
+.surface-dark.text--secondary { color: var(--color-chrome-fg-muted); }
+.surface-dark.text--muted { color: var(--color-chrome-fg-muted); }
 </style>

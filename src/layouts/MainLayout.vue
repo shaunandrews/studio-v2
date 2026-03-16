@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { drawerLeft } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import SiteList from '@/components/features/SiteList.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
-import PreferencesModal from '@/components/composites/PreferencesModal.vue'
+import SettingsPage from '@/components/composites/SettingsPage.vue'
+import { useSettings } from '@/data/useSettings'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
 import AddSitePage from '@/pages/AddSitePage.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
@@ -18,8 +19,11 @@ const { isWindows } = useOperatingSystem()
 const { shouldShowAddSite, hasSites, openAddSite } = useAddSite()
 
 const showShortcuts = ref(false)
-const showPreferences = ref(false)
 const showGlobalMenu = ref(false)
+const { isSettingsOpen, settingsTab, openSettings, closeSettings } = useSettings()
+
+// Chrome backdrop: either add-site or settings slides sidebar/frame offscreen
+const isBackdropActive = computed(() => shouldShowAddSite.value || isSettingsOpen.value)
 const gravatarRef = ref<HTMLElement | null>(null)
 const toggleRef = ref<HTMLElement | null>(null)
 
@@ -30,7 +34,7 @@ function onGlobalKeydown(e: KeyboardEvent) {
   }
   if ((e.metaKey || e.ctrlKey) && e.key === ',') {
     e.preventDefault()
-    showPreferences.value = !showPreferences.value
+    if (isSettingsOpen.value) { closeSettings() } else { openSettings() }
   }
   if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
     e.preventDefault()
@@ -58,7 +62,7 @@ function handleNewSite() {
     <WindowsTitlebar v-if="isWindows" />
 
     <!-- Traffic lights: fixed window position, UI moves around them (macOS only) -->
-    <div v-if="!isWindows" v-show="!shouldShowAddSite" class="traffic-lights">
+    <div v-if="!isWindows" class="traffic-lights">
       <span class="light close"></span>
       <span class="light minimize"></span>
       <span class="light maximize"></span>
@@ -66,7 +70,7 @@ function handleNewSite() {
 
     <!-- Floating footer buttons: persist outside sidebar so they survive collapse -->
     <button
-      v-show="!shouldShowAddSite"
+      v-show="!isBackdropActive"
       ref="gravatarRef"
       class="floating-btn gravatar-btn"
       :class="{ 'is-sidebar-hidden': hidden }"
@@ -75,7 +79,7 @@ function handleNewSite() {
       <img class="gravatar" src="https://gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=64" alt="User" />
     </button>
     <button
-      v-show="!shouldShowAddSite"
+      v-show="!isBackdropActive"
       ref="toggleRef"
       class="floating-btn sidebar-toggle"
       :class="{ 'is-sidebar-hidden': hidden }"
@@ -91,14 +95,23 @@ function handleNewSite() {
       <!-- Add-site surface: lives behind sidebar + frame -->
       <AddSitePage
         v-show="shouldShowAddSite"
-        class="add-site-surface"
+        class="backdrop-surface"
         :visible="shouldShowAddSite"
         :has-sites="hasSites"
       />
 
+      <!-- Settings surface: lives behind sidebar + frame -->
+      <SettingsPage
+        v-if="isSettingsOpen"
+        class="backdrop-surface"
+        :open="isSettingsOpen"
+        :initial-tab="settingsTab"
+        @close="closeSettings"
+      />
+
       <div
         class="sidebar vstack"
-        :class="{ 'is-hidden': hidden, 'is-offscreen': shouldShowAddSite }"
+        :class="{ 'is-hidden': hidden, 'is-offscreen': isBackdropActive }"
         :style="{ viewTransitionName: 'sidebar' }"
       >
         <SiteList class="flex-1 min-h-0" @new-site="handleNewSite" />
@@ -106,7 +119,7 @@ function handleNewSite() {
 
       <main
         class="frame"
-        :class="{ 'is-full': hidden, 'is-offscreen': shouldShowAddSite }"
+        :class="{ 'is-full': hidden, 'is-offscreen': isBackdropActive }"
         :style="{ viewTransitionName: 'site-frame' }"
       >
         <router-view name="main" v-slot="{ Component }">
@@ -115,7 +128,6 @@ function handleNewSite() {
       </main>
     </div>
     <ShortcutsModal :open="showShortcuts" @close="showShortcuts = false" />
-    <PreferencesModal :open="showPreferences" @close="showPreferences = false" />
     <GlobalMenu :open="showGlobalMenu" :anchor="gravatarRef" @close="showGlobalMenu = false" />
   </div>
 </template>
@@ -164,7 +176,7 @@ function handleNewSite() {
 
 /* ── Add-site surface ── */
 
-.add-site-surface {
+.backdrop-surface {
   position: absolute;
   inset: 0;
   z-index: 0;

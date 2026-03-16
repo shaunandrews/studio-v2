@@ -37,7 +37,7 @@ const categories = [
       { id: 'global-menu', label: 'GlobalMenu' },
       { id: 'input-chat', label: 'InputChat' },
       { id: 'panel-toolbar', label: 'PanelToolbar' },
-      { id: 'preferences-modal', label: 'PreferencesModal' },
+      { id: 'preferences-modal', label: 'SettingsPage' },
       { id: 'site-item', label: 'SiteItem' },
       { id: 'screen-layout', label: 'ScreenLayout' },
       { id: 'shortcuts-modal', label: 'ShortcutsModal' },

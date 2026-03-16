@@ -192,7 +192,7 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         </Transition>
       </div>
       <span v-else class="site-title">
-        <SiteIcon :favicon="favicon" :site-name="title" :size="28" />
+        <SiteIcon :favicon="favicon" :site-name="title" :size="32" />
         {{ title }}
       </span>
     </div>

@@ -3,7 +3,7 @@ import { ref, nextTick } from 'vue'
 import { toPng } from 'html-to-image'
 import { useSites } from '@/data/useSites'
 import { skills } from '@/data/skills'
-import PreferencesModal from '@/components/composites/PreferencesModal.vue'
+import SettingsPage from '@/components/composites/SettingsPage.vue'
 import SiteSettingsGeneral from '@/components/features/site-settings/SiteSettingsGeneral.vue'
 import SiteSettingsAdmin from '@/components/features/site-settings/SiteSettingsAdmin.vue'
 import SiteSettingsSkills from '@/components/features/site-settings/SiteSettingsSkills.vue'
@@ -135,16 +135,16 @@ async function pickPanel(e: MouseEvent) {
       <template v-if="activeSection === 'studio-settings'">
         <div ref="captureRef" class="overviews__row">
           <div class="overviews__panel">
-            <PreferencesModal :open="true" embedded locked-tab="general" />
+            <SettingsPage :open="true" embedded locked-tab="general" />
           </div>
           <div class="overviews__panel">
-            <PreferencesModal :open="true" embedded locked-tab="agents" />
+            <SettingsPage :open="true" embedded locked-tab="agents" />
           </div>
           <div class="overviews__panel overviews__panel--capped">
-            <PreferencesModal :open="true" embedded locked-tab="skills" os-override="windows" />
+            <SettingsPage :open="true" embedded locked-tab="skills" os-override="windows" />
           </div>
           <div class="overviews__panel">
-            <PreferencesModal :open="true" embedded locked-tab="account" os-override="windows" />
+            <SettingsPage :open="true" embedded locked-tab="account" os-override="windows" />
           </div>
         </div>
       </template>

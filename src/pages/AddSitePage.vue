@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { chevronLeft, close } from '@wordpress/icons'
 import { illustrations } from '@/components/features/add-site/illustrations'
+import BackdropPage from '@/layouts/BackdropPage.vue'
 import Button from '@/components/primitives/Button.vue'
 import SiteDetailsForm from '@/components/features/add-site/SiteDetailsForm.vue'
 import BlueprintPicker from '@/components/features/add-site/BlueprintPicker.vue'
@@ -156,29 +156,15 @@ async function onSubmit(data: { name: string }) {
 </script>
 
 <template>
-  <div class="add-site-page">
-    <!-- Accent glow -->
-    <div class="accent-glow" />
-
-    <!-- Header: cancel/back button (left-aligned) -->
-    <header v-if="currentStep !== 'building'" class="page-header hstack">
-      <Button
-        v-if="canGoBack"
-        :icon="chevronLeft"
-        label="Back"
-        variant="tertiary"
-        surface="dark"
-        @click="goBack"
-      />
-      <Button
-        v-else-if="hasSites"
-        :icon="close"
-        label="Cancel"
-        variant="tertiary"
-        surface="dark"
-        @click="dismiss"
-      />
-    </header>
+  <BackdropPage
+    :show-back="canGoBack"
+    :hide-header="currentStep === 'building'"
+    @close="dismiss"
+    @back="goBack"
+  >
+    <template #background>
+      <div class="accent-glow" />
+    </template>
 
     <!-- Content -->
     <div class="page-content">
@@ -253,22 +239,10 @@ async function onSubmit(data: { name: string }) {
 
       </Transition>
     </div>
-  </div>
+  </BackdropPage>
 </template>
 
 <style scoped>
-/* ── Page shell ── */
-
-.add-site-page {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--color-chrome-bg);
-  color: var(--color-chrome-fg);
-  overflow: hidden;
-}
-
 /* ── Accent glow ── */
 
 .accent-glow {
@@ -299,28 +273,15 @@ async function onSubmit(data: { name: string }) {
   50% { opacity: 0.12; }
 }
 
-/* ── Header ── */
-
-.page-header {
-  position: relative;
-  z-index: 2;
-  flex-shrink: 0;
-  height: 56px;
-  padding: 0 var(--space-m);
-  align-items: center;
-}
-
 /* ── Content ── */
 
 .page-content {
-  position: relative;
-  z-index: 1;
   flex: 1;
   overflow-y: auto;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: var(--space-m);
+  padding: 56px var(--space-m) var(--space-m); /* Clear header height */
 }
 
 .step-content {

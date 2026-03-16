@@ -13,7 +13,7 @@ import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
-import PreferencesModal from '@/components/composites/PreferencesModal.vue'
+import { useSettings } from '@/data/useSettings'
 import { useSites, ALL_SITES_ID } from '@/data/useSites'
 import { useResizablePane } from '@/data/useResizablePane'
 import { useConversations } from '@/data/useConversations'
@@ -163,8 +163,7 @@ const { width: navWidth, isDragging: isResizing, onPointerDown: onResizeStart, r
   storageKey: 'studio-nav-width',
 })
 
-const showPreferences = ref(false)
-const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general')
+const { openSettings } = useSettings()
 
 </script>
 
@@ -230,21 +229,20 @@ const preferencesTab = ref<'general' | 'agents' | 'skills' | 'account'>('general
               :elevated="isScrolledUp"
               :placeholder="isNewTask ? 'Describe what this task should do...' : 'Ask anything...'"
               @send="onSend"
-              @manage-agents="preferencesTab = 'agents'; showPreferences = true"
+              @manage-agents="openSettings('agents')"
             />
           </div>
         </template>
         <SyncScreen v-else-if="!isAllSites && currentScreen === 'sync'" :site-id="activeSiteId!" />
         <PreviewsScreen v-else-if="!isAllSites && currentScreen === 'previews'" :site-id="activeSiteId!" />
         <ImportExportScreen v-else-if="!isAllSites && currentScreen === 'import-export'" :site-id="activeSiteId!" />
-        <SiteSettingsScreen v-else-if="!isAllSites && currentScreen === 'settings'" :site-id="activeSiteId!" @manage-global-skills="preferencesTab = 'skills'; showPreferences = true" />
+        <SiteSettingsScreen v-else-if="!isAllSites && currentScreen === 'settings'" :site-id="activeSiteId!" @manage-global-skills="openSettings('skills')" />
         <div v-else class="detail-empty">
           <span class="detail-empty__text">Select a task or start a new one</span>
         </div>
       </div>
     </div>
 
-    <PreferencesModal :open="showPreferences" :initial-tab="preferencesTab" @close="showPreferences = false; preferencesTab = 'general'" />
   </div>
 </template>
 

@@ -28,7 +28,7 @@ src/
   styles/            # CSS tokens (colors, space, radius, typography, layout, motion) + overrides
   components/
     primitives/      # Badge, Button, ButtonSplit, ContextMenu, ContextRing, Dropdown, FlyoutMenu, Modal, StatusIndicator, Text, TextInput, Toggle, Tooltip, WPIcon
-    composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, PreferencesModal, ScreenHeader, ScreenLayout, ShortcutsModal, SiteItem, SiteToolbar, chat-cards/, renderers/
+    composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, ScreenHeader, ScreenLayout, SettingsPage, ShortcutsModal, SiteItem, SiteToolbar, chat-cards/, renderers/
     features/        # SiteNavigation, SiteList, SiteSettingsScreen, SyncScreen, PreviewsScreen, ImportExportScreen, add-site/, sync/
   layouts/           # MainLayout (app shell), BareLayout (standalone pages)
   pages/             # SitePage, AddSitePage, DesignSystem, Components, Settings, Architecture

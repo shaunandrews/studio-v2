@@ -3,11 +3,12 @@ import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
 import Popover from '@/components/primitives/Popover.vue'
-import PreferencesModal from '@/components/composites/PreferencesModal.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
+import { useSettings } from '@/data/useSettings'
 
 const { mod } = useOperatingSystem()
+const { openSettings } = useSettings()
 
 const props = defineProps<{
   open: boolean
@@ -19,7 +20,6 @@ const emit = defineEmits<{
   'update:open': [value: boolean]
 }>()
 
-const showPreferences = ref(false)
 const showShortcuts = ref(false)
 
 function close() {
@@ -28,7 +28,7 @@ function close() {
 
 function openPreferences() {
   close()
-  showPreferences.value = true
+  openSettings()
 }
 
 function openShortcuts() {
@@ -108,7 +108,6 @@ function openShortcuts() {
     </div>
   </Popover>
   <ShortcutsModal :open="showShortcuts" @close="showShortcuts = false" />
-  <PreferencesModal :open="showPreferences" @close="showPreferences = false" />
 </template>
 
 <style>

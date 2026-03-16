@@ -4,7 +4,7 @@ import ChatMessage from '@/components/composites/ChatMessage.vue'
 import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
 import InputChat from '@/components/composites/InputChat.vue'
-import PreferencesModal from '@/components/composites/PreferencesModal.vue'
+import SettingsPage from '@/components/composites/SettingsPage.vue'
 import PanelToolbar from '@/components/composites/PanelToolbar.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
 import ScreenLayout from '@/components/composites/ScreenLayout.vue'
@@ -203,9 +203,9 @@ const shortcutsOpen = ref(false)
     </div>
   </section>
 
-  <!-- PreferencesModal -->
+  <!-- SettingsPage -->
   <section id="preferences-modal">
-    <h2>PreferencesModal</h2>
+    <h2>SettingsPage</h2>
     <p class="section-desc">Multi-tab settings modal covering appearance, agents, skills, and account configuration.</p>
 
     <div class="props-table">
@@ -228,7 +228,7 @@ const shortcutsOpen = ref(false)
     <h3>Preview</h3>
     <div class="example-section">
       <Button variant="secondary" label="Open Preferences" @click="prefsOpen = true" />
-      <PreferencesModal :open="prefsOpen" @close="prefsOpen = false" />
+      <SettingsPage :open="prefsOpen" @close="prefsOpen = false" />
     </div>
   </section>
 
