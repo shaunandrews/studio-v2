@@ -10,6 +10,7 @@ import AuthSimulation from '@/components/features/onboarding/AuthSimulation.vue'
 import PermissionDialog from '@/components/features/onboarding/PermissionDialog.vue'
 import { useOnboarding } from '@/data/useOnboarding'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
+import { useAddSite } from '@/data/useAddSite'
 
 const route = useRoute()
 const router = useRouter()
@@ -55,6 +56,9 @@ function handlePermissionCancel() {
 
 function handlePermissionComplete() {
   exiting.value = true
+  // Ensure add-site backdrop is open before navigating so there's no flash of empty all-sites
+  const { openAddSite } = useAddSite()
+  openAddSite()
   setTimeout(() => {
     router.push('/all-sites')
   }, 600)
