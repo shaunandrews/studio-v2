@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import SiteToolbar from '@/components/composites/SiteToolbar.vue'
 import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import InputChat from '@/components/composites/InputChat.vue'
@@ -183,22 +182,6 @@ const { openSettings } = useSettings()
   <div class="site-page vstack">
     <!-- Nested route outlet (children render null — SitePage owns the layout) -->
     <router-view />
-    <SiteToolbar
-      v-if="currentSite || isAllSites"
-      :title="isAllSites ? 'All Sites' : currentSite!.name"
-      :site-id="isAllSites ? undefined : currentSite!.id"
-      :favicon="isAllSites ? undefined : currentSite!.favicon"
-      :status="isAllSites ? undefined : currentSite!.status"
-      :sidebar-hidden="sidebarHidden"
-      :is-all-sites="isAllSites"
-      :loading-target="loadingTarget"
-      @toggle-status="toggleStatus"
-      @switch-site="(id) => {
-        const screen = currentScreen === 'tasks' ? 'site-tasks' : `site-${currentScreen}`
-        router.push({ name: screen, params: { id } })
-      }"
-      @navigate-all-sites="router.push({ name: 'all-sites' })"
-    />
     <div class="panes" :class="{ 'is-resizing': isResizing }">
       <div class="pane pane-site-navigation" :style="{ width: navWidth + 'px' }">
         <SiteNavigation
@@ -212,11 +195,16 @@ const { openSettings } = useSettings()
           @select="onSelectChat"
           @new-task="onNewChat"
           @navigate="onNavigate"
+          @switch-site="(id) => {
+            const screen = currentScreen === 'tasks' ? 'site-tasks' : `site-${currentScreen}`
+            router.push({ name: screen, params: { id } })
+          }"
+          @navigate-all-sites="router.push({ name: 'all-sites' })"
         />
       </div>
       <ResizeHandle :is-dragging="isResizing" @pointerdown="onResizeStart" @dblclick="resetNavWidth" />
       <div class="pane pane-detail">
-        <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" />
+        <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" :status="currentSite?.status" :loading-target="loadingTarget" @toggle-status="toggleStatus" />
         <template v-else-if="currentScreen === 'tasks' && selectedConvoId">
           <TaskToolbar v-if="!isNewTask" :conversation-id="selectedConvoId" />
           <ChatMessageList v-if="!isNewTask" :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" />

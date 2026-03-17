@@ -1,13 +1,26 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { chevronDown } from '@wordpress/icons'
 import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
+import ButtonSplit from '@/components/primitives/ButtonSplit.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
+import WPIcon from '@/components/primitives/WPIcon.vue'
+import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
+import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
 import { useSites } from '@/data/useSites'
+import { useWPAdmin } from '@/data/useWPAdmin'
+import type { SiteStatus } from '@/data/types'
 
 const props = defineProps<{
   siteId: string
+  status?: SiteStatus
+  loadingTarget?: 'running' | 'stopped'
+}>()
+
+const emit = defineEmits<{
+  'toggle-status': []
 }>()
 
 const { sites } = useSites()
@@ -15,6 +28,10 @@ const site = computed(() => sites.value.find(s => s.id === props.siteId))
 
 const siteLayout = computed(() => site.value?.mockLayout ?? 'cafe')
 const localPath = computed(() => `/Users/shaun/Studio/${site.value?.id ?? 'site'}`)
+
+const themeType = computed(() => site.value?.themeType ?? 'block')
+const siteFeatures = computed(() => site.value?.features ?? [])
+const { adminLinks } = useWPAdmin(themeType, siteFeatures)
 
 const copiedField = ref<string | null>(null)
 let copiedTimeout: ReturnType<typeof setTimeout> | undefined
@@ -28,6 +45,50 @@ function copyToClipboard(text: string, field: string) {
 
 const features = computed(() => site.value?.features ?? [])
 const hasWoo = computed(() => features.value.includes('woocommerce'))
+
+// ── Status ──
+
+const statusLabel = computed(() => {
+  if (props.status === 'running') return 'Running'
+  if (props.status === 'loading') return props.loadingTarget === 'stopped' ? 'Stopping…' : 'Starting…'
+  return 'Stopped'
+})
+
+const statusTooltip = computed(() => {
+  if (props.status === 'running') return 'Stop site'
+  if (props.status === 'loading') return props.loadingTarget === 'stopped' ? 'Stopping…' : 'Starting…'
+  return 'Start site'
+})
+
+// ── Open In ──
+
+const openLabel = ref('Browser')
+const openIconUrl = ref('/icons/chrome.svg')
+
+function onOpenSelect(label: string, iconUrl: string) {
+  openLabel.value = label
+  openIconUrl.value = iconUrl
+}
+
+const openMenuGroups = computed<FlyoutMenuGroup[]>(() => [
+  {
+    items: [
+      { label: 'Browser', iconUrl: '/icons/chrome.svg', checked: openLabel.value === 'Browser', action: () => onOpenSelect('Browser', '/icons/chrome.svg') },
+      { label: 'VS Code', iconUrl: '/icons/vscode.svg', checked: openLabel.value === 'VS Code', action: () => onOpenSelect('VS Code', '/icons/vscode.svg') },
+      { label: 'Cursor', iconUrl: '/icons/cursor.svg', checked: openLabel.value === 'Cursor', action: () => onOpenSelect('Cursor', '/icons/cursor.svg') },
+      { label: 'Claude', iconUrl: '/icons/claude.svg', checked: openLabel.value === 'Claude', action: () => onOpenSelect('Claude', '/icons/claude.svg') },
+      { label: 'Codex', iconUrl: '/icons/codex-color.svg', checked: openLabel.value === 'Codex', action: () => onOpenSelect('Codex', '/icons/codex-color.svg') },
+    ],
+  },
+  {
+    items: [
+      { label: 'Terminal', iconUrl: '/icons/terminal.svg', checked: openLabel.value === 'Terminal', action: () => onOpenSelect('Terminal', '/icons/terminal.svg') },
+      { label: 'Finder', iconUrl: '/icons/finder.svg', checked: openLabel.value === 'Finder', action: () => onOpenSelect('Finder', '/icons/finder.svg') },
+    ],
+  },
+])
+
+// ── Content stats ──
 
 interface StatItem {
   value: number
@@ -72,7 +133,7 @@ const contentStats = computed<StatItem[]>(() => {
   <div class="overview">
     <div class="overview__content">
 
-      <!-- Site overview -->
+      <!-- Site preview + credentials -->
       <div class="site-overview vstack align-center gap-xs">
         <Tooltip text="Open site in browser" placement="top">
           <SiteThumbnail :layout="siteLayout" :name="site?.name" @click="alert('Opening site preview…')" />
@@ -88,6 +149,47 @@ const contentStats = computed<StatItem[]>(() => {
         </div>
       </div>
 
+      <!-- Status + Open In -->
+      <div class="overview__actions">
+        <div class="overview__status">
+          <span class="status-label" :class="status ?? 'stopped'">{{ statusLabel }}</span>
+          <Tooltip :text="statusTooltip" placement="bottom">
+            <button
+              class="status-btn"
+              :class="status ?? 'stopped'"
+              :disabled="status === 'loading'"
+              @click="emit('toggle-status')"
+            >
+              <svg v-if="status === 'loading'" class="status-spinner" viewBox="0 0 16 16">
+                <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="20 12" />
+              </svg>
+              <svg v-else class="status-shape" viewBox="0 0 10 10">
+                <template v-if="(status ?? 'stopped') === 'stopped'">
+                  <rect class="status-rect" x="1" y="1" width="8" height="8" rx="1.5" />
+                  <path class="status-play" d="M3.5 1.8 L8.5 5 L3.5 8.2Z" />
+                </template>
+                <template v-else>
+                  <circle class="status-circle" cx="5" cy="5" r="4.5" />
+                  <rect class="status-stop" x="1" y="1" width="8" height="8" rx="1.5" />
+                </template>
+              </svg>
+            </button>
+          </Tooltip>
+        </div>
+        <FlyoutMenu :groups="openMenuGroups" surface="dark" align="end">
+          <template #trigger="{ toggle }">
+            <Tooltip :text="`Open in ${openLabel}`" placement="bottom">
+              <ButtonSplit
+                :iconUrl="openIconUrl"
+                label="Open"
+                @click="alert(`Opening in ${openLabel}…`)"
+                @secondary-click="toggle"
+              />
+            </Tooltip>
+          </template>
+        </FlyoutMenu>
+      </div>
+
       <!-- Content snapshot -->
       <section class="overview__section">
         <div class="stats">
@@ -95,6 +197,16 @@ const contentStats = computed<StatItem[]>(() => {
             <span class="stat__value">{{ stat.value }}</span>
             <span class="stat__label">{{ stat.label }}</span>
           </div>
+        </div>
+      </section>
+
+      <!-- WordPress shortcuts -->
+      <section class="overview__section">
+        <div class="shortcuts">
+          <button v-for="link in adminLinks" :key="link.label" class="shortcut" @click="alert(`Opening ${link.label}…`)">
+            <WPIcon :icon="link.icon" :size="20" class="shortcut__icon" />
+            <span class="shortcut__label">{{ link.label }}</span>
+          </button>
         </div>
       </section>
 
@@ -124,6 +236,7 @@ const contentStats = computed<StatItem[]>(() => {
 
 .site-overview {
   width: 100%;
+  max-width: 320px;
 }
 
 /* Override Tooltip's inline-flex trigger so thumb gets full width */
@@ -154,6 +267,89 @@ const contentStats = computed<StatItem[]>(() => {
   margin: 0 1px;
 }
 
+/* ── Actions row (status + open in) ── */
+
+.overview__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-s);
+  width: 100%;
+}
+
+.overview__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* ── Status ── */
+
+.status-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-frame-fg-muted);
+}
+
+.status-label.running {
+  color: var(--color-status-running);
+}
+
+.status-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-s);
+  background: var(--color-frame-bg);
+  cursor: pointer;
+  transition: background var(--duration-instant) var(--ease-default),
+              border-color var(--duration-instant) var(--ease-default);
+}
+
+.status-btn:hover:not(:disabled) {
+  background: var(--color-frame-hover);
+}
+
+.status-shape {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
+.status-shape rect,
+.status-shape circle,
+.status-shape path {
+  transition: opacity 200ms var(--ease-default);
+}
+
+.status-rect { fill: var(--color-status-stopped); opacity: 1; }
+.status-play { fill: var(--color-status-running); stroke: var(--color-status-running); stroke-width: 1; stroke-linejoin: round; opacity: 0; }
+.status-btn.stopped:hover:not(:disabled) .status-rect { opacity: 0; }
+.status-btn.stopped:hover:not(:disabled) .status-play { opacity: 1; }
+
+.status-circle { fill: var(--color-status-running); opacity: 1; }
+.status-stop { fill: var(--color-status-stop-hover); opacity: 0; }
+.status-btn.running:hover:not(:disabled) .status-circle { opacity: 0; }
+.status-btn.running:hover:not(:disabled) .status-stop { opacity: 1; }
+
+.status-spinner {
+  width: 14px;
+  height: 14px;
+  color: var(--color-frame-theme);
+  animation: overview-spin 0.8s linear infinite;
+}
+
+@keyframes overview-spin {
+  to { transform: rotate(360deg); }
+}
+
+.status-btn:disabled { cursor: default; opacity: 0.7; }
+.status-btn.running:hover:not(:disabled) { border-color: var(--color-status-stop-hover); }
+.status-btn.stopped:hover:not(:disabled) { border-color: var(--color-status-running); }
+
 /* ── Sections ── */
 
 .overview__section {
@@ -164,14 +360,6 @@ const contentStats = computed<StatItem[]>(() => {
   background: var(--color-frame-fill);
   padding: var(--space-s);
   border-radius: var(--radius-l);
-}
-
-.section-heading {
-  font-size: 11px;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 /* ── Content stats ── */
@@ -200,5 +388,51 @@ const contentStats = computed<StatItem[]>(() => {
 .stat__label {
   font-size: var(--font-size-xs);
   color: var(--color-frame-fg-muted);
+}
+
+/* ── Shortcuts grid ── */
+
+.shortcuts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 2px;
+}
+
+.shortcut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xxxs);
+  padding: var(--space-s) var(--space-xxs);
+  border: none;
+  border-radius: var(--radius-m);
+  background: none;
+  color: var(--color-frame-fg-muted);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background var(--duration-instant) var(--ease-default),
+    color var(--duration-instant) var(--ease-default);
+}
+
+.shortcut:hover {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+}
+
+.shortcut__icon {
+  color: var(--color-frame-fg-muted);
+  transition: color var(--duration-instant) var(--ease-default);
+}
+
+.shortcut:hover .shortcut__icon {
+  color: var(--color-frame-fg);
+}
+
+.shortcut__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 </style>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, toRef } from 'vue'
-import { plus, archive, update, customLink, login, tool, home } from '@wordpress/icons'
+import { computed, ref, toRef, onMounted, onBeforeUnmount } from 'vue'
+import { plus, archive, update, customLink, login, tool, home, chevronDown, category } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
+import SiteItem from '@/components/composites/SiteItem.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Button from '@/components/primitives/Button.vue'
 
@@ -12,6 +13,8 @@ import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 
 import { useConversations } from '@/data/useConversations'
 import { useSites } from '@/data/useSites'
+import { useOperatingSystem } from '@/data/useOperatingSystem'
+import { useAddSite } from '@/data/useAddSite'
 
 const props = defineProps<{
   siteId: string
@@ -22,16 +25,57 @@ const props = defineProps<{
   sidebarHidden?: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   select: [conversationId: string]
   'new-task': []
   navigate: [screen: string]
+  'switch-site': [id: string]
+  'navigate-all-sites': []
 }>()
 
-const { getConversations, messages, archiveConversation, unarchiveConversation } = useConversations()
+const { isMac } = useOperatingSystem()
+const { openAddSite } = useAddSite()
+const { conversations, getConversations, messages, archiveConversation, unarchiveConversation } = useConversations()
 const siteConvos = getConversations(toRef(props, 'siteId'))
 
 const { sites: allSites } = useSites()
+const currentSite = computed(() => allSites.value.find(s => s.id === props.siteId))
+const siteName = computed(() => currentSite.value?.name ?? props.siteId)
+
+/* ── Site picker ── */
+const sitePickerOpen = ref(false)
+const sitePickerEl = ref<HTMLElement | null>(null)
+
+function toggleSitePicker() { sitePickerOpen.value = !sitePickerOpen.value }
+function closeSitePicker() { sitePickerOpen.value = false }
+
+function onPickerClickOutside(e: MouseEvent) {
+  if (sitePickerEl.value && !sitePickerEl.value.contains(e.target as Node)) {
+    closeSitePicker()
+  }
+}
+
+onMounted(() => document.addEventListener('pointerdown', onPickerClickOutside))
+onBeforeUnmount(() => document.removeEventListener('pointerdown', onPickerClickOutside))
+
+function getUnreadCount(siteId: string): number {
+  return conversations.value.filter(c => c.siteId === siteId && c.unread && !c.archived).length
+}
+
+function selectSite(id: string) {
+  closeSitePicker()
+  emit('switch-site', id)
+}
+
+function goAllSites() {
+  closeSitePicker()
+  emit('navigate-all-sites')
+}
+
+function addSite() {
+  closeSitePicker()
+  openAddSite()
+}
 const runningCount = computed(() => allSites.value.filter(p => p.status === 'running').length)
 const stoppedCount = computed(() => allSites.value.filter(p => p.status === 'stopped').length)
 
@@ -123,6 +167,49 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
     </div>
 
+    <!-- Site picker (when sidebar hidden) -->
+    <Transition name="site-header">
+      <div v-if="!isAllSites && sidebarHidden" ref="sitePickerEl" class="site-picker-anchor" :class="{ 'has-lights': isMac }">
+        <button class="site-picker pill pill-with-icon" @click="toggleSitePicker">
+          <span class="pill-icon-start">
+            <SiteIcon :favicon="siteFavicon" :site-name="siteId" :size="14" />
+          </span>
+          <span class="pill-label">{{ siteName }}</span>
+          <span class="pill-icon-end">
+            <WPIcon :icon="chevronDown" :size="14" />
+          </span>
+        </button>
+        <Transition name="picker">
+          <div v-if="sitePickerOpen" class="site-picker-panel">
+            <button class="picker-row picker-all-sites" @click="goAllSites">
+              <span class="picker-all-sites-icon">
+                <WPIcon :icon="category" :size="20" />
+              </span>
+              <span class="picker-row-label">All Sites</span>
+            </button>
+            <div class="picker-divider" />
+            <div class="picker-sites">
+              <SiteItem
+                v-for="s in allSites"
+                :key="s.id"
+                :site="s"
+                :active="s.id === siteId"
+                :unread-count="getUnreadCount(s.id)"
+                @select="selectSite"
+              />
+            </div>
+            <div class="picker-divider" />
+            <button class="picker-row picker-add-site" @click="addSite">
+              <span class="picker-add-site-icon">
+                <WPIcon :icon="plus" :size="16" />
+              </span>
+              <span class="picker-row-label">Add site</span>
+            </button>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+
     <!-- Site nav -->
     <nav v-if="!isAllSites" class="site-sections">
       <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'overview' }" @click="$emit('navigate', 'overview')">
@@ -209,6 +296,183 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 .nav-blur {
   z-index: 1;
+}
+
+/* ── Site picker ── */
+
+.site-picker-anchor {
+  position: relative;
+  padding: 0 var(--space-xs);
+  flex-shrink: 0;
+}
+
+.site-picker-anchor.has-lights {
+  padding-block-start: 48px; /* Clear macOS traffic lights within the frame */
+}
+
+/* Site header animate in/out */
+.site-header-enter-active {
+  transition: opacity 300ms var(--ease-default),
+    max-height 300ms var(--ease-default);
+}
+.site-header-leave-active {
+  transition: opacity 200ms var(--ease-default),
+    max-height 200ms var(--ease-default);
+}
+.site-header-enter-from,
+.site-header-leave-to {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+.site-header-enter-to,
+.site-header-leave-from {
+  max-height: 80px;
+  overflow: hidden;
+}
+
+/* ── Pill button ── */
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  width: 100%;
+  padding-inline-start: 12px;
+  padding-inline-end: 8px;
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-s);
+  background: var(--color-frame-bg);
+  color: var(--color-frame-fg);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--duration-instant) var(--ease-default);
+}
+
+.pill-with-icon {
+  padding: 6px;
+  gap: 4px;
+}
+
+.pill:hover {
+  background: var(--color-frame-hover);
+}
+
+.pill-icon-start,
+.pill-icon-end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--color-frame-fg-muted);
+}
+
+.pill-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: start;
+}
+
+/* ── Picker panel ── */
+
+.site-picker-panel {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-xxs));
+  inset-inline-start: var(--space-xs);
+  inset-inline-end: var(--space-xs);
+  min-width: 220px;
+  max-width: 280px;
+  padding: var(--space-xxs);
+  border-radius: var(--radius-m);
+  background: var(--color-chrome-bg);
+  border: 1px solid var(--color-chrome-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-sites {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border: none;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--color-chrome-fg-muted);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  cursor: pointer;
+  text-align: start;
+  transition: background var(--duration-instant) var(--ease-default),
+    color var(--duration-instant) var(--ease-default);
+}
+
+.picker-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-chrome-fg);
+}
+
+.picker-row.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-chrome-fg);
+}
+
+.picker-all-sites-icon,
+.picker-add-site-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.picker-row-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-block: var(--space-xxxs);
+}
+
+/* Picker panel transition */
+.picker-enter-active {
+  transition: opacity var(--duration-quick) var(--ease-default),
+    transform var(--duration-quick) var(--ease-default);
+}
+.picker-leave-active {
+  transition: opacity var(--duration-instant) var(--ease-default),
+    transform var(--duration-instant) var(--ease-default);
+}
+.picker-enter-from,
+.picker-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 /* ── Site sections nav ── */

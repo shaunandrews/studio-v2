@@ -21,21 +21,21 @@ export const seedConversations: Conversation[] = [
   { id: 'cafe-events', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Events page', createdAt: '2026-03-03T13:00:00Z', status: 'running', unread: true, worktree: { branch: 'task/events-page', port: 3956 } },
 
   // Studio Meridian
-  { id: 'portfolio-onboarding', siteId: 'portfolio', agentId: 'wpcom', title: 'Setting up Studio Meridian', createdAt: '2026-01-20T09:00:00Z' },
-  { id: 'portfolio-assistant-1', siteId: 'portfolio', agentId: 'wpcom', title: 'Adding Meridian × Oura case study', createdAt: '2026-02-15T14:00:00Z' },
+  { id: 'portfolio-onboarding', siteId: 'portfolio', agentId: 'wpcom', title: 'Setting up Studio Meridian', createdAt: '2026-01-20T09:00:00Z', status: 'merged', worktree: { branch: 'task/setting-up-studio-meridian', port: 3961 } },
+  { id: 'portfolio-assistant-1', siteId: 'portfolio', agentId: 'wpcom', title: 'Adding Meridian × Oura case study', createdAt: '2026-02-15T14:00:00Z', worktree: { branch: 'task/adding-meridian-oura-case-study', port: 3962 } },
 
   // Wild Lens
-  { id: 'records-design-1', siteId: 'wild-lens', agentId: 'wpcom', title: 'Photo gallery layout', createdAt: '2026-02-05T13:00:00Z' },
+  { id: 'records-design-1', siteId: 'wild-lens', agentId: 'wpcom', title: 'Photo gallery layout', createdAt: '2026-02-05T13:00:00Z', status: 'merged', worktree: { branch: 'task/photo-gallery-layout', port: 3971 } },
 
   // Thread & Co
-  { id: 'mise-assistant-1', siteId: 'thread-and-co', agentId: 'wpcom', title: 'Product card layout', createdAt: '2026-02-08T11:30:00Z' },
+  { id: 'mise-assistant-1', siteId: 'thread-and-co', agentId: 'wpcom', title: 'Product card layout', createdAt: '2026-02-08T11:30:00Z', worktree: { branch: 'task/product-card-layout', port: 3981 } },
 
   // Launchpad
-  { id: 'ledger-assistant-1', siteId: 'launchpad', agentId: 'wpcom', title: 'Landing page template', createdAt: '2026-02-10T09:30:00Z' },
-  { id: 'ledger-code-1', siteId: 'launchpad', agentId: 'wpcom', title: 'Signup flow API', createdAt: '2026-02-11T10:00:00Z' },
+  { id: 'ledger-assistant-1', siteId: 'launchpad', agentId: 'wpcom', title: 'Landing page template', createdAt: '2026-02-10T09:30:00Z', status: 'merged', worktree: { branch: 'task/landing-page-template', port: 3991 } },
+  { id: 'ledger-code-1', siteId: 'launchpad', agentId: 'wpcom', title: 'Signup flow API', createdAt: '2026-02-11T10:00:00Z', status: 'running', worktree: { branch: 'task/signup-flow-api', port: 3992 } },
 
   // DevRef
-  { id: 'fuego-assistant-1', siteId: 'devref', agentId: 'wpcom', title: 'Setting up the docs', createdAt: '2026-02-14T12:30:00Z' },
+  { id: 'fuego-assistant-1', siteId: 'devref', agentId: 'wpcom', title: 'Setting up the docs', createdAt: '2026-02-14T12:30:00Z', status: 'merged', worktree: { branch: 'task/setting-up-the-docs', port: 3995 } },
 ]
 
 export const seedMessages: Message[] = [

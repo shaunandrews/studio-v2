@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { category, chevronDown, moreVertical, wordpress, share, trash, backup, seen, plus } from '@wordpress/icons'
+import { category, chevronDown, moreVertical, share, trash, backup, seen, plus } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
@@ -12,7 +12,6 @@ import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useSites } from '@/data/useSites'
 import { useConversations } from '@/data/useConversations'
 import { useAddSite } from '@/data/useAddSite'
-import { useWPAdmin } from '@/data/useWPAdmin'
 
 const openLabel = ref('Browser')
 const openIconUrl = ref('/icons/chrome.svg')
@@ -47,9 +46,6 @@ const { conversations } = useConversations()
 const { openAddSite } = useAddSite()
 
 const currentSite = computed(() => sites.value.find(s => s.id === props.siteId))
-const themeType = computed(() => currentSite.value?.themeType ?? 'block')
-const siteFeatures = computed(() => currentSite.value?.features ?? [])
-const { adminLinks } = useWPAdmin(themeType, siteFeatures)
 
 /* ── Site picker panel ── */
 const sitePickerOpen = ref(false)
@@ -102,13 +98,6 @@ const statusTooltip = computed(() => {
   if (props.status === 'loading') return props.loadingTarget === 'stopped' ? 'Stopping…' : 'Starting…'
   return 'Start site'
 })
-
-const wpMenuGroups = computed<FlyoutMenuGroup[]>(() => [{
-  items: adminLinks.value.map(link => ({
-    label: link.label,
-    icon: link.icon,
-  })),
-}])
 
 const openMenuGroups = computed<FlyoutMenuGroup[]>(() => [
   {
@@ -221,18 +210,6 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
             </svg>
           </button>
         </Tooltip>
-        <FlyoutMenu :groups="wpMenuGroups" surface="dark" align="end">
-          <template #trigger="{ toggle }">
-            <Tooltip text="Open WordPress admin" placement="bottom">
-              <ButtonSplit
-                :icon="wordpress"
-                label="WordPress"
-                @click="alert('Opening WordPress admin…')"
-                @secondary-click="toggle"
-              />
-            </Tooltip>
-          </template>
-        </FlyoutMenu>
         <FlyoutMenu :groups="openMenuGroups" surface="dark" align="end">
           <template #trigger="{ toggle }">
             <Tooltip :text="`Open in ${openLabel}`" placement="bottom">
