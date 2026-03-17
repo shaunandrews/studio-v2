@@ -383,8 +383,7 @@ function handlePermissionComplete() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
+  color: var(--color-chrome-fg);
   position: relative;
   z-index: 1;
   transition: flex 600ms cubic-bezier(0.4, 0, 0.2, 1);
