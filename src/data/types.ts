@@ -146,3 +146,23 @@ export interface PreviewOperation {
   status: 'pending' | 'fulfilled' | 'rejected'
   error?: string
 }
+
+// --- Personas ---
+
+export interface AuthUser {
+  name: string
+  email: string
+  avatar: string
+}
+
+export interface Persona {
+  id: string
+  name: string
+  description: string
+  icon: string
+  auth: AuthUser | null
+  onboardingCompleted: boolean
+  sites: Site[]
+  conversations: Conversation[]
+  messages: Message[]
+}
