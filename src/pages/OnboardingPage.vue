@@ -229,7 +229,7 @@ function handlePermissionComplete() {
 .light {
   width: 12px; /* OS-native size */
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
 }
 
 .light.close { background: var(--color-macos-close); }
@@ -309,7 +309,7 @@ function handlePermissionComplete() {
 .hero-content {
   position: relative;
   z-index: 2;
-  color: #fff;
+  color: var(--color-theme-fg);
   pointer-events: none;
 }
 
@@ -333,15 +333,14 @@ function handlePermissionComplete() {
   flex-direction: column;
   align-items: center;
   gap: var(--space-m);
-  background: #768eeb; /* Slightly lighter than theme bg */
-  border: 1px solid #5b7bf3;
+  background: #3050d1;
   border-radius: var(--radius-m);
   padding: var(--space-l) var(--space-m);
 }
 
 .illus-dialog__lock {
   opacity: 0.8;
-  color: #fff;
+  color: var(--color-theme-fg);
 }
 
 .illus-dialog__lines {
@@ -354,7 +353,7 @@ function handlePermissionComplete() {
 
 .illus-line {
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   background: #5b7bf3;
 }
 
@@ -428,7 +427,7 @@ function handlePermissionComplete() {
 .content-body {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: start;
   gap: var(--space-xl);
   max-width: 380px;
   width: 100%;
@@ -447,17 +446,14 @@ function handlePermissionComplete() {
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin: 0;
+  white-space: pre-line;
 }
 
 .content-body__pitch {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   margin: 0;
   line-height: 1.5;
-}
-
-.content-body__title {
-  white-space: pre-line;
 }
 
 .content-body__benefits {
@@ -494,12 +490,12 @@ function handlePermissionComplete() {
 
 .content-body__signup {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   margin: 0;
 }
 
 .content-body__link {
-  color: var(--color-frame-theme);
+  color: var(--color-chrome-theme);
   text-decoration: none;
 }
 
@@ -520,7 +516,7 @@ function handlePermissionComplete() {
 
 .perm-item {
   display: flex;
-  align-items: flex-start;
+  align-items: start;
   gap: var(--space-m);
   padding: var(--space-m);
 
