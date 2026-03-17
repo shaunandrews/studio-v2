@@ -15,8 +15,8 @@ const props = defineProps<{
 
 const SPACING = 28
 const DOT_RADIUS = 2
-const INFLUENCE = 120
-const PUSH_STRENGTH = 40
+const INFLUENCE = 100
+const PUSH_STRENGTH = 18
 const RETURN_SPEED = 0.08
 const DAMPING = 0.85
 const REST_THRESHOLD = 0.1

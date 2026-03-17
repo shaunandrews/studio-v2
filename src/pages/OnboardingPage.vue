@@ -48,7 +48,7 @@ function handleSkip() {
           rest-color="rgba(255, 255, 255, 0.1)"
           active-color="rgba(56, 88, 233, 0.9)"
         />
-        <WPIcon :icon="wordpress" :size="48" class="welcome-screen__wp-mark" />
+        <WPIcon :icon="wordpress" :size="120" class="welcome-screen__wp-mark" />
       </div>
 
       <!-- Right: content -->
