@@ -277,9 +277,15 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
       <div v-if="sortedConvos.length === 0" class="site-tasks__empty">
         <div class="empty__illustration">
-          <span class="empty__dot empty__dot--1" />
-          <span class="empty__dot empty__dot--2" />
-          <span class="empty__dot empty__dot--3" />
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <!-- Chat bubble -->
+            <rect x="6" y="8" width="36" height="24" rx="4" stroke="currentColor" stroke-width="1.5" opacity="0.25" />
+            <path d="M14 36l4-4h0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.25" />
+            <!-- Lines representing a message -->
+            <rect x="12" y="15" width="20" height="2" rx="1" fill="currentColor" opacity="0.15" />
+            <rect x="12" y="20" width="14" height="2" rx="1" fill="currentColor" opacity="0.15" />
+            <rect x="12" y="25" width="18" height="2" rx="1" fill="currentColor" opacity="0.15" />
+          </svg>
         </div>
         <p class="empty__heading">AI agents that work for you</p>
         <p class="empty__description">Tasks are conversations with AI agents that can edit your site, install plugins, write content, and more.</p>
@@ -694,29 +700,11 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   text-align: center;
 }
 
-/* ── Empty illustration: typing dots ── */
+/* ── Empty illustration ── */
 
 .empty__illustration {
-  display: flex;
-  gap: 6px;
   margin-block-end: var(--space-m);
-}
-
-.empty__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-frame-border);
-  animation: dot-bounce 1.4s ease-in-out infinite;
-}
-
-.empty__dot--1 { animation-delay: 0s; }
-.empty__dot--2 { animation-delay: 0.15s; }
-.empty__dot--3 { animation-delay: 0.3s; }
-
-@keyframes dot-bounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-  30% { transform: translateY(-4px); opacity: 1; }
+  color: var(--color-frame-fg);
 }
 
 .empty__heading {

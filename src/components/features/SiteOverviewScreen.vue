@@ -30,6 +30,7 @@ const siteLayout = computed(() => site.value?.mockLayout ?? 'cafe')
 const localPath = computed(() => {
   const name = (site.value?.name ?? 'site')
     .toLowerCase()
+    .replace(/['']/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
   return `/Users/shaun/Studio/${name}`
