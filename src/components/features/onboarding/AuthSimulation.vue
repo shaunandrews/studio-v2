@@ -407,4 +407,9 @@ function handleDeny() {
   width: 100%;
   margin-block-start: var(--space-m);
 }
+
+.oauth-card__actions :deep(.tooltip-trigger) {
+  flex: 1;
+  min-width: 0;
+}
 </style>

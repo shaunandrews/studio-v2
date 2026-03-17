@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { wordpress, lock, globe, brush, cloudUpload } from '@wordpress/icons'
+import { wordpress, lock, globe, brush, cloudUpload, mapMarker, connection } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
@@ -158,12 +158,19 @@ function handlePermissionComplete() {
 
             <div class="content-body__perms">
               <div class="perm-item">
-                <span class="perm-item__title">Manage local URLs</span>
-                <span class="perm-item__desc">Add hostnames for your Studio sites to /etc/hosts</span>
+                <WPIcon :icon="mapMarker" :size="20" class="perm-item__icon" />
+                <div class="perm-item__text">
+                  <span class="perm-item__title">Manage local URLs</span>
+                  <span class="perm-item__desc">Add hostnames for your Studio sites to /etc/hosts</span>
+                </div>
               </div>
+              <div class="perm-divider" />
               <div class="perm-item">
-                <span class="perm-item__title">Accept incoming network connections</span>
-                <span class="perm-item__desc">Allows you to access your sites through a browser</span>
+                <WPIcon :icon="connection" :size="20" class="perm-item__icon" />
+                <div class="perm-item__text">
+                  <span class="perm-item__title">Accept incoming network connections</span>
+                  <span class="perm-item__desc">Allows you to access your sites through a browser</span>
+                </div>
               </div>
             </div>
 
@@ -501,18 +508,29 @@ function handlePermissionComplete() {
 .content-body__perms {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
   width: 100%;
+  border: 1px solid var(--color-chrome-border);
+  border-radius: var(--radius-m);
+  background: var(--color-chrome-fill);
 }
 
 .perm-item {
   display: flex;
+  align-items: flex-start;
+  gap: var(--space-m);
+  padding: var(--space-m);
+}
+
+.perm-item__icon {
+  flex-shrink: 0;
+  color: var(--color-chrome-fg-muted);
+  margin-block-start: 2px;
+}
+
+.perm-item__text {
+  display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
-  padding: var(--space-m);
-  border: 1px solid var(--color-chrome-border);
-  border-radius: var(--radius-m);
-  background: var(--color-chrome-fill);
 }
 
 .perm-item__title {
@@ -524,6 +542,12 @@ function handlePermissionComplete() {
   font-size: var(--font-size-s);
   color: var(--color-chrome-fg-muted);
   line-height: 1.4;
+}
+
+.perm-divider {
+  height: 1px;
+  background: var(--color-chrome-border);
+  margin-inline: var(--space-m);
 }
 
 /* ── Popup transitions (OAuth + permission dialog) ── */
