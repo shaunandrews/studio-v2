@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { wordpress } from '@wordpress/icons'
-import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
+import DotGrid from '@/components/features/onboarding/DotGrid.vue'
 import { useOnboarding } from '@/data/useOnboarding'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 import AuthSimulation from '@/components/features/onboarding/AuthSimulation.vue'
@@ -41,31 +40,9 @@ function handleSkip() {
 
     <!-- Welcome screen: always visible as the base layer -->
     <div class="welcome-screen">
-      <!-- Left: theme panel with illustration -->
+      <!-- Left: theme panel with interactive dot grid -->
       <div class="welcome-screen__hero">
-        <WPIcon :icon="wordpress" :size="32" class="welcome-screen__wp-logo" />
-
-        <!-- Stylized app wireframe illustration -->
-        <div class="welcome-screen__illustration">
-          <div class="illus-window">
-            <div class="illus-sidebar">
-              <div class="illus-dot" />
-              <div class="illus-line illus-line--short" />
-              <div class="illus-line" />
-              <div class="illus-line" />
-              <div class="illus-line illus-line--short" />
-            </div>
-            <div class="illus-content">
-              <div class="illus-bar" />
-              <div class="illus-bar illus-bar--wide" />
-              <div class="illus-bar illus-bar--medium" />
-              <div class="illus-row">
-                <div class="illus-bar illus-bar--small" />
-                <div class="illus-bar illus-bar--small illus-bar--accent" />
-              </div>
-            </div>
-          </div>
-        </div>
+        <DotGrid />
       </div>
 
       <!-- Right: content -->
@@ -176,106 +153,9 @@ function handleSkip() {
 
 .welcome-screen__hero {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-theme-bg);
-  color: var(--color-theme-fg);
   position: relative;
-  gap: var(--space-xxl);
-}
-
-.welcome-screen__wp-logo {
-  position: absolute;
-  top: 28px; /* Physical: near traffic lights vertically */
-  left: 50%; /* Physical: centered in hero */
-  transform: translateX(-50%);
-  opacity: 0.8;
-}
-
-/* ── Illustration: stylized app wireframe ── */
-
-.welcome-screen__illustration {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.illus-window {
-  width: 240px;
-  display: flex;
-  gap: 1px;
-  background: var(--color-theme-fill);
-  border: 1px solid var(--color-theme-border);
-  border-radius: var(--radius-m);
+  background: var(--color-theme-bg);
   overflow: hidden;
-  padding: var(--space-s);
-}
-
-.illus-sidebar {
-  width: 56px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  padding: var(--space-xs);
-}
-
-.illus-dot {
-  width: 20px;
-  height: 20px;
-  border-radius: var(--radius-full);
-  background: var(--color-theme-border);
-  margin-block-end: var(--space-xs);
-}
-
-.illus-line {
-  height: 8px;
-  border-radius: 4px;
-  background: var(--color-theme-border);
-}
-
-.illus-line--short {
-  width: 70%;
-}
-
-.illus-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-  padding: var(--space-s);
-}
-
-.illus-bar {
-  height: 12px;
-  border-radius: 4px;
-  background: var(--color-theme-border);
-}
-
-.illus-bar--wide {
-  width: 100%;
-}
-
-.illus-bar--medium {
-  width: 75%;
-}
-
-.illus-bar--small {
-  flex: 1;
-  height: 20px;
-}
-
-.illus-bar--accent {
-  background: var(--color-theme-fill);
-  border: 1px solid var(--color-theme-border);
-}
-
-.illus-row {
-  display: flex;
-  gap: var(--space-xs);
-  margin-block-start: auto;
 }
 
 /* ── Right content panel ── */

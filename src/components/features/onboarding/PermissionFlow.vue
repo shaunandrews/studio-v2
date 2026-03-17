@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { wordpress, check, lock } from '@wordpress/icons'
+import { check, lock } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import PermissionDialog from './PermissionDialog.vue'
@@ -38,7 +38,6 @@ function handleCancel() {
     <div class="permission-screen">
       <!-- Left: theme panel with lock illustration -->
       <div class="permission-screen__hero">
-        <WPIcon :icon="wordpress" :size="32" class="permission-screen__wp-logo" />
 
         <div class="permission-screen__illustration">
           <div class="illus-dialog">
@@ -122,14 +121,6 @@ function handleCancel() {
   background: var(--color-theme-bg);
   color: var(--color-theme-fg);
   position: relative;
-}
-
-.permission-screen__wp-logo {
-  position: absolute;
-  top: 28px; /* Physical: near traffic lights vertically */
-  left: 50%; /* Physical: centered in hero */
-  transform: translateX(-50%);
-  opacity: 0.8;
 }
 
 /* ── Illustration: stylized macOS permission dialog ── */
