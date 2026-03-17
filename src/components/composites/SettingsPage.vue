@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import { moreVertical, settings as settingsIcon, commentAuthorAvatar, tool, people } from '@wordpress/icons'
+import { moreVertical, settings as settingsIcon, commentAuthorAvatar, tool, people, bug } from '@wordpress/icons'
 import BackdropPage from '@/layouts/BackdropPage.vue'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
@@ -18,11 +18,11 @@ import { useOperatingSystem } from '@/data/useOperatingSystem'
 
 const props = withDefaults(defineProps<{
   open: boolean
-  initialTab?: 'general' | 'agents' | 'skills' | 'account'
+  initialTab?: 'general' | 'agents' | 'skills' | 'account' | 'prototype'
   /** Render inline with window chrome — for design overviews */
   embedded?: boolean
   /** Lock to a specific tab (hides tab interaction) */
-  lockedTab?: 'general' | 'agents' | 'skills' | 'account'
+  lockedTab?: 'general' | 'agents' | 'skills' | 'account' | 'prototype'
   /** Override the OS chrome per-instance (for design overviews) */
   osOverride?: 'macos' | 'windows'
   /** Surface context: light (frame) or dark (chrome backdrop) */
@@ -50,7 +50,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKeydown))
 
 // -- Nav --
 
-type Tab = 'general' | 'agents' | 'skills' | 'account'
+type Tab = 'general' | 'agents' | 'skills' | 'account' | 'prototype'
 const activeTab = ref<Tab>('general')
 
 const tabs: { id: Tab, label: string, icon: object }[] = [
@@ -58,6 +58,7 @@ const tabs: { id: Tab, label: string, icon: object }[] = [
   { id: 'agents', label: 'Agents', icon: commentAuthorAvatar },
   { id: 'skills', label: 'Skills', icon: tool },
   { id: 'account', label: 'Account', icon: people },
+  { id: 'prototype', label: 'Prototype', icon: bug },
 ]
 
 // -- Appearance --
@@ -673,16 +674,6 @@ function skillInstallLabel(id: string): string {
           {{ tab.label }}
         </button>
 
-        <!-- Prototype controls pinned to bottom of sidebar -->
-        <div class="proto-controls">
-          <Toggle v-model="isWindows" label="Windows mode" surface="dark" size="small" @update:model-value="(v: boolean) => setOS(v ? 'windows' : 'macos')" />
-          <div class="proto-row">
-            <input v-model="apiKey" type="password" class="proto-input" placeholder="API key (sk-ant-...)" spellcheck="false" autocomplete="off" />
-            <Button v-if="apiKey" variant="primary" size="small" surface="dark" :label="keySaved ? 'Saved' : 'Save'" :disabled="keySaved" @click="saveKey" />
-            <Button v-if="keyConfigured && !keySaved" variant="tertiary" size="small" surface="dark" label="Clear" @click="clearKey" />
-          </div>
-          <Button variant="secondary" size="small" surface="dark" label="Reset all data" @click="() => { localStorage.clear(); location.reload() }" />
-        </div>
       </nav>
 
       <!-- Content area (scrollable, fluid width) -->
@@ -873,6 +864,35 @@ function skillInstallLabel(id: string): string {
           </div>
         </template>
 
+        <!-- ═══ Prototype ═══ -->
+        <template v-if="activeTab === 'prototype'">
+          <div class="settings-section">
+            <Text variant="body-small" color="muted" :surface="surfaceMode" class="proto-notice">These settings are specific to this prototype and won't be part of the shipping product.</Text>
+          </div>
+
+          <div class="settings-section">
+            <Toggle v-model="isWindows" label="Windows mode" :surface="surfaceMode" size="small" @update:model-value="(v: boolean) => setOS(v ? 'windows' : 'macos')">
+              <template #hint>Switch the app chrome between macOS and Windows styles.</template>
+            </Toggle>
+          </div>
+
+          <div class="settings-section">
+            <Text variant="body-small" weight="semibold" :surface="surfaceMode" class="settings-field-label">API key</Text>
+            <div class="proto-row">
+              <input v-model="apiKey" type="password" class="proto-input" placeholder="sk-ant-..." spellcheck="false" autocomplete="off" />
+              <Button v-if="apiKey" variant="primary" size="small" :surface="surfaceMode" :label="keySaved ? 'Saved' : 'Save'" :disabled="keySaved" @click="saveKey" />
+              <Button v-if="keyConfigured && !keySaved" variant="tertiary" size="small" :surface="surfaceMode" label="Clear" @click="clearKey" />
+            </div>
+            <Text variant="body-small" color="muted" :surface="surfaceMode" class="settings-hint">Anthropic API key for AI chat features.</Text>
+          </div>
+
+          <div class="settings-section">
+            <Text variant="body-small" weight="semibold" :surface="surfaceMode" class="settings-field-label settings-field-label--danger">Danger zone</Text>
+            <Button variant="secondary" size="small" :surface="surfaceMode" label="Reset all data" @click="() => { localStorage.clear(); location.reload() }" />
+            <Text variant="body-small" color="muted" :surface="surfaceMode" class="settings-hint">Clears all local storage and reloads the prototype.</Text>
+          </div>
+        </template>
+
       </div>
     </div>
   </BackdropPage>
@@ -884,10 +904,13 @@ function skillInstallLabel(id: string): string {
    ═══════════════════════════════════════════════════════ */
 
 .settings-columns {
-  flex: 1;
   display: flex;
   min-height: 0;
+  max-width: 840px;
+  width: 100%;
+  margin-inline: auto;
   padding-block-start: 56px; /* Clear header height */
+  flex: 1;
 }
 
 /* ── Sidebar nav ── */
@@ -1056,8 +1079,6 @@ function skillInstallLabel(id: string): string {
 .settings-content {
   flex: 1;
   min-width: 0;
-  max-width: 680px;
-  margin-inline: auto;
   overflow-y: auto;
   padding: 0 var(--space-xl) var(--space-xl);
 }
@@ -1278,18 +1299,14 @@ function skillInstallLabel(id: string): string {
 
 .surface-dark .settings-meter-fill { background: var(--color-chrome-theme); }
 
-/* -- Prototype controls (pinned to sidebar bottom) -- */
+/* -- Prototype tab -- */
 
-.proto-controls {
-  margin-block-start: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  color: rgba(255, 255, 255, 0.5);
-  padding: var(--space-s);
-  background: var(--color-chrome-border);
+.proto-notice {
+  line-height: 1.5;
+  padding: var(--space-s) var(--space-m);
+  background: var(--color-chrome-hover);
+  border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-m);
-  margin-block-end: var(--space-m);
 }
 
 .proto-row { display: flex; gap: var(--space-xxs); align-items: center; }
@@ -1297,16 +1314,23 @@ function skillInstallLabel(id: string): string {
 .proto-input {
   flex: 1;
   min-width: 0;
-  height: 32px;
-  padding: 0 var(--space-xs);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  height: 40px;
+  padding: 0 var(--space-s);
+  border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-s);
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.8);
+  background: var(--color-chrome-fill);
+  color: var(--color-chrome-fg);
   font-family: inherit;
-  font-size: var(--font-size-s);
+  font-size: var(--font-size-m);
 }
 
-.proto-input:focus { outline: 1px solid rgba(255, 255, 255, 0.3); outline-offset: -1px; }
-.proto-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+.proto-input:focus {
+  outline: none;
+  border-color: var(--color-chrome-theme);
+  box-shadow: 0 0 0 1px var(--color-chrome-theme);
+}
+
+.proto-input::placeholder { color: var(--color-chrome-fg-muted); }
+
+.settings-field-label--danger { color: var(--color-frame-danger) !important; }
 </style>
