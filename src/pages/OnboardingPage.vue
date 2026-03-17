@@ -2,13 +2,16 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
+import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
 import { useOnboarding } from '@/data/useOnboarding'
+import { useOperatingSystem } from '@/data/useOperatingSystem'
 import AuthSimulation from '@/components/features/onboarding/AuthSimulation.vue'
 import PermissionFlow from '@/components/features/onboarding/PermissionFlow.vue'
 
 const route = useRoute()
 const router = useRouter()
 const { markVisited } = useOnboarding()
+const { isWindows } = useOperatingSystem()
 
 markVisited('welcome')
 
@@ -25,7 +28,15 @@ function handleSkip() {
 </script>
 
 <template>
-  <div class="onboarding-page">
+  <div class="onboarding-page" :class="{ 'is-windows': isWindows }">
+    <!-- Window controls -->
+    <WindowsTitlebar v-if="isWindows" />
+    <div v-else class="traffic-lights">
+      <span class="light close" />
+      <span class="light minimize" />
+      <span class="light maximize" />
+    </div>
+
     <!-- Welcome screen: always visible as the base layer -->
     <div class="welcome-screen">
       <div class="welcome-screen__content">
@@ -80,6 +91,43 @@ function handleSkip() {
 .onboarding-page {
   position: fixed;
   inset: 0;
+  background: var(--color-chrome-bg);
+}
+
+/* ── Traffic lights (macOS) ── */
+
+.traffic-lights {
+  position: absolute;
+  top: 18px; /* Physical: fixed window position */
+  left: 16px; /* Physical: fixed window position */
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  -webkit-app-region: drag;
+}
+
+.light {
+  width: 12px; /* OS-native size */
+  height: 12px;
+  border-radius: 50%;
+}
+
+.light.close { background: var(--color-macos-close); }
+.light.minimize { background: var(--color-macos-minimize); }
+.light.maximize { background: var(--color-macos-maximize); }
+
+/* ── Windows overrides ── */
+
+.onboarding-page.is-windows {
+  display: flex;
+  flex-direction: column;
+}
+
+.onboarding-page.is-windows .welcome-screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
 /* ── Welcome screen (persistent base) ── */
