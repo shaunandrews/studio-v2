@@ -6,13 +6,9 @@ import {
   people,
   postList,
   comment,
-  tag,
-  plus,
-  bell,
-  chartBar,
-  media,
-  menu,
   lock,
+  cloudUpload,
+  globe,
 } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
@@ -30,15 +26,11 @@ markVisited('oauth')
 const isLoading = ref(false)
 
 const scopes = [
-  { icon: people, label: 'Personal details' },
-  { icon: postList, label: 'Posts' },
-  { icon: comment, label: 'Comments' },
-  { icon: tag, label: 'Tags and categories' },
-  { icon: plus, label: 'Blog follows' },
-  { icon: bell, label: 'Notifications' },
-  { icon: chartBar, label: 'Stats' },
-  { icon: media, label: 'Media' },
-  { icon: menu, label: 'Menus' },
+  { icon: people, label: 'Email address' },
+  { icon: postList, label: 'Your sites' },
+  { icon: comment, label: 'Manage and edit sites' },
+  { icon: cloudUpload, label: 'Sync content' },
+  { icon: globe, label: 'Preview sites' },
 ]
 
 async function handleApprove() {
@@ -114,11 +106,11 @@ function handleDeny() {
             />
             <div class="oauth-card__user-info">
               <span class="oauth-card__user-name">Shaun Andrews</span>
-              <span class="oauth-card__user-meta">shaunandrews - 733 sites</span>
+              <span class="oauth-card__user-meta">shaunandrews - 7 sites</span>
             </div>
           </div>
 
-          <a href="#" class="oauth-card__link" @click.prevent>Log in with a different account</a>
+          <a href="#" class="oauth-card__link oauth-card__link--centered" @click.prevent>Log in with a different account</a>
 
           <p class="oauth-card__scopes-label">Studio is requesting access to:</p>
           <div class="oauth-card__scopes">
@@ -132,17 +124,17 @@ function handleDeny() {
             </div>
           </div>
 
-          <a href="#" class="oauth-card__link" @click.prevent>Learn more about how Studio uses your data</a>
-
           <div class="oauth-card__actions">
             <Button
               variant="secondary"
+              size="large"
               label="Deny"
               width="full"
               @click="handleDeny"
             />
             <Button
               variant="primary"
+              size="large"
               :label="isLoading ? 'Approving...' : 'Approve'"
               width="full"
               :disabled="isLoading"
@@ -334,7 +326,6 @@ function handleDeny() {
   align-items: center;
   gap: var(--space-m);
   width: 100%;
-  padding: var(--space-m);
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-s);
   margin-block-end: var(--space-m);
@@ -374,6 +365,10 @@ function handleDeny() {
   margin-block-end: var(--space-xl);
 }
 
+.oauth-card__link--centered {
+  align-self: center;
+}
+
 .oauth-card__link:hover {
   text-decoration: underline;
 }
@@ -386,9 +381,9 @@ function handleDeny() {
 }
 
 .oauth-card__scopes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-m) var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
   width: 100%;
   margin-block-end: var(--space-xl);
 }
