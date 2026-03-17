@@ -308,9 +308,8 @@ function handlePermissionComplete() {
 
 .hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   color: #fff;
-  opacity: 0.5;
   pointer-events: none;
 }
 
@@ -334,7 +333,7 @@ function handlePermissionComplete() {
   flex-direction: column;
   align-items: center;
   gap: var(--space-m);
-  background: #4668eb; /* Slightly lighter than theme bg */
+  background: #768eeb; /* Slightly lighter than theme bg */
   border: 1px solid #5b7bf3;
   border-radius: var(--radius-m);
   padding: var(--space-l) var(--space-m);
