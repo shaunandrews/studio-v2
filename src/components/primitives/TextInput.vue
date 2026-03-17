@@ -123,11 +123,11 @@ defineEmits<{
 }
 
 .text-input.surface-dark .text-input__field::placeholder {
-	color: rgba(255, 255, 255, 0.35);
+	color: var(--color-chrome-fg-muted);
 }
 
 .text-input.surface-dark .text-input__field:disabled {
-	color: rgba(255, 255, 255, 0.4);
+	color: var(--color-chrome-fg-muted);
 	background: var(--color-chrome-hover);
 	border-style: dashed;
 }

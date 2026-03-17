@@ -1,12 +1,12 @@
 :root {
   /* Chrome (app frame, sidebar, titlebar) */
-  --color-chrome-bg: #1e1e1e;
+  --color-chrome-bg: #f0f0f0;
   --color-chrome-theme: #3858e9;
-  --color-chrome-fg: #fff;
-  --color-chrome-fg-muted: rgba(255, 255, 255, 0.7);
-  --color-chrome-border: rgba(255, 255, 255, 0.1);
-  --color-chrome-fill: rgba(255, 255, 255, 0.02);
-  --color-chrome-hover: rgba(255, 255, 255, 0.05);
+  --color-chrome-fg: #1e1e1e;
+  --color-chrome-fg-muted: rgba(0, 0, 0, 0.6);
+  --color-chrome-border: rgba(0, 0, 0, 0.08);
+  --color-chrome-fill: rgba(0, 0, 0, 0.03);
+  --color-chrome-hover: rgba(0, 0, 0, 0.06);
 
   /* Frame (content panels, inputs, cards) */
   --color-frame-bg: #fff;
@@ -48,6 +48,13 @@
 /* Dark tokens — applied by OS preference or manual toggle */
 @media (prefers-color-scheme: dark) {
   :root:not([data-color-scheme="light"]) {
+    --color-chrome-bg: #1e1e1e;
+    --color-chrome-fg: #fff;
+    --color-chrome-fg-muted: rgba(255, 255, 255, 0.7);
+    --color-chrome-border: rgba(255, 255, 255, 0.1);
+    --color-chrome-fill: rgba(255, 255, 255, 0.02);
+    --color-chrome-hover: rgba(255, 255, 255, 0.05);
+
     --color-frame-bg: #2c2c2c;
     --color-frame-theme: #5b7bf3;
     --color-frame-fg: #fff;
@@ -64,6 +71,13 @@
 
 /* Force dark when manually selected */
 :root[data-color-scheme="dark"] {
+  --color-chrome-bg: #1e1e1e;
+  --color-chrome-fg: #fff;
+  --color-chrome-fg-muted: rgba(255, 255, 255, 0.7);
+  --color-chrome-border: rgba(255, 255, 255, 0.1);
+  --color-chrome-fill: rgba(255, 255, 255, 0.02);
+  --color-chrome-hover: rgba(255, 255, 255, 0.05);
+
   --color-frame-bg: #2c2c2c;
   --color-frame-theme: #5b7bf3;
   --color-frame-fg: #fff;

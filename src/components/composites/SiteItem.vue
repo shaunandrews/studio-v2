@@ -55,12 +55,12 @@ function toggleStatus() {
 }
 
 .site-list-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-chrome-fill);
   color: var(--color-chrome-fg);
 }
 
 .site-list-item.active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-chrome-hover);
   color: var(--color-chrome-fg);
 }
 

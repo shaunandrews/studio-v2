@@ -97,7 +97,7 @@ defineEmits<{
 
 .toggle__input:checked + .toggle__track::before {
 	inset-inline-start: 17px;
-	background: var(--color-frame-bg);
+	background: #fff;
 }
 
 .toggle__label-text {
@@ -139,7 +139,7 @@ defineEmits<{
 }
 
 .toggle-field.surface-dark .toggle__input:checked + .toggle__track::before {
-	background: var(--color-chrome-fg);
+	background: #fff;
 }
 
 .toggle-field.surface-dark .toggle__hint {
