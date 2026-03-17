@@ -33,46 +33,48 @@ async function handleOK() {
     <div class="dialog-box">
       <!-- Lock + app icon -->
       <div class="dialog-icon-stack">
-        <div class="dialog-lock">
-          <svg viewBox="0 0 32 32" width="48" height="48">
-            <!-- Lock body -->
-            <rect x="6" y="14" width="20" height="15" rx="2" fill="#c8a84e" />
-            <rect x="7" y="15" width="18" height="13" rx="1.5" fill="url(#lock-gradient)" />
-            <!-- Lock shackle -->
-            <path d="M10 14V10a6 6 0 0 1 12 0v4" fill="none" stroke="#8a8a8a" stroke-width="2.5" stroke-linecap="round" />
-            <path d="M10 14V10a6 6 0 0 1 12 0v4" fill="none" stroke="url(#shackle-gradient)" stroke-width="2" stroke-linecap="round" />
-            <!-- Keyhole -->
-            <circle cx="16" cy="21" r="2" fill="#5a4a20" />
-            <rect x="15" y="22" width="2" height="3" rx="0.5" fill="#5a4a20" />
-            <defs>
-              <linearGradient id="lock-gradient" x1="7" y1="15" x2="7" y2="28">
-                <stop offset="0%" stop-color="#f0d56c" />
-                <stop offset="100%" stop-color="#c8a84e" />
-              </linearGradient>
-              <linearGradient id="shackle-gradient" x1="10" y1="6" x2="10" y2="14">
-                <stop offset="0%" stop-color="#c0c0c0" />
-                <stop offset="100%" stop-color="#9a9a9a" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
+        <svg class="dialog-lock" viewBox="0 0 40 52" width="40" height="52" fill="none">
+          <!-- Shackle -->
+          <path d="M12 22V16a8 8 0 0 1 16 0v6" stroke="#9a9a9a" stroke-width="3" stroke-linecap="round" />
+          <path d="M12 22V16a8 8 0 0 1 16 0v6" stroke="url(#shackle-grad)" stroke-width="2.5" stroke-linecap="round" />
+          <!-- Body -->
+          <rect x="4" y="22" width="32" height="26" rx="3" fill="url(#body-grad)" />
+          <rect x="5" y="23" width="30" height="24" rx="2.5" fill="url(#body-face)" />
+          <!-- Keyhole -->
+          <circle cx="20" cy="34" r="2.5" fill="#6b5a28" />
+          <rect x="19" y="35.5" width="2" height="4" rx="0.5" fill="#6b5a28" />
+          <defs>
+            <linearGradient id="shackle-grad" x1="12" y1="8" x2="12" y2="22">
+              <stop offset="0%" stop-color="#c8c8c8" />
+              <stop offset="100%" stop-color="#8a8a8a" />
+            </linearGradient>
+            <linearGradient id="body-grad" x1="4" y1="22" x2="4" y2="48">
+              <stop offset="0%" stop-color="#d4a832" />
+              <stop offset="100%" stop-color="#b8922a" />
+            </linearGradient>
+            <linearGradient id="body-face" x1="5" y1="23" x2="5" y2="47">
+              <stop offset="0%" stop-color="#f2d56c" />
+              <stop offset="100%" stop-color="#d4a832" />
+            </linearGradient>
+          </defs>
+        </svg>
         <div class="dialog-app-icon">
           <WPIcon :icon="wordpress" :size="20" />
         </div>
       </div>
 
-      <!-- Text -->
-      <p class="dialog-title">
+      <!-- Title -->
+      <h2 class="dialog-title">
         <strong>"WordPress Studio"</strong> wants to make changes.
-      </p>
+      </h2>
       <p class="dialog-subtitle">
         Enter your password to allow this.
       </p>
 
-      <!-- Password fields -->
+      <!-- Fields: stacked label + input -->
       <div class="dialog-fields">
         <div class="dialog-field">
-          <label class="dialog-field__label">User Name:</label>
+          <label class="dialog-field__label">User Name</label>
           <input
             class="dialog-field__input"
             type="text"
@@ -81,16 +83,17 @@ async function handleOK() {
           />
         </div>
         <div class="dialog-field">
-          <label class="dialog-field__label">Password:</label>
+          <label class="dialog-field__label">Password</label>
           <input
             v-model="password"
-            class="dialog-field__input dialog-field__input--password"
+            class="dialog-field__input"
             type="password"
+            autofocus
           />
         </div>
       </div>
 
-      <!-- Buttons -->
+      <!-- Full-width buttons -->
       <div class="dialog-buttons">
         <button class="dialog-btn dialog-btn--cancel" @click="handleCancel">
           Cancel
@@ -100,7 +103,7 @@ async function handleOK() {
           :disabled="isAuthenticating"
           @click="handleOK"
         >
-          {{ isAuthenticating ? 'OK' : 'OK' }}
+          OK
         </button>
       </div>
     </div>
@@ -114,18 +117,18 @@ async function handleOK() {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-block-start: 140px;
+  padding-block-start: 100px;
   z-index: 60;
 }
 
 .dialog-box {
-  width: 340px;
+  width: 260px;
   background: var(--color-frame-bg);
   border-radius: var(--radius-l);
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.3),
     0 0 0 0.5px rgba(0, 0, 0, 0.12);
-  padding: var(--space-l) var(--space-xl) var(--space-l);
+  padding: var(--space-l) var(--space-l) var(--space-m);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -137,18 +140,19 @@ async function handleOK() {
 
 .dialog-icon-stack {
   position: relative;
+  width: 40px;
+  height: 52px;
   margin-block-end: var(--space-m);
 }
 
 .dialog-lock {
-  width: 48px;
-  height: 48px;
+  display: block;
 }
 
 .dialog-app-icon {
   position: absolute;
-  inset-block-end: -4px;
-  inset-inline-end: -8px;
+  inset-block-end: -2px;
+  inset-inline-end: -10px;
   width: 24px;
   height: 24px;
   background: var(--color-frame-fg);
@@ -157,13 +161,14 @@ async function handleOK() {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 /* ── Text ── */
 
 .dialog-title {
   font-size: var(--font-size-s);
+  font-weight: var(--font-weight-regular);
   color: var(--color-frame-fg);
   margin: 0 0 var(--space-xxs);
   text-align: center;
@@ -177,47 +182,45 @@ async function handleOK() {
   text-align: center;
 }
 
-/* ── Form fields ── */
+/* ── Form fields: stacked label + input ── */
 
 .dialog-fields {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: var(--space-s);
   margin-block-end: var(--space-l);
 }
 
 .dialog-field {
   display: flex;
-  align-items: center;
-  gap: var(--space-s);
+  flex-direction: column;
+  gap: var(--space-xxxs);
 }
 
 .dialog-field__label {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg);
-  white-space: nowrap;
-  width: 88px;
-  text-align: end;
-  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-frame-fg-muted);
+  font-weight: var(--font-weight-medium);
 }
 
 .dialog-field__input {
-  flex: 1;
-  height: 24px;
+  width: 100%;
+  height: 28px;
   padding: 0 var(--space-xs);
   border: 1px solid var(--color-frame-border);
-  border-radius: 4px;
+  border-radius: var(--radius-s);
   background: var(--color-frame-bg);
   color: var(--color-frame-fg);
   font-size: var(--font-size-s);
   font-family: var(--font-family);
   outline: none;
+  box-sizing: border-box;
 }
 
 .dialog-field__input:focus {
   border-color: var(--color-frame-theme);
-  box-shadow: 0 0 0 2px rgba(56, 88, 233, 0.3);
+  box-shadow: 0 0 0 3px rgba(56, 88, 233, 0.25);
 }
 
 .dialog-field__input[readonly] {
@@ -225,25 +228,23 @@ async function handleOK() {
   color: var(--color-frame-fg-muted);
 }
 
-/* ── Buttons (macOS style: right-aligned, Cancel + OK) ── */
+/* ── Full-width buttons ── */
 
 .dialog-buttons {
   display: flex;
-  justify-content: flex-end;
   gap: var(--space-xs);
   width: 100%;
 }
 
 .dialog-btn {
-  height: 24px;
-  padding-inline: var(--space-m);
+  flex: 1;
+  height: 32px;
   border-radius: var(--radius-s);
   font-size: var(--font-size-s);
   font-family: var(--font-family);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   border: none;
-  line-height: 1;
 }
 
 .dialog-btn--cancel {
@@ -259,7 +260,6 @@ async function handleOK() {
 .dialog-btn--ok {
   background: var(--color-frame-theme);
   color: #fff;
-  min-width: 64px;
 }
 
 .dialog-btn--ok:hover {
