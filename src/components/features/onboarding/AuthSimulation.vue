@@ -59,7 +59,7 @@ function handleDeny() {
 </script>
 
 <template>
-  <div class="oauth-backdrop">
+  <div class="oauth-overlay">
     <div class="browser-window" :class="{ 'is-mac': isMac }">
       <!-- macOS titlebar -->
       <div v-if="isMac" class="browser-titlebar browser-titlebar--mac">
@@ -156,17 +156,16 @@ function handleDeny() {
 </template>
 
 <style scoped>
-/* ── Backdrop ── */
+/* ── Overlay (dimmed backdrop behind the browser window) ── */
 
-.oauth-backdrop {
+.oauth-overlay {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-chrome-bg);
-  font-family: var(--font-family);
-  -webkit-font-smoothing: antialiased;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 50;
   padding: var(--space-xxl);
 }
 

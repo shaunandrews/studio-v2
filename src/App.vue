@@ -10,11 +10,7 @@ const layoutName = computed(() => (route.meta.layout as string) || 'bare')
 <template>
   <MainLayout v-if="layoutName === 'main'" />
   <template v-else>
-    <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </router-view>
+    <router-view />
   </template>
 </template>
 

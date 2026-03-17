@@ -25,24 +25,16 @@ const router = createRouter({
       meta: { layout: 'bare', setup: true },
     },
 
-    // Onboarding routes
+    // Onboarding — single page with overlay steps
     {
-      name: 'welcome',
       path: '/welcome',
-      component: () => import('@/components/features/onboarding/WelcomeScreen.vue'),
+      component: () => import('@/pages/OnboardingPage.vue'),
       meta: { layout: 'bare', setup: true },
-    },
-    {
-      name: 'oauth',
-      path: '/oauth',
-      component: () => import('@/components/features/onboarding/AuthSimulation.vue'),
-      meta: { layout: 'bare', setup: true },
-    },
-    {
-      name: 'permissions',
-      path: '/permissions',
-      component: () => import('@/components/features/onboarding/PermissionPrep.vue'),
-      meta: { layout: 'bare', setup: true },
+      children: [
+        { name: 'welcome', path: '', component: { render: () => null } },
+        { name: 'oauth', path: '/oauth', component: { render: () => null } },
+        { name: 'permissions', path: '/permissions', component: { render: () => null } },
+      ],
     },
 
     // App routes
