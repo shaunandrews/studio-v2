@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { wordpress, check, lock } from '@wordpress/icons'
+import { wordpress, check, lock, globe, brush, cloudUpload } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
@@ -17,6 +17,34 @@ const { markVisited } = useOnboarding()
 const { isWindows } = useOperatingSystem()
 
 markVisited('welcome')
+
+const headlines = [
+  'Build something\nbeautiful',
+  'Your WordPress\nplayground',
+  'Create, test,\nand launch',
+  'Design without\nlimits',
+]
+
+const headlineIndex = ref(0)
+let headlineTimer: ReturnType<typeof setInterval>
+
+onMounted(() => {
+  headlineTimer = setInterval(() => {
+    headlineIndex.value = (headlineIndex.value + 1) % headlines.length
+  }, 4000)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(headlineTimer)
+})
+
+const currentHeadline = computed(() => headlines[headlineIndex.value])
+
+const benefits = [
+  { icon: brush, text: 'Use AI to build sites, themes, and plugins' },
+  { icon: globe, text: 'Share preview sites with clients and colleagues' },
+  { icon: cloudUpload, text: 'Seamlessly sync with WordPress.com and Pressable' },
+]
 
 const step = computed(() => {
   if (route.name === 'permissions') return 'permissions'
@@ -108,22 +136,26 @@ function handlePermissionComplete() {
           <!-- Welcome content -->
           <div v-if="step === 'welcome'" key="welcome" class="content-body">
             <div class="content-body__brand">
-              <h1 class="content-body__title">Welcome to<br />WordPress Studio</h1>
+              <Transition name="headline" mode="out-in">
+                <h1 class="content-body__title" :key="headlineIndex">{{ currentHeadline }}</h1>
+              </Transition>
               <p class="content-body__pitch">
-                Start by connecting your WordPress.com account to unlock the full power of Studio.
+                Connect your WordPress.com account to unlock the full power of Studio.
               </p>
             </div>
 
-            <ul class="content-body__benefits">
-              <li>Share preview sites with clients and colleagues</li>
-              <li>Seamlessly sync with WordPress.com and Pressable</li>
-              <li>Get smart suggestions from the Studio Assistant</li>
-            </ul>
+            <div class="content-body__benefits">
+              <div v-for="benefit in benefits" :key="benefit.text" class="benefit-item">
+                <WPIcon :icon="benefit.icon" :size="20" class="benefit-item__icon" />
+                <span class="benefit-item__text">{{ benefit.text }}</span>
+              </div>
+            </div>
 
             <div class="content-body__actions">
               <Button
                 variant="primary"
-                label="Log in to WordPress.com"
+                size="large"
+                label="Log in with WordPress.com"
                 width="full"
                 @click="handleLogin"
               />
@@ -441,29 +473,52 @@ function handlePermissionComplete() {
   line-height: 1.5;
 }
 
+.content-body__title {
+  white-space: pre-line;
+}
+
 .content-body__benefits {
-  list-style: none;
-  padding: 0;
-  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
+  gap: var(--space-m);
   width: 100%;
 }
 
-.content-body__benefits li {
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
-  padding-inline-start: var(--space-l);
-  position: relative;
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
 }
 
-.content-body__benefits li::before {
-  content: '✓';
-  position: absolute;
-  inset-inline-start: 0;
-  color: var(--color-status-running);
-  font-weight: var(--font-weight-semibold);
+.benefit-item__icon {
+  flex-shrink: 0;
+  color: var(--color-chrome-fg-muted);
+}
+
+.benefit-item__text {
+  font-size: var(--font-size-s);
+  color: var(--color-chrome-fg-muted);
+  line-height: 1.4;
+}
+
+/* ── Headline rotation transition ── */
+
+.headline-enter-active {
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.headline-leave-active {
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.headline-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.headline-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
 .content-body__actions {
