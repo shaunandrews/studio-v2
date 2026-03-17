@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { check } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import PermissionDialog from './PermissionDialog.vue'
 import { useOnboarding } from '@/data/useOnboarding'
 
-const router = useRouter()
 const { markVisited } = useOnboarding()
 
 markVisited('permissions')
@@ -36,27 +34,27 @@ function handleCancel() {
 
 <template>
   <div class="permission-flow">
-    <!-- Prep screen: explains what permissions are needed -->
-    <div class="prep-overlay">
-      <div class="prep-card">
-        <h1 class="prep-card__title">Permissions needed</h1>
-        <p class="prep-card__subtitle">You'll need to grant Studio access to:</p>
+    <!-- Full-screen prep content -->
+    <div class="permission-screen">
+      <div class="permission-screen__content">
+        <h1 class="permission-screen__title">Permissions needed</h1>
+        <p class="permission-screen__subtitle">You'll need to grant Studio access to:</p>
 
-        <div class="prep-card__list">
+        <div class="permission-screen__list">
           <div
             v-for="perm in permissions"
             :key="perm.title"
-            class="prep-card__item"
+            class="permission-screen__item"
           >
-            <WPIcon :icon="check" :size="24" class="prep-card__check" />
-            <div class="prep-card__item-text">
-              <span class="prep-card__item-title">{{ perm.title }}</span>
-              <span class="prep-card__item-desc">{{ perm.description }}</span>
+            <WPIcon :icon="check" :size="24" class="permission-screen__check" />
+            <div class="permission-screen__item-text">
+              <span class="permission-screen__item-title">{{ perm.title }}</span>
+              <span class="permission-screen__item-desc">{{ perm.description }}</span>
             </div>
           </div>
         </div>
 
-        <div class="prep-card__actions">
+        <div class="permission-screen__actions">
           <Button
             variant="primary"
             label="Continue"
@@ -67,7 +65,7 @@ function handleCancel() {
       </div>
     </div>
 
-    <!-- macOS permission dialog: layers on top of prep screen -->
+    <!-- macOS permission dialog floats on top -->
     <Transition name="dialog">
       <PermissionDialog v-if="showDialog" @cancel="handleCancel" />
     </Transition>
@@ -81,80 +79,78 @@ function handleCancel() {
   z-index: 50;
 }
 
-/* ── Prep overlay ── */
+/* ── Full-screen permissions prep ── */
 
-.prep-overlay {
+.permission-screen {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.prep-card {
-  width: 480px;
-  max-width: 90vw;
-  background: var(--color-frame-bg);
-  border-radius: var(--radius-l);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: var(--space-xxl);
+  background: var(--color-chrome-bg);
+  color: var(--color-chrome-fg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
 
-.prep-card__title {
-  font-size: 24px;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-  margin: 0 0 var(--space-xs);
+.permission-screen__content {
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  width: 100%;
+  padding: var(--space-xl);
 }
 
-.prep-card__subtitle {
+.permission-screen__title {
+  font-size: 28px;
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-s);
+}
+
+.permission-screen__subtitle {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   margin: 0 0 var(--space-xl);
   line-height: 1.5;
 }
 
-.prep-card__list {
+.permission-screen__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-l);
-  margin-block-end: var(--space-xl);
+  margin-block-end: var(--space-xxl);
 }
 
-.prep-card__item {
+.permission-screen__item {
   display: flex;
   align-items: flex-start;
   gap: var(--space-m);
 }
 
-.prep-card__check {
+.permission-screen__check {
   flex-shrink: 0;
   color: var(--color-status-running);
   margin-block-start: 2px;
 }
 
-.prep-card__item-text {
+.permission-screen__item-text {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
 }
 
-.prep-card__item-title {
+.permission-screen__item-title {
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
 }
 
-.prep-card__item-desc {
+.permission-screen__item-desc {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   line-height: 1.4;
 }
 
-.prep-card__actions {
+.permission-screen__actions {
   width: 100%;
 }
 

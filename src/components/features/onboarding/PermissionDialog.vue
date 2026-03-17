@@ -115,7 +115,6 @@ async function handleOK() {
   align-items: flex-start;
   justify-content: center;
   padding-block-start: 140px;
-  background: rgba(0, 0, 0, 0.25);
   z-index: 60;
 }
 
