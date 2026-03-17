@@ -1,6 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import {
+  wordpress,
+  people,
+  postList,
+  comment,
+  tag,
+  plus,
+  bell,
+  chartBar,
+  media,
+  menu,
+} from '@wordpress/icons'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import { useAuth } from '@/data/useAuth'
 import { useOnboarding } from '@/data/useOnboarding'
@@ -11,60 +24,94 @@ const { markVisited } = useOnboarding()
 
 markVisited('oauth')
 
-const email = ref('user@example.com')
-const password = ref('••••••••')
 const isLoading = ref(false)
 
-async function handleLogin() {
+const scopes = [
+  { icon: people, label: 'Personal details' },
+  { icon: postList, label: 'Posts' },
+  { icon: comment, label: 'Comments' },
+  { icon: tag, label: 'Tags and categories' },
+  { icon: plus, label: 'Blog follows' },
+  { icon: bell, label: 'Notifications' },
+  { icon: chartBar, label: 'Stats' },
+  { icon: media, label: 'Media' },
+  { icon: menu, label: 'Menus' },
+]
+
+async function handleApprove() {
   isLoading.value = true
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 800))
+  await new Promise(resolve => setTimeout(resolve, 600))
   login({
-    name: 'Studio User',
-    email: email.value,
-    avatar: 'https://gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=64',
+    name: 'Shaun Andrews',
+    email: 'shaun@automattic.com',
+    avatar: 'https://gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=64',
   })
   isLoading.value = false
   router.push('/permissions')
 }
+
+function handleDeny() {
+  router.back()
+}
 </script>
 
 <template>
-  <div class="auth-simulation">
-    <div class="auth-simulation__card">
-      <div class="auth-simulation__header">
-        <svg class="auth-simulation__logo" viewBox="0 0 24 24" width="36" height="36">
-          <circle cx="12" cy="12" r="12" fill="#0675C4" />
-          <path d="M12 3.3c-4.8 0-8.7 3.9-8.7 8.7 0 4.8 3.9 8.7 8.7 8.7 4.8 0 8.7-3.9 8.7-8.7 0-4.8-3.9-8.7-8.7-8.7zm-1.2 13.4L7 12.9l1.2-2.7 2.1 1 3.5-7.1 1.5 2.8-4.5 7.8z" fill="white" />
-        </svg>
-        <h2 class="auth-simulation__title">Log in to WordPress.com</h2>
+  <div class="oauth-screen">
+    <div class="oauth-card">
+      <!-- WP logo -->
+      <div class="oauth-card__logo">
+        <WPIcon :icon="wordpress" :size="40" />
       </div>
 
-      <div class="auth-simulation__form">
-        <label class="auth-simulation__field">
-          <span class="auth-simulation__label">Email address</span>
-          <input
-            v-model="email"
-            type="email"
-            class="auth-simulation__input"
-            placeholder="you@example.com"
-          />
-        </label>
-        <label class="auth-simulation__field">
-          <span class="auth-simulation__label">Password</span>
-          <input
-            v-model="password"
-            type="password"
-            class="auth-simulation__input"
-          />
-        </label>
+      <h1 class="oauth-card__title">Connect WordPress Studio</h1>
+      <p class="oauth-card__subtitle">
+        Give WordPress Studio access to your WordPress.com account.
+      </p>
 
+      <!-- User card -->
+      <div class="oauth-card__user">
+        <img
+          class="oauth-card__avatar"
+          src="https://gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=128"
+          alt="User"
+        />
+        <div class="oauth-card__user-info">
+          <span class="oauth-card__user-name">Shaun Andrews</span>
+          <span class="oauth-card__user-meta">shaunandrews - 733 sites</span>
+        </div>
+      </div>
+
+      <a href="#" class="oauth-card__link" @click.prevent>Log in with a different account</a>
+
+      <!-- Scopes -->
+      <p class="oauth-card__scopes-label">Studio is requesting access to:</p>
+      <div class="oauth-card__scopes">
+        <div
+          v-for="scope in scopes"
+          :key="scope.label"
+          class="oauth-card__scope"
+        >
+          <WPIcon :icon="scope.icon" :size="20" />
+          <span>{{ scope.label }}</span>
+        </div>
+      </div>
+
+      <a href="#" class="oauth-card__link" @click.prevent>Learn more about how Studio uses your data</a>
+
+      <!-- Actions -->
+      <div class="oauth-card__actions">
+        <Button
+          variant="secondary"
+          label="Deny"
+          width="full"
+          @click="handleDeny"
+        />
         <Button
           variant="primary"
-          :label="isLoading ? 'Logging in...' : 'Log in'"
+          :label="isLoading ? 'Approving...' : 'Approve'"
           width="full"
           :disabled="isLoading"
-          @click="handleLogin"
+          @click="handleApprove"
         />
       </div>
     </div>
@@ -72,69 +119,135 @@ async function handleLogin() {
 </template>
 
 <style scoped>
-.auth-simulation {
+.oauth-screen {
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   background: var(--color-frame-bg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
+  overflow-y: auto;
+  padding-block: var(--space-xxl);
 }
 
-.auth-simulation__card {
-  width: 380px;
+.oauth-card {
+  width: 480px;
   max-width: 90vw;
-}
-
-.auth-simulation__header {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.oauth-card__logo {
+  width: 56px;
+  height: 56px;
+  background: var(--color-frame-fg);
+  color: var(--color-frame-bg);
+  border-radius: var(--radius-m);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-block-end: var(--space-l);
+}
+
+.oauth-card__title {
+  font-size: 24px;
+  font-weight: var(--font-weight-regular);
+  color: var(--color-frame-fg);
+  margin: 0 0 var(--space-xs);
+  text-align: center;
+}
+
+.oauth-card__subtitle {
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg-muted);
+  margin: 0 0 var(--space-xl);
+  text-align: center;
+}
+
+.oauth-card__user {
+  display: flex;
+  align-items: center;
   gap: var(--space-m);
+  width: 100%;
+  padding: var(--space-m);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-s);
+  margin-block-end: var(--space-m);
+}
+
+.oauth-card__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-s);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.oauth-card__user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.oauth-card__user-name {
+  font-size: var(--font-size-m);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg);
+}
+
+.oauth-card__user-meta {
+  font-size: var(--font-size-s);
+  color: var(--color-frame-fg-muted);
+}
+
+.oauth-card__link {
+  font-size: var(--font-size-s);
+  color: var(--color-frame-theme);
+  text-decoration: none;
+  align-self: flex-start;
   margin-block-end: var(--space-xl);
 }
 
-.auth-simulation__title {
-  font-size: var(--font-size-l);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-  margin: 0;
+.oauth-card__link:hover {
+  text-decoration: underline;
 }
 
-.auth-simulation__form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-m);
-}
-
-.auth-simulation__field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xxs);
-}
-
-.auth-simulation__label {
-  font-size: var(--font-size-s);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg);
-}
-
-.auth-simulation__input {
-  height: 40px;
-  padding: 0 var(--space-s);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-s);
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
+.oauth-card__scopes-label {
   font-size: var(--font-size-m);
-  font-family: var(--font-family);
-  outline: none;
-  transition: border-color 150ms ease;
+  color: var(--color-frame-fg);
+  margin: 0 0 var(--space-m);
+  align-self: flex-start;
 }
 
-.auth-simulation__input:focus {
-  border-color: var(--color-frame-theme);
+.oauth-card__scopes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-m) var(--space-xl);
+  width: 100%;
+  margin-block-end: var(--space-xl);
+}
+
+.oauth-card__scope {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg);
+}
+
+.oauth-card__scope :deep(svg) {
+  flex-shrink: 0;
+  color: var(--color-frame-fg);
+}
+
+.oauth-card__actions {
+  display: flex;
+  gap: var(--space-m);
+  width: 100%;
+  margin-block-start: var(--space-m);
 }
 </style>
