@@ -27,7 +27,13 @@ const { sites } = useSites()
 const site = computed(() => sites.value.find(s => s.id === props.siteId))
 
 const siteLayout = computed(() => site.value?.mockLayout ?? 'cafe')
-const localPath = computed(() => `/Users/shaun/Studio/${site.value?.name ?? 'site'}`)
+const localPath = computed(() => {
+  const name = (site.value?.name ?? 'site')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+  return `/Users/shaun/Studio/${name}`
+})
 
 const themeType = computed(() => site.value?.themeType ?? 'block')
 const siteFeatures = computed(() => site.value?.features ?? [])

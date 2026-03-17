@@ -277,18 +277,9 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
       <div v-if="sortedConvos.length === 0" class="site-tasks__empty">
         <div class="empty__illustration">
-          <div class="empty__bubble empty__bubble--1">
-            <div class="empty__bubble-line empty__bubble-line--long" />
-            <div class="empty__bubble-line empty__bubble-line--short" />
-          </div>
-          <div class="empty__bubble empty__bubble--2">
-            <div class="empty__bubble-line empty__bubble-line--medium" />
-          </div>
-          <div class="empty__bubble empty__bubble--3">
-            <div class="empty__bubble-line empty__bubble-line--short" />
-            <div class="empty__bubble-line empty__bubble-line--long" />
-            <div class="empty__bubble-line empty__bubble-line--medium" />
-          </div>
+          <span class="empty__dot empty__dot--1" />
+          <span class="empty__dot empty__dot--2" />
+          <span class="empty__dot empty__dot--3" />
         </div>
         <p class="empty__heading">AI agents that work for you</p>
         <p class="empty__description">Tasks are conversations with AI agents that can edit your site, install plugins, write content, and more.</p>
@@ -703,56 +694,29 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   text-align: center;
 }
 
-/* ── Empty illustration: floating chat bubbles ── */
+/* ── Empty illustration: typing dots ── */
 
 .empty__illustration {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  margin-block-end: var(--space-l);
-  width: 100%;
-  max-width: 180px;
+  gap: 6px;
+  margin-block-end: var(--space-m);
 }
 
-.empty__bubble {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: var(--space-s) var(--space-m);
-  border-radius: var(--radius-m);
-  background: var(--color-frame-fill);
-  border: 1px solid var(--color-frame-border);
-  animation: bubble-float 3s ease-in-out infinite;
-}
-
-.empty__bubble--1 {
-  align-self: flex-start;
-  animation-delay: 0s;
-}
-
-.empty__bubble--2 {
-  align-self: flex-end;
-  animation-delay: -1s;
-}
-
-.empty__bubble--3 {
-  align-self: flex-start;
-  animation-delay: -2s;
-}
-
-.empty__bubble-line {
-  height: 4px;
-  border-radius: 2px;
+.empty__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   background: var(--color-frame-border);
+  animation: dot-bounce 1.4s ease-in-out infinite;
 }
 
-.empty__bubble-line--long { width: 100%; }
-.empty__bubble-line--medium { width: 70%; }
-.empty__bubble-line--short { width: 45%; }
+.empty__dot--1 { animation-delay: 0s; }
+.empty__dot--2 { animation-delay: 0.15s; }
+.empty__dot--3 { animation-delay: 0.3s; }
 
-@keyframes bubble-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+@keyframes dot-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
 }
 
 .empty__heading {
