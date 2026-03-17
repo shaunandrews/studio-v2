@@ -293,7 +293,7 @@ function handlePermissionComplete() {
 /* ── Left hero panel ── */
 
 .split__hero {
-  flex: 1;
+  flex: 0 0 30%;
   position: relative;
   background: var(--color-menu-bg);
   overflow: hidden;
