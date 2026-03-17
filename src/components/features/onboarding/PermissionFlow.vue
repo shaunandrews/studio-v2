@@ -118,8 +118,8 @@ function handleCancel() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--color-theme-bg);
-  color: var(--color-theme-fg);
+  background: var(--color-menu-bg);
+  color: var(--color-menu-fg);
   position: relative;
 }
 
@@ -137,8 +137,8 @@ function handleCancel() {
   flex-direction: column;
   align-items: center;
   gap: var(--space-m);
-  background: var(--color-theme-fill);
-  border: 1px solid var(--color-theme-border);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-m);
   padding: var(--space-l) var(--space-m);
 }
@@ -158,7 +158,7 @@ function handleCancel() {
 .illus-line {
   height: 8px;
   border-radius: 4px;
-  background: var(--color-theme-border);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .illus-line--wide {
@@ -173,7 +173,7 @@ function handleCancel() {
   width: 100%;
   height: 24px;
   border-radius: var(--radius-s);
-  border: 1px solid var(--color-theme-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   background: var(--color-theme-fill);
 }
 
@@ -187,12 +187,11 @@ function handleCancel() {
   flex: 1;
   height: 20px;
   border-radius: var(--radius-s);
-  background: var(--color-theme-border);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .illus-btn--primary {
-  background: var(--color-theme-fg);
-  opacity: 0.3;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* ── Right content panel ── */

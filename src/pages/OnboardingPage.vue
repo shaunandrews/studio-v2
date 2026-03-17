@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { wordpress } from '@wordpress/icons'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
 import DotGrid from '@/components/features/onboarding/DotGrid.vue'
@@ -40,9 +42,13 @@ function handleSkip() {
 
     <!-- Welcome screen: always visible as the base layer -->
     <div class="welcome-screen">
-      <!-- Left: theme panel with interactive dot grid -->
+      <!-- Left: dark panel with interactive dot grid -->
       <div class="welcome-screen__hero">
-        <DotGrid />
+        <DotGrid
+          rest-color="rgba(255, 255, 255, 0.1)"
+          active-color="rgba(56, 88, 233, 0.9)"
+        />
+        <WPIcon :icon="wordpress" :size="48" class="welcome-screen__wp-mark" />
       </div>
 
       <!-- Right: content -->
@@ -154,8 +160,18 @@ function handleSkip() {
 .welcome-screen__hero {
   flex: 1;
   position: relative;
-  background: var(--color-theme-bg);
+  background: var(--color-menu-bg);
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-screen__wp-mark {
+  position: relative;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.9);
+  pointer-events: none;
 }
 
 /* ── Right content panel ── */

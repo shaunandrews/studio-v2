@@ -8,13 +8,27 @@ let running = false
 let mouse = { x: -1000, y: -1000 }
 let dots: { baseX: number; baseY: number; x: number; y: number; vx: number; vy: number }[] = []
 
+const props = defineProps<{
+  restColor?: string
+  activeColor?: string
+}>()
+
 const SPACING = 28
 const DOT_RADIUS = 2
 const INFLUENCE = 120
 const PUSH_STRENGTH = 40
 const RETURN_SPEED = 0.08
 const DAMPING = 0.85
-const REST_THRESHOLD = 0.1 // Below this total energy, stop animating
+const REST_THRESHOLD = 0.1
+const GLOW_RADIUS = 180 // Radius for the light-up glow around cursor
+
+function parseRGBA(color: string): { r: number; g: number; b: number; a: number } {
+  const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/)
+  if (match) {
+    return { r: +match[1], g: +match[2], b: +match[3], a: match[4] != null ? +match[4] : 1 }
+  }
+  return { r: 255, g: 255, b: 255, a: 0.15 }
+}
 
 function initDots(w: number, h: number) {
   dots = []
@@ -53,15 +67,22 @@ function startLoop() {
   tick()
 }
 
+function getColors() {
+  const rest = props.restColor ?? 'rgba(255, 255, 255, 0.15)'
+  const active = props.activeColor ?? 'rgba(255, 255, 255, 0.8)'
+  return { rest, active }
+}
+
 function drawStatic() {
   if (!ctx || !canvas.value) return
   const w = canvas.value.clientWidth
   const h = canvas.value.clientHeight
+  const { rest } = getColors()
   ctx.clearRect(0, 0, w, h)
   for (const dot of dots) {
     ctx.beginPath()
     ctx.arc(dot.baseX, dot.baseY, DOT_RADIUS, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'
+    ctx.fillStyle = rest
     ctx.fill()
   }
 }
@@ -72,6 +93,11 @@ function tick() {
   const h = canvas.value.clientHeight
 
   ctx.clearRect(0, 0, w, h)
+
+  const { rest, active } = getColors()
+  // Parse rgba values for interpolation
+  const restParsed = parseRGBA(rest)
+  const activeParsed = parseRGBA(active)
 
   let totalEnergy = 0
 
@@ -106,13 +132,24 @@ function tick() {
     )
     totalEnergy += Math.abs(dot.vx) + Math.abs(dot.vy) + displacement
 
+    // Proximity glow: blend rest→active based on distance to cursor
+    const glowDist = Math.sqrt(
+      (dot.baseX - mouse.x) ** 2 + (dot.baseY - mouse.y) ** 2
+    )
+    const glow = glowDist < GLOW_RADIUS ? 1 - glowDist / GLOW_RADIUS : 0
+    const t = Math.max(glow, Math.min(displacement * 0.03, 1))
+
+    const r = Math.round(restParsed.r + (activeParsed.r - restParsed.r) * t)
+    const g = Math.round(restParsed.g + (activeParsed.g - restParsed.g) * t)
+    const b = Math.round(restParsed.b + (activeParsed.b - restParsed.b) * t)
+    const a = restParsed.a + (activeParsed.a - restParsed.a) * t
+
     // Draw
     const scale = Math.min(1 + displacement * 0.04, 2.5)
-    const alpha = 0.2 + Math.min(displacement * 0.02, 0.6)
 
     ctx.beginPath()
     ctx.arc(dot.x, dot.y, DOT_RADIUS * scale, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`
     ctx.fill()
   }
 
