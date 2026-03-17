@@ -12,15 +12,18 @@ import {
   chartBar,
   media,
   menu,
+  lock,
 } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import { useAuth } from '@/data/useAuth'
 import { useOnboarding } from '@/data/useOnboarding'
+import { useOperatingSystem } from '@/data/useOperatingSystem'
 
 const router = useRouter()
 const { login } = useAuth()
 const { markVisited } = useOnboarding()
+const { isMac } = useOperatingSystem()
 
 markVisited('oauth')
 
@@ -56,85 +59,246 @@ function handleDeny() {
 </script>
 
 <template>
-  <div class="oauth-screen">
-    <div class="oauth-card">
-      <!-- WP logo -->
-      <div class="oauth-card__logo">
-        <WPIcon :icon="wordpress" :size="40" />
+  <div class="oauth-backdrop">
+    <div class="browser-window" :class="{ 'is-mac': isMac }">
+      <!-- macOS titlebar -->
+      <div v-if="isMac" class="browser-titlebar browser-titlebar--mac">
+        <div class="mac-lights">
+          <span class="mac-light mac-light--close" />
+          <span class="mac-light mac-light--minimize" />
+          <span class="mac-light mac-light--maximize" />
+        </div>
+        <div class="browser-url-bar">
+          <WPIcon :icon="lock" :size="14" class="browser-url-bar__lock" />
+          <span class="browser-url-bar__url">public-api.wordpress.com</span>
+        </div>
+        <div class="mac-lights-spacer" />
       </div>
 
-      <h1 class="oauth-card__title">Connect WordPress Studio</h1>
-      <p class="oauth-card__subtitle">
-        Give WordPress Studio access to your WordPress.com account.
-      </p>
-
-      <!-- User card -->
-      <div class="oauth-card__user">
-        <img
-          class="oauth-card__avatar"
-          src="https://gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=128"
-          alt="User"
-        />
-        <div class="oauth-card__user-info">
-          <span class="oauth-card__user-name">Shaun Andrews</span>
-          <span class="oauth-card__user-meta">shaunandrews - 733 sites</span>
+      <!-- Windows titlebar -->
+      <div v-else class="browser-titlebar browser-titlebar--win">
+        <div class="browser-url-bar">
+          <WPIcon :icon="lock" :size="14" class="browser-url-bar__lock" />
+          <span class="browser-url-bar__url">public-api.wordpress.com</span>
+        </div>
+        <div class="win-controls">
+          <button class="win-btn">
+            <svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor" /></svg>
+          </button>
+          <button class="win-btn">
+            <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1" /></svg>
+          </button>
+          <button class="win-btn win-btn--close">
+            <svg width="10" height="10" viewBox="0 0 10 10"><path d="M0 0L10 10M10 0L0 10" stroke="currentColor" stroke-width="1.2" /></svg>
+          </button>
         </div>
       </div>
 
-      <a href="#" class="oauth-card__link" @click.prevent>Log in with a different account</a>
+      <!-- Page content -->
+      <div class="browser-content">
+        <div class="oauth-card">
+          <div class="oauth-card__logo">
+            <WPIcon :icon="wordpress" :size="40" />
+          </div>
 
-      <!-- Scopes -->
-      <p class="oauth-card__scopes-label">Studio is requesting access to:</p>
-      <div class="oauth-card__scopes">
-        <div
-          v-for="scope in scopes"
-          :key="scope.label"
-          class="oauth-card__scope"
-        >
-          <WPIcon :icon="scope.icon" :size="20" />
-          <span>{{ scope.label }}</span>
+          <h1 class="oauth-card__title">Connect WordPress Studio</h1>
+          <p class="oauth-card__subtitle">
+            Give WordPress Studio access to your WordPress.com account.
+          </p>
+
+          <div class="oauth-card__user">
+            <img
+              class="oauth-card__avatar"
+              src="https://gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=128"
+              alt="User"
+            />
+            <div class="oauth-card__user-info">
+              <span class="oauth-card__user-name">Shaun Andrews</span>
+              <span class="oauth-card__user-meta">shaunandrews - 733 sites</span>
+            </div>
+          </div>
+
+          <a href="#" class="oauth-card__link" @click.prevent>Log in with a different account</a>
+
+          <p class="oauth-card__scopes-label">Studio is requesting access to:</p>
+          <div class="oauth-card__scopes">
+            <div
+              v-for="scope in scopes"
+              :key="scope.label"
+              class="oauth-card__scope"
+            >
+              <WPIcon :icon="scope.icon" :size="20" />
+              <span>{{ scope.label }}</span>
+            </div>
+          </div>
+
+          <a href="#" class="oauth-card__link" @click.prevent>Learn more about how Studio uses your data</a>
+
+          <div class="oauth-card__actions">
+            <Button
+              variant="secondary"
+              label="Deny"
+              width="full"
+              @click="handleDeny"
+            />
+            <Button
+              variant="primary"
+              :label="isLoading ? 'Approving...' : 'Approve'"
+              width="full"
+              :disabled="isLoading"
+              @click="handleApprove"
+            />
+          </div>
         </div>
-      </div>
-
-      <a href="#" class="oauth-card__link" @click.prevent>Learn more about how Studio uses your data</a>
-
-      <!-- Actions -->
-      <div class="oauth-card__actions">
-        <Button
-          variant="secondary"
-          label="Deny"
-          width="full"
-          @click="handleDeny"
-        />
-        <Button
-          variant="primary"
-          :label="isLoading ? 'Approving...' : 'Approve'"
-          width="full"
-          :disabled="isLoading"
-          @click="handleApprove"
-        />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.oauth-screen {
+/* ── Backdrop: theme accent behind the browser window ── */
+
+.oauth-backdrop {
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  background: var(--color-frame-bg);
+  background: var(--color-theme-bg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
-  overflow-y: auto;
-  padding-block: var(--space-xxl);
+  padding: var(--space-xxl);
 }
 
+/* ── Simulated browser window ── */
+
+.browser-window {
+  width: 560px;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-frame-bg);
+  border-radius: var(--radius-l);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+/* ── macOS titlebar ── */
+
+.browser-titlebar--mac {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding-inline: var(--space-m);
+  background: var(--color-frame-bg);
+  border-block-end: 1px solid var(--color-frame-border);
+  flex-shrink: 0;
+}
+
+.mac-lights {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 68px;
+  flex-shrink: 0;
+}
+
+.mac-light {
+  width: 12px; /* OS-native size */
+  height: 12px;
+  border-radius: 50%;
+}
+
+.mac-light--close { background: var(--color-macos-close); }
+.mac-light--minimize { background: var(--color-macos-minimize); }
+.mac-light--maximize { background: var(--color-macos-maximize); }
+
+.mac-lights-spacer {
+  width: 68px;
+  flex-shrink: 0;
+}
+
+/* ── Windows titlebar ── */
+
+.browser-titlebar--win {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding-inline-start: var(--space-m);
+  background: var(--color-frame-bg);
+  border-block-end: 1px solid var(--color-frame-border);
+  flex-shrink: 0;
+}
+
+.win-controls {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  margin-inline-start: auto;
+}
+
+.win-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 100%;
+  border: none;
+  background: none;
+  color: var(--color-frame-fg-muted);
+  cursor: default;
+}
+
+.win-btn:hover {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+}
+
+.win-btn--close:hover {
+  background: #e81123;
+  color: white;
+}
+
+/* ── Shared URL bar ── */
+
+.browser-url-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xxs);
+  height: 28px;
+  background: var(--color-frame-fill);
+  border-radius: var(--radius-s);
+  padding-inline: var(--space-s);
+}
+
+.browser-url-bar__lock {
+  color: var(--color-frame-fg-muted);
+  flex-shrink: 0;
+}
+
+.browser-url-bar__url {
+  font-size: var(--font-size-s);
+  color: var(--color-frame-fg-muted);
+}
+
+/* ── Browser content (scrollable page) ── */
+
+.browser-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-xxl) var(--space-xl);
+}
+
+/* ── OAuth card (page content) ── */
+
 .oauth-card {
-  width: 480px;
-  max-width: 90vw;
+  width: 100%;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
   align-items: center;
