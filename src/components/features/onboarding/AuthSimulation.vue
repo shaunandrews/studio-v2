@@ -156,7 +156,7 @@ function handleDeny() {
 </template>
 
 <style scoped>
-/* ── Backdrop: theme accent behind the browser window ── */
+/* ── Backdrop ── */
 
 .oauth-backdrop {
   position: fixed;
@@ -164,7 +164,7 @@ function handleDeny() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-theme-bg);
+  background: var(--color-chrome-bg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   padding: var(--space-xxl);

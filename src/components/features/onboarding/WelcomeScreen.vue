@@ -36,15 +36,13 @@ function handleSkip() {
 
       <div class="welcome-screen__actions">
         <Button
-          variant="secondary"
-          surface="dark"
+          variant="primary"
           label="Log in to WordPress.com"
           width="full"
           @click="handleLogin"
         />
         <Button
           variant="tertiary"
-          surface="dark"
           label="Skip"
           width="full"
           @click="handleSkip"
@@ -66,8 +64,8 @@ function handleSkip() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-theme-bg);
-  color: var(--color-theme-fg);
+  background: var(--color-chrome-bg);
+  color: var(--color-chrome-fg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
@@ -95,12 +93,11 @@ function handleSkip() {
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin: 0;
-  color: var(--color-theme-fg);
 }
 
 .welcome-screen__pitch {
   font-size: var(--font-size-m);
-  color: var(--color-theme-fg-muted);
+  color: var(--color-chrome-fg-muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -118,7 +115,7 @@ function handleSkip() {
 
 .welcome-screen__benefits li {
   font-size: var(--font-size-s);
-  color: var(--color-theme-fg-muted);
+  color: var(--color-chrome-fg-muted);
   padding-inline-start: var(--space-l);
   position: relative;
 }
@@ -127,7 +124,7 @@ function handleSkip() {
   content: '✓';
   position: absolute;
   inset-inline-start: 0;
-  color: var(--color-theme-fg);
+  color: var(--color-status-running);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -140,17 +137,16 @@ function handleSkip() {
 
 .welcome-screen__signup {
   font-size: var(--font-size-s);
-  color: var(--color-theme-fg-muted);
+  color: var(--color-chrome-fg-muted);
   margin: 0;
 }
 
 .welcome-screen__link {
-  color: var(--color-theme-fg);
-  text-decoration: underline;
-  text-decoration-color: var(--color-theme-border);
+  color: var(--color-chrome-theme);
+  text-decoration: none;
 }
 
 .welcome-screen__link:hover {
-  text-decoration-color: var(--color-theme-fg);
+  text-decoration: underline;
 }
 </style>
