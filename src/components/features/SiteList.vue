@@ -63,6 +63,7 @@ function getSiteMenuGroups(site: Site): FlyoutMenuGroup[] {
 const router = useRouter()
 const route = useRoute()
 const isAllSitesActive = computed(() => route.name === 'all-sites')
+const showAllSites = computed(() => sites.value.length > 1)
 
 function goToAllSites() {
   router.push({ name: 'all-sites' })
@@ -71,18 +72,20 @@ function goToAllSites() {
 
 <template>
   <div class="site-list vstack">
-    <div
-      class="all-sites-item"
-      :class="{ active: isAllSitesActive }"
-      @click="goToAllSites"
-    >
-      <div class="all-sites-icon">
-        <WPIcon :icon="category" :size="20" />
+    <template v-if="showAllSites">
+      <div
+        class="all-sites-item"
+        :class="{ active: isAllSitesActive }"
+        @click="goToAllSites"
+      >
+        <div class="all-sites-icon">
+          <WPIcon :icon="category" :size="20" />
+        </div>
+        <span class="all-sites-label">All Sites</span>
       </div>
-      <span class="all-sites-label">All Sites</span>
-    </div>
 
-    <div class="sidebar-divider" />
+      <div class="sidebar-divider" />
+    </template>
 
     <div class="items-stack">
       <ContextMenu

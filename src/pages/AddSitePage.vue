@@ -22,7 +22,7 @@ const props = defineProps<{
 type Path = 'blank' | 'blueprint' | 'pull' | 'import'
 type Step = 'choose' | 'picker' | 'details' | 'building'
 
-const { createUntitledSite, updateSite } = useSites()
+const { createUntitledSite, updateSite, setStatus } = useSites()
 const { navigateToSite } = useSiteTransition('site')
 const { closeAddSite } = useAddSite()
 
@@ -148,6 +148,7 @@ async function onSubmit(data: { name: string }) {
 
   // Brief pause on "Ready!" then navigate
   await new Promise(r => setTimeout(r, 600))
+  setStatus(site.id, 'running')
   closeAddSite()
   setTimeout(async () => {
     await navigateToSite(site.id)
