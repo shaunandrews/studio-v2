@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { wordpress, check, lock, globe, brush, cloudUpload } from '@wordpress/icons'
+import { wordpress, lock, globe, brush, cloudUpload } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
@@ -18,27 +18,7 @@ const { isWindows } = useOperatingSystem()
 
 markVisited('welcome')
 
-const headlines = [
-  'Build something\nbeautiful',
-  'Your WordPress\nplayground',
-  'Create, test,\nand launch',
-  'Design without\nlimits',
-]
-
-const headlineIndex = ref(0)
-let headlineTimer: ReturnType<typeof setInterval>
-
-onMounted(() => {
-  headlineTimer = setInterval(() => {
-    headlineIndex.value = (headlineIndex.value + 1) % headlines.length
-  }, 4000)
-})
-
-onBeforeUnmount(() => {
-  clearInterval(headlineTimer)
-})
-
-const currentHeadline = computed(() => headlines[headlineIndex.value])
+const headline = 'Create, test,\nand launch'
 
 const benefits = [
   { icon: brush, text: 'Use AI to build sites, themes, and plugins' },
@@ -136,9 +116,7 @@ function handlePermissionComplete() {
           <!-- Welcome content -->
           <div v-if="step === 'welcome'" key="welcome" class="content-body">
             <div class="content-body__brand">
-              <Transition name="headline" mode="out-in">
-                <h1 class="content-body__title" :key="headlineIndex">{{ currentHeadline }}</h1>
-              </Transition>
+              <h1 class="content-body__title">{{ headline }}</h1>
               <p class="content-body__pitch">
                 Connect your WordPress.com account to unlock the full power of Studio.
               </p>
@@ -180,18 +158,12 @@ function handlePermissionComplete() {
 
             <div class="content-body__perms">
               <div class="perm-item">
-                <WPIcon :icon="check" :size="24" class="perm-item__check" />
-                <div class="perm-item__text">
-                  <span class="perm-item__title">Manage local URLs</span>
-                  <span class="perm-item__desc">Add hostnames for your Studio sites to /etc/hosts</span>
-                </div>
+                <span class="perm-item__title">Manage local URLs</span>
+                <span class="perm-item__desc">Add hostnames for your Studio sites to /etc/hosts</span>
               </div>
               <div class="perm-item">
-                <WPIcon :icon="check" :size="24" class="perm-item__check" />
-                <div class="perm-item__text">
-                  <span class="perm-item__title">Accept incoming network connections</span>
-                  <span class="perm-item__desc">Allows you to access your sites through a browser</span>
-                </div>
+                <span class="perm-item__title">Accept incoming network connections</span>
+                <span class="perm-item__desc">Allows you to access your sites through a browser</span>
               </div>
             </div>
 
@@ -501,25 +473,6 @@ function handlePermissionComplete() {
   line-height: 1.4;
 }
 
-/* ── Headline rotation transition ── */
-
-.headline-enter-active {
-  transition: opacity 300ms ease, transform 300ms ease;
-}
-
-.headline-leave-active {
-  transition: opacity 200ms ease, transform 200ms ease;
-}
-
-.headline-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.headline-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
 
 .content-body__actions {
   display: flex;
@@ -548,26 +501,18 @@ function handlePermissionComplete() {
 .content-body__perms {
   display: flex;
   flex-direction: column;
-  gap: var(--space-l);
+  gap: var(--space-s);
   width: 100%;
 }
 
 .perm-item {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-m);
-}
-
-.perm-item__check {
-  flex-shrink: 0;
-  color: var(--color-status-running);
-  margin-block-start: 2px;
-}
-
-.perm-item__text {
-  display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
+  padding: var(--space-m);
+  border: 1px solid var(--color-chrome-border);
+  border-radius: var(--radius-m);
+  background: var(--color-chrome-fill);
 }
 
 .perm-item__title {
@@ -577,7 +522,7 @@ function handlePermissionComplete() {
 
 .perm-item__desc {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-chrome-fg-muted);
   line-height: 1.4;
 }
 
