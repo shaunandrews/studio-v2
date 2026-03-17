@@ -292,7 +292,7 @@ function handlePermissionComplete() {
 /* ── Left hero panel ── */
 
 .split__hero {
-  flex: 0 0 30%;
+  flex: 0 0 36%;
   position: relative;
   background: var(--color-theme-bg);
   overflow: hidden;
@@ -309,8 +309,8 @@ function handlePermissionComplete() {
 .hero-content {
   position: relative;
   z-index: 1;
-  color: var(--color-theme-fg);
-  opacity: 0.2;
+  color: #fff;
+  opacity: 0.5;
   pointer-events: none;
 }
 
@@ -334,14 +334,15 @@ function handlePermissionComplete() {
   flex-direction: column;
   align-items: center;
   gap: var(--space-m);
-  background: var(--color-theme-fill);
-  border: 1px solid var(--color-theme-border);
+  background: #4668eb; /* Slightly lighter than theme bg */
+  border: 1px solid #5b7bf3;
   border-radius: var(--radius-m);
   padding: var(--space-l) var(--space-m);
 }
 
 .illus-dialog__lock {
-  opacity: 0.7;
+  opacity: 0.8;
+  color: #fff;
 }
 
 .illus-dialog__lines {
@@ -355,7 +356,7 @@ function handlePermissionComplete() {
 .illus-line {
   height: 8px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.35);
+  background: #5b7bf3;
 }
 
 .illus-line--wide {
@@ -370,8 +371,8 @@ function handlePermissionComplete() {
   width: 100%;
   height: 24px;
   border-radius: var(--radius-s);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #5b7bf3;
+  background: #4e70ed;
 }
 
 .illus-dialog__buttons {
@@ -384,11 +385,11 @@ function handlePermissionComplete() {
   flex: 1;
   height: 20px;
   border-radius: var(--radius-s);
-  background: rgba(255, 255, 255, 0.3);
+  background: #5b7bf3;
 }
 
 .illus-btn--primary {
-  background: rgba(255, 255, 255, 0.5);
+  background: #8da4f7;
 }
 
 /* ── Right content panel ── */
