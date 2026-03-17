@@ -4,6 +4,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 const canvas = ref<HTMLCanvasElement | null>(null)
 let ctx: CanvasRenderingContext2D | null = null
 let animId = 0
+let running = false
 let mouse = { x: -1000, y: -1000 }
 let dots: { baseX: number; baseY: number; x: number; y: number; vx: number; vy: number }[] = []
 
@@ -13,6 +14,7 @@ const INFLUENCE = 120
 const PUSH_STRENGTH = 40
 const RETURN_SPEED = 0.08
 const DAMPING = 0.85
+const REST_THRESHOLD = 0.1 // Below this total energy, stop animating
 
 function initDots(w: number, h: number) {
   dots = []
@@ -45,12 +47,33 @@ function resize() {
   initDots(w, h)
 }
 
+function startLoop() {
+  if (running) return
+  running = true
+  tick()
+}
+
+function drawStatic() {
+  if (!ctx || !canvas.value) return
+  const w = canvas.value.clientWidth
+  const h = canvas.value.clientHeight
+  ctx.clearRect(0, 0, w, h)
+  for (const dot of dots) {
+    ctx.beginPath()
+    ctx.arc(dot.baseX, dot.baseY, DOT_RADIUS, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'
+    ctx.fill()
+  }
+}
+
 function tick() {
   if (!ctx || !canvas.value) return
   const w = canvas.value.clientWidth
   const h = canvas.value.clientHeight
 
   ctx.clearRect(0, 0, w, h)
+
+  let totalEnergy = 0
 
   for (const dot of dots) {
     // Mouse repulsion
@@ -77,10 +100,13 @@ function tick() {
     dot.x += dot.vx
     dot.y += dot.vy
 
-    // Draw
+    // Track energy (velocity + displacement)
     const displacement = Math.sqrt(
       (dot.x - dot.baseX) ** 2 + (dot.y - dot.baseY) ** 2
     )
+    totalEnergy += Math.abs(dot.vx) + Math.abs(dot.vy) + displacement
+
+    // Draw
     const scale = Math.min(1 + displacement * 0.04, 2.5)
     const alpha = 0.2 + Math.min(displacement * 0.02, 0.6)
 
@@ -88,6 +114,20 @@ function tick() {
     ctx.arc(dot.x, dot.y, DOT_RADIUS * scale, 0, Math.PI * 2)
     ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
     ctx.fill()
+  }
+
+  // Stop loop when settled
+  if (totalEnergy < REST_THRESHOLD && mouse.x === -1000) {
+    // Snap to grid and draw one clean frame
+    for (const dot of dots) {
+      dot.x = dot.baseX
+      dot.y = dot.baseY
+      dot.vx = 0
+      dot.vy = 0
+    }
+    drawStatic()
+    running = false
+    return
   }
 
   animId = requestAnimationFrame(tick)
@@ -98,16 +138,18 @@ function onPointerMove(e: PointerEvent) {
   const rect = canvas.value.getBoundingClientRect()
   mouse.x = e.clientX - rect.left
   mouse.y = e.clientY - rect.top
+  startLoop()
 }
 
 function onPointerLeave() {
   mouse.x = -1000
   mouse.y = -1000
+  // Keep running so dots settle back
 }
 
 onMounted(() => {
   resize()
-  tick()
+  drawStatic() // Draw initial resting state without starting the loop
   window.addEventListener('resize', resize)
 })
 
