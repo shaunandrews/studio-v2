@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
 import { useOnboarding } from '@/data/useOnboarding'
 import AuthSimulation from '@/components/features/onboarding/AuthSimulation.vue'
-import PermissionDialog from '@/components/features/onboarding/PermissionDialog.vue'
+import PermissionFlow from '@/components/features/onboarding/PermissionFlow.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -69,9 +69,9 @@ function handleSkip() {
       <AuthSimulation v-if="showOAuth" />
     </Transition>
 
-    <!-- macOS permission dialog overlay -->
+    <!-- Permission prep + macOS dialog overlay -->
     <Transition name="popup">
-      <PermissionDialog v-if="showPermissions" />
+      <PermissionFlow v-if="showPermissions" />
     </Transition>
   </div>
 </template>

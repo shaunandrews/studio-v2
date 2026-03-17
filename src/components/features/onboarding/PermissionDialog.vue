@@ -6,15 +6,17 @@ import WPIcon from '@/components/primitives/WPIcon.vue'
 import { useOnboarding } from '@/data/useOnboarding'
 
 const router = useRouter()
-const { markVisited, complete } = useOnboarding()
+const { complete } = useOnboarding()
 
-markVisited('permissions')
+const emit = defineEmits<{
+  cancel: []
+}>()
 
 const password = ref('••••••••')
 const isAuthenticating = ref(false)
 
 function handleCancel() {
-  router.back()
+  emit('cancel')
 }
 
 async function handleOK() {
