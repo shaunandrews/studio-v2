@@ -15,6 +15,7 @@ import { useSidebarCollapse } from '@/data/useSidebarCollapse'
 import { useAddSite } from '@/data/useAddSite'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useResizablePane } from '@/data/useResizablePane'
+import { useAuth } from '@/data/useAuth'
 
 const { hidden, toggle: toggleSidebar } = useSidebarCollapse()
 
@@ -26,6 +27,7 @@ const { width: sidebarWidth, isDragging: isSidebarResizing, onPointerDown: onSid
 })
 const { isWindows } = useOperatingSystem()
 const { shouldShowAddSite, hasSites, openAddSite } = useAddSite()
+const { user } = useAuth()
 
 const showShortcuts = ref(false)
 const showGlobalMenu = ref(false)
@@ -85,7 +87,8 @@ function handleNewSite() {
       :class="{ 'is-sidebar-hidden': hidden }"
       @click="showGlobalMenu = !showGlobalMenu"
     >
-      <img class="gravatar" src="https://gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=64" alt="User" />
+      <img v-if="user" class="gravatar" :src="user.avatar" alt="User" />
+      <span v-else class="gravatar gravatar--placeholder">?</span>
     </button>
     <button
       v-show="!isBackdropActive"
@@ -237,6 +240,16 @@ function handleNewSite() {
   height: 28px;
   border-radius: 100px; /* Figma: fully circular */
   object-fit: cover;
+}
+
+.gravatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-chrome-fg-muted);
+  background: var(--color-chrome-hover);
 }
 
 /* ── Frame ──
