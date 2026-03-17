@@ -177,7 +177,7 @@ function handlePermissionComplete() {
             <div class="content-body__actions">
               <Button
                 variant="primary"
-                label="Grant permissions"
+                label="Request permissions"
                 @click="handleGrantPermissions"
               />
             </div>
