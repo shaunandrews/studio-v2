@@ -36,13 +36,15 @@ function handleSkip() {
 
       <div class="welcome-screen__actions">
         <Button
-          variant="primary"
+          variant="secondary"
+          surface="dark"
           label="Log in to WordPress.com"
           width="full"
           @click="handleLogin"
         />
         <Button
           variant="tertiary"
+          surface="dark"
           label="Skip"
           width="full"
           @click="handleSkip"
@@ -64,8 +66,8 @@ function handleSkip() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
+  background: var(--color-theme-bg);
+  color: var(--color-theme-fg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
@@ -93,12 +95,12 @@ function handleSkip() {
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin: 0;
-  color: var(--color-frame-fg);
+  color: var(--color-theme-fg);
 }
 
 .welcome-screen__pitch {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-theme-fg-muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -116,7 +118,7 @@ function handleSkip() {
 
 .welcome-screen__benefits li {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-theme-fg-muted);
   padding-inline-start: var(--space-l);
   position: relative;
 }
@@ -125,7 +127,7 @@ function handleSkip() {
   content: '✓';
   position: absolute;
   inset-inline-start: 0;
-  color: var(--color-status-running);
+  color: var(--color-theme-fg);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -138,16 +140,17 @@ function handleSkip() {
 
 .welcome-screen__signup {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-theme-fg-muted);
   margin: 0;
 }
 
 .welcome-screen__link {
-  color: var(--color-frame-theme);
-  text-decoration: none;
+  color: var(--color-theme-fg);
+  text-decoration: underline;
+  text-decoration-color: var(--color-theme-border);
 }
 
 .welcome-screen__link:hover {
-  text-decoration: underline;
+  text-decoration-color: var(--color-theme-fg);
 }
 </style>

@@ -54,7 +54,8 @@ function handleContinue() {
 
       <div class="permission-prep__actions">
         <Button
-          variant="primary"
+          variant="secondary"
+          surface="dark"
           label="Continue"
           width="full"
           @click="handleContinue"
@@ -71,8 +72,8 @@ function handleContinue() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg);
+  background: var(--color-theme-bg);
+  color: var(--color-theme-fg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
@@ -88,13 +89,13 @@ function handleContinue() {
 .permission-prep__title {
   font-size: 28px;
   font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
+  color: var(--color-theme-fg);
   margin: 0 0 var(--space-s);
 }
 
 .permission-prep__subtitle {
   font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-theme-fg-muted);
   margin: 0 0 var(--space-xl);
   line-height: 1.5;
 }
@@ -114,7 +115,7 @@ function handleContinue() {
 
 .permission-prep__check {
   flex-shrink: 0;
-  color: var(--color-status-running);
+  color: var(--color-theme-fg);
   margin-block-start: 2px;
 }
 
@@ -127,12 +128,12 @@ function handleContinue() {
 .permission-prep__item-title {
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
+  color: var(--color-theme-fg);
 }
 
 .permission-prep__item-desc {
   font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
+  color: var(--color-theme-fg-muted);
   line-height: 1.4;
 }
 
