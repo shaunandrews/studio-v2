@@ -59,6 +59,8 @@ function resize() {
   ctx = canvas.value.getContext('2d')!
   ctx.scale(dpr, dpr)
   initDots(w, h)
+  if (running) return // loop will redraw on next tick
+  drawStatic()
 }
 
 function startLoop() {

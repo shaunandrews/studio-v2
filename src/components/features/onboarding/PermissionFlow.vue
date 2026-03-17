@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { wordpress, check } from '@wordpress/icons'
+import { check, lock } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import DotGrid from './DotGrid.vue'
@@ -37,13 +37,26 @@ function handleCancel() {
   <div class="permission-flow">
     <!-- Full-screen split layout -->
     <div class="permission-screen">
-      <!-- Left: dark panel with dot grid -->
+      <!-- Left: dark panel with dot grid + illustration -->
       <div class="permission-screen__hero">
         <DotGrid
           rest-color="rgba(255, 255, 255, 0.1)"
           active-color="rgba(56, 88, 233, 0.9)"
         />
-        <WPIcon :icon="wordpress" :size="120" class="permission-screen__wp-mark" />
+        <div class="permission-screen__illustration">
+          <div class="illus-dialog">
+            <WPIcon :icon="lock" :size="32" class="illus-dialog__lock" />
+            <div class="illus-dialog__lines">
+              <div class="illus-line illus-line--wide" />
+              <div class="illus-line illus-line--medium" />
+            </div>
+            <div class="illus-dialog__field" />
+            <div class="illus-dialog__buttons">
+              <div class="illus-btn" />
+              <div class="illus-btn illus-btn--primary" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Right: content -->
@@ -113,11 +126,78 @@ function handleCancel() {
   justify-content: center;
 }
 
-.permission-screen__wp-mark {
+/* ── Illustration: stylized macOS permission dialog ── */
+
+.permission-screen__illustration {
   position: relative;
   z-index: 1;
-  color: rgba(255, 255, 255, 0.9);
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.illus-dialog {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-m);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-m);
+  padding: var(--space-l) var(--space-m);
+}
+
+.illus-dialog__lock {
+  opacity: 0.5;
+}
+
+.illus-dialog__lines {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+}
+
+.illus-line {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.illus-line--wide {
+  width: 80%;
+}
+
+.illus-line--medium {
+  width: 60%;
+}
+
+.illus-dialog__field {
+  width: 100%;
+  height: 24px;
+  border-radius: var(--radius-s);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.illus-dialog__buttons {
+  display: flex;
+  gap: var(--space-xs);
+  width: 100%;
+}
+
+.illus-btn {
+  flex: 1;
+  height: 20px;
+  border-radius: var(--radius-s);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.illus-btn--primary {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* ── Right content panel ── */
