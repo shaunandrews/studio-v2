@@ -143,14 +143,14 @@ function handleCancel() {
   flex-direction: column;
   align-items: center;
   gap: var(--space-m);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-m);
   padding: var(--space-l) var(--space-m);
 }
 
 .illus-dialog__lock {
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .illus-dialog__lines {
@@ -164,7 +164,7 @@ function handleCancel() {
 .illus-line {
   height: 8px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .illus-line--wide {
@@ -179,8 +179,8 @@ function handleCancel() {
   width: 100%;
   height: 24px;
   border-radius: var(--radius-s);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .illus-dialog__buttons {
@@ -193,11 +193,11 @@ function handleCancel() {
   flex: 1;
   height: 20px;
   border-radius: var(--radius-s);
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .illus-btn--primary {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* ── Right content panel ── */
