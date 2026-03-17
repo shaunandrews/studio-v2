@@ -26,6 +26,8 @@ export function useSites() {
       status: 'stopped',
       url: '',
       createdAt: new Date().toISOString(),
+      mockLayout: 'default',
+      themeType: 'block',
     }
     sites.value.push(newSite)
     return newSite

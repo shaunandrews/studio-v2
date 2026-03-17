@@ -1,6 +1,6 @@
 export type SiteStatus = 'running' | 'stopped' | 'loading'
 
-export type MockLayout = 'cafe' | 'portfolio' | 'blog' | 'store' | 'landing' | 'docs' | 'gallery'
+export type MockLayout = 'default' | 'cafe' | 'portfolio' | 'blog' | 'store' | 'landing' | 'docs' | 'gallery'
 
 export type ThemeType = 'block' | 'classic'
 

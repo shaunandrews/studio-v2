@@ -413,6 +413,34 @@ function onLeave() {
       </div>
     </div>
 
+    <!-- Default (Twenty Twenty-Five) -->
+    <div v-else-if="layout === 'default'" class="site-thumb__mock mock--default" :style="mockStyle">
+      <div class="mock__nav">
+        <span class="mock__logo">{{ name || 'My Site' }}</span>
+        <div class="mock__nav-links"><a>Blog</a><a>About</a><a>Contact</a></div>
+      </div>
+      <div class="mock__default-content">
+        <article class="mock__default-post">
+          <h2 class="mock__default-post-title">Hello world!</h2>
+          <div class="mock__default-meta">March 17, 2026</div>
+          <p class="mock__default-excerpt">Welcome to WordPress. This is your first post. Edit or delete it, then start writing!</p>
+          <div class="mock__default-readmore">Read more →</div>
+        </article>
+        <div class="mock__default-divider" />
+        <div class="mock__default-sidebar">
+          <h4 class="mock__default-widget-title">Pages</h4>
+          <a class="mock__default-widget-link">Sample Page</a>
+          <h4 class="mock__default-widget-title">Categories</h4>
+          <a class="mock__default-widget-link">Uncategorized</a>
+          <h4 class="mock__default-widget-title">Archives</h4>
+          <a class="mock__default-widget-link">March 2026</a>
+        </div>
+      </div>
+      <div class="mock__default-footer">
+        Proudly powered by <strong>WordPress</strong>
+      </div>
+    </div>
+
     <!-- Fallback -->
     <div v-else class="site-thumb__mock mock--cafe" :style="mockStyle">
       <div class="mock__nav">
@@ -1249,5 +1277,94 @@ function onLeave() {
   display: block;
   border-radius: 4px;
   object-fit: cover;
+}
+
+/* ── Default (Twenty Twenty-Five) ── */
+
+.mock--default {
+  background: #fff;
+  color: #1a1a1a;
+}
+
+.mock__default-content {
+  display: flex;
+  gap: 48px;
+  padding: 32px 48px;
+}
+
+.mock__default-post {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mock__default-post-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.mock__default-meta {
+  font-size: 12px;
+  color: #999;
+}
+
+.mock__default-excerpt {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #555;
+  margin: 0;
+}
+
+.mock__default-readmore {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-block-start: 4px;
+}
+
+.mock__default-divider {
+  width: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.mock__default-sidebar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mock__default-widget-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #999;
+  margin: 12px 0 2px;
+}
+
+.mock__default-widget-title:first-child {
+  margin-block-start: 0;
+}
+
+.mock__default-widget-link {
+  font-size: 13px;
+  color: #333;
+  text-decoration: none;
+}
+
+.mock__default-footer {
+  padding: 16px 48px;
+  font-size: 12px;
+  color: #999;
+  border-block-start: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mock__default-footer strong {
+  color: #555;
 }
 </style>

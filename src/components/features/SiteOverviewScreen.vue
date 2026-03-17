@@ -97,6 +97,7 @@ interface StatItem {
 
 const contentStats = computed<StatItem[]>(() => {
   const layoutStats: Record<string, { posts: number; pages: number; media: number }> = {
+    default: { posts: 1, pages: 2, media: 0 },
     cafe: { posts: 12, pages: 6, media: 47 },
     portfolio: { posts: 0, pages: 9, media: 84 },
     blog: { posts: 43, pages: 4, media: 22 },
