@@ -1,10 +1,21 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
+import { useOnboarding } from '@/data/useOnboarding'
 
-const emit = defineEmits<{
-  login: []
-  skip: []
-}>()
+const router = useRouter()
+const { markVisited } = useOnboarding()
+
+// Mark welcome as visited on mount
+markVisited('welcome')
+
+function handleLogin() {
+  router.push('/oauth')
+}
+
+function handleSkip() {
+  router.push('/permissions')
+}
 </script>
 
 <template>
@@ -28,19 +39,19 @@ const emit = defineEmits<{
           variant="primary"
           label="Log in to WordPress.com"
           width="full"
-          @click="emit('login')"
+          @click="handleLogin"
         />
         <Button
           variant="tertiary"
           label="Skip"
           width="full"
-          @click="emit('skip')"
+          @click="handleSkip"
         />
       </div>
 
       <p class="welcome-screen__signup">
         New to WordPress.com?
-        <a href="#" class="welcome-screen__link" @click.prevent="emit('login')">Create a free account</a>
+        <a href="#" class="welcome-screen__link" @click.prevent="handleLogin">Create a free account</a>
       </p>
     </div>
   </div>
@@ -48,10 +59,13 @@ const emit = defineEmits<{
 
 <style scoped>
 .welcome-screen {
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  background: var(--color-frame-bg);
+  color: var(--color-frame-fg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
 import { useAuth } from '@/data/useAuth'
+import { useOnboarding } from '@/data/useOnboarding'
 
-const emit = defineEmits<{
-  complete: []
-}>()
-
+const router = useRouter()
 const { login } = useAuth()
+const { markVisited } = useOnboarding()
+
+markVisited('oauth')
 
 const email = ref('user@example.com')
 const password = ref('••••••••')
@@ -23,14 +25,13 @@ async function handleLogin() {
     avatar: 'https://gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=64',
   })
   isLoading.value = false
-  emit('complete')
+  router.push('/permissions')
 }
 </script>
 
 <template>
   <div class="auth-simulation">
-    <div class="auth-simulation__backdrop" />
-    <div class="auth-simulation__modal">
+    <div class="auth-simulation__card">
       <div class="auth-simulation__header">
         <svg class="auth-simulation__logo" viewBox="0 0 24 24" width="36" height="36">
           <circle cx="12" cy="12" r="12" fill="#0675C4" />
@@ -77,23 +78,12 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  background: var(--color-frame-bg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
 
-.auth-simulation__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.auth-simulation__modal {
-  position: relative;
-  background: var(--color-frame-bg);
-  border-radius: var(--radius-l);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
-  padding: var(--space-xxl);
+.auth-simulation__card {
   width: 380px;
   max-width: 90vw;
 }

@@ -1,17 +1,18 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import { personas } from '@/data/personas'
+import { usePersona } from '@/data/usePersona'
 import type { Persona } from '@/data/types'
 
-const emit = defineEmits<{
-  select: [id: string]
-}>()
+const router = useRouter()
+const { activatePersona } = usePersona()
 
 function isUrl(str: string): boolean {
   return str.startsWith('http') || str.startsWith('/')
 }
 
 function selectPersona(persona: Persona) {
-  emit('select', persona.id)
+  activatePersona(persona.id, router)
 }
 </script>
 

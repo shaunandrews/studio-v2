@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
+import { useOnboarding } from '@/data/useOnboarding'
 
-const emit = defineEmits<{
-  complete: []
-}>()
+const router = useRouter()
+const { markVisited, complete } = useOnboarding()
+
+markVisited('permissions')
 
 function handleContinue() {
   // Simulate a system permission dialog
@@ -11,7 +14,8 @@ function handleContinue() {
     'WordPress Studio wants to access files on your computer to create and manage WordPress sites.\n\nAllow access?'
   )
   if (granted) {
-    emit('complete')
+    complete()
+    router.push('/all-sites')
   }
 }
 </script>
@@ -59,10 +63,13 @@ function handleContinue() {
 
 <style scoped>
 .permission-prep {
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  background: var(--color-frame-bg);
+  color: var(--color-frame-fg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }

@@ -1,13 +1,51 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useSites } from '@/data/useSites'
+import { usePersona, getInitialPersonaId } from '@/data/usePersona'
+import { useOnboarding } from '@/data/useOnboarding'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: '/',
-      redirect: '/all-sites',
+      redirect: () => {
+        const { personaChosen } = usePersona()
+        if (!personaChosen.value) return '/choose'
+        const { needsOnboarding } = useOnboarding()
+        if (needsOnboarding.value) return '/welcome'
+        return '/all-sites'
+      },
     },
+
+    // Persona chooser
+    {
+      name: 'choose',
+      path: '/choose',
+      component: () => import('@/components/features/PersonaChooser.vue'),
+      meta: { layout: 'bare', setup: true },
+    },
+
+    // Onboarding routes
+    {
+      name: 'welcome',
+      path: '/welcome',
+      component: () => import('@/components/features/onboarding/WelcomeScreen.vue'),
+      meta: { layout: 'bare', setup: true },
+    },
+    {
+      name: 'oauth',
+      path: '/oauth',
+      component: () => import('@/components/features/onboarding/AuthSimulation.vue'),
+      meta: { layout: 'bare', setup: true },
+    },
+    {
+      name: 'permissions',
+      path: '/permissions',
+      component: () => import('@/components/features/onboarding/PermissionPrep.vue'),
+      meta: { layout: 'bare', setup: true },
+    },
+
+    // App routes
     {
       name: 'site',
       path: '/sites/:id',
@@ -84,6 +122,52 @@ const router = createRouter({
     // Catch-all
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
+})
+
+// Initialize persona from URL param or localStorage on first navigation
+let initialized = false
+
+router.beforeEach((to) => {
+  if (!initialized) {
+    initialized = true
+    const id = getInitialPersonaId()
+    if (id) {
+      const { activatePersona } = usePersona()
+      // Activate without router navigation — state resets, then guard redirects
+      activatePersona(id)
+      // After activation, onboarding state is set — redirect if landing on / or /choose
+      if (to.path === '/' || to.path === '/choose') {
+        const { needsOnboarding } = useOnboarding()
+        if (needsOnboarding.value) return '/welcome'
+        return '/all-sites'
+      }
+    }
+  }
+
+  const isSetupRoute = to.meta.setup === true
+  const { personaChosen } = usePersona()
+
+  // No persona chosen? Must go to /choose
+  if (!personaChosen.value && to.path !== '/choose') {
+    return '/choose'
+  }
+
+  // Persona chosen but needs onboarding? Block app routes
+  if (personaChosen.value && !isSetupRoute) {
+    const { needsOnboarding } = useOnboarding()
+    if (needsOnboarding.value) {
+      return '/welcome'
+    }
+  }
+
+  // Onboarding flow guards — prevent skipping ahead
+  if (to.name === 'oauth' || to.name === 'permissions') {
+    const { canAccess } = useOnboarding()
+    const step = to.name as 'oauth' | 'permissions'
+    if (!canAccess(step)) {
+      return '/welcome'
+    }
+  }
 })
 
 export default router

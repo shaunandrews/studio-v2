@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
 import Popover from '@/components/primitives/Popover.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
@@ -11,6 +11,7 @@ import { usePersona } from '@/data/usePersona'
 
 const { mod } = useOperatingSystem()
 const { openSettings } = useSettings()
+const router = useRouter()
 const { user } = useAuth()
 const { clearPersona } = usePersona()
 
@@ -42,7 +43,7 @@ function openShortcuts() {
 
 function switchPersona() {
   close()
-  clearPersona()
+  clearPersona(router)
 }
 </script>
 
