@@ -180,6 +180,8 @@ function handlePermissionComplete() {
             <div class="content-body__actions">
               <Button
                 variant="primary"
+                width="full"
+                size="large"
                 label="Request permissions"
                 @click="handleGrantPermissions"
               />
