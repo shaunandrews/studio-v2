@@ -83,8 +83,8 @@ function handlePermissionComplete() {
       <!-- Left: dark panel with dot grid + morphing content -->
       <div class="split__hero">
         <DotGrid
-          rest-color="rgba(255, 255, 255, 0.1)"
-          active-color="rgba(56, 88, 233, 0.9)"
+          rest-color="rgba(255, 255, 255, 0.15)"
+          active-color="rgba(255, 255, 255, 0.6)"
         />
 
         <!-- Hero content crossfades -->
@@ -158,22 +158,21 @@ function handlePermissionComplete() {
           <!-- Permissions content -->
           <div v-else key="permissions" class="content-body">
             <h1 class="content-body__title">Permissions needed</h1>
-            <p class="content-body__pitch">You'll need to grant Studio access to:</p>
+            <p class="content-body__pitch">Studio needs permission to your system for the following:</p>
 
             <div class="content-body__perms">
               <div class="perm-item">
                 <WPIcon :icon="mapMarker" :size="20" class="perm-item__icon" />
                 <div class="perm-item__text">
-                  <span class="perm-item__title">Manage local URLs</span>
-                  <span class="perm-item__desc">Add hostnames for your Studio sites to /etc/hosts</span>
+                  <span class="perm-item__title">Setup dev URLs</span>
+                  <span class="perm-item__desc">Manage hostnames for your local sites</span>
                 </div>
               </div>
-              <div class="perm-divider" />
               <div class="perm-item">
                 <WPIcon :icon="connection" :size="20" class="perm-item__icon" />
                 <div class="perm-item__text">
                   <span class="perm-item__title">Accept incoming network connections</span>
-                  <span class="perm-item__desc">Allows you to access your sites through a browser</span>
+                  <span class="perm-item__desc">Needed to access your sites through a browser</span>
                 </div>
               </div>
             </div>
@@ -295,7 +294,7 @@ function handlePermissionComplete() {
 .split__hero {
   flex: 0 0 30%;
   position: relative;
-  background: var(--color-menu-bg);
+  background: var(--color-theme-bg);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -310,7 +309,8 @@ function handlePermissionComplete() {
 .hero-content {
   position: relative;
   z-index: 1;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-theme-fg);
+  opacity: 0.2;
   pointer-events: none;
 }
 
@@ -334,8 +334,8 @@ function handlePermissionComplete() {
   flex-direction: column;
   align-items: center;
   gap: var(--space-m);
-  background: #222;
-  border: 1px solid #333;
+  background: var(--color-theme-fill);
+  border: 1px solid var(--color-theme-border);
   border-radius: var(--radius-m);
   padding: var(--space-l) var(--space-m);
 }
@@ -515,7 +515,7 @@ function handlePermissionComplete() {
   width: 100%;
   border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-m);
-  background: var(--color-chrome-fill);
+  /* background: var(--color-chrome-fill); */
 }
 
 .perm-item {
@@ -523,6 +523,10 @@ function handlePermissionComplete() {
   align-items: flex-start;
   gap: var(--space-m);
   padding: var(--space-m);
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--color-chrome-border);
+  }
 }
 
 .perm-item__icon {
@@ -546,12 +550,6 @@ function handlePermissionComplete() {
   font-size: var(--font-size-s);
   color: var(--color-chrome-fg-muted);
   line-height: 1.4;
-}
-
-.perm-divider {
-  height: 1px;
-  background: var(--color-chrome-border);
-  margin-inline: var(--space-m);
 }
 
 /* ── Popup transitions (OAuth + permission dialog) ── */
