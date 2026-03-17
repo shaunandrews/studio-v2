@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { wordpress } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
@@ -20,6 +20,7 @@ markVisited('welcome')
 
 const showOAuth = computed(() => route.name === 'oauth')
 const showPermissions = computed(() => route.name === 'permissions')
+const exiting = ref(false)
 
 function handleLogin() {
   router.push('/oauth')
@@ -27,6 +28,14 @@ function handleLogin() {
 
 function handleSkip() {
   router.push('/permissions')
+}
+
+function handleComplete() {
+  exiting.value = true
+  // Wait for the slide-out animation to finish, then navigate
+  setTimeout(() => {
+    router.push('/all-sites')
+  }, 500)
 }
 </script>
 
@@ -41,7 +50,7 @@ function handleSkip() {
     </div>
 
     <!-- Welcome screen: always visible as the base layer -->
-    <div class="welcome-screen">
+    <div class="welcome-screen" :class="{ 'is-exiting': exiting }">
       <!-- Left: dark panel with interactive dot grid -->
       <div class="welcome-screen__hero">
         <DotGrid
@@ -96,8 +105,8 @@ function handleSkip() {
     </Transition>
 
     <!-- Permission prep + macOS dialog overlay -->
-    <Transition name="popup">
-      <PermissionFlow v-if="showPermissions" />
+    <Transition name="slide">
+      <PermissionFlow v-if="showPermissions" @complete="handleComplete" />
     </Transition>
   </div>
 </template>
@@ -165,6 +174,12 @@ function handleSkip() {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: flex 500ms cubic-bezier(0.4, 0, 0.2, 1), transform 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.welcome-screen.is-exiting .welcome-screen__hero {
+  flex: 0;
+  transform: translateX(-100%);
 }
 
 .welcome-screen__wp-mark {
@@ -183,6 +198,7 @@ function handleSkip() {
   justify-content: center;
   background: var(--color-frame-bg);
   color: var(--color-frame-fg);
+  transition: flex 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .welcome-screen__body {
@@ -263,41 +279,55 @@ function handleSkip() {
   text-decoration: underline;
 }
 
-/* ── Popup overlay transition ── */
+/* ── Popup overlay transitions ── */
 
+/* OAuth browser window: scale up from center */
 .popup-enter-active {
-  transition: opacity 200ms ease;
+  transition: opacity 250ms ease;
 }
 
-.popup-enter-active :deep(.browser-window),
-.popup-enter-active :deep(.dialog-box) {
-  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+.popup-enter-active :deep(.browser-window) {
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .popup-leave-active {
-  transition: opacity 150ms ease;
+  transition: opacity 200ms ease;
 }
 
-.popup-leave-active :deep(.browser-window),
-.popup-leave-active :deep(.dialog-box) {
-  transition: transform 150ms ease;
+.popup-leave-active :deep(.browser-window) {
+  transition: transform 200ms ease;
 }
 
 .popup-enter-from {
   opacity: 0;
 }
 
-.popup-enter-from :deep(.browser-window),
-.popup-enter-from :deep(.dialog-box) {
-  transform: scale(0.92) translateY(12px);
+.popup-enter-from :deep(.browser-window) {
+  transform: scale(0.9) translateY(16px);
 }
 
 .popup-leave-to {
   opacity: 0;
 }
 
-.popup-leave-to :deep(.browser-window),
-.popup-leave-to :deep(.dialog-box) {
-  transform: scale(0.96);
+.popup-leave-to :deep(.browser-window) {
+  transform: scale(0.95);
+}
+
+/* Permissions flow: slide in from right */
+.slide-enter-active {
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-leave-active {
+  transition: transform 300ms ease;
+}
+
+.slide-enter-from {
+  transform: translateX(100%);
+}
+
+.slide-leave-to {
+  transform: translateX(100%);
 }
 </style>

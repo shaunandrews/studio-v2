@@ -7,6 +7,10 @@ import DotGrid from './DotGrid.vue'
 import PermissionDialog from './PermissionDialog.vue'
 import { useOnboarding } from '@/data/useOnboarding'
 
+const emit = defineEmits<{
+  complete: []
+}>()
+
 const { markVisited } = useOnboarding()
 
 markVisited('permissions')
@@ -92,7 +96,7 @@ function handleCancel() {
 
     <!-- macOS permission dialog floats on top -->
     <Transition name="dialog">
-      <PermissionDialog v-if="showDialog" @cancel="handleCancel" />
+      <PermissionDialog v-if="showDialog" @cancel="handleCancel" @complete="emit('complete')" />
     </Transition>
   </div>
 </template>

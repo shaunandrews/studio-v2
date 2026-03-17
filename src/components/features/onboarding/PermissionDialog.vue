@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { wordpress } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import { useOnboarding } from '@/data/useOnboarding'
 
-const router = useRouter()
 const { complete } = useOnboarding()
 
 const emit = defineEmits<{
   cancel: []
+  complete: []
 }>()
 
 const password = ref('••••••••')
@@ -24,7 +23,7 @@ async function handleOK() {
   await new Promise(resolve => setTimeout(resolve, 500))
   isAuthenticating.value = false
   complete()
-  router.push('/all-sites')
+  emit('complete')
 }
 </script>
 
