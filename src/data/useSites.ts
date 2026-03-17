@@ -36,6 +36,11 @@ export function useSites() {
     if (p) Object.assign(p, updates)
   }
 
+  function resetSites(newSites: Site[]) {
+    sites.value = structuredClone(newSites)
+    activeSiteId.value = null
+  }
+
   return {
     sites,
     activeSiteId,
@@ -43,5 +48,6 @@ export function useSites() {
     setStatus,
     createUntitledSite,
     updateSite,
+    resetSites,
   }
 }

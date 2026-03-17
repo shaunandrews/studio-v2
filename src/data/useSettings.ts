@@ -16,10 +16,10 @@ export function useSettings() {
     initialTab.value = 'general'
   }
 
-  return {
-    isSettingsOpen: isOpen,
-    settingsTab: initialTab,
-    openSettings,
-    closeSettings,
+  function resetSettings() {
+    isOpen.value = false
+    initialTab.value = 'general'
   }
+
+  return { isSettingsOpen: isOpen, settingsTab: initialTab, openSettings, closeSettings, resetSettings }
 }

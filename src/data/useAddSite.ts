@@ -17,11 +17,9 @@ export function useAddSite() {
     isAddingSite.value = false
   }
 
-  return {
-    isAddingSite,
-    shouldShowAddSite,
-    hasSites,
-    openAddSite,
-    closeAddSite,
+  function resetAddSite() {
+    isAddingSite.value = false
   }
+
+  return { isAddingSite, shouldShowAddSite, hasSites, openAddSite, closeAddSite, resetAddSite }
 }

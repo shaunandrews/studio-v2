@@ -243,6 +243,12 @@ export function useConversations() {
     if (conv) conv.archived = false
   }
 
+  function resetConversations(newConvos: Conversation[], newMessages: Message[]) {
+    conversations.value = newConvos.map(c => ({ ...c }))
+    messages.value = newMessages.map(m => ({ ...m }))
+    nextWorktreePort = 4001
+  }
+
   return {
     conversations,
     messages,
@@ -258,5 +264,6 @@ export function useConversations() {
     archiveConversation,
     unarchiveConversation,
     generateTaskTitle,
+    resetConversations,
   }
 }
