@@ -143,8 +143,8 @@ function handleCancel() {
   flex-direction: column;
   align-items: center;
   gap: var(--space-m);
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #222;
+  border: 1px solid #333;
   border-radius: var(--radius-m);
   padding: var(--space-l) var(--space-m);
 }
