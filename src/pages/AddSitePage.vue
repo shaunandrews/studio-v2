@@ -159,6 +159,7 @@ async function onSubmit(data: { name: string }) {
   <BackdropPage
     :show-back="canGoBack"
     :hide-header="currentStep === 'building'"
+    :hide-close="!hasSites"
     @close="dismiss"
     @back="goBack"
   >

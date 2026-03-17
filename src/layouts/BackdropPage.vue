@@ -10,9 +10,12 @@ withDefaults(defineProps<{
   showBack?: boolean
   /** Hide the header entirely */
   hideHeader?: boolean
+  /** Hide the close button (e.g. new user with no sites to go back to) */
+  hideClose?: boolean
 }>(), {
   showBack: false,
   hideHeader: false,
+  hideClose: false,
 })
 
 defineEmits<{
@@ -35,8 +38,9 @@ defineEmits<{
         @click="$emit('back')"
       />
       <Button
-        v-else
+        v-else-if="!hideClose"
         :icon="close"
+        label="Close"
         variant="tertiary"
         surface="dark"
         @click="$emit('close')"
