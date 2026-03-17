@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { wordpress } from '@wordpress/icons'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
 import { useOnboarding } from '@/data/useOnboarding'
@@ -39,39 +41,69 @@ function handleSkip() {
 
     <!-- Welcome screen: always visible as the base layer -->
     <div class="welcome-screen">
+      <!-- Left: theme panel with illustration -->
+      <div class="welcome-screen__hero">
+        <WPIcon :icon="wordpress" :size="32" class="welcome-screen__wp-logo" />
+
+        <!-- Stylized app wireframe illustration -->
+        <div class="welcome-screen__illustration">
+          <div class="illus-window">
+            <div class="illus-sidebar">
+              <div class="illus-dot" />
+              <div class="illus-line illus-line--short" />
+              <div class="illus-line" />
+              <div class="illus-line" />
+              <div class="illus-line illus-line--short" />
+            </div>
+            <div class="illus-content">
+              <div class="illus-bar" />
+              <div class="illus-bar illus-bar--wide" />
+              <div class="illus-bar illus-bar--medium" />
+              <div class="illus-row">
+                <div class="illus-bar illus-bar--small" />
+                <div class="illus-bar illus-bar--small illus-bar--accent" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: content -->
       <div class="welcome-screen__content">
-        <div class="welcome-screen__brand">
-          <h1 class="welcome-screen__title">Welcome to<br />WordPress Studio</h1>
-          <p class="welcome-screen__pitch">
-            Start by connecting your WordPress.com account to unlock the full power of Studio.
+        <div class="welcome-screen__body">
+          <div class="welcome-screen__brand">
+            <h1 class="welcome-screen__title">Welcome to<br />WordPress Studio</h1>
+            <p class="welcome-screen__pitch">
+              Start by connecting your WordPress.com account to unlock the full power of Studio.
+            </p>
+          </div>
+
+          <ul class="welcome-screen__benefits">
+            <li>Share preview sites with clients and colleagues</li>
+            <li>Seamlessly sync with WordPress.com and Pressable</li>
+            <li>Get smart suggestions from the Studio Assistant</li>
+          </ul>
+
+          <div class="welcome-screen__actions">
+            <Button
+              variant="primary"
+              label="Log in to WordPress.com"
+              width="full"
+              @click="handleLogin"
+            />
+            <Button
+              variant="tertiary"
+              label="Skip"
+              width="full"
+              @click="handleSkip"
+            />
+          </div>
+
+          <p class="welcome-screen__signup">
+            New to WordPress.com?
+            <a href="#" class="welcome-screen__link" @click.prevent="handleLogin">Create a free account</a>
           </p>
         </div>
-
-        <ul class="welcome-screen__benefits">
-          <li>Share preview sites with clients and colleagues</li>
-          <li>Seamlessly sync with WordPress.com and Pressable</li>
-          <li>Get smart suggestions from the Studio Assistant</li>
-        </ul>
-
-        <div class="welcome-screen__actions">
-          <Button
-            variant="primary"
-            label="Log in to WordPress.com"
-            width="full"
-            @click="handleLogin"
-          />
-          <Button
-            variant="tertiary"
-            label="Skip"
-            width="full"
-            @click="handleSkip"
-          />
-        </div>
-
-        <p class="welcome-screen__signup">
-          New to WordPress.com?
-          <a href="#" class="welcome-screen__link" @click.prevent="handleLogin">Create a free account</a>
-        </p>
       </div>
     </div>
 
@@ -130,29 +162,141 @@ function handleSkip() {
   min-height: 0;
 }
 
-/* ── Welcome screen (persistent base) ── */
+/* ── Welcome screen: split layout ── */
 
 .welcome-screen {
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-chrome-bg);
-  color: var(--color-chrome-fg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
 
-.welcome-screen__content {
+/* ── Left hero panel ── */
+
+.welcome-screen__hero {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  background: var(--color-theme-bg);
+  color: var(--color-theme-fg);
+  position: relative;
+  gap: var(--space-xxl);
+}
+
+.welcome-screen__wp-logo {
+  position: absolute;
+  top: 28px; /* Physical: near traffic lights vertically */
+  left: 50%; /* Physical: centered in hero */
+  transform: translateX(-50%);
+  opacity: 0.8;
+}
+
+/* ── Illustration: stylized app wireframe ── */
+
+.welcome-screen__illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.illus-window {
+  width: 240px;
+  display: flex;
+  gap: 1px;
+  background: var(--color-theme-fill);
+  border: 1px solid var(--color-theme-border);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  padding: var(--space-s);
+}
+
+.illus-sidebar {
+  width: 56px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+}
+
+.illus-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-theme-border);
+  margin-block-end: var(--space-xs);
+}
+
+.illus-line {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-theme-border);
+}
+
+.illus-line--short {
+  width: 70%;
+}
+
+.illus-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding: var(--space-s);
+}
+
+.illus-bar {
+  height: 12px;
+  border-radius: 4px;
+  background: var(--color-theme-border);
+}
+
+.illus-bar--wide {
+  width: 100%;
+}
+
+.illus-bar--medium {
+  width: 75%;
+}
+
+.illus-bar--small {
+  flex: 1;
+  height: 20px;
+}
+
+.illus-bar--accent {
+  background: var(--color-theme-fill);
+  border: 1px solid var(--color-theme-border);
+}
+
+.illus-row {
+  display: flex;
+  gap: var(--space-xs);
+  margin-block-start: auto;
+}
+
+/* ── Right content panel ── */
+
+.welcome-screen__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-frame-bg);
+  color: var(--color-frame-fg);
+}
+
+.welcome-screen__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: var(--space-xl);
-  max-width: 400px;
+  max-width: 380px;
   width: 100%;
   padding: var(--space-xl);
-  text-align: center;
 }
 
 .welcome-screen__brand {
@@ -171,7 +315,7 @@ function handleSkip() {
 
 .welcome-screen__pitch {
   font-size: var(--font-size-m);
-  color: var(--color-chrome-fg-muted);
+  color: var(--color-frame-fg-muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -183,13 +327,12 @@ function handleSkip() {
   display: flex;
   flex-direction: column;
   gap: var(--space-s);
-  text-align: start;
   width: 100%;
 }
 
 .welcome-screen__benefits li {
   font-size: var(--font-size-s);
-  color: var(--color-chrome-fg-muted);
+  color: var(--color-frame-fg-muted);
   padding-inline-start: var(--space-l);
   position: relative;
 }
@@ -211,12 +354,12 @@ function handleSkip() {
 
 .welcome-screen__signup {
   font-size: var(--font-size-s);
-  color: var(--color-chrome-fg-muted);
+  color: var(--color-frame-fg-muted);
   margin: 0;
 }
 
 .welcome-screen__link {
-  color: var(--color-chrome-theme);
+  color: var(--color-frame-theme);
   text-decoration: none;
 }
 

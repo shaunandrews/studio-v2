@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { check } from '@wordpress/icons'
+import { wordpress, check, lock } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import PermissionDialog from './PermissionDialog.vue'
@@ -34,33 +34,55 @@ function handleCancel() {
 
 <template>
   <div class="permission-flow">
-    <!-- Full-screen prep content -->
+    <!-- Full-screen split layout -->
     <div class="permission-screen">
-      <div class="permission-screen__content">
-        <h1 class="permission-screen__title">Permissions needed</h1>
-        <p class="permission-screen__subtitle">You'll need to grant Studio access to:</p>
+      <!-- Left: theme panel with lock illustration -->
+      <div class="permission-screen__hero">
+        <WPIcon :icon="wordpress" :size="32" class="permission-screen__wp-logo" />
 
-        <div class="permission-screen__list">
-          <div
-            v-for="perm in permissions"
-            :key="perm.title"
-            class="permission-screen__item"
-          >
-            <WPIcon :icon="check" :size="24" class="permission-screen__check" />
-            <div class="permission-screen__item-text">
-              <span class="permission-screen__item-title">{{ perm.title }}</span>
-              <span class="permission-screen__item-desc">{{ perm.description }}</span>
+        <div class="permission-screen__illustration">
+          <div class="illus-dialog">
+            <WPIcon :icon="lock" :size="32" class="illus-dialog__lock" />
+            <div class="illus-dialog__lines">
+              <div class="illus-line illus-line--wide" />
+              <div class="illus-line illus-line--medium" />
+            </div>
+            <div class="illus-dialog__field" />
+            <div class="illus-dialog__buttons">
+              <div class="illus-btn" />
+              <div class="illus-btn illus-btn--primary" />
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="permission-screen__actions">
-          <Button
-            variant="primary"
-            label="Continue"
-            width="full"
-            @click="handleContinue"
-          />
+      <!-- Right: content -->
+      <div class="permission-screen__content">
+        <div class="permission-screen__body">
+          <h1 class="permission-screen__title">Permissions needed</h1>
+          <p class="permission-screen__subtitle">You'll need to grant Studio access to:</p>
+
+          <div class="permission-screen__list">
+            <div
+              v-for="perm in permissions"
+              :key="perm.title"
+              class="permission-screen__item"
+            >
+              <WPIcon :icon="check" :size="24" class="permission-screen__check" />
+              <div class="permission-screen__item-text">
+                <span class="permission-screen__item-title">{{ perm.title }}</span>
+                <span class="permission-screen__item-desc">{{ perm.description }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="permission-screen__actions">
+            <Button
+              variant="primary"
+              label="Grant permissions"
+              @click="handleContinue"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -79,24 +101,125 @@ function handleCancel() {
   z-index: 50;
 }
 
-/* ── Full-screen permissions prep ── */
+/* ── Split layout ── */
 
 .permission-screen {
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-chrome-bg);
-  color: var(--color-chrome-fg);
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
 }
 
-.permission-screen__content {
+/* ── Left hero panel ── */
+
+.permission-screen__hero {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 480px;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-theme-bg);
+  color: var(--color-theme-fg);
+  position: relative;
+}
+
+.permission-screen__wp-logo {
+  position: absolute;
+  top: 28px; /* Physical: near traffic lights vertically */
+  left: 50%; /* Physical: centered in hero */
+  transform: translateX(-50%);
+  opacity: 0.8;
+}
+
+/* ── Illustration: stylized macOS permission dialog ── */
+
+.permission-screen__illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.illus-dialog {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-m);
+  background: var(--color-theme-fill);
+  border: 1px solid var(--color-theme-border);
+  border-radius: var(--radius-m);
+  padding: var(--space-l) var(--space-m);
+}
+
+.illus-dialog__lock {
+  opacity: 0.5;
+}
+
+.illus-dialog__lines {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+}
+
+.illus-line {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-theme-border);
+}
+
+.illus-line--wide {
+  width: 80%;
+}
+
+.illus-line--medium {
+  width: 60%;
+}
+
+.illus-dialog__field {
+  width: 100%;
+  height: 24px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--color-theme-border);
+  background: var(--color-theme-fill);
+}
+
+.illus-dialog__buttons {
+  display: flex;
+  gap: var(--space-xs);
+  width: 100%;
+}
+
+.illus-btn {
+  flex: 1;
+  height: 20px;
+  border-radius: var(--radius-s);
+  background: var(--color-theme-border);
+}
+
+.illus-btn--primary {
+  background: var(--color-theme-fg);
+  opacity: 0.3;
+}
+
+/* ── Right content panel ── */
+
+.permission-screen__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-frame-bg);
+  color: var(--color-frame-fg);
+}
+
+.permission-screen__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 380px;
   width: 100%;
   padding: var(--space-xl);
 }
@@ -109,8 +232,8 @@ function handleCancel() {
 
 .permission-screen__subtitle {
   font-size: var(--font-size-m);
-  color: var(--color-chrome-fg-muted);
-  margin: 0 0 var(--space-xl);
+  color: var(--color-frame-fg-muted);
+  margin: 0 0 var(--space-xxl);
   line-height: 1.5;
 }
 
@@ -146,12 +269,8 @@ function handleCancel() {
 
 .permission-screen__item-desc {
   font-size: var(--font-size-s);
-  color: var(--color-chrome-fg-muted);
+  color: var(--color-frame-fg-muted);
   line-height: 1.4;
-}
-
-.permission-screen__actions {
-  width: 100%;
 }
 
 /* ── Dialog transition ── */
