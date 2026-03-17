@@ -6,9 +6,13 @@ import Popover from '@/components/primitives/Popover.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useSettings } from '@/data/useSettings'
+import { useAuth } from '@/data/useAuth'
+import { usePersona } from '@/data/usePersona'
 
 const { mod } = useOperatingSystem()
 const { openSettings } = useSettings()
+const { user } = useAuth()
+const { clearPersona } = usePersona()
 
 const props = defineProps<{
   open: boolean
@@ -35,6 +39,11 @@ function openShortcuts() {
   close()
   showShortcuts.value = true
 }
+
+function switchPersona() {
+  close()
+  clearPersona()
+}
 </script>
 
 <template>
@@ -51,11 +60,12 @@ function openShortcuts() {
       <!-- Account row -->
       <div class="global-menu__section global-menu__account">
         <img
+          v-if="user"
           class="global-menu__avatar"
-          src="https://gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=64"
+          :src="user.avatar"
           alt="User"
         />
-        <span class="global-menu__email">shaun@automattic.com</span>
+        <span class="global-menu__email">{{ user?.email ?? 'Not signed in' }}</span>
         <Button size="small" variant="secondary" surface="dark" label="Logout" />
       </div>
 
@@ -84,6 +94,9 @@ function openShortcuts() {
 
       <!-- Links -->
       <div class="global-menu__section global-menu__nav">
+        <div class="global-menu__item" @click="switchPersona">
+          Switch persona
+        </div>
         <RouterLink to="/overviews" class="global-menu__item" @click="close">
           Design Overviews
         </RouterLink>
