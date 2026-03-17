@@ -37,7 +37,6 @@ defineEmits<{
       <Button
         v-else
         :icon="close"
-        label="Close"
         variant="tertiary"
         surface="dark"
         @click="$emit('close')"
@@ -71,9 +70,10 @@ defineEmits<{
   pointer-events: none;
 }
 
-/* Clear macOS traffic lights: 16px left + 3×12px dots + 2×8px gaps = 68px, plus breathing room */
+/* macOS: position below traffic lights */
 .backdrop-header.has-traffic-lights {
-  padding-inline-start: 80px; /* Physical: clear traffic lights */
+  inset-block-start: 40px; /* Physical: below traffic lights (18px top + 12px dots + 10px gap) */
+  padding-inline-start: var(--space-m);
 }
 
 /* Let the button itself receive clicks */
