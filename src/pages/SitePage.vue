@@ -6,8 +6,10 @@ import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import InputChat from '@/components/composites/InputChat.vue'
 import Text from '@/components/primitives/Text.vue'
+import Button from '@/components/primitives/Button.vue'
 import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import ResizeHandle from '@/components/primitives/ResizeHandle.vue'
+import TaskToolbar from '@/components/composites/TaskToolbar.vue'
 import SyncScreen from '@/components/features/SyncScreen.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
@@ -96,6 +98,16 @@ const currentMessages = getMessages(selectedConvoId)
 const isNewTask = computed(() =>
   selectedConvoId.value != null && currentMessages.value.length === 0
 )
+
+const selectedConvo = computed(() =>
+  conversations.value.find(c => c.id === selectedConvoId.value)
+)
+const isReview = computed(() => selectedConvo.value?.status === 'review')
+
+function approveAndMerge() {
+  if (!selectedConvo.value) return
+  selectedConvo.value.status = 'approved'
+}
 
 const inputChatRef = ref<InstanceType<typeof InputChat> | null>(null)
 const inputWrapRef = ref<HTMLDivElement | null>(null)
@@ -206,6 +218,7 @@ const { openSettings } = useSettings()
       <div class="pane pane-detail">
         <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" />
         <template v-else-if="currentScreen === 'tasks' && selectedConvoId">
+          <TaskToolbar v-if="!isNewTask" :conversation-id="selectedConvoId" />
           <ChatMessageList v-if="!isNewTask" :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" />
           <div ref="inputWrapRef" class="detail-input" :class="{ 'is-new-task': isNewTask }">
             <Transition name="welcome-fade">
@@ -217,11 +230,15 @@ const { openSettings } = useSettings()
                 </div>
                 <div class="new-task-welcome__copy">
                   <Text tag="p" variant="body-large" weight="semibold">New task</Text>
-                  <Text tag="p" color="muted">Describe what you need and an AI agent will get to work on your site.</Text>
+                  <Text tag="p" color="muted">An AI assistant can complete your task for you. Then you can review and approve the changes, merging them into your main Studio site.</Text>
                 </div>
               </div>
             </Transition>
             <ProgressiveBlur v-if="!isNewTask" class="input-blur" height="calc(100% + 6px)" />
+            <div v-if="isReview" class="merge-banner">
+              <Text variant="body-small" color="muted">This task is ready for your review.</Text>
+              <Button label="Approve & merge" variant="primary" size="small" @click="approveAndMerge" />
+            </div>
             <InputChat
               ref="inputChatRef"
               v-model="draft"
@@ -296,6 +313,21 @@ const { openSettings } = useSettings()
   inset-block-end: 50%;
   transform: translateY(50%);
   padding: 0;
+}
+
+/* ── Merge banner ── */
+
+.merge-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 580px;
+  padding: var(--space-xs) var(--space-s);
+  background: var(--color-frame-fill);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-m);
+  margin-block-end: var(--space-xs);
 }
 
 /* ── Progressive blur behind input ── */

@@ -80,7 +80,12 @@ export interface ToolCall {
   code?: string            // Code output shown in expandable detail (streams when running)
 }
 
-export type ConversationStatus = 'idle' | 'running'
+export type ConversationStatus = 'idle' | 'running' | 'review' | 'approved' | 'merged' | 'rejected'
+
+export interface TaskWorktree {
+  branch: string
+  port: number
+}
 
 export interface Conversation {
   id: string
@@ -91,6 +96,7 @@ export interface Conversation {
   archived?: boolean
   status?: ConversationStatus
   unread?: boolean
+  worktree?: TaskWorktree
 }
 
 export interface Message {

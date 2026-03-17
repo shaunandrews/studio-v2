@@ -9,16 +9,16 @@ export const seedConversations: Conversation[] = [
   { id: 'global-1', siteId: null, agentId: 'wpcom', title: 'Getting started', createdAt: '2026-02-10T08:00:00Z' },
 
   // Arlo Writes
-  { id: 'blog-assistant-1', siteId: 'arlo-blog', agentId: 'wpcom', title: 'Hero section redesign', createdAt: '2026-02-12T10:00:00Z', unread: true },
-  { id: 'blog-code-1', siteId: 'arlo-blog', agentId: 'wpcom', title: 'Custom block development', createdAt: '2026-02-11T14:00:00Z' },
+  { id: 'blog-assistant-1', siteId: 'arlo-blog', agentId: 'wpcom', title: 'Hero section redesign', createdAt: '2026-02-12T10:00:00Z', unread: true, status: 'review', worktree: { branch: 'task/hero-section-redesign', port: 3941 } },
+  { id: 'blog-code-1', siteId: 'arlo-blog', agentId: 'wpcom', title: 'Custom block development', createdAt: '2026-02-11T14:00:00Z', status: 'merged', worktree: { branch: 'task/custom-block-development', port: 3942 } },
 
   // Downstreet Café
-  { id: 'cafe-onboarding', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Setting up Downstreet Café', createdAt: '2026-02-24T10:00:00Z' },
-  { id: 'cafe-hero-tweak', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Homepage hero updates', createdAt: '2026-02-25T09:00:00Z' },
-  { id: 'cafe-photos', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Menu photo updates', createdAt: '2026-02-26T14:00:00Z' },
-  { id: 'cafe-reservations', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Online reservations', createdAt: '2026-02-27T11:00:00Z' },
-  { id: 'cafe-seo', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'SEO & analytics setup', createdAt: '2026-02-28T10:00:00Z' },
-  { id: 'cafe-events', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Events page', createdAt: '2026-03-03T13:00:00Z', status: 'running', unread: true },
+  { id: 'cafe-onboarding', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Setting up Downstreet Café', createdAt: '2026-02-24T10:00:00Z', status: 'merged', worktree: { branch: 'task/setting-up-downstreet-cafe', port: 3951 } },
+  { id: 'cafe-hero-tweak', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Homepage hero updates', createdAt: '2026-02-25T09:00:00Z', status: 'merged', worktree: { branch: 'task/homepage-hero-updates', port: 3952 } },
+  { id: 'cafe-photos', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Menu photo updates', createdAt: '2026-02-26T14:00:00Z', status: 'approved', worktree: { branch: 'task/menu-photo-updates', port: 3953 } },
+  { id: 'cafe-reservations', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Online reservations', createdAt: '2026-02-27T11:00:00Z', status: 'review', worktree: { branch: 'task/online-reservations', port: 3954 } },
+  { id: 'cafe-seo', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'SEO & analytics setup', createdAt: '2026-02-28T10:00:00Z', status: 'review', worktree: { branch: 'task/seo-analytics-setup', port: 3955 } },
+  { id: 'cafe-events', siteId: 'downstreet-cafe', agentId: 'wpcom', title: 'Events page', createdAt: '2026-03-03T13:00:00Z', status: 'running', unread: true, worktree: { branch: 'task/events-page', port: 3956 } },
 
   // Studio Meridian
   { id: 'portfolio-onboarding', siteId: 'portfolio', agentId: 'wpcom', title: 'Setting up Studio Meridian', createdAt: '2026-01-20T09:00:00Z' },

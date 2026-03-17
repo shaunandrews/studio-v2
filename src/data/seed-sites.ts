@@ -4,7 +4,7 @@ export const seedProjects: Site[] = [
   {
     id: 'downstreet-cafe',
     name: 'Downstreet Café',
-
+    favicon: '/icons/sites/downstreet-cafe.svg',
     status: 'running',
     url: 'https://downstreet.cafe',
     createdAt: '2025-11-15T10:00:00Z',
@@ -63,7 +63,7 @@ export const seedProjects: Site[] = [
   {
     id: 'thread-and-co',
     name: 'Thread & Co.',
-
+    favicon: '/icons/sites/thread-and-co.svg',
     status: 'running',
     url: 'localhost:3921',
     createdAt: '2026-02-10T14:00:00Z',
@@ -85,7 +85,7 @@ export const seedProjects: Site[] = [
   {
     id: 'launchpad',
     name: 'Launchpad',
-
+    favicon: '/icons/sites/launchpad.svg',
     status: 'running',
     url: 'localhost:3923',
     createdAt: '2026-02-20T11:00:00Z',
@@ -107,7 +107,7 @@ export const seedProjects: Site[] = [
   {
     id: 'wild-lens',
     name: 'Wild Lens',
-
+    favicon: '/icons/sites/wild-lens.svg',
     status: 'running',
     url: 'localhost:3925',
     createdAt: '2026-02-15T16:00:00Z',

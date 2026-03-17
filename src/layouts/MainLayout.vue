@@ -10,11 +10,20 @@ import { useSettings } from '@/data/useSettings'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
 import AddSitePage from '@/pages/AddSitePage.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
+import ResizeHandle from '@/components/primitives/ResizeHandle.vue'
 import { useSidebarCollapse } from '@/data/useSidebarCollapse'
 import { useAddSite } from '@/data/useAddSite'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
+import { useResizablePane } from '@/data/useResizablePane'
 
 const { hidden, toggle: toggleSidebar } = useSidebarCollapse()
+
+const { width: sidebarWidth, isDragging: isSidebarResizing, onPointerDown: onSidebarResizeStart, resetWidth: resetSidebarWidth } = useResizablePane({
+  defaultWidth: 210,
+  minWidth: 160,
+  maxWidth: 360,
+  storageKey: 'studio-sidebar-width',
+})
 const { isWindows } = useOperatingSystem()
 const { shouldShowAddSite, hasSites, openAddSite } = useAddSite()
 
@@ -57,7 +66,7 @@ function handleNewSite() {
 </script>
 
 <template>
-  <div class="main-layout" :class="{ 'is-windows': isWindows }">
+  <div class="main-layout" :class="{ 'is-windows': isWindows }" :style="{ '--sidebar-width': sidebarWidth + 'px' }">
     <!-- Windows titlebar -->
     <WindowsTitlebar v-if="isWindows" />
 
@@ -82,7 +91,7 @@ function handleNewSite() {
       v-show="!isBackdropActive"
       ref="toggleRef"
       class="floating-btn sidebar-toggle"
-      :class="{ 'is-sidebar-hidden': hidden }"
+      :class="{ 'is-sidebar-hidden': hidden, 'is-resizing': isSidebarResizing }"
       @click="toggleSidebar()"
     >
       <WPIcon :icon="drawerLeft" :size="20" />
@@ -111,15 +120,23 @@ function handleNewSite() {
 
       <div
         class="sidebar vstack"
-        :class="{ 'is-hidden': hidden, 'is-offscreen': isBackdropActive }"
-        :style="{ viewTransitionName: 'sidebar' }"
+        :class="{ 'is-hidden': hidden, 'is-offscreen': isBackdropActive, 'is-resizing': isSidebarResizing }"
+        :style="{ viewTransitionName: 'sidebar', width: hidden ? undefined : sidebarWidth + 'px' }"
       >
         <SiteList class="flex-1 min-h-0" @new-site="handleNewSite" />
       </div>
 
+      <ResizeHandle
+        v-show="!hidden && !isBackdropActive"
+        class="sidebar-resize-handle"
+        :is-dragging="isSidebarResizing"
+        @pointerdown="onSidebarResizeStart"
+        @dblclick="resetSidebarWidth"
+      />
+
       <main
         class="frame"
-        :class="{ 'is-full': hidden, 'is-offscreen': isBackdropActive }"
+        :class="{ 'is-full': hidden, 'is-offscreen': isBackdropActive, 'is-resizing': isSidebarResizing }"
         :style="{ viewTransitionName: 'site-frame' }"
       >
         <router-view name="main" v-slot="{ Component }">
@@ -186,6 +203,7 @@ function handleNewSite() {
   position: relative;
   z-index: 1;
   width: 210px;
+  flex-shrink: 0;
   height: 100%;
   overflow: hidden;
   padding-block-start: 36px; /* Clear traffic lights: 15px top + 12px dots + 9px gap */
@@ -193,6 +211,10 @@ function handleNewSite() {
   transition:
     width 300ms cubic-bezier(0.4, 0, 0.2, 1) 200ms,
     transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar.is-resizing {
+  transition: none;
 }
 
 .sidebar.is-hidden {
@@ -228,7 +250,7 @@ function handleNewSite() {
   position: absolute;
   inset-block-start: 8px;
   inset-block-end: 8px;
-  inset-inline-start: calc(210px + 16px); /* sidebar + body padding + gap */
+  inset-inline-start: calc(var(--sidebar-width, 210px) + 16px); /* sidebar + body padding + gap */
   inset-inline-end: 8px;
   border-radius: var(--radius-l);
   background: var(--color-frame-bg);
@@ -246,6 +268,10 @@ function handleNewSite() {
     inset-inline-start 300ms cubic-bezier(0.4, 0, 0.2, 1) 200ms,
     border-radius 200ms var(--ease-default),
     transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.frame.is-resizing {
+  transition: none;
 }
 
 .frame.is-full {
@@ -342,11 +368,22 @@ function handleNewSite() {
   background: var(--color-frame-hover);
 }
 
+/* ── Sidebar resize handle ── */
+
+.sidebar-resize-handle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--sidebar-width, 210px) + 15px); /* body padding (8px) + gap (8px) - 1px to sit on frame edge */
+  z-index: 3;
+  height: auto;
+  background: transparent;
+}
+
 /* ── Sidebar toggle ── */
 
 .sidebar-toggle {
   bottom: 8px; /* Physical: body padding from window edge */
-  left: 186px; /* Physical: 8px body + 210px sidebar - 32px button */
+  left: calc(var(--sidebar-width, 210px) + 8px - 32px); /* Physical: body padding + sidebar width - button width */
   /* Show: slide right with sidebar expansion (300ms, delayed 200ms) */
   transition:
     left 300ms cubic-bezier(0.4, 0, 0.2, 1) 200ms,
@@ -354,6 +391,10 @@ function handleNewSite() {
     background 300ms var(--ease-default) 200ms,
     color 300ms var(--ease-default) 200ms,
     border-color 300ms var(--ease-default) 200ms;
+}
+
+.sidebar-toggle.is-resizing {
+  transition: none;
 }
 
 .sidebar-toggle:hover {

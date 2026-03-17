@@ -8,6 +8,20 @@ import type { Conversation, Message, AgentId } from './types'
 const conversations = ref<Conversation[]>(seedConversations.map(c => ({ ...c })))
 const messages = ref<Message[]>(seedMessages.map(m => ({ ...m })))
 
+let nextWorktreePort = 4001
+
+function assignWorktree(conv: Conversation, nameSource: string) {
+  const slug = nameSource
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40)
+  conv.worktree = {
+    branch: `task/${slug}`,
+    port: nextWorktreePort++,
+  }
+}
+
 function appendMessage(
   conversationId: string,
   role: 'user' | 'agent',
@@ -76,6 +90,14 @@ async function sendToAI(conversationId: string, agentId?: AgentId) {
 }
 
 async function generateTaskTitle(conversationId: string, userMessage: string) {
+  const conv = conversations.value.find(c => c.id === conversationId)
+  if (!conv) return
+
+  // Always assign a worktree on first message
+  if (!conv.worktree) {
+    assignWorktree(conv, userMessage)
+  }
+
   if (!isAIConfigured()) return
   try {
     const client = new Anthropic({
@@ -93,8 +115,11 @@ async function generateTaskTitle(conversationId: string, userMessage: string) {
       ],
     })
     const title = (response.content[0] as { type: 'text'; text: string }).text.trim()
-    const conv = conversations.value.find(c => c.id === conversationId)
-    if (conv && title) conv.title = title
+    if (title) {
+      conv.title = title
+      // Update branch name to use the cleaner AI-generated title
+      assignWorktree(conv, title)
+    }
   } catch {
     // Silent fail — title stays as "New task"
   }
