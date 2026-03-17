@@ -27,7 +27,7 @@ const { sites } = useSites()
 const site = computed(() => sites.value.find(s => s.id === props.siteId))
 
 const siteLayout = computed(() => site.value?.mockLayout ?? 'cafe')
-const localPath = computed(() => `/Users/shaun/Studio/${site.value?.id ?? 'site'}`)
+const localPath = computed(() => `/Users/shaun/Studio/${site.value?.name ?? 'site'}`)
 
 const themeType = computed(() => site.value?.themeType ?? 'block')
 const siteFeatures = computed(() => site.value?.features ?? [])

@@ -276,6 +276,20 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         </span>
       </div>
       <div v-if="sortedConvos.length === 0" class="site-tasks__empty">
+        <div class="empty__illustration">
+          <div class="empty__bubble empty__bubble--1">
+            <div class="empty__bubble-line empty__bubble-line--long" />
+            <div class="empty__bubble-line empty__bubble-line--short" />
+          </div>
+          <div class="empty__bubble empty__bubble--2">
+            <div class="empty__bubble-line empty__bubble-line--medium" />
+          </div>
+          <div class="empty__bubble empty__bubble--3">
+            <div class="empty__bubble-line empty__bubble-line--short" />
+            <div class="empty__bubble-line empty__bubble-line--long" />
+            <div class="empty__bubble-line empty__bubble-line--medium" />
+          </div>
+        </div>
         <p class="empty__heading">AI agents that work for you</p>
         <p class="empty__description">Tasks are conversations with AI agents that can edit your site, install plugins, write content, and more.</p>
         <Button label="Create your first task" variant="secondary" size="small" @click="$emit('new-task')" />
@@ -687,6 +701,58 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   align-items: center;
   padding: var(--space-xl) var(--space-l);
   text-align: center;
+}
+
+/* ── Empty illustration: floating chat bubbles ── */
+
+.empty__illustration {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-block-end: var(--space-l);
+  width: 100%;
+  max-width: 180px;
+}
+
+.empty__bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--radius-m);
+  background: var(--color-frame-fill);
+  border: 1px solid var(--color-frame-border);
+  animation: bubble-float 3s ease-in-out infinite;
+}
+
+.empty__bubble--1 {
+  align-self: flex-start;
+  animation-delay: 0s;
+}
+
+.empty__bubble--2 {
+  align-self: flex-end;
+  animation-delay: -1s;
+}
+
+.empty__bubble--3 {
+  align-self: flex-start;
+  animation-delay: -2s;
+}
+
+.empty__bubble-line {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-frame-border);
+}
+
+.empty__bubble-line--long { width: 100%; }
+.empty__bubble-line--medium { width: 70%; }
+.empty__bubble-line--short { width: 45%; }
+
+@keyframes bubble-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 .empty__heading {
