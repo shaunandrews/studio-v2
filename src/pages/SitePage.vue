@@ -148,7 +148,7 @@ function onNewChat() {
   const conv: Conversation = {
     id: `conv-${Date.now()}`,
     siteId,
-    agentId: 'assistant',
+    agentId: 'wpcom',
     createdAt: new Date().toISOString(),
   }
   conversations.value.push(conv)

@@ -64,7 +64,7 @@ const label = computed(() => statusLabel[props.status])
 .brief-header[data-status="running"]  .brief-status__dot { background: var(--color-brief-dot-running); }
 .brief-header[data-status="review"]   .brief-status__dot { background: var(--color-brief-dot-review); }
 .brief-header[data-status="approved"] .brief-status__dot { background: var(--color-brief-dot-approved); }
-.brief-header[data-status="merged"]   .brief-status__dot { background: var(--color-brief-dot-approved); }
+.brief-header[data-status="merged"]   .brief-status__dot { background: var(--color-brief-dot-approved); } /* Intentional: merged shares approved dot color — both are "done successfully" */
 .brief-header[data-status="rejected"] .brief-status__dot { background: var(--color-brief-dot-rejected); }
 
 /* Running pulse animation on the dot */

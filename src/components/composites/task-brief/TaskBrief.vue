@@ -33,9 +33,7 @@ const previewUrl = computed(() =>
 
 const isExpanded = ref(false)
 
-const cardAriaLabel = computed(() =>
-  `${title.value} — ${isExpanded.value ? 'Collapse' : 'Expand'}`
-)
+const cardAriaLabel = computed(() => `Task brief: ${title.value}`)
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' || e.key === ' ') {
