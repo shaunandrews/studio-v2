@@ -9,6 +9,7 @@ import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import { useSites } from '@/data/useSites'
 import { useConversations } from '@/data/useConversations'
 import { useSiteTransition } from '@/data/useSiteTransition'
+import { useAllSitesView } from '@/data/useAllSitesView'
 import type { Site } from '@/data/types'
 
 const emit = defineEmits<{
@@ -63,7 +64,8 @@ function getSiteMenuGroups(site: Site): FlyoutMenuGroup[] {
 const router = useRouter()
 const route = useRoute()
 const isAllSitesActive = computed(() => route.name === 'all-sites')
-const showAllSites = computed(() => sites.value.length > 1)
+const { showAllSitesView } = useAllSitesView()
+const showAllSites = computed(() => showAllSitesView.value && sites.value.length > 1)
 
 function goToAllSites() {
   router.push({ name: 'all-sites' })
