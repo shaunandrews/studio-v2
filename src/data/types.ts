@@ -87,6 +87,17 @@ export interface TaskWorktree {
   port: number
 }
 
+export interface ChangedFile {
+  path: string                   // e.g. "hero.html"
+  type: 'added' | 'modified' | 'deleted'
+}
+
+export interface ChangedEntity {
+  name: string                   // e.g. "Welcome to Our Site"
+  entityType: string             // e.g. "post", "page", "option", "plugin"
+  action: 'created' | 'updated' | 'deleted' | 'activated' | 'deactivated'
+}
+
 export interface Conversation {
   id: string
   siteId: string | null
@@ -97,6 +108,9 @@ export interface Conversation {
   status?: ConversationStatus
   unread?: boolean
   worktree?: TaskWorktree
+  summary?: string
+  changedFiles?: ChangedFile[]
+  changedEntities?: ChangedEntity[]
 }
 
 export interface Message {
