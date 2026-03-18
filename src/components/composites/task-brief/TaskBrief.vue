@@ -28,10 +28,14 @@ const summary = computed(() => conversation.value?.summary)
 const changedFiles = computed(() => conversation.value?.changedFiles)
 const changedEntities = computed(() => conversation.value?.changedEntities)
 const previewUrl = computed(() =>
-  worktree.value ? `localhost:${worktree.value.port}` : undefined
+  worktree.value ? `http://localhost:${worktree.value.port}` : undefined
 )
 
 const isExpanded = ref(false)
+
+const cardAriaLabel = computed(() =>
+  `${title.value} — ${isExpanded.value ? 'Collapse' : 'Expand'}`
+)
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' || e.key === ' ') {
@@ -56,7 +60,7 @@ const stampLabel = computed(() =>
     role="button"
     tabindex="0"
     :aria-expanded="isExpanded"
-    aria-label="Task brief — click to expand"
+    :aria-label="cardAriaLabel"
     @click="isExpanded = !isExpanded"
     @keydown="handleKeydown"
   >
