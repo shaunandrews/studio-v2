@@ -8,7 +8,7 @@ import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
 import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import ResizeHandle from '@/components/primitives/ResizeHandle.vue'
-import TaskToolbar from '@/components/composites/TaskToolbar.vue'
+import TaskBrief from '@/components/composites/task-brief/TaskBrief.vue'
 import SyncScreen from '@/components/features/SyncScreen.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
@@ -206,7 +206,13 @@ const { openSettings } = useSettings()
       <div class="pane pane-detail">
         <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" :status="currentSite?.status" :loading-target="loadingTarget" @toggle-status="toggleStatus" />
         <template v-else-if="currentScreen === 'tasks' && selectedConvoId">
-          <TaskToolbar v-if="!isNewTask" :conversation-id="selectedConvoId" />
+          <TaskBrief
+            v-if="!isNewTask"
+            :conversation-id="selectedConvoId"
+            class="task-brief-panel"
+            @preview="(id) => { /* TODO: open preview */ }"
+            @review="(id) => { /* out of scope: review view not yet built */ }"
+          />
           <ChatMessageList v-if="!isNewTask" :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" />
           <div ref="inputWrapRef" class="detail-input" :class="{ 'is-new-task': isNewTask }">
             <Transition name="welcome-fade">
@@ -281,6 +287,12 @@ const { openSettings } = useSettings()
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+.task-brief-panel {
+  flex-shrink: 0;
+  margin: var(--space-s);
+  margin-block-end: 0;
 }
 
 .detail-input {
