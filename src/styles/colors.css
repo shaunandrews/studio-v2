@@ -64,7 +64,7 @@
   --color-brief-running: #fef3c7;
   --color-brief-review: #dbeafe;
   --color-brief-approved: #dcfce7;
-  --color-brief-merged: #dcfce7;
+  --color-brief-merged: #dcfce7; /* same tint as approved — both are "done successfully" */
   --color-brief-rejected: #fee2e2;
 
   /* Task Brief status dot colors */
@@ -125,6 +125,7 @@
     --color-brief-merged: #0f2e1a;
     --color-brief-rejected: #2e0f0f;
 
+    --color-brief-dot-idle: rgba(255, 255, 255, 0.5); /* explicit dark override; light uses var(--color-frame-fg-muted) */
     --color-brief-dot-running: #f59e0b;
     --color-brief-dot-review: #60a5fa;
     --color-brief-dot-approved: #4ade80;
@@ -179,6 +180,7 @@
   --color-brief-merged: #0f2e1a;
   --color-brief-rejected: #2e0f0f;
 
+  --color-brief-dot-idle: rgba(255, 255, 255, 0.5); /* explicit dark override; light uses var(--color-frame-fg-muted) */
   --color-brief-dot-running: #f59e0b;
   --color-brief-dot-review: #60a5fa;
   --color-brief-dot-approved: #4ade80;
