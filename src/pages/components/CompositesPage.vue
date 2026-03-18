@@ -229,7 +229,7 @@ const shortcutsOpen = ref(false)
     <h3>Preview</h3>
     <div class="example-section">
       <Button variant="secondary" label="Open Preferences" @click="prefsOpen = true" />
-      <SettingsPage :open="prefsOpen" @close="prefsOpen = false" />
+      <SettingsPage v-if="prefsOpen" :open="prefsOpen" @close="prefsOpen = false" />
     </div>
   </section>
 
@@ -330,7 +330,7 @@ const shortcutsOpen = ref(false)
     <h3>Preview</h3>
     <div class="example-section">
       <Button variant="secondary" label="Open Shortcuts" @click="shortcutsOpen = true" />
-      <ShortcutsModal :open="shortcutsOpen" @close="shortcutsOpen = false" />
+      <ShortcutsModal v-if="shortcutsOpen" :open="shortcutsOpen" @close="shortcutsOpen = false" />
     </div>
   </section>
 
