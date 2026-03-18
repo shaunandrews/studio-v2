@@ -6,6 +6,7 @@ import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
 import Toggle from '@/components/primitives/Toggle.vue'
+import RadioGroup from '@/components/primitives/RadioGroup.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
 import { codingAgents, installAgent, uninstallAgent } from '@/data/agents'
@@ -15,6 +16,8 @@ import Badge from '@/components/primitives/Badge.vue'
 import { wordpress } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
+import { usePersona } from '@/data/usePersona'
+import { useAllSitesView } from '@/data/useAllSitesView'
 
 const props = withDefaults(defineProps<{
   open: boolean
@@ -94,6 +97,22 @@ applyAppearance(appearance.value)
 
 const { os, isWindows: globalIsWindows, setOS } = useOperatingSystem()
 const isWindows = computed(() => props.osOverride ? props.osOverride === 'windows' : globalIsWindows.value)
+
+// -- Persona --
+
+const { activePersonaId, personas: allPersonas, activatePersona } = usePersona()
+
+const personaOptions = computed(() =>
+  allPersonas.map(p => ({ value: p.id, label: p.name, description: p.description }))
+)
+
+function setPersona(id: string) {
+  activatePersona(id)
+}
+
+// -- All Sites toggle --
+
+const { showAllSitesView, setShowAllSites } = useAllSitesView()
 
 // -- API Key --
 
@@ -871,6 +890,17 @@ function skillInstallLabel(id: string): string {
           </div>
 
           <div class="settings-section">
+            <Text variant="body-small" weight="semibold" :surface="surfaceMode" class="settings-field-label">Persona</Text>
+            <RadioGroup :model-value="activePersonaId || ''" :options="personaOptions" name="persona" :surface="surfaceMode" @update:model-value="setPersona" />
+          </div>
+
+          <div class="settings-section">
+            <Toggle v-model="showAllSitesView" label="Show All Sites view" :surface="surfaceMode" size="small" @update:model-value="setShowAllSites">
+              <template #hint>Toggle the All Sites aggregated view in the sidebar.</template>
+            </Toggle>
+          </div>
+
+          <div class="settings-section">
             <Toggle v-model="isWindows" label="Windows mode" :surface="surfaceMode" size="small" @update:model-value="(v: boolean) => setOS(v ? 'windows' : 'macos')">
               <template #hint>Switch the app chrome between macOS and Windows styles.</template>
             </Toggle>
@@ -1080,7 +1110,7 @@ function skillInstallLabel(id: string): string {
   flex: 1;
   min-width: 0;
   overflow-y: auto;
-  padding: 0 var(--space-xl) var(--space-xl);
+  padding: var(--space-m) var(--space-xl) var(--space-xl);
 }
 
 /* Embedded mode: tighter padding since it's in a small window */
