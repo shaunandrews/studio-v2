@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import TaskBrief from '@/components/composites/task-brief/TaskBrief.vue'
 import ChatMessage from '@/components/composites/ChatMessage.vue'
 import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
@@ -372,6 +373,59 @@ const shortcutsOpen = ref(false)
     <h3>Stopped site</h3>
     <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
       <SiteToolbar title="UI Portfolio" status="stopped" />
+    </div>
+  </section>
+
+  <!-- TaskBrief -->
+  <section id="task-brief">
+    <h2>TaskBrief</h2>
+    <p class="section-desc">Skeuomorphic paper card summarising the active task. Shows status, branch, title, AI summary, and changed files/entities. Collapses to a compact title row and expands to full detail with Preview/Review actions. Lives above the chat in SitePage.</p>
+
+    <div class="props-table">
+      <h3>Props</h3>
+      <table>
+        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>conversationId</code></td><td><code>string</code></td><td>—</td><td>Looks up the conversation from the store — drives all derived state</td></tr>
+        </tbody>
+      </table>
+      <h3>Events</h3>
+      <table>
+        <thead><tr><th>Event</th><th>Payload</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>preview</code></td><td><code>conversationId: string</code></td><td>Preview button clicked</td></tr>
+          <tr><td><code>review</code></td><td><code>conversationId: string</code></td><td>Review button clicked</td></tr>
+        </tbody>
+      </table>
+      <h3>Sub-components</h3>
+      <table>
+        <thead><tr><th>Component</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>TaskBriefHeader</code></td><td>Status band — tinted by status, animated pulse dot for running, monospace branch name</td></tr>
+          <tr><td><code>TaskBriefStats</code></td><td>Changed files and entities — compact single-line or expanded two-column grid with expandable sub-lists</td></tr>
+          <tr><td><code>TaskBriefActions</code></td><td>Preview + Review buttons — compact (icon-only) or expanded (labelled); Review is primary when status is <code>review</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Running</h3>
+    <div class="example-section" style="max-width: 400px;">
+      <TaskBrief conversation-id="cafe-hero-tweak" />
+    </div>
+
+    <h3>In Review</h3>
+    <div class="example-section" style="max-width: 400px;">
+      <TaskBrief conversation-id="blog-assistant-1" />
+    </div>
+
+    <h3>Approved</h3>
+    <div class="example-section" style="max-width: 400px;">
+      <TaskBrief conversation-id="cafe-photos" />
+    </div>
+
+    <h3>Merged</h3>
+    <div class="example-section" style="max-width: 400px;">
+      <TaskBrief conversation-id="blog-code-1" />
     </div>
   </section>
 

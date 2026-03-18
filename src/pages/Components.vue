@@ -42,6 +42,7 @@ const categories = [
       { id: 'screen-layout', label: 'ScreenLayout' },
       { id: 'shortcuts-modal', label: 'ShortcutsModal' },
       { id: 'site-toolbar', label: 'SiteToolbar' },
+      { id: 'task-brief', label: 'TaskBrief' },
     ],
   },
   {
