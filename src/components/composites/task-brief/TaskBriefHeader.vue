@@ -84,6 +84,6 @@ const label = computed(() => statusLabel[props.status])
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-inline-size: 200px;
+  max-inline-size: 200px; /* Intentional: visual truncation cap, not a spacing value */
 }
 </style>

@@ -82,7 +82,7 @@ function fileTypeLabel(file: ChangedFile) {
       <ul v-if="entitiesOpen" class="brief-stat-list">
         <li
           v-for="entity in changedEntities"
-          :key="entity.name + entity.entityType"
+          :key="`${entity.name}::${entity.entityType}::${entity.action}`"
           class="brief-stat-item hstack gap-xxs"
         >
           <Text variant="body-small" color="muted" class="brief-stat-entity-type">{{ entity.entityType }}</Text>
@@ -91,7 +91,7 @@ function fileTypeLabel(file: ChangedFile) {
       </ul>
     </div>
 
-    <Text v-if="fileCount === 0 && entityCount === 0" variant="body-small" color="muted">No changes yet</Text>
+    <Text v-if="fileCount === 0 && entityCount === 0" variant="body-small" color="muted" class="brief-stats-empty">No changes yet</Text>
   </div>
 </template>
 
@@ -109,6 +109,11 @@ function fileTypeLabel(file: ChangedFile) {
 
 /* When only one group is present (v-if), span full width */
 .brief-stat-group:only-child {
+  grid-column: 1 / -1;
+}
+
+/* "No changes yet" fallback spans both columns */
+.brief-stats-empty {
   grid-column: 1 / -1;
 }
 
@@ -181,7 +186,7 @@ function fileTypeLabel(file: ChangedFile) {
 .brief-stat-entity-type {
   font-size: var(--font-size-xs);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.04em; /* Intentional: slightly tighter than heading-small (0.05em) for compact entity labels */
   flex-shrink: 0;
 }
 </style>
