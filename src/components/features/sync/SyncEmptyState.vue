@@ -9,16 +9,16 @@ defineEmits<{
 <template>
   <div class="sync-empty">
     <div class="sync-empty__illustration">
-      <div class="sync-empty__env sync-empty__env--local">Studio</div>
+      <div class="sync-empty__env sync-empty__env--local">Local</div>
       <div class="sync-empty__env sync-empty__env--staging">Staging</div>
       <div class="sync-empty__env sync-empty__env--production">Production</div>
     </div>
 
     <div class="sync-empty__message">
       <div class="sync-empty__copy">
-        <p class="sync-empty__heading">Sync your site across environments</p>
+        <p class="sync-empty__heading">Build locally, publish confidently</p>
         <p class="sync-empty__subtext">
-          Work locally, push to staging to test, then deploy to production when ready.
+          Keep your local site connected to staging and production. Test changes privately before they reach your visitors.
         </p>
       </div>
 

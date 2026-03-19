@@ -32,7 +32,7 @@ export function usePipeline(siteId: Ref<string | null>) {
       { id: `stage-${Date.now()}-1`, label: 'Staging', environment: 'staging' as EnvironmentType, order: 1 },
       { id: `stage-${Date.now()}-2`, label: 'Production', environment: 'production' as EnvironmentType, order: 2 },
     ]
-    setupPhase.value = -1
+    setupPhase.value = -2
   }
 
   function advanceSetup() {

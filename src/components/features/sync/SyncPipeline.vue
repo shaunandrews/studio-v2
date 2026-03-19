@@ -34,16 +34,21 @@ watch(isSetup, (val, oldVal) => {
 })
 
 // ── Setup step definitions ──
-// Phase -1 = local, 0+ = pipeline stage indices
+// Phase -2 = intro, -1 = local, 0+ = pipeline stage indices
 
 interface SetupStep {
   title: string
   subtitle: string
 }
 
+const STEP_INTRO: SetupStep = {
+  title: 'Your sync pipeline',
+  subtitle: 'Build locally, push to staging to test, then deploy to production when ready. Connect each environment below to get started.',
+}
+
 const STEP_LOCAL: SetupStep = {
   title: 'Your local site',
-  subtitle: 'Connect an environment below to start syncing.',
+  subtitle: 'This is your local WordPress site, running in Studio. It\'s the starting point for all your changes.',
 }
 
 const STEP_DEFS: Record<string, SetupStep> = {
@@ -59,11 +64,13 @@ const STEP_DEFS: Record<string, SetupStep> = {
 
 const currentStep = computed((): SetupStep | null => {
   if (setupPhase.value === null) return null
+  if (setupPhase.value === -2) return STEP_INTRO
   if (setupPhase.value === -1) return STEP_LOCAL
   const stage = pipeline.value[setupPhase.value]
   return STEP_DEFS[stage?.environment ?? ''] ?? null
 })
 
+const isIntroStep = computed(() => setupPhase.value === -2)
 const isLocalStep = computed(() => setupPhase.value === -1)
 
 // ── Guide vertical alignment ──
@@ -126,11 +133,11 @@ function envColor(environment?: string): string {
 
 <template>
   <ScreenLayout>
-    <div class="sync-pipeline__layout" :class="{ 'is-setup': showSetupLayout, 'is-ending': setupEnding }">
+    <div class="sync-pipeline__layout" :class="{ 'is-setup': showSetupLayout, 'is-ending': setupEnding, 'is-intro': isIntroStep }">
       <div ref="envContainerRef" class="sync-pipeline__environments">
         <StageCard
           data-setup-index="-1"
-          label="Studio"
+          label="Local"
           :url="siteUrl"
           :favicon="site?.favicon"
           :site-name="site?.name"
@@ -147,10 +154,10 @@ function envColor(environment?: string): string {
 
         <template v-for="(stage, index) in pipeline" :key="stage.id">
           <PipelineConnector
-            :from-label="index === 0 ? 'Studio' : pipeline[index - 1].label"
+            :from-label="index === 0 ? 'Local' : pipeline[index - 1].label"
             :to-label="stage.label"
             :to-connected="!!stage.site"
-            :dimmed="isSetup && index > setupPhase!"
+            :dimmed="isSetup && !isIntroStep && index > setupPhase!"
             @push="onConnectorPush(index === 0 ? 'local' : pipeline[index - 1].id, stage.id)"
           />
           <StageCard
@@ -161,7 +168,7 @@ function envColor(environment?: string): string {
             :site-name="site?.name"
             :connected="!!stage.site"
             :env-color="envColor(stage.environment)"
-            :dimmed="isSetup && index > setupPhase!"
+            :dimmed="isSetup && !isIntroStep && index > setupPhase!"
             :sync-phase="getProgress(stage.id).phase"
             :sync-percent="getProgress(stage.id).percent"
             :sync-label="getProgress(stage.id).label"
@@ -178,7 +185,8 @@ function envColor(environment?: string): string {
       <div v-if="currentStep" class="setup-guide" :style="{ paddingBlockStart: guideOffset + 'px' }">
         <Text variant="body" weight="semibold" tag="p">{{ currentStep.title }}</Text>
         <Text variant="body" color="muted" tag="p">{{ currentStep.subtitle }}</Text>
-        <Button v-if="isLocalStep" label="Continue" variant="secondary" size="small" @click="skipSetupStep" />
+        <Button v-if="isIntroStep" label="Get started" variant="primary" size="small" class="setup-guide__cta" @click="skipSetupStep" />
+        <Button v-else-if="isLocalStep" label="Continue" variant="secondary" size="small" class="setup-guide__cta" @click="skipSetupStep" />
         <button v-else class="setup-guide__skip" @click="skipSetupStep">
           Skip this step
         </button>
@@ -209,16 +217,53 @@ function envColor(environment?: string): string {
   gap: 4px;
   width: 100%;
   max-width: 680px;
-  transition: max-width 400ms var(--ease-default);
+  transition: max-width 400ms var(--ease-default), transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .is-setup .sync-pipeline__environments {
-  max-width: 420px;
+  max-width: 360px;
   flex-shrink: 0;
+  transform: scale(1);
 }
 
 .is-ending .sync-pipeline__environments {
   max-width: 680px;
+  transform: scale(1);
+}
+
+/* ── Intro layout: centered column, stack scaled down ── */
+
+.sync-pipeline__layout.is-intro {
+  flex-direction: column;
+  align-items: center;
+}
+
+.is-intro .sync-pipeline__environments {
+  transform: scale(0.8);
+  transform-origin: top center;
+}
+
+.is-intro .setup-guide {
+  order: -1;
+  align-items: center;
+  text-align: center;
+}
+
+.is-intro :deep(.connector__push-btn) {
+  display: none;
+}
+
+.is-intro :deep(.connector__line) {
+  height: 8px;
+}
+
+.is-intro .sync-pipeline__environments {
+  pointer-events: none;
+}
+
+.is-intro :deep(.sync-env__action),
+.is-intro :deep(.sync-env .btn) {
+  display: none;
 }
 
 /* ── Setup guide panel ── */
@@ -227,9 +272,13 @@ function envColor(environment?: string): string {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxs);
-  min-width: 240px;
-  max-width: 360px;
+  min-width: 280px;
+  max-width: 480px;
   transition: padding-block-start 200ms var(--ease-default);
+}
+
+.setup-guide__cta {
+  margin-block-start: var(--space-m);
 }
 
 .setup-guide p {

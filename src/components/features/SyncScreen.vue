@@ -114,7 +114,7 @@ function handleSyncFromCard(payload: { verb: 'push' | 'pull'; envId: string }) {
       v-else
       :site-id="siteId"
       :site-status="site?.status ?? 'stopped'"
-      :site-url="site?.url ?? 'localhost'"
+      :site-url="site?.url || 'localhost'"
     />
     <ConnectSiteModal
       :open="connectModalOpen"
@@ -136,7 +136,7 @@ function handleSyncFromCard(payload: { verb: 'push' | 'pull'; envId: string }) {
       :dest-url="syncDestUrl"
       :default-env-id="syncAction?.fromStage"
       :environments="connectedEnvironments"
-      :local-url="site?.url ?? 'localhost'"
+      :local-url="site?.url || 'localhost'"
       @close="closeSyncModal"
       @start="handleSync"
       @start-sync="handleSyncFromCard"
