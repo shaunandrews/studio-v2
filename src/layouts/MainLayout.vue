@@ -8,7 +8,6 @@ import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import SettingsPage from '@/components/composites/SettingsPage.vue'
 import { useSettings } from '@/data/useSettings'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
-import AddSitePage from '@/pages/AddSitePage.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
 import ResizeHandle from '@/components/primitives/ResizeHandle.vue'
 import { useSidebarCollapse } from '@/data/useSidebarCollapse'
@@ -26,15 +25,15 @@ const { width: sidebarWidth, isDragging: isSidebarResizing, onPointerDown: onSid
   storageKey: 'studio-sidebar-width',
 })
 const { isWindows } = useOperatingSystem()
-const { shouldShowAddSite, hasSites, openAddSite } = useAddSite()
+const { openAddSite } = useAddSite()
 const { user } = useAuth()
 
 const showShortcuts = ref(false)
 const showGlobalMenu = ref(false)
 const { isSettingsOpen, settingsTab, openSettings, closeSettings } = useSettings()
 
-// Chrome backdrop: either add-site or settings slides sidebar/frame offscreen
-const isBackdropActive = computed(() => shouldShowAddSite.value || isSettingsOpen.value)
+// Chrome backdrop: settings slides sidebar/frame offscreen
+const isBackdropActive = computed(() => isSettingsOpen.value)
 const gravatarRef = ref<HTMLElement | null>(null)
 const toggleRef = ref<HTMLElement | null>(null)
 
@@ -104,14 +103,6 @@ function handleNewSite() {
     <Tooltip :text="hidden ? 'Show sidebar' : 'Hide sidebar'" placement="top" :delay="300" :anchor="toggleRef" class="anchored-tooltip" />
 
     <div class="app-body">
-      <!-- Add-site surface: lives behind sidebar + frame -->
-      <AddSitePage
-        v-show="shouldShowAddSite"
-        class="backdrop-surface"
-        :visible="shouldShowAddSite"
-        :has-sites="hasSites"
-      />
-
       <!-- Settings surface: lives behind sidebar + frame -->
       <SettingsPage
         v-if="isSettingsOpen"

@@ -28,7 +28,7 @@ defineEmits<{
   <div class="backdrop-page">
     <slot name="background" />
 
-    <header v-if="!hideHeader" class="backdrop-header hstack" :class="{ 'has-traffic-lights': !isWindows }">
+    <header v-if="!hideHeader" class="backdrop-header hstack" :class="{ 'has-traffic-lights': !isWindows, 'has-windows-titlebar': isWindows }">
       <Button
         v-if="showBack"
         :icon="chevronLeft"
@@ -78,6 +78,11 @@ defineEmits<{
 .backdrop-header.has-traffic-lights {
   inset-block-start: 40px; /* Physical: below traffic lights (18px top + 12px dots + 10px gap) */
   padding-inline-start: var(--space-m);
+}
+
+/* Windows: position below titlebar */
+.backdrop-header.has-windows-titlebar {
+  inset-block-start: 36px; /* Physical: WindowsTitlebar height */
 }
 
 /* Let the button itself receive clicks */

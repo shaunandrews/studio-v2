@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { illustrations } from '@/components/features/add-site/illustrations'
 import BackdropPage from '@/layouts/BackdropPage.vue'
 import Button from '@/components/primitives/Button.vue'
@@ -9,51 +10,51 @@ import ImportDropZone from '@/components/features/add-site/ImportDropZone.vue'
 import PullSitePicker from '@/components/features/add-site/PullSitePicker.vue'
 import type { Blueprint } from '@/components/features/add-site/BlueprintPicker.vue'
 import type { RemoteSite } from '@/components/features/add-site/PullSitePicker.vue'
-import type { SelectedFile } from '@/components/features/add-site/ImportDropZone.vue'
+import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
 import { useSites } from '@/data/useSites'
 import { useSiteTransition } from '@/data/useSiteTransition'
 import { useAddSite } from '@/data/useAddSite'
+import { useOperatingSystem } from '@/data/useOperatingSystem'
 
-const props = defineProps<{
-  visible: boolean
-  hasSites: boolean
-}>()
-
-type Path = 'blank' | 'blueprint' | 'pull' | 'import'
-type Step = 'choose' | 'picker' | 'details' | 'building'
-
-const { createUntitledSite, updateSite, setStatus } = useSites()
+const route = useRoute()
+const router = useRouter()
+const { createUntitledSite, updateSite, setStatus, sites } = useSites()
 const { navigateToSite } = useSiteTransition('site')
-const { closeAddSite } = useAddSite()
+const { isWindows } = useOperatingSystem()
+const {
+  currentPath,
+  selectedBlueprint,
+  selectedRemoteSite,
+  selectedFile,
+  closeAddSite,
+  choosePath,
+  goToDetails,
+  initialName,
+} = useAddSite()
 
-const currentPath = ref<Path | null>(null)
-const currentStep = ref<Step>('choose')
+const hasSites = computed(() => sites.value.length > 0)
 
-// Building step state
+// Building step state (transient, no route)
+const isBuilding = ref(false)
 const buildingSiteName = ref('')
 const buildingProgress = ref(0)
 const buildingStatus = ref('')
 
-// Path-specific state
-const selectedBlueprint = ref<Blueprint | null>(null)
-const selectedRemoteSite = ref<RemoteSite | null>(null)
-const selectedFile = ref<SelectedFile | null>(null)
-const isAuthenticated = ref(true) // Prototype: pretend logged in
-
-// Reset state when opened
-watch(() => props.visible, (visible) => {
-  if (visible) {
-    currentPath.value = null
-    currentStep.value = 'choose'
-    selectedBlueprint.value = null
-    selectedRemoteSite.value = null
-    selectedFile.value = null
+const step = computed(() => {
+  if (isBuilding.value) return 'building'
+  switch (route.name) {
+    case 'add-site': return 'choose'
+    case 'add-site-blueprint': return 'picker'
+    case 'add-site-pull': return 'picker'
+    case 'add-site-import': return 'picker'
+    case 'add-site-details': return 'details'
+    default: return 'choose'
   }
 })
 
 const heading = computed(() => {
-  if (currentStep.value === 'choose') return 'Add a new site'
-  if (currentStep.value === 'details') return 'Site details'
+  if (step.value === 'choose') return 'Add a new site'
+  if (step.value === 'details') return 'Site details'
   switch (currentPath.value) {
     case 'blueprint': return 'Choose a blueprint'
     case 'pull': return 'Pull an existing site'
@@ -62,13 +63,13 @@ const heading = computed(() => {
   }
 })
 
-const canGoBack = computed(() => currentStep.value !== 'choose')
+const canGoBack = computed(() => step.value !== 'choose')
 
 const pathOptions = [
-  { id: 'blank' as Path, illustration: illustrations.blank, label: 'Blank site', desc: 'Start fresh with a clean WordPress install' },
-  { id: 'blueprint' as Path, illustration: illustrations.blueprint, label: 'Blueprint', desc: 'Choose a pre-configured site template' },
-  { id: 'pull' as Path, illustration: illustrations.pull, label: 'Pull existing', desc: 'Download from WordPress.com or Pressable' },
-  { id: 'import' as Path, illustration: illustrations.import, label: 'Import backup', desc: 'Import a Jetpack backup or full-site export' },
+  { id: 'blank' as const, illustration: illustrations.blank, label: 'Blank site', desc: 'Start fresh with a clean WordPress install' },
+  { id: 'blueprint' as const, illustration: illustrations.blueprint, label: 'Blueprint', desc: 'Choose a pre-configured site template' },
+  { id: 'pull' as const, illustration: illustrations.pull, label: 'Pull existing', desc: 'Download from WordPress.com or Pressable' },
+  { id: 'import' as const, illustration: illustrations.import, label: 'Import backup', desc: 'Import a Jetpack backup or full-site export' },
 ]
 
 // Seed data
@@ -88,36 +89,22 @@ const remoteSites: RemoteSite[] = [
   { id: 'rs-4', name: 'Downtown Bakery', url: 'downtownbakery.com' },
 ]
 
-function choosePath(path: Path) {
-  currentPath.value = path
-  currentStep.value = path === 'blank' ? 'details' : 'picker'
-}
+const isAuthenticated = ref(true)
+
+// Picker handlers
+function onBlueprintSelect(bp: Blueprint) { selectedBlueprint.value = bp }
+function onBlueprintContinue() { if (selectedBlueprint.value) goToDetails() }
+function onRemoteSiteSelect(site: RemoteSite) { selectedRemoteSite.value = site }
+function onRemoteSiteContinue() { if (selectedRemoteSite.value) goToDetails() }
+function onFileSelect(file: any) { selectedFile.value = file }
+function onFileContinue() { if (selectedFile.value) goToDetails() }
 
 function goBack() {
-  if (currentStep.value === 'details' && currentPath.value !== 'blank') {
-    currentStep.value = 'picker'
-  } else {
-    currentPath.value = null
-    currentStep.value = 'choose'
-  }
+  router.back()
 }
 
 function dismiss() {
   closeAddSite()
-}
-
-// Picker handlers
-function onBlueprintSelect(bp: Blueprint) { selectedBlueprint.value = bp }
-function onBlueprintContinue() { if (selectedBlueprint.value) currentStep.value = 'details' }
-function onRemoteSiteSelect(site: RemoteSite) { selectedRemoteSite.value = site }
-function onRemoteSiteContinue() { if (selectedRemoteSite.value) currentStep.value = 'details' }
-function onFileSelect(file: SelectedFile) { selectedFile.value = file }
-function onFileContinue() { if (selectedFile.value) currentStep.value = 'details' }
-
-function initialName(): string | undefined {
-  if (currentPath.value === 'blueprint' && selectedBlueprint.value) return selectedBlueprint.value.title
-  if (currentPath.value === 'pull' && selectedRemoteSite.value) return selectedRemoteSite.value.name
-  return undefined
 }
 
 const buildSteps: { progress: number; status: string; duration: number }[] = [
@@ -133,33 +120,36 @@ async function onSubmit(data: { name: string }) {
   const site = createUntitledSite()
   updateSite(site.id, { name: data.name })
 
-  // Transition to building step
   buildingSiteName.value = data.name
   buildingProgress.value = 0
   buildingStatus.value = 'Preparing…'
-  currentStep.value = 'building'
+  isBuilding.value = true
 
-  // Walk through simulated build steps
-  for (const step of buildSteps) {
-    await new Promise(r => setTimeout(r, step.duration))
-    buildingProgress.value = step.progress
-    buildingStatus.value = step.status
+  for (const s of buildSteps) {
+    await new Promise(r => setTimeout(r, s.duration))
+    buildingProgress.value = s.progress
+    buildingStatus.value = s.status
   }
 
-  // Brief pause on "Ready!" then navigate
   await new Promise(r => setTimeout(r, 600))
   setStatus(site.id, 'running')
-  closeAddSite()
-  setTimeout(async () => {
-    await navigateToSite(site.id)
-  }, 100)
+  isBuilding.value = false
+  await navigateToSite(site.id)
 }
 </script>
 
 <template>
+  <div class="add-site-page" :class="{ 'is-windows': isWindows }">
+    <WindowsTitlebar v-if="isWindows" />
+    <div v-else class="traffic-lights">
+      <span class="light close" />
+      <span class="light minimize" />
+      <span class="light maximize" />
+    </div>
+
   <BackdropPage
     :show-back="canGoBack"
-    :hide-header="currentStep === 'building'"
+    :hide-header="step === 'building'"
     :hide-close="!hasSites"
     @close="dismiss"
     @back="goBack"
@@ -173,7 +163,7 @@ async function onSubmit(data: { name: string }) {
       <Transition name="step-fade" mode="out-in">
 
         <!-- Step: Choose path -->
-        <div v-if="currentStep === 'choose'" key="choose" class="step-content">
+        <div v-if="step === 'choose'" key="choose" class="step-content">
           <div class="options-grid">
             <button
               v-for="(opt, idx) in pathOptions"
@@ -194,7 +184,7 @@ async function onSubmit(data: { name: string }) {
         </div>
 
         <!-- Step: Blueprint picker -->
-        <div v-else-if="currentStep === 'picker' && currentPath === 'blueprint'" key="blueprint" class="step-content step-content--wide">
+        <div v-else-if="step === 'picker' && currentPath === 'blueprint'" key="blueprint" class="step-content step-content--wide">
           <BlueprintPicker :blueprints="blueprints" @select="onBlueprintSelect" />
           <div class="picker-footer hstack gap-xs">
             <Button label="Continue" variant="primary" surface="dark" :disabled="!selectedBlueprint" @click="onBlueprintContinue" />
@@ -202,7 +192,7 @@ async function onSubmit(data: { name: string }) {
         </div>
 
         <!-- Step: Pull site picker -->
-        <div v-else-if="currentStep === 'picker' && currentPath === 'pull'" key="pull" class="step-content step-content--medium">
+        <div v-else-if="step === 'picker' && currentPath === 'pull'" key="pull" class="step-content step-content--medium">
           <PullSitePicker
             :authenticated="isAuthenticated"
             :sites="remoteSites"
@@ -215,7 +205,7 @@ async function onSubmit(data: { name: string }) {
         </div>
 
         <!-- Step: Import file picker -->
-        <div v-else-if="currentStep === 'picker' && currentPath === 'import'" key="import" class="step-content step-content--medium">
+        <div v-else-if="step === 'picker' && currentPath === 'import'" key="import" class="step-content step-content--medium">
           <ImportDropZone @select="onFileSelect" @clear="selectedFile = null" />
           <div class="picker-footer hstack gap-xs">
             <Button label="Continue" variant="primary" surface="dark" :disabled="!selectedFile" @click="onFileContinue" />
@@ -223,7 +213,7 @@ async function onSubmit(data: { name: string }) {
         </div>
 
         <!-- Step: Site details form -->
-        <div v-else-if="currentStep === 'details'" key="details" class="step-content step-content--narrow">
+        <div v-else-if="step === 'details'" key="details" class="step-content step-content--narrow">
           <SiteDetailsForm
             :initial-name="initialName()"
             @submit="onSubmit"
@@ -231,7 +221,7 @@ async function onSubmit(data: { name: string }) {
         </div>
 
         <!-- Step: Building / setup -->
-        <div v-else-if="currentStep === 'building'" key="building" class="step-content step-content--narrow building-step">
+        <div v-else-if="step === 'building'" key="building" class="step-content step-content--narrow building-step">
           <h2 class="building-site-name">{{ buildingSiteName }}</h2>
           <div class="building-progress-track">
             <div class="building-progress-bar" :style="{ width: buildingProgress + '%' }" />
@@ -242,9 +232,48 @@ async function onSubmit(data: { name: string }) {
       </Transition>
     </div>
   </BackdropPage>
+  </div>
 </template>
 
 <style scoped>
+.add-site-page {
+  position: fixed;
+  inset: 0;
+  background: var(--color-chrome-bg);
+  overflow: hidden;
+}
+
+.add-site-page :deep(.windows-titlebar) {
+  position: relative;
+  z-index: 100;
+}
+
+/* ── Traffic lights (macOS) ── */
+
+.traffic-lights {
+  position: absolute;
+  top: 18px; /* Physical: fixed window position */
+  left: 16px; /* Physical: fixed window position */
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  -webkit-app-region: drag;
+}
+
+.light {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+}
+
+.light.close { background: var(--color-macos-close); }
+.light.minimize { background: var(--color-macos-minimize); }
+.light.maximize { background: var(--color-macos-maximize); }
+
+/* ── Windows overrides ── */
+
+
 /* ── Accent glow ── */
 
 .accent-glow {

@@ -1,25 +1,67 @@
 import { ref, computed } from 'vue'
-import { useSites } from '@/data/useSites'
+import { useRouter } from 'vue-router'
+import type { Blueprint } from '@/components/features/add-site/BlueprintPicker.vue'
+import type { RemoteSite } from '@/components/features/add-site/PullSitePicker.vue'
+import type { SelectedFile } from '@/components/features/add-site/ImportDropZone.vue'
 
-const isAddingSite = ref(false)
+export type AddSitePath = 'blank' | 'blueprint' | 'pull' | 'import'
+
+// Shared state across route transitions
+const currentPath = ref<AddSitePath | null>(null)
+const selectedBlueprint = ref<Blueprint | null>(null)
+const selectedRemoteSite = ref<RemoteSite | null>(null)
+const selectedFile = ref<SelectedFile | null>(null)
 
 export function useAddSite() {
-  const { sites } = useSites()
-
-  const shouldShowAddSite = computed(() => isAddingSite.value || sites.value.length === 0)
-  const hasSites = computed(() => sites.value.length > 0)
+  const router = useRouter()
 
   function openAddSite() {
-    isAddingSite.value = true
+    resetState()
+    router.push('/add-site')
   }
 
   function closeAddSite() {
-    isAddingSite.value = false
+    resetState()
+    router.push('/all-sites')
   }
 
-  function resetAddSite() {
-    isAddingSite.value = false
+  function resetState() {
+    currentPath.value = null
+    selectedBlueprint.value = null
+    selectedRemoteSite.value = null
+    selectedFile.value = null
   }
 
-  return { isAddingSite, shouldShowAddSite, hasSites, openAddSite, closeAddSite, resetAddSite }
+  function choosePath(path: AddSitePath) {
+    currentPath.value = path
+    if (path === 'blank') {
+      router.push('/add-site/details')
+    } else {
+      router.push(`/add-site/${path}`)
+    }
+  }
+
+  function goToDetails() {
+    router.push('/add-site/details')
+  }
+
+  function initialName(): string | undefined {
+    if (currentPath.value === 'blueprint' && selectedBlueprint.value) return selectedBlueprint.value.title
+    if (currentPath.value === 'pull' && selectedRemoteSite.value) return selectedRemoteSite.value.name
+    return undefined
+  }
+
+  return {
+    currentPath,
+    selectedBlueprint,
+    selectedRemoteSite,
+    selectedFile,
+    openAddSite,
+    closeAddSite,
+    resetState,
+    resetAddSite: resetState,
+    choosePath,
+    goToDetails,
+    initialName,
+  }
 }

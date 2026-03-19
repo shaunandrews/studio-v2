@@ -37,6 +37,20 @@ const router = createRouter({
       ],
     },
 
+    // Add site flow — full-page routes
+    {
+      path: '/add-site',
+      component: () => import('@/pages/AddSitePage.vue'),
+      meta: { layout: 'bare' },
+      children: [
+        { name: 'add-site', path: '', component: { render: () => null } },
+        { name: 'add-site-blueprint', path: 'blueprint', component: { render: () => null } },
+        { name: 'add-site-pull', path: 'pull', component: { render: () => null } },
+        { name: 'add-site-import', path: 'import', component: { render: () => null } },
+        { name: 'add-site-details', path: 'details', component: { render: () => null } },
+      ],
+    },
+
     // App routes
     {
       name: 'site',
