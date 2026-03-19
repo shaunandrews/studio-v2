@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { h, defineComponent, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { wordpress, lock, globe, brush, cloudUpload, mapMarker, connection } from '@wordpress/icons'
+import { wordpress, lock, mapMarker, connection } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
@@ -10,7 +10,6 @@ import AuthSimulation from '@/components/features/onboarding/AuthSimulation.vue'
 import PermissionDialog from '@/components/features/onboarding/PermissionDialog.vue'
 import { useOnboarding } from '@/data/useOnboarding'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
-import { useAddSite } from '@/data/useAddSite'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,12 +18,71 @@ const { isWindows } = useOperatingSystem()
 
 markVisited('welcome')
 
-const headline = 'Create, test,\nand launch'
+function svg(viewBox: string, children: ReturnType<typeof h>[]) {
+  const parts = viewBox.split(' ').map(Number)
+  return h('svg', { width: parts[2], height: parts[3], viewBox, fill: 'none', xmlns: 'http://www.w3.org/2000/svg' }, children)
+}
 
-const benefits = [
-  { icon: brush, text: 'Use AI to build sites, themes, and plugins' },
-  { icon: globe, text: 'Share preview sites with clients and colleagues' },
-  { icon: cloudUpload, text: 'Seamlessly sync with WordPress.com and Pressable' },
+const IllustrationAI = defineComponent({
+  setup() {
+    // Wider canvas (140×74), content centered. Shapes same size.
+    return () => svg('-1 -1 140 74', [
+      h('rect', { x: 4, y: 6, width: 130, height: 5, rx: 2.5, fill: 'currentColor', opacity: 0.2 }),
+      h('rect', { x: 4, y: 16, width: 105, height: 5, rx: 2.5, fill: 'currentColor', opacity: 0.2 }),
+      h('rect', { x: 4, y: 26, width: 80, height: 5, rx: 2.5, fill: 'currentColor', opacity: 0.15 }),
+      // Chat input box — spans full width
+      h('rect', { x: 0, y: 44, width: 138, height: 24, rx: 8, stroke: 'currentColor', 'stroke-width': 1, fill: 'currentColor', 'fill-opacity': 0.04, opacity: 0.5 }),
+      // Cursor
+      h('rect', { x: 14, y: 52, width: 2, height: 8, rx: 1, fill: 'var(--color-chrome-theme)', opacity: 0.9 }),
+    ])
+  },
+})
+
+const IllustrationShare = defineComponent({
+  setup() {
+    // Wider canvas (140×74), shapes shifted to center (~30px offset)
+    const ox = 30
+    return () => svg('-1 -1 140 74', [
+      h('defs', {}, [
+        h('clipPath', { id: 'clip-back-frame' }, [
+          h('path', { d: `M-1-1h141v75h-141z M${2 + ox} 22 v46 h62 v-46 z`, 'clip-rule': 'evenodd' }),
+        ]),
+      ]),
+      h('rect', { x: 14 + ox, y: 2, width: 62, height: 46, rx: 7, stroke: 'currentColor', 'stroke-width': 1, fill: 'none', opacity: 0.25, 'clip-path': 'url(#clip-back-frame)' }),
+      h('rect', { x: 2 + ox, y: 22, width: 62, height: 46, rx: 7, stroke: 'currentColor', 'stroke-width': 1, fill: 'currentColor', 'fill-opacity': 0.05, opacity: 0.55 }),
+      h('line', { x1: 2 + ox, y1: 34, x2: 64 + ox, y2: 34, stroke: 'currentColor', 'stroke-width': 1, opacity: 0.12 }),
+      h('circle', { cx: 12 + ox, cy: 28, r: 2, fill: 'currentColor', opacity: 0.25 }),
+      h('circle', { cx: 19 + ox, cy: 28, r: 2, fill: 'currentColor', opacity: 0.25 }),
+      h('circle', { cx: 26 + ox, cy: 28, r: 2, fill: 'currentColor', opacity: 0.25 }),
+      h('path', { d: `M${30 + ox} 58 L${30 + ox} 46 L${50 + ox} 46`, stroke: 'currentColor', 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none', opacity: 0.25 }),
+      h('path', { d: `M${44 + ox} 40 L${50 + ox} 46 L${44 + ox} 52`, stroke: 'var(--color-chrome-theme)', 'stroke-width': 1, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none', opacity: 0.7 }),
+    ])
+  },
+})
+
+const IllustrationSync = defineComponent({
+  setup() {
+    // Wider canvas (140×74), pills spread wider across the space
+    return () => svg('-1 -1 140 74', [
+      // Local pill (top-left)
+      h('rect', { x: 0, y: 8, width: 56, height: 16, rx: 4, stroke: 'currentColor', 'stroke-width': 1, fill: 'currentColor', 'fill-opacity': 0.05, opacity: 0.5 }),
+      h('rect', { x: 8, y: 13, width: 28, height: 5, rx: 2.5, fill: 'currentColor', opacity: 0.15 }),
+      // Staging pill (middle)
+      h('rect', { x: 36, y: 30, width: 56, height: 16, rx: 4, stroke: 'var(--color-env-staging-bg)', 'stroke-width': 1, fill: 'var(--color-env-staging-bg)', 'fill-opacity': 0.15, opacity: 0.8 }),
+      h('rect', { x: 44, y: 35, width: 32, height: 5, rx: 2.5, fill: 'currentColor', opacity: 0.12 }),
+      // Production pill (bottom-right)
+      h('rect', { x: 72, y: 52, width: 60, height: 16, rx: 4, stroke: 'var(--color-env-production-bg)', 'stroke-width': 1, fill: 'var(--color-env-production-bg)', 'fill-opacity': 0.15, opacity: 0.8 }),
+      h('rect', { x: 80, y: 57, width: 36, height: 5, rx: 2.5, fill: 'currentColor', opacity: 0.12 }),
+    ])
+  },
+})
+
+const headline = 'Build here. Go anywhere.'
+
+const features = [
+  { illustration: IllustrationAI, label: 'AI-powered building', desc: 'Use AI to build sites, themes, and plugins' },
+  { illustration: IllustrationShare, label: 'Easy previews', desc: 'Share preview sites with clients and colleagues' },
+  { illustration: IllustrationSync, label: 'Seamless sync', desc: 'Sync with WordPress.com and Pressable' },
 ]
 
 const step = computed(() => {
@@ -56,11 +114,8 @@ function handlePermissionCancel() {
 
 function handlePermissionComplete() {
   exiting.value = true
-  // Ensure add-site backdrop is open before navigating so there's no flash of empty all-sites
-  const { openAddSite } = useAddSite()
-  openAddSite()
   setTimeout(() => {
-    router.push('/all-sites')
+    router.push('/add-site')
   }, 600)
 }
 </script>
@@ -122,14 +177,17 @@ function handlePermissionComplete() {
             <div class="content-body__brand">
               <h1 class="content-body__title">{{ headline }}</h1>
               <p class="content-body__pitch">
-                Connect your WordPress.com account to unlock the full power of Studio.
+                A full WordPress development environment on your machine.
               </p>
             </div>
 
-            <div class="content-body__benefits">
-              <div v-for="benefit in benefits" :key="benefit.text" class="benefit-item">
-                <WPIcon :icon="benefit.icon" :size="20" class="benefit-item__icon" />
-                <span class="benefit-item__text">{{ benefit.text }}</span>
+            <div class="content-body__features">
+              <div v-for="feature in features" :key="feature.label" class="feature-card">
+                <div class="feature-card__illus">
+                  <component :is="feature.illustration" />
+                </div>
+                <span class="feature-card__label">{{ feature.label }}</span>
+                <span class="feature-card__desc">{{ feature.desc }}</span>
               </div>
             </div>
 
@@ -138,41 +196,40 @@ function handlePermissionComplete() {
                 variant="primary"
                 size="large"
                 label="Log in with WordPress.com"
-                width="full"
                 @click="handleLogin"
               />
               <Button
                 variant="tertiary"
-                label="Skip"
-                width="full"
+                size="large"
+                label="Continue without account"
                 @click="handleSkip"
               />
             </div>
 
-            <p class="content-body__signup">
-              New to WordPress.com?
-              <a href="#" class="content-body__link" @click.prevent="handleLogin">Create a free account</a>
-            </p>
           </div>
 
           <!-- Permissions content -->
           <div v-else key="permissions" class="content-body">
-            <h1 class="content-body__title">Permissions needed</h1>
-            <p class="content-body__pitch">Studio needs permission to your system for the following:</p>
+            <div class="content-body__brand">
+              <h1 class="content-body__title">Almost ready</h1>
+              <p class="content-body__pitch">
+                Studio needs system access to run WordPress on your machine.
+              </p>
+            </div>
 
             <div class="content-body__perms">
               <div class="perm-item">
                 <WPIcon :icon="mapMarker" :size="20" class="perm-item__icon" />
                 <div class="perm-item__text">
-                  <span class="perm-item__title">Setup dev URLs</span>
-                  <span class="perm-item__desc">Manage hostnames for your local sites</span>
+                  <span class="perm-item__title">Custom dev URLs</span>
+                  <span class="perm-item__desc">So your sites get real hostnames like <em>mysite.local</em> instead of just port numbers.</span>
                 </div>
               </div>
               <div class="perm-item">
                 <WPIcon :icon="connection" :size="20" class="perm-item__icon" />
                 <div class="perm-item__text">
-                  <span class="perm-item__title">Accept incoming network connections</span>
-                  <span class="perm-item__desc">Needed to access your sites through a browser</span>
+                  <span class="perm-item__title">Local network access</span>
+                  <span class="perm-item__desc">Lets your browser talk to the WordPress server running on your machine.</span>
                 </div>
               </div>
             </div>
@@ -180,9 +237,8 @@ function handlePermissionComplete() {
             <div class="content-body__actions">
               <Button
                 variant="primary"
-                width="full"
                 size="large"
-                label="Request permissions"
+                label="Request permission"
                 @click="handleGrantPermissions"
               />
             </div>
@@ -294,7 +350,7 @@ function handlePermissionComplete() {
 /* ── Left hero panel ── */
 
 .split__hero {
-  flex: 0 0 36%;
+  flex: 0 0 30%;
   position: relative;
   background: var(--color-theme-bg);
   overflow: hidden;
@@ -431,10 +487,11 @@ function handlePermissionComplete() {
   flex-direction: column;
   align-items: start;
   gap: var(--space-xl);
-  max-width: 380px;
+  max-width: 660px;
   width: 100%;
   padding: var(--space-xl);
 }
+
 
 .content-body__brand {
   display: flex;
@@ -443,12 +500,11 @@ function handlePermissionComplete() {
 }
 
 .content-body__title {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin: 0;
-  white-space: pre-line;
 }
 
 .content-body__pitch {
@@ -458,51 +514,15 @@ function handlePermissionComplete() {
   line-height: 1.5;
 }
 
-.content-body__benefits {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-m);
-  width: 100%;
-}
-
-.benefit-item {
-  display: flex;
-  align-items: center;
+.content-body__features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-s);
-}
-
-.benefit-item__icon {
-  flex-shrink: 0;
-  color: var(--color-chrome-fg-muted);
-}
-
-.benefit-item__text {
-  font-size: var(--font-size-s);
-  color: var(--color-chrome-fg-muted);
-  line-height: 1.4;
-}
-
-
-.content-body__actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
   width: 100%;
 }
 
-.content-body__signup {
-  font-size: var(--font-size-s);
-  color: var(--color-chrome-fg-muted);
-  margin: 0;
-}
-
-.content-body__link {
-  color: var(--color-chrome-theme);
-  text-decoration: none;
-}
-
-.content-body__link:hover {
-  text-decoration: underline;
+.content-body__features--2col {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 /* ── Permissions items ── */
@@ -511,9 +531,9 @@ function handlePermissionComplete() {
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: 420px;
   border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-m);
-  /* background: var(--color-chrome-fill); */
 }
 
 .perm-item {
@@ -549,6 +569,43 @@ function handlePermissionComplete() {
   color: var(--color-chrome-fg-muted);
   line-height: 1.4;
 }
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  padding: var(--space-l);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-l);
+  background: var(--color-frame-bg);
+}
+
+.feature-card__illus {
+  color: var(--color-chrome-fg);
+  margin-block-end: var(--space-xs);
+}
+
+.feature-card__label {
+  font-size: var(--font-size-m);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-chrome-fg);
+}
+
+.feature-card__desc {
+  font-size: var(--font-size-m);
+  color: var(--color-chrome-fg-muted);
+  line-height: 1.4;
+}
+
+
+.content-body__actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-s);
+}
+
+
 
 /* ── Popup transitions (OAuth + permission dialog) ── */
 
