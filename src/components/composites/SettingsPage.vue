@@ -16,6 +16,7 @@ import Badge from '@/components/primitives/Badge.vue'
 import { wordpress } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
+import { useRouter } from 'vue-router'
 import { usePersona } from '@/data/usePersona'
 import { useAllSitesView } from '@/data/useAllSitesView'
 
@@ -100,6 +101,7 @@ const isWindows = computed(() => props.osOverride ? props.osOverride === 'window
 
 // -- Persona --
 
+const router = useRouter()
 const { activePersonaId, personas: allPersonas, activatePersona } = usePersona()
 
 const personaOptions = computed(() =>
@@ -107,7 +109,8 @@ const personaOptions = computed(() =>
 )
 
 function setPersona(id: string) {
-  activatePersona(id)
+  activatePersona(id, router)
+  emit('close')
 }
 
 // -- All Sites toggle --
@@ -892,6 +895,7 @@ function skillInstallLabel(id: string): string {
           <div class="settings-section">
             <Text variant="body-small" weight="semibold" :surface="surfaceMode" class="settings-field-label">Persona</Text>
             <RadioGroup :model-value="activePersonaId || ''" :options="personaOptions" name="persona" :surface="surfaceMode" @update:model-value="setPersona" />
+            <Text variant="body-small" color="muted" :surface="surfaceMode" class="settings-hint">Switches immediately — resets all state and navigates to the persona's starting screen.</Text>
           </div>
 
           <div class="settings-section">
