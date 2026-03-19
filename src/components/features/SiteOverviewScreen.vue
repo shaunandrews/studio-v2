@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { chevronDown } from '@wordpress/icons'
 import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
-import ButtonSplit from '@/components/primitives/ButtonSplit.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
-import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
-import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
 import { useSites } from '@/data/useSites'
 import { useWPAdmin } from '@/data/useWPAdmin'
@@ -50,9 +46,6 @@ function copyToClipboard(text: string, field: string) {
   copiedTimeout = setTimeout(() => { copiedField.value = null }, 1500)
 }
 
-const features = computed(() => site.value?.features ?? [])
-const hasWoo = computed(() => features.value.includes('woocommerce'))
-
 // ── Status ──
 
 const statusLabel = computed(() => {
@@ -67,74 +60,17 @@ const statusTooltip = computed(() => {
   return 'Start site'
 })
 
-// ── Open In ──
+// ── Open In shortcuts ──
 
-const openLabel = ref('Browser')
-const openIconUrl = ref('/icons/chrome.svg')
-
-function onOpenSelect(label: string, iconUrl: string) {
-  openLabel.value = label
-  openIconUrl.value = iconUrl
-}
-
-const openMenuGroups = computed<FlyoutMenuGroup[]>(() => [
-  {
-    items: [
-      { label: 'Browser', iconUrl: '/icons/chrome.svg', checked: openLabel.value === 'Browser', action: () => onOpenSelect('Browser', '/icons/chrome.svg') },
-      { label: 'VS Code', iconUrl: '/icons/vscode.svg', checked: openLabel.value === 'VS Code', action: () => onOpenSelect('VS Code', '/icons/vscode.svg') },
-      { label: 'Cursor', iconUrl: '/icons/cursor.svg', checked: openLabel.value === 'Cursor', action: () => onOpenSelect('Cursor', '/icons/cursor.svg') },
-      { label: 'Claude', iconUrl: '/icons/claude.svg', checked: openLabel.value === 'Claude', action: () => onOpenSelect('Claude', '/icons/claude.svg') },
-      { label: 'Codex', iconUrl: '/icons/codex-color.svg', checked: openLabel.value === 'Codex', action: () => onOpenSelect('Codex', '/icons/codex-color.svg') },
-    ],
-  },
-  {
-    items: [
-      { label: 'Terminal', iconUrl: '/icons/terminal.svg', checked: openLabel.value === 'Terminal', action: () => onOpenSelect('Terminal', '/icons/terminal.svg') },
-      { label: 'Finder', iconUrl: '/icons/finder.svg', checked: openLabel.value === 'Finder', action: () => onOpenSelect('Finder', '/icons/finder.svg') },
-    ],
-  },
-])
-
-// ── Content stats ──
-
-interface StatItem {
-  value: number
-  label: string
-}
-
-const contentStats = computed<StatItem[]>(() => {
-  const layoutStats: Record<string, { posts: number; pages: number; media: number }> = {
-    default: { posts: 1, pages: 2, media: 0 },
-    cafe: { posts: 12, pages: 6, media: 47 },
-    portfolio: { posts: 0, pages: 9, media: 84 },
-    blog: { posts: 43, pages: 4, media: 22 },
-    store: { posts: 8, pages: 14, media: 156 },
-    landing: { posts: 2, pages: 3, media: 18 },
-    docs: { posts: 28, pages: 12, media: 8 },
-    gallery: { posts: 6, pages: 5, media: 210 },
-  }
-  const l = site.value?.mockLayout ?? 'cafe'
-  const s = layoutStats[l] ?? layoutStats.cafe
-
-  const stats: StatItem[] = [
-    { value: s.posts, label: 'Posts' },
-    { value: s.pages, label: 'Pages' },
-    { value: s.media, label: 'Media' },
-  ]
-
-  if (hasWoo.value) {
-    const wooStats: Record<string, { products: number; orders: number }> = {
-      store: { products: 86, orders: 243 },
-    }
-    const w = wooStats[l] ?? { products: 24, orders: 58 }
-    stats.push(
-      { value: w.products, label: 'Products' },
-      { value: w.orders, label: 'Orders' },
-    )
-  }
-
-  return stats
-})
+const openInLinks = [
+  { label: 'Browser', iconUrl: '/icons/chrome.svg' },
+  { label: 'VS Code', iconUrl: '/icons/vscode.svg' },
+  { label: 'Cursor', iconUrl: '/icons/cursor.svg' },
+  { label: 'Claude', iconUrl: '/icons/claude.svg' },
+  { label: 'Codex', iconUrl: '/icons/codex-outline.svg' },
+  { label: 'Terminal', iconUrl: '/icons/terminal.svg' },
+  { label: 'Finder', iconUrl: '/icons/finder.svg' },
+]
 </script>
 
 <template>
@@ -157,7 +93,7 @@ const contentStats = computed<StatItem[]>(() => {
         </div>
       </div>
 
-      <!-- Status + Open In -->
+      <!-- Status -->
       <div class="overview__actions">
         <div class="overview__status">
           <span class="status-label" :class="status ?? 'stopped'">{{ statusLabel }}</span>
@@ -184,27 +120,15 @@ const contentStats = computed<StatItem[]>(() => {
             </button>
           </Tooltip>
         </div>
-        <FlyoutMenu :groups="openMenuGroups" surface="dark" align="end">
-          <template #trigger="{ toggle }">
-            <Tooltip :text="`Open in ${openLabel}`" placement="bottom">
-              <ButtonSplit
-                :iconUrl="openIconUrl"
-                label="Open"
-                @click="alert(`Opening in ${openLabel}…`)"
-                @secondary-click="toggle"
-              />
-            </Tooltip>
-          </template>
-        </FlyoutMenu>
       </div>
 
-      <!-- Content snapshot -->
+      <!-- Open in shortcuts -->
       <section class="overview__section">
-        <div class="stats">
-          <div v-for="stat in contentStats" :key="stat.label" class="stat">
-            <span class="stat__value">{{ stat.value }}</span>
-            <span class="stat__label">{{ stat.label }}</span>
-          </div>
+        <div class="shortcuts">
+          <button v-for="link in openInLinks" :key="link.label" class="shortcut" @click="alert(`Opening in ${link.label}…`)">
+            <img :src="link.iconUrl" :alt="link.label" class="shortcut__icon-img" />
+            <span class="shortcut__label">{{ link.label }}</span>
+          </button>
         </div>
       </section>
 
@@ -370,34 +294,6 @@ const contentStats = computed<StatItem[]>(() => {
   border-radius: var(--radius-l);
 }
 
-/* ── Content stats ── */
-
-.stats {
-  display: flex;
-  gap: 2px;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  flex: 1;
-  padding: var(--space-xs);
-}
-
-.stat__value {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-  line-height: 1;
-}
-
-.stat__label {
-  font-size: var(--font-size-xs);
-  color: var(--color-frame-fg-muted);
-}
-
 /* ── Shortcuts grid ── */
 
 .shortcuts {
@@ -435,6 +331,12 @@ const contentStats = computed<StatItem[]>(() => {
 
 .shortcut:hover .shortcut__icon {
   color: var(--color-frame-fg);
+}
+
+.shortcut__icon-img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .shortcut__label {
