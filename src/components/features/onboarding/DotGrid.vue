@@ -75,12 +75,51 @@ function getColors() {
   return { rest, active }
 }
 
+function drawGrid(color: string) {
+  if (!ctx || !canvas.value) return
+  const w = canvas.value.clientWidth
+  const h = canvas.value.clientHeight
+  const cols = Math.ceil(w / SPACING) + 2
+  const rows = Math.ceil(h / SPACING) + 2
+  const offsetX = (w - (cols - 1) * SPACING) / 2
+  const offsetY = (h - (rows - 1) * SPACING) / 2
+
+  // Parse color for line use at lower opacity
+  const parsed = parseRGBA(color)
+  const lineColor = `rgba(${parsed.r}, ${parsed.g}, ${parsed.b}, ${parsed.a * 1.2})`
+
+  ctx.setLineDash([2, 4])
+  ctx.lineWidth = 1
+  ctx.strokeStyle = lineColor
+
+  // Horizontal lines
+  for (let r = 0; r < rows; r++) {
+    const y = offsetY + r * SPACING
+    ctx.beginPath()
+    ctx.moveTo(0, y)
+    ctx.lineTo(w, y)
+    ctx.stroke()
+  }
+
+  // Vertical lines
+  for (let c = 0; c < cols; c++) {
+    const x = offsetX + c * SPACING
+    ctx.beginPath()
+    ctx.moveTo(x, 0)
+    ctx.lineTo(x, h)
+    ctx.stroke()
+  }
+
+  ctx.setLineDash([])
+}
+
 function drawStatic() {
   if (!ctx || !canvas.value) return
   const w = canvas.value.clientWidth
   const h = canvas.value.clientHeight
   const { rest } = getColors()
   ctx.clearRect(0, 0, w, h)
+  drawGrid(rest)
   for (const dot of dots) {
     ctx.beginPath()
     ctx.arc(dot.baseX, dot.baseY, DOT_RADIUS, 0, Math.PI * 2)
@@ -97,6 +136,7 @@ function tick() {
   ctx.clearRect(0, 0, w, h)
 
   const { rest, active } = getColors()
+  drawGrid(rest)
   // Parse rgba values for interpolation
   const restParsed = parseRGBA(rest)
   const activeParsed = parseRGBA(active)
