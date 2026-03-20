@@ -11,7 +11,7 @@ import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 
-import { useConversations } from '@/data/useConversations'
+import { useTasks } from '@/data/useTasks'
 import { useSites } from '@/data/useSites'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useAddSite } from '@/data/useAddSite'
@@ -27,7 +27,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  select: [conversationId: string]
+  select: [taskId: string]
   'new-task': []
   navigate: [screen: string]
   'switch-site': [id: string]
@@ -37,8 +37,8 @@ const emit = defineEmits<{
 const { isMac } = useOperatingSystem()
 const { openAddSite } = useAddSite()
 const { showAllSitesView } = useAllSitesView()
-const { conversations, getConversations, messages, archiveConversation, unarchiveConversation } = useConversations()
-const siteConvos = getConversations(toRef(props, 'siteId'))
+const { tasks, getTasksForSite, messages, archiveTask, unarchiveTask } = useTasks()
+const siteTasks = getTasksForSite(toRef(props, 'siteId'))
 
 const { sites: allSites } = useSites()
 const currentSite = computed(() => allSites.value.find(s => s.id === props.siteId))
@@ -61,7 +61,7 @@ onMounted(() => document.addEventListener('pointerdown', onPickerClickOutside))
 onBeforeUnmount(() => document.removeEventListener('pointerdown', onPickerClickOutside))
 
 function getUnreadCount(siteId: string): number {
-  return conversations.value.filter(c => c.siteId === siteId && c.unread && !c.archived).length
+  return tasks.value.filter(t => t.siteId === siteId && t.unread && !t.archived).length
 }
 
 function selectSite(id: string) {
@@ -81,10 +81,9 @@ function addSite() {
 const runningCount = computed(() => allSites.value.filter(p => p.status === 'running').length)
 const stoppedCount = computed(() => allSites.value.filter(p => p.status === 'stopped').length)
 
-const sortedConvos = computed(() =>
-  [...siteConvos.value]
-    .filter(c => !c.archived)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+const sortedTasks = computed(() =>
+  [...siteTasks.value]
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 )
 
 function formatTime(iso: string): string {
@@ -100,37 +99,37 @@ function formatTime(iso: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function getLastTimestamp(convoId: string): string {
-  const convoMsgs = messages.value
-    .filter(m => m.conversationId === convoId)
+function getLastTimestamp(taskId: string): string {
+  const taskMsgs = messages.value
+    .filter(m => m.taskId === taskId)
     .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-  return convoMsgs[0]?.timestamp ?? ''
+  return taskMsgs[0]?.timestamp ?? ''
 }
 
-function onArchive(e: Event, convoId: string) {
+function onArchive(e: Event, taskId: string) {
   e.stopPropagation()
-  archiveConversation(convoId)
+  archiveTask(taskId)
 }
 
 const archiveMenuRef = ref<InstanceType<typeof FlyoutMenu> | null>(null)
 
-const archivedConvos = computed(() =>
-  [...siteConvos.value]
-    .filter(c => c.archived)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+const archivedTasks = computed(() =>
+  tasks.value
+    .filter(t => t.siteId === props.siteId && t.archived)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 )
 
 const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
-  if (archivedConvos.value.length === 0) {
+  if (archivedTasks.value.length === 0) {
     return [{ items: [{ label: 'No archived tasks' }] }]
   }
   return [
     {
       label: 'Archived tasks',
-      items: archivedConvos.value.map(c => ({
-        label: c.title || 'New task',
-        detail: formatTime(c.createdAt),
-        action: () => unarchiveConversation(c.id),
+      items: archivedTasks.value.map(t => ({
+        label: t.title || 'New task',
+        detail: formatTime(t.createdAt),
+        action: () => unarchiveTask(t.id),
       })),
     },
     {
@@ -257,29 +256,29 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     <!-- Site tasks -->
     <div class="site-tasks__list">
       <div
-        v-for="convo in sortedConvos"
-        :key="convo.id"
+        v-for="task in sortedTasks"
+        :key="task.id"
         class="site-tasks__item"
-        :class="{ 'is-selected': convo.id === selectedId }"
-        @click="$emit('select', convo.id)"
+        :class="{ 'is-selected': task.id === selectedId }"
+        @click="$emit('select', task.id)"
       >
-        <span v-if="convo.unread" class="site-tasks__unread-dot" />
-        <span class="site-tasks__item-title">{{ convo.title || 'New task' }}</span>
+        <span v-if="task.unread" class="site-tasks__unread-dot" />
+        <span class="site-tasks__item-title">{{ task.title || 'New task' }}</span>
         <span class="site-tasks__item-end">
-          <template v-if="convo.status === 'running'">
+          <template v-if="task.status === 'running'">
             <svg class="site-tasks__spinner" width="14" height="14" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="24 12" fill="none" />
             </svg>
           </template>
-          <span v-else class="site-tasks__time">{{ formatTime(getLastTimestamp(convo.id) || convo.createdAt) }}</span>
+          <span v-else class="site-tasks__time">{{ formatTime(getLastTimestamp(task.id) || task.createdAt) }}</span>
           <Tooltip text="Archive" placement="right" :delay="300" class="site-tasks__archive-wrap">
-            <button class="site-tasks__archive" @click.stop="onArchive($event, convo.id)">
+            <button class="site-tasks__archive" @click.stop="onArchive($event, task.id)">
               <WPIcon :icon="archive" :size="16" />
             </button>
           </Tooltip>
         </span>
       </div>
-      <div v-if="sortedConvos.length === 0" class="site-tasks__empty">
+      <div v-if="sortedTasks.length === 0" class="site-tasks__empty">
         <div class="empty__illustration">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
             <!-- Chat bubble -->

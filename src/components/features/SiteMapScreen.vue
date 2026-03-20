@@ -4,7 +4,7 @@ import { plus, fullscreen, arrowUp } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import { useSites } from '@/data/useSites'
-import { useConversations } from '@/data/useConversations'
+import { useTasks } from '@/data/useTasks'
 import { sites as siteRegistry } from '@/data/sites/index'
 import { assemblePage, deriveSiteMapTree } from '@/data/useSiteTemplates'
 import type { SiteMapNode } from '@/data/useSiteTemplates'
@@ -16,7 +16,7 @@ const props = defineProps<{
 }>()
 
 const { sites } = useSites()
-const { conversations, sendMessage, generateTaskTitle } = useConversations()
+const { tasks, sendMessage, generateTaskTitle, createTask } = useTasks()
 const site = computed(() => sites.value.find(s => s.id === props.siteId))
 const layout = computed<MockLayout>(() => site.value?.mockLayout ?? 'default')
 const siteFiles = computed(() => siteRegistry[layout.value] ?? null)
@@ -115,25 +115,23 @@ function updateTaskInputPos() {
   }
 }
 
-function sendTask() {
+async function sendTask() {
   const text = taskMessage.value.trim()
   if (!text || !selectedNode.value) return
 
   const pageName = selectedNode.value.label
-  const conv = {
-    id: `conv-${Date.now()}`,
+  const task = await createTask({
     siteId: props.siteId,
-    agentId: 'claude-code' as const,
-    createdAt: new Date().toISOString(),
+    agentId: 'claude-code',
+    origin: { surface: 'sitemap', context: `Site Map → ${pageName} page` },
     title: `${pageName}: ${text.slice(0, 40)}`,
-    status: 'running' as const,
-    unread: true,
-  }
-  conversations.value.push(conv)
+    status: 'running',
+  })
+  task.unread = true
 
   const contextMessage = `[Site Map → ${pageName} page]\n\n${text}`
-  sendMessage(conv.id, contextMessage)
-  generateTaskTitle(conv.id, text)
+  sendMessage(task.id, contextMessage)
+  generateTaskTitle(task.id, text)
 
   taskMessage.value = ''
   selectedNodeId.value = null

@@ -17,8 +17,7 @@ import SiteMapScreen from '@/components/features/SiteMapScreen.vue'
 import { useSettings } from '@/data/useSettings'
 import { useSites, ALL_SITES_ID } from '@/data/useSites'
 import { useResizablePane } from '@/data/useResizablePane'
-import { useConversations } from '@/data/useConversations'
-import type { Conversation } from '@/data/types'
+import { useTasks } from '@/data/useTasks'
 
 defineProps<{
   sidebarHidden?: boolean
@@ -37,7 +36,7 @@ function toggleStatus() {
   setStatus(currentSite.value.id, 'loading')
   setTimeout(() => setStatus(currentSite.value!.id, target), 1200)
 }
-const { conversations, getConversations, getMessages, sendMessage, streamAgentMessage, ensureConversation, generateTaskTitle, markRead } = useConversations()
+const { tasks, getTasksForSite, getMessages, sendMessage, streamAgentMessage, createTask, generateTaskTitle, markRead } = useTasks()
 
 const currentSite = computed(() =>
   sites.value.find(p => p.id === activeSiteId.value)
@@ -73,39 +72,39 @@ const currentScreen = computed<Screen>(() =>
 
 // -- Selection state (derived from route) --
 
-const selectedConvoId = computed<string | null>(() =>
-  route.params.convoId as string ?? null
+const selectedTaskId = computed<string | null>(() =>
+  route.params.taskId as string ?? null
 )
 
-// Auto-select first conversation when landing on bare tasks route
+// Auto-select first task when landing on bare tasks route
 watch(
   [() => route.name, () => activeSiteId.value],
   ([routeName, siteId]) => {
     if (routeName !== 'site-tasks' || !siteId) return
-    const convos = conversations.value
-      .filter(c => c.siteId === siteId && !c.archived)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    const firstId = convos[0]?.id
+    const siteTasks = tasks.value
+      .filter(t => t.siteId === siteId && !t.archived)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    const firstId = siteTasks[0]?.id
     if (firstId) {
-      router.replace({ name: 'site-task', params: { id: siteId, convoId: firstId } })
+      router.replace({ name: 'site-task', params: { id: siteId, taskId: firstId } })
     }
   },
   { immediate: true },
 )
 
-const currentMessages = getMessages(selectedConvoId)
+const currentMessages = getMessages(selectedTaskId)
 const isNewTask = computed(() =>
-  selectedConvoId.value != null && currentMessages.value.length === 0
+  selectedTaskId.value != null && currentMessages.value.length === 0
 )
 
-const selectedConvo = computed(() =>
-  conversations.value.find(c => c.id === selectedConvoId.value)
+const selectedTask = computed(() =>
+  tasks.value.find(t => t.id === selectedTaskId.value)
 )
-const isReview = computed(() => selectedConvo.value?.status === 'review')
+const isReview = computed(() => selectedTask.value?.status === 'review')
 
 function approveAndMerge() {
-  if (!selectedConvo.value) return
-  selectedConvo.value.status = 'approved'
+  if (!selectedTask.value) return
+  selectedTask.value.status = 'approved'
 }
 
 const inputChatRef = ref<InstanceType<typeof InputChat> | null>(null)
@@ -134,37 +133,34 @@ function onNavigate(screen: string) {
   router.push({ name: routeName, params: { id } })
 }
 
-function onSelectChat(convoId: string) {
+function onSelectChat(taskId: string) {
   const id = activeSiteId.value
   if (!id) return
   draft.value = ''
-  markRead(convoId)
-  router.push({ name: 'site-task', params: { id, convoId } })
+  markRead(taskId)
+  router.push({ name: 'site-task', params: { id, taskId } })
   nextTick(() => inputChatRef.value?.focus())
 }
 
-function onNewChat() {
+async function onNewChat() {
   const siteId = activeSiteId.value
   if (!siteId) return
-  const conv: Conversation = {
-    id: `conv-${Date.now()}`,
+  const task = await createTask({
     siteId,
-    agentId: 'wpcom',
-    createdAt: new Date().toISOString(),
-  }
-  conversations.value.push(conv)
+    origin: { surface: 'chat' },
+  })
   draft.value = ''
-  router.push({ name: 'site-task', params: { id: siteId, convoId: conv.id } })
+  router.push({ name: 'site-task', params: { id: siteId, taskId: task.id } })
   nextTick(() => inputChatRef.value?.focus())
 }
 
 function onSend(text: string) {
-  if (!selectedConvoId.value) return
+  if (!selectedTaskId.value) return
   const isFirst = isNewTask.value
-  sendMessage(selectedConvoId.value, text)
+  sendMessage(selectedTaskId.value, text)
   draft.value = ''
   if (isFirst) {
-    generateTaskTitle(selectedConvoId.value, text)
+    generateTaskTitle(selectedTaskId.value, text)
   }
 }
 
@@ -188,7 +184,7 @@ const { openSettings } = useSettings()
         <SiteNavigation
           v-if="activeSiteId"
           :site-id="activeSiteId"
-          :selected-id="currentScreen === 'tasks' ? selectedConvoId : null"
+          :selected-id="currentScreen === 'tasks' ? selectedTaskId : null"
           :active-screen="currentScreen"
           :site-favicon="isAllSites ? undefined : currentSite?.favicon"
           :is-all-sites="isAllSites"
@@ -207,10 +203,10 @@ const { openSettings } = useSettings()
       <div class="pane pane-detail">
         <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" :status="currentSite?.status" :loading-target="loadingTarget" @toggle-status="toggleStatus" />
         <SiteMapScreen v-else-if="!isAllSites && currentScreen === 'sitemap'" :site-id="activeSiteId!" />
-        <template v-else-if="currentScreen === 'tasks' && selectedConvoId">
+        <template v-else-if="currentScreen === 'tasks' && selectedTaskId">
           <TaskBrief
             v-if="!isNewTask"
-            :conversation-id="selectedConvoId"
+            :task-id="selectedTaskId"
             :elevated="!isAtTop"
             class="task-brief-panel"
             @preview="(id) => { /* TODO: open preview */ }"
@@ -316,7 +312,7 @@ const { openSettings } = useSettings()
   padding: 0;
 }
 
-/* ── Merge banner ── */
+/* -- Merge banner -- */
 
 .merge-banner {
   display: flex;
@@ -333,7 +329,7 @@ const { openSettings } = useSettings()
   margin-block-end: var(--space-xs);
 }
 
-/* ── Progressive blur behind input ── */
+/* -- Progressive blur behind input -- */
 
 .input-blur {
   inset-inline-start: calc(-1 * var(--space-xl));
@@ -354,7 +350,7 @@ const { openSettings } = useSettings()
   color: var(--color-frame-fg-muted);
 }
 
-/* ── New task welcome ── */
+/* -- New task welcome -- */
 
 .new-task-welcome {
   display: flex;
@@ -384,7 +380,7 @@ const { openSettings } = useSettings()
   transform: translateY(-8px);
 }
 
-/* ── New task illustration ── */
+/* -- New task illustration -- */
 
 .new-task-illustration {
   display: flex;

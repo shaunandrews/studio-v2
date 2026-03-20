@@ -7,7 +7,7 @@ import SiteItem from '@/components/composites/SiteItem.vue'
 import ContextMenu from '@/components/primitives/ContextMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import { useSites } from '@/data/useSites'
-import { useConversations } from '@/data/useConversations'
+import { useTasks } from '@/data/useTasks'
 import { useSiteTransition } from '@/data/useSiteTransition'
 import { useAllSitesView } from '@/data/useAllSitesView'
 import type { Site } from '@/data/types'
@@ -17,11 +17,11 @@ const emit = defineEmits<{
 }>()
 
 const { sites, activeSiteId, setStatus } = useSites()
-const { conversations } = useConversations()
+const { tasks } = useTasks()
 const { navigateToSite } = useSiteTransition('site')
 
 function getUnreadCount(siteId: string): number {
-  return conversations.value.filter(c => c.siteId === siteId && c.unread && !c.archived).length
+  return tasks.value.filter(t => t.siteId === siteId && t.unread && !t.archived).length
 }
 
 function getSiteMenuGroups(site: Site): FlyoutMenuGroup[] {

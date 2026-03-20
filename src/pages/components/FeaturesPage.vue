@@ -51,7 +51,7 @@ import '@/pages/dev-docs.css'
       <table>
         <thead><tr><th>Event</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>select</code></td><td>Conversation selected (conversationId: string)</td></tr>
+          <tr><td><code>select</code></td><td>Task selected (taskId: string)</td></tr>
           <tr><td><code>new-task</code></td><td>New task creation requested</td></tr>
           <tr><td><code>navigate</code></td><td>Navigate to another screen (screen: string)</td></tr>
         </tbody>

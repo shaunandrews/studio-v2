@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Text from '@/components/primitives/Text.vue'
-import type { ConversationStatus } from '@/data/types'
+import type { TaskStatus } from '@/data/types'
 
 const props = defineProps<{
-  status: ConversationStatus
+  status: TaskStatus
   branch?: string
   title: string
 }>()
 
-const statusLabel: Record<ConversationStatus, string> = {
-  idle: 'Idle',
+const statusLabel: Record<TaskStatus, string> = {
+  queued: 'Queued',
   running: 'Running',
   review: 'In Review',
   approved: 'Approved',
   merged: 'Merged',
   rejected: 'Rejected',
+  failed: 'Failed',
 }
 
 const label = computed(() => statusLabel[props.status])

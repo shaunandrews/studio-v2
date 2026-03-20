@@ -115,7 +115,7 @@ const platform = ref<'mac' | 'windows'>('mac')
         <h3>All Sites <code>/all-sites</code></h3>
         <p class="arch-body">Landing view. Nav pane shows an all-sites summary (favicon stack, running/stopped counts) and a cross-site task list. Detail pane shows the selected conversation or an empty state. Toolbar has no status pill or site-specific actions.</p>
 
-        <h3>Tasks <code>/sites/:id/tasks/:convoId?</code></h3>
+        <h3>Tasks <code>/sites/:id/tasks/:taskId?</code></h3>
         <p class="arch-body">The primary working view. Nav pane has three zones: site overview (thumbnail, URL, credentials), task list (conversations with archive), and section nav links. Detail pane shows the selected conversation as a chat — messages rendered as <code>MarkdownText</code> or structured cards (plugin, settings, progress, page, post draft). <code>InputChat</code> pins to the bottom with a model selector and action strip.</p>
 
         <h3>Sync <code>/sites/:id/sync</code></h3>

@@ -86,8 +86,8 @@ const shortcutsOpen = ref(false)
     <h3>Preview</h3>
     <div class="example-section" style="max-width: 640px; height: 200px; border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
       <ChatMessageList :messages="[
-        { id: '1', conversationId: 'c1', role: 'user', content: 'Can you update the homepage hero?', timestamp: '' },
-        { id: '2', conversationId: 'c1', role: 'agent', content: 'Sure! I will update the hero section with a new gradient background.', timestamp: '' },
+        { id: '1', taskId: 'c1', role: 'user', content: 'Can you update the homepage hero?', timestamp: '' },
+        { id: '2', taskId: 'c1', role: 'agent', content: 'Sure! I will update the hero section with a new gradient background.', timestamp: '' },
       ]" />
     </div>
   </section>
@@ -386,15 +386,15 @@ const shortcutsOpen = ref(false)
       <table>
         <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>conversationId</code></td><td><code>string</code></td><td>—</td><td>Looks up the conversation from the store — drives all derived state</td></tr>
+          <tr><td><code>taskId</code></td><td><code>string</code></td><td>—</td><td>Looks up the task from the store — drives all derived state</td></tr>
         </tbody>
       </table>
       <h3>Events</h3>
       <table>
         <thead><tr><th>Event</th><th>Payload</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>preview</code></td><td><code>conversationId: string</code></td><td>Preview button clicked</td></tr>
-          <tr><td><code>review</code></td><td><code>conversationId: string</code></td><td>Review button clicked</td></tr>
+          <tr><td><code>preview</code></td><td><code>taskId: string</code></td><td>Preview button clicked</td></tr>
+          <tr><td><code>review</code></td><td><code>taskId: string</code></td><td>Review button clicked</td></tr>
         </tbody>
       </table>
       <h3>Sub-components</h3>

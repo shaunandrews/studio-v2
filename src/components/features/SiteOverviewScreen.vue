@@ -75,26 +75,8 @@ const openInLinks = [
 
 <template>
   <div class="overview">
-    <div class="overview__content">
-
-      <!-- Site preview + credentials -->
-      <div class="site-overview vstack align-center gap-xs">
-        <Tooltip text="Open site in browser" placement="top">
-          <SiteThumbnail :layout="siteLayout" :name="site?.name" @click="alert('Opening site preview…')" />
-        </Tooltip>
-        <div class="vstack align-center gap-xxxxs">
-          <Text variant="body" weight="semibold" class="overview__url">localhost:3920</Text>
-          <span class="hstack gap-xxxs overview__creds">
-            <Button variant="tertiary" size="mini" label="admin" :tooltip="copiedField === 'user' ? 'Copied!' : 'Copy username'" tooltip-placement="bottom" @click="copyToClipboard('admin', 'user')" />
-            <span class="overview__creds-sep">/</span>
-            <Button variant="tertiary" size="mini" label="••••••••" :tooltip="copiedField === 'pass' ? 'Copied!' : 'Copy password'" tooltip-placement="bottom" @click="copyToClipboard('password', 'pass')" />
-          </span>
-          <Button variant="tertiary" size="mini" :label="localPath" :tooltip="copiedField === 'path' ? 'Copied!' : 'Copy local path'" tooltip-placement="bottom" @click="copyToClipboard(localPath, 'path')" />
-        </div>
-      </div>
-
-      <!-- Status -->
-      <div class="overview__actions">
+    <header class="overview__header hstack justify-between align-center">
+        <h1 class="overview__title">Site Overview</h1>
         <div class="overview__status">
           <span class="status-label" :class="status ?? 'stopped'">{{ statusLabel }}</span>
           <Tooltip :text="statusTooltip" placement="bottom">
@@ -119,6 +101,23 @@ const openInLinks = [
               </svg>
             </button>
           </Tooltip>
+        </div>
+    </header>
+
+    <div class="overview__content">
+      <!-- Site preview + credentials -->
+      <div class="site-overview vstack align-center gap-xs">
+        <Tooltip text="Open site in browser" placement="top">
+          <SiteThumbnail :layout="siteLayout" :name="site?.name" @click="alert('Opening site preview…')" />
+        </Tooltip>
+        <div class="vstack align-center gap-xxxxs">
+          <Text variant="body" weight="semibold" class="overview__url">localhost:3920</Text>
+          <span class="hstack gap-xxxs overview__creds">
+            <Button variant="tertiary" size="mini" label="admin" :tooltip="copiedField === 'user' ? 'Copied!' : 'Copy username'" tooltip-placement="bottom" @click="copyToClipboard('admin', 'user')" />
+            <span class="overview__creds-sep">/</span>
+            <Button variant="tertiary" size="mini" label="••••••••" :tooltip="copiedField === 'pass' ? 'Copied!' : 'Copy password'" tooltip-placement="bottom" @click="copyToClipboard('password', 'pass')" />
+          </span>
+          <Button variant="tertiary" size="mini" :label="localPath" :tooltip="copiedField === 'path' ? 'Copied!' : 'Copy local path'" tooltip-placement="bottom" @click="copyToClipboard(localPath, 'path')" />
         </div>
       </div>
 
@@ -150,18 +149,33 @@ const openInLinks = [
 .overview {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-xl);
+  flex-direction: column;
+  min-height: 0;
+}
+
+.overview__header {
+  flex-shrink: 0;
+  padding: var(--space-s) var(--space-m);
+  border-block-end: 1px solid var(--color-frame-border);
+}
+
+.overview__title {
+  font-size: var(--font-size-m);
+  font-weight: 600;
+  color: var(--color-frame-fg);
 }
 
 .overview__content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-xl);
   width: 100%;
   max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-xl);
+  overflow-y: auto;
 }
 
 /* ── Site overview ── */
@@ -197,16 +211,6 @@ const openInLinks = [
   color: var(--color-frame-fg-muted);
   opacity: 0.5;
   margin: 0 1px;
-}
-
-/* ── Actions row (status + open in) ── */
-
-.overview__actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-s);
-  width: 100%;
 }
 
 .overview__status {

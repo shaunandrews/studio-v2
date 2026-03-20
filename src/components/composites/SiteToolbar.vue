@@ -10,7 +10,7 @@ import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useSites } from '@/data/useSites'
-import { useConversations } from '@/data/useConversations'
+import { useTasks } from '@/data/useTasks'
 import { useAddSite } from '@/data/useAddSite'
 import { useAllSitesView } from '@/data/useAllSitesView'
 
@@ -43,7 +43,7 @@ const emit = defineEmits<{
 
 const { isMac } = useOperatingSystem()
 const { sites } = useSites()
-const { conversations } = useConversations()
+const { tasks } = useTasks()
 const { openAddSite } = useAddSite()
 const { showAllSitesView } = useAllSitesView()
 
@@ -71,7 +71,7 @@ onMounted(() => document.addEventListener('pointerdown', onPickerClickOutside))
 onBeforeUnmount(() => document.removeEventListener('pointerdown', onPickerClickOutside))
 
 function getUnreadCount(siteId: string): number {
-  return conversations.value.filter(c => c.siteId === siteId && c.unread && !c.archived).length
+  return tasks.value.filter(t => t.siteId === siteId && t.unread && !t.archived).length
 }
 
 function selectSite(id: string) {

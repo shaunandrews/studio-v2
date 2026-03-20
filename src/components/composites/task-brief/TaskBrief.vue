@@ -1,32 +1,32 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useConversations } from '@/data/useConversations'
+import { useTasks } from '@/data/useTasks'
 import TaskBriefHeader from './TaskBriefHeader.vue'
 import TaskBriefStats from './TaskBriefStats.vue'
 import TaskBriefActions from './TaskBriefActions.vue'
 import Text from '@/components/primitives/Text.vue'
 
 const props = defineProps<{
-  conversationId: string
+  taskId: string
   elevated?: boolean
 }>()
 
 const emit = defineEmits<{
-  'preview': [conversationId: string]
+  'preview': [taskId: string]
 }>()
 
-const { conversations } = useConversations()
+const { tasks } = useTasks()
 
-const conversation = computed(() =>
-  conversations.value.find(c => c.id === props.conversationId)
+const task = computed(() =>
+  tasks.value.find(t => t.id === props.taskId)
 )
 
-const title = computed(() => conversation.value?.title ?? 'New task')
-const status = computed(() => conversation.value?.status ?? 'idle')
-const worktree = computed(() => conversation.value?.worktree)
-const summary = computed(() => conversation.value?.summary)
-const changedFiles = computed(() => conversation.value?.changedFiles)
-const changedEntities = computed(() => conversation.value?.changedEntities)
+const title = computed(() => task.value?.title ?? 'New task')
+const status = computed(() => task.value?.status ?? 'queued')
+const worktree = computed(() => task.value?.worktree)
+const summary = computed(() => task.value?.summary)
+const changedFiles = computed(() => task.value?.changedFiles)
+const changedEntities = computed(() => task.value?.changedEntities)
 const previewUrl = computed(() =>
   worktree.value ? `http://localhost:${worktree.value.port}` : undefined
 )
@@ -55,7 +55,7 @@ const previewUrl = computed(() =>
 
       <TaskBriefActions
         :preview-url="previewUrl"
-        @preview="emit('preview', conversationId)"
+        @preview="emit('preview', taskId)"
       />
     </div>
   </div>
