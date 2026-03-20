@@ -30,7 +30,7 @@ export function useHydration() {
 
       if (count === 0) {
         // First load — seed from persona
-        await db.transaction('rw', db.sites, db.tasks, db.messages, async () => {
+        await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, async () => {
           if (persona.sites.length) await db.sites.bulkPut(persona.sites)
           if (persona.tasks.length) await db.tasks.bulkPut(persona.tasks)
           if (persona.messages.length) await db.messages.bulkPut(persona.messages)
@@ -47,6 +47,7 @@ export function useHydration() {
       ])
 
       const { _setSites } = useSites()
+      dbSites.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
       _setSites(dbSites)
 
       const { _setTasks } = useTasks()

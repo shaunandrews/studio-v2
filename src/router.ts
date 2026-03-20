@@ -3,6 +3,7 @@ import { useSites } from '@/data/useSites'
 import { usePersona, getInitialPersonaId } from '@/data/usePersona'
 import { useOnboarding } from '@/data/useOnboarding'
 import { useAllSitesView } from '@/data/useAllSitesView'
+import { useHydration } from '@/data/useHydration'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -78,7 +79,7 @@ const router = createRouter({
         { name: 'site-overview', path: 'overview', component: { render: () => null } },
         { name: 'site-sitemap', path: 'sitemap', component: { render: () => null } },
         { name: 'site-tasks', path: 'tasks', component: { render: () => null } },
-        { name: 'site-task', path: 'tasks/:convoId', component: { render: () => null } },
+        { name: 'site-task', path: 'tasks/:taskId', component: { render: () => null } },
         { name: 'site-sync', path: 'sync', component: { render: () => null } },
         { name: 'site-previews', path: 'previews', component: { render: () => null } },
         { name: 'site-settings', path: 'settings', component: { render: () => null } },
@@ -138,14 +139,17 @@ const router = createRouter({
 // Initialize persona from URL param or localStorage on first navigation
 let initialized = false
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (!initialized) {
     initialized = true
     const id = getInitialPersonaId()
     if (id) {
-      const { activatePersona } = usePersona()
-      // Activate without router navigation — state resets, then guard redirects
-      activatePersona(id)
+      // Hydrate from DB (persisted data) rather than re-seeding from persona
+      const { hydrate } = useHydration()
+      await hydrate(id)
+      // Mark persona as chosen
+      const { activePersonaId } = usePersona()
+      activePersonaId.value = id
       // After activation, onboarding state is set — redirect if landing on / or /choose
       if (to.path === '/' || to.path === '/choose') {
         const { needsOnboarding } = useOnboarding()
