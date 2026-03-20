@@ -55,9 +55,21 @@ const timeSince = computed(() => {
 </script>
 
 <template>
+  <!-- Compact: just a subtle "Add staging site" button -->
+  <button
+    v-if="compact"
+    class="sync-env-add"
+    :style="{ '--env-accent': envColor }"
+    @click="$emit('connect')"
+  >
+    + Add {{ label.toLowerCase() }} site
+  </button>
+
+  <!-- Full card -->
   <div
+    v-else
     class="sync-env"
-    :class="{ 'sync-env--dimmed': dimmed, 'sync-env--compact': compact }"
+    :class="{ 'sync-env--dimmed': dimmed }"
     :style="{ '--env-accent': envColor }"
   >
     <div class="sync-env__details" :class="{ 'sync-env__details--connected': connected }">
@@ -132,9 +144,32 @@ const timeSince = computed(() => {
   box-shadow: none;
 }
 
-.sync-env--compact {
-  border-style: dashed;
-  box-shadow: none;
+/* ── Compact: subtle add button ── */
+
+.sync-env-add {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding-inline: var(--space-xs);
+  border: 1px dashed color-mix(in srgb, var(--env-accent, transparent) 40%, var(--color-frame-border));
+  border-radius: var(--radius-m);
+  background: color-mix(in srgb, var(--env-accent, transparent) 8%, transparent);
+  color: var(--color-frame-fg-muted);
+  font-family: inherit;
+  font-size: var(--font-size-s);
+  line-height: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--duration-instant) var(--ease-default),
+    color var(--duration-instant) var(--ease-default),
+    border-color var(--duration-instant) var(--ease-default);
+}
+
+.sync-env-add:hover {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
+  border-color: var(--color-frame-fg-muted);
 }
 
 
