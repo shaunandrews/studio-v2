@@ -1,0 +1,34 @@
+{
+  "name": "Studio Meridian",
+  "description": "A dark-themed design agency portfolio",
+  "favicon": "\u25c6",
+  "theme": {
+    "colors": {
+      "bg": "#111",
+      "text": "#fff",
+      "accent": "#fff",
+      "muted": "rgba(255,255,255,0.5)",
+      "border": "rgba(255,255,255,0.08)",
+      "surface": "#1a1a1a"
+    },
+    "fonts": {
+      "heading": "'Inter', sans-serif",
+      "body": "'Inter', sans-serif"
+    },
+    "spacing": {
+      "content": "680px",
+      "wide": "1000px"
+    }
+  },
+  "parts": ["header", "footer"],
+  "pages": [
+    { "slug": "/", "title": "Home", "template": "home" },
+    {
+      "slug": "/work", "title": "Work", "template": "work",
+      "collection": { "slug": "/work/:slug", "title": "Project", "template": "project", "count": 8 }
+    },
+    { "slug": "/services", "title": "Services", "template": "services" },
+    { "slug": "/about", "title": "About", "template": "about" },
+    { "slug": "/contact", "title": "Contact", "template": "contact" }
+  ]
+}
