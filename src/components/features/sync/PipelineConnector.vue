@@ -2,6 +2,7 @@
 defineProps<{
   fromLabel: string
   toLabel: string
+  fromConnected?: boolean
   toConnected: boolean
   dimmed?: boolean
 }>()
@@ -16,7 +17,7 @@ defineEmits<{
     <div class="connector__line" />
     <button
       class="connector__push-btn"
-      :disabled="!toConnected"
+      :disabled="!toConnected || fromConnected === false"
       @click="$emit('push')"
     >
       Push {{ fromLabel }} to {{ toLabel }}

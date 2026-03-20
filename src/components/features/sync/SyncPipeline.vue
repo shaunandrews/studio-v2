@@ -107,6 +107,30 @@ function getProgress(cardId: string) {
   return syncProgress.value
 }
 
+// True when there's a connected stage after this one — used to decide
+// whether to hide the connector and shrink an unconnected card.
+function hasLaterConnectedStage(index: number): boolean {
+  for (let i = index + 1; i < pipeline.value.length; i++) {
+    if (pipeline.value[i].site) return true
+  }
+  return false
+}
+
+// Walk back from a connector's natural source to find the nearest connected stage.
+// If the previous pipeline stage isn't connected, fall back to Local so users can
+// push directly (e.g. Local → Production when Staging is skipped).
+function effectiveSource(index: number): { id: string; label: string; connected: boolean } {
+  if (index === 0) return { id: 'local', label: 'Local', connected: true }
+  const prev = pipeline.value[index - 1]
+  if (prev.site) return { id: prev.id, label: prev.label, connected: true }
+  // Previous stage not connected — walk back
+  for (let i = index - 2; i >= 0; i--) {
+    const s = pipeline.value[i]
+    if (s.site) return { id: s.id, label: s.label, connected: true }
+  }
+  return { id: 'local', label: 'Local', connected: true }
+}
+
 function onConnectorPush(fromStageId: string, toStageId: string) {
   openSyncModal('push', fromStageId, toStageId)
 }
@@ -153,30 +177,60 @@ function envColor(environment?: string): string {
         />
 
         <template v-for="(stage, index) in pipeline" :key="stage.id">
-          <PipelineConnector
-            :from-label="index === 0 ? 'Local' : pipeline[index - 1].label"
-            :to-label="stage.label"
-            :to-connected="!!stage.site"
-            :dimmed="isSetup && !isIntroStep && index > setupPhase!"
-            @push="onConnectorPush(index === 0 ? 'local' : pipeline[index - 1].id, stage.id)"
-          />
-          <StageCard
-            :data-setup-index="index"
-            :label="stage.label"
-            :url="stage.site?.url"
-            :favicon="site?.favicon"
-            :site-name="site?.name"
-            :connected="!!stage.site"
-            :env-color="envColor(stage.environment)"
-            :dimmed="isSetup && !isIntroStep && index > setupPhase!"
-            :sync-phase="getProgress(stage.id).phase"
-            :sync-percent="getProgress(stage.id).percent"
-            :sync-label="getProgress(stage.id).label"
-            :sync-done-at="getProgress(stage.id).doneAt"
-            :sync-done-verb="getProgress(stage.id).doneVerb"
-            @sync="onSync(stage.id)"
-            @connect="openConnectModal(stage.id)"
-          />
+          <!-- Compact skipped stage: sits beside the skip-connector in a horizontal row -->
+          <template v-if="!stage.site && hasLaterConnectedStage(index)">
+            <div class="sync-pipeline__skip-zone">
+              <PipelineConnector
+                :from-label="effectiveSource(index + 1).label"
+                :to-label="pipeline[index + 1]?.label ?? stage.label"
+                :from-connected="effectiveSource(index + 1).connected"
+                :to-connected="!!pipeline[index + 1]?.site"
+                :dimmed="isSetup && !isIntroStep && (index + 1) > setupPhase!"
+                @push="onConnectorPush(effectiveSource(index + 1).id, pipeline[index + 1]?.id ?? stage.id)"
+              />
+              <StageCard
+                class="sync-pipeline__skip-card"
+                :data-setup-index="index"
+                :label="stage.label"
+                :connected="false"
+                compact
+                :env-color="envColor(stage.environment)"
+                :dimmed="isSetup && !isIntroStep && index > setupPhase!"
+                @connect="openConnectModal(stage.id)"
+              />
+            </div>
+          </template>
+
+          <!-- Normal flow: connector then card -->
+          <template v-else>
+            <!-- Hide connector if next stage already rendered it in the skip-row -->
+            <PipelineConnector
+              v-if="!(index > 0 && !pipeline[index - 1].site && hasLaterConnectedStage(index - 1))"
+              :from-label="effectiveSource(index).label"
+              :to-label="stage.label"
+              :from-connected="effectiveSource(index).connected"
+              :to-connected="!!stage.site"
+              :dimmed="isSetup && !isIntroStep && index > setupPhase!"
+              @push="onConnectorPush(effectiveSource(index).id, stage.id)"
+            />
+            <StageCard
+              :data-setup-index="index"
+              :label="stage.label"
+              :url="stage.site?.url"
+              :favicon="site?.favicon"
+              :site-name="site?.name"
+              :connected="!!stage.site"
+              :env-color="envColor(stage.environment)"
+              :dimmed="isSetup && !isIntroStep && index > setupPhase!"
+              :sync-phase="getProgress(stage.id).phase"
+              :sync-percent="getProgress(stage.id).percent"
+              :sync-label="getProgress(stage.id).label"
+              :sync-done-at="getProgress(stage.id).doneAt"
+              :sync-done-verb="getProgress(stage.id).doneVerb"
+              @sync="onSync(stage.id)"
+              @connect="openConnectModal(stage.id)"
+            />
+          </template>
         </template>
       </div>
 
@@ -229,6 +283,20 @@ function envColor(environment?: string): string {
 .is-ending .sync-pipeline__environments {
   max-width: 680px;
   transform: scale(1);
+}
+
+/* ── Skip-zone: connector centered, compact card positioned to the end ── */
+
+.sync-pipeline__skip-zone {
+  position: relative;
+  padding-block: var(--space-s);
+}
+
+.sync-pipeline__skip-card {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 50%;
+  translate: 0 -50%;
 }
 
 /* ── Intro layout: centered column, stack scaled down ── */

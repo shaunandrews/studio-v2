@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
-import Button from '@/components/primitives/Button.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
 
 const props = withDefaults(defineProps<{
@@ -9,6 +8,7 @@ const props = withDefaults(defineProps<{
   favicon?: string
   siteName?: string
   connected: boolean
+  compact?: boolean
   envColor?: string
   dimmed?: boolean
   syncDisabled?: boolean
@@ -57,7 +57,7 @@ const timeSince = computed(() => {
 <template>
   <div
     class="sync-env"
-    :class="{ 'sync-env--dimmed': dimmed }"
+    :class="{ 'sync-env--dimmed': dimmed, 'sync-env--compact': compact }"
     :style="{ '--env-accent': envColor }"
   >
     <div class="sync-env__details" :class="{ 'sync-env__details--connected': connected }">
@@ -103,13 +103,13 @@ const timeSince = computed(() => {
     </button>
 
     <!-- Unconnected: connect button (only when not dimmed) -->
-    <Button
+    <button
       v-if="!connected && !dimmed && syncPhase !== 'syncing'"
-      label="Connect site"
-      variant="primary"
-      size="small"
+      class="sync-env__action"
       @click="$emit('connect')"
-    />
+    >
+      Connect site
+    </button>
   </div>
 </template>
 
@@ -128,6 +128,11 @@ const timeSince = computed(() => {
 
 .sync-env--dimmed {
   opacity: 0.35;
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.sync-env--compact {
   border-style: dashed;
   box-shadow: none;
 }
