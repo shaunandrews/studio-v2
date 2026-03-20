@@ -1,15 +1,25 @@
 <script setup lang="ts">
 import MarkdownText from '@/components/composites/renderers/MarkdownText.vue'
 import ToolCallItem from '@/components/composites/ToolCallItem.vue'
+import { useSiteDocument } from '@/data/useSiteDocument'
 import type { AgentId, ToolCall } from '@/data/types'
 
-defineProps<{
+const props = defineProps<{
   role: 'user' | 'agent'
   content: string
   toolCalls?: ToolCall[]
   agentId?: AgentId
   siteId?: string
 }>()
+
+const { undoChange } = useSiteDocument()
+
+function onToolUndo(changeId: string) {
+  if (!props.siteId) return
+  undoChange(props.siteId, changeId)
+  const tc = props.toolCalls?.find(t => t.changeId === changeId)
+  if (tc) tc.status = 'reverted'
+}
 </script>
 
 <template>
@@ -36,6 +46,8 @@ defineProps<{
             :result="tc.result"
             :error="tc.error"
             :code="tc.code"
+            :change-id="tc.changeId"
+            @undo="onToolUndo"
           />
         </div>
         <MarkdownText

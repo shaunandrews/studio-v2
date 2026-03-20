@@ -5,7 +5,7 @@ import StreamingCode from '@/components/composites/StreamingCode.vue'
 import { chevronRight } from '@wordpress/icons'
 import type { ToolCallStatus } from '@/data/types'
 
-defineProps<{
+const props = defineProps<{
   label: string
   status: ToolCallStatus
   toolName?: string
@@ -13,12 +13,22 @@ defineProps<{
   result?: string
   error?: string
   code?: string
+  changeId?: string
+}>()
+
+const emit = defineEmits<{
+  undo: [changeId: string]
 }>()
 
 const expanded = ref(false)
 
 function toggle() {
   expanded.value = !expanded.value
+}
+
+function onUndo(e: Event) {
+  e.stopPropagation()
+  if (props.changeId) emit('undo', props.changeId)
 }
 </script>
 
@@ -54,6 +64,15 @@ function toggle() {
       </svg>
 
       <span class="tool-call-item__label">{{ label }}</span>
+
+      <button
+        v-if="status === 'done' && changeId"
+        class="tool-call-item__undo"
+        title="Undo this change"
+        @click="onUndo"
+      >
+        Undo
+      </button>
 
       <WPIcon
         :icon="chevronRight"
@@ -186,6 +205,36 @@ function toggle() {
 
 .tool-call-item--error .tool-call-item__detail {
   border-inline-start-color: var(--color-frame-danger);
+}
+
+/* Reverted state */
+.tool-call-item--reverted .tool-call-item__label {
+  text-decoration: line-through;
+  color: var(--color-frame-fg-disabled);
+}
+
+.tool-call-item--reverted .tool-call-item__chevron {
+  color: var(--color-frame-fg-disabled);
+}
+
+/* Undo button */
+.tool-call-item__undo {
+  font-size: var(--font-size-xs);
+  color: var(--color-frame-fg-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 var(--space-xxs);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.tool-call-item:hover .tool-call-item__undo {
+  opacity: 1;
+}
+
+.tool-call-item__undo:hover {
+  color: var(--color-frame-fg);
 }
 
 /* Spinner */
