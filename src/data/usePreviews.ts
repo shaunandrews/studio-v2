@@ -1,6 +1,7 @@
-import { computed, ref } from 'vue'
+import { computed, ref, toRaw } from 'vue'
 import type { PreviewSite, PreviewInvite, PreviewOperation, PreviewOperationType } from './types'
 import { seedPreviews } from './seed-previews'
+import { db, isDbAvailable } from './db'
 
 // --- Helpers ---
 
@@ -34,6 +35,21 @@ function pick<T>(arr: T[]): T {
 
 function generatePreviewUrl(siteSlug: string): string {
   return `${siteSlug}-${pick(ADJECTIVES)}-${pick(ANIMALS)}.wp.build`
+}
+
+// --- Persistence ---
+
+async function persistPreview(preview: PreviewSite) {
+  if (await isDbAvailable()) {
+    const raw = JSON.parse(JSON.stringify(toRaw(preview)))
+    await db.previews.put(raw)
+  }
+}
+
+async function deletePreviewFromDb(previewId: string) {
+  if (await isDbAvailable()) {
+    await db.previews.delete(previewId)
+  }
 }
 
 // --- Module-level state (singleton) ---
@@ -217,6 +233,7 @@ export function usePreviews() {
       if (p) {
         p.status = 'active'
         p.updatedAt = new Date().toISOString()
+        persistPreview(p)
       }
     })
 
@@ -244,6 +261,7 @@ export function usePreviews() {
       const p = previews.value.find(p => p.id === previewId)
       if (p) {
         p.updatedAt = new Date().toISOString()
+        persistPreview(p)
       }
     })
 
@@ -271,6 +289,7 @@ export function usePreviews() {
       const p = previews.value.find(p => p.id === previewId)
       if (p) {
         p.status = 'deleted'
+        deletePreviewFromDb(previewId)
       }
     })
 
@@ -281,6 +300,7 @@ export function usePreviews() {
     const preview = previews.value.find(p => p.id === previewId)
     if (preview) {
       preview.name = name
+      persistPreview(preview)
     }
   }
 
@@ -290,6 +310,7 @@ export function usePreviews() {
       const d = new Date()
       d.setDate(d.getDate() + days - PREVIEW_LIFETIME_DAYS)
       preview.updatedAt = d.toISOString()
+      persistPreview(preview)
     }
   }
 
@@ -297,6 +318,7 @@ export function usePreviews() {
     const idx = previews.value.findIndex(p => p.id === previewId)
     if (idx !== -1) {
       previews.value.splice(idx, 1)
+      deletePreviewFromDb(previewId)
     }
   }
 
@@ -304,6 +326,7 @@ export function usePreviews() {
     const preview = previews.value.find(p => p.id === previewId)
     if (preview) {
       preview.note = note || undefined
+      persistPreview(preview)
     }
   }
 
@@ -315,13 +338,31 @@ export function usePreviews() {
       email,
       sentAt: new Date().toISOString(),
     })
+    persistPreview(preview)
   }
 
   function removeInvite(previewId: string, email: string) {
     const preview = previews.value.find(p => p.id === previewId)
     if (!preview) return
     const idx = preview.invites.findIndex(i => i.email === email)
-    if (idx !== -1) preview.invites.splice(idx, 1)
+    if (idx !== -1) {
+      preview.invites.splice(idx, 1)
+      persistPreview(preview)
+    }
+  }
+
+  async function resetPreviews(newPreviews: PreviewSite[]) {
+    if (await isDbAvailable()) {
+      await db.previews.clear()
+      if (newPreviews.length) await db.previews.bulkPut(newPreviews)
+    }
+    previews.value = newPreviews.map(p => ({ ...p }))
+    operations.value = []
+  }
+
+  function _setPreviews(newPreviews: PreviewSite[]) {
+    previews.value = newPreviews
+    operations.value = []
   }
 
   return {
@@ -341,5 +382,7 @@ export function usePreviews() {
     removeInvite,
     getExpiration,
     relativeTime,
+    resetPreviews,
+    _setPreviews,
   }
 }
