@@ -1,0 +1,35 @@
+{
+  "name": "Thread & Co.",
+  "description": "A clean, modern e-commerce store",
+  "favicon": "🧵",
+  "theme": {
+    "colors": {
+      "bg": "#fff",
+      "text": "#1a1a1a",
+      "accent": "#1a1a1a",
+      "muted": "#888",
+      "border": "rgba(0,0,0,0.08)",
+      "surface": "#f8f8f8"
+    },
+    "fonts": {
+      "heading": "'Inter', sans-serif",
+      "body": "'Inter', sans-serif"
+    },
+    "spacing": {
+      "content": "680px",
+      "wide": "1000px"
+    }
+  },
+  "parts": ["header", "footer"],
+  "pages": [
+    { "slug": "/", "title": "Home", "template": "home" },
+    { "slug": "/shop", "title": "Shop", "template": "shop" },
+    {
+      "slug": "/products", "title": "Products", "template": "product",
+      "collection": { "slug": "/products/:slug", "title": "Product", "template": "product", "count": 24 }
+    },
+    { "slug": "/cart", "title": "Cart", "template": "cart" },
+    { "slug": "/about", "title": "About", "template": "about" },
+    { "slug": "/contact", "title": "Contact", "template": "contact" }
+  ]
+}
