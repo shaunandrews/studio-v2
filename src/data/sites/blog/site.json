@@ -1,0 +1,33 @@
+{
+  "name": "Arlo Writes",
+  "description": "A personal blog about design and engineering",
+  "favicon": "\u270d\ufe0f",
+  "theme": {
+    "colors": {
+      "bg": "#fff",
+      "text": "#1a1a1a",
+      "accent": "#1a1a1a",
+      "muted": "#999",
+      "border": "rgba(0,0,0,0.06)",
+      "surface": "#f0f0f0"
+    },
+    "fonts": {
+      "heading": "'Inter', sans-serif",
+      "body": "'Inter', sans-serif"
+    },
+    "spacing": {
+      "content": "640px",
+      "wide": "960px"
+    }
+  },
+  "parts": ["header", "footer"],
+  "pages": [
+    { "slug": "/", "title": "Home", "template": "home" },
+    {
+      "slug": "/blog", "title": "Articles", "template": "blog",
+      "collection": { "slug": "/blog/:slug", "title": "Post", "template": "post", "count": 36 }
+    },
+    { "slug": "/about", "title": "About", "template": "about" },
+    { "slug": "/contact", "title": "Contact", "template": "contact" }
+  ]
+}
