@@ -80,7 +80,14 @@ export interface ToolCall {
   code?: string            // Code output shown in expandable detail (streams when running)
 }
 
-export type ConversationStatus = 'idle' | 'running' | 'review' | 'approved' | 'merged' | 'rejected'
+export type TaskStatus = 'queued' | 'running' | 'review' | 'approved' | 'merged' | 'rejected' | 'failed'
+export type TaskOriginSurface = 'chat' | 'sitemap' | 'preview' | 'overview' | 'quick-action'
+
+export interface TaskOrigin {
+  surface: TaskOriginSurface
+  context?: string      // e.g. "Site Map → About page"
+  entityRef?: string    // specific page/entity ID
+}
 
 export interface TaskWorktree {
   branch: string
@@ -98,15 +105,17 @@ export interface ChangedEntity {
   action: 'created' | 'updated' | 'deleted' | 'activated' | 'deactivated'
 }
 
-export interface Conversation {
+export interface Task {
   id: string
-  siteId: string | null
+  siteId: string
   agentId: AgentId
   title?: string
+  status: TaskStatus
   createdAt: string
+  updatedAt: string
   archived?: boolean
-  status?: ConversationStatus
   unread?: boolean
+  origin: TaskOrigin
   worktree?: TaskWorktree
   summary?: string
   changedFiles?: ChangedFile[]
@@ -115,7 +124,7 @@ export interface Conversation {
 
 export interface Message {
   id: string
-  conversationId: string
+  taskId: string
   role: 'user' | 'agent'
   agentId?: AgentId
   content: string
@@ -177,6 +186,7 @@ export interface Persona {
   auth: AuthUser | null
   onboardingCompleted: boolean
   sites: Site[]
-  conversations: Conversation[]
+  tasks: Task[]
   messages: Message[]
+  previews: PreviewSite[]
 }

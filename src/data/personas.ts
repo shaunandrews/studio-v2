@@ -1,6 +1,8 @@
 import type { Persona } from './types'
 import { seedProjects } from './seed-sites'
-import { seedConversations, seedMessages } from './seed-conversations'
+import { seedTasks } from './seed-tasks'
+import { seedMessages } from './seed-messages'
+import { seedPreviews } from './seed-previews'
 
 export const personas: Persona[] = [
   {
@@ -11,13 +13,14 @@ export const personas: Persona[] = [
     auth: null,
     onboardingCompleted: false,
     sites: [],
-    conversations: [],
+    tasks: [],
     messages: [],
+    previews: [],
   },
   {
     id: 'existing-user',
     name: 'Shaun',
-    description: '7 sites, active conversations, fully set up.',
+    description: '7 sites, active tasks, fully set up.',
     icon: 'https://gravatar.com/avatar/b7fdd6477cc13ca16e8358a0725bc02c?s=64',
     auth: {
       name: 'Shaun Andrews',
@@ -26,8 +29,9 @@ export const personas: Persona[] = [
     },
     onboardingCompleted: true,
     sites: seedProjects,
-    conversations: seedConversations,
+    tasks: seedTasks,
     messages: seedMessages,
+    previews: seedPreviews,
   },
 ]
 
