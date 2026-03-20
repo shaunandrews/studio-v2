@@ -1,0 +1,36 @@
+{{header}}
+
+<div style="max-width: var(--content); margin: 0 auto; padding: 48px 32px;">
+  <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px; font-family: var(--font-body);"><a href="/blog" style="color: var(--accent); text-decoration: none;">Blog</a> <span style="margin: 0 6px;">/</span> Article</div>
+
+  <h1 style="font-family: var(--font-heading); font-size: 32px; color: var(--text); margin: 0 0 12px; font-weight: 700; line-height: 1.3;">Migrating to v3: What Changed</h1>
+  <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); margin-bottom: 32px;">March 8, 2026 &middot; DevRef Team</div>
+
+  <p style="font-family: var(--font-body); font-size: 15px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+    DevRef v3 is a major release that rethinks how configuration, routing, and plugins work together. We've simplified the config format, moved to file-based routing by default, and introduced a new plugin lifecycle that gives authors much more control over the build pipeline.
+  </p>
+  <p style="font-family: var(--font-body); font-size: 15px; color: var(--text); line-height: 1.8; margin: 0 0 28px;">
+    The biggest change is the new <code style="background: var(--surface); padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 13px;">devref.config.ts</code> format. In v2, configuration was spread across multiple files. Now everything lives in a single typed config file with full IntelliSense support. The migration is mostly mechanical — we've built a codemod that handles 90% of cases automatically.
+  </p>
+
+  <!-- Code Block -->
+  <div style="background: #1e293b; border-radius: 8px; padding: 20px 24px; margin-bottom: 28px; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 13px; line-height: 1.8; color: #e2e8f0; overflow: hidden;">
+    <div><span style="color: #94a3b8;">// Run the migration tool</span></div>
+    <div><span style="color: #94a3b8;">$</span> npx devref migrate v3</div>
+    <div style="height: 8px;"></div>
+    <div><span style="color: #94a3b8;">// Review and commit the changes</span></div>
+    <div><span style="color: #94a3b8;">$</span> git diff</div>
+    <div><span style="color: #94a3b8;">$</span> npm run dev</div>
+  </div>
+
+  <p style="font-family: var(--font-body); font-size: 15px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+    We've also overhauled the routing layer. Dynamic routes now use a bracket syntax (<code style="background: var(--surface); padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 13px;">[slug].tsx</code>) that maps directly to URL segments. Catch-all routes, optional parameters, and route groups are all supported natively — no more manual route configuration.
+  </p>
+
+  <div style="background: rgba(37,99,235,0.06); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 0 6px 6px 0; margin-bottom: 28px;">
+    <div style="font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 4px;">Upgrade guide</div>
+    <div style="font-size: 13px; color: var(--text); line-height: 1.6;">See the full <a href="/docs" style="color: var(--accent); text-decoration: none; font-weight: 500;">v3 migration docs</a> for a complete list of breaking changes and automated fixes.</div>
+  </div>
+</div>
+
+{{footer}}

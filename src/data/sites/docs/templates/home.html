@@ -1,0 +1,69 @@
+{{header}}
+
+<div style="display: flex; max-width: var(--wide); margin: 0 auto; min-height: 800px;">
+  <!-- Sidebar -->
+  <aside style="width: 220px; padding: 24px 20px; border-right: 1px solid var(--border); font-family: var(--font-body); flex-shrink: 0;">
+    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; font-weight: 600;">Getting Started</div>
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px;">
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Installation</a>
+      <a href="/docs" style="font-size: 13px; color: var(--accent); text-decoration: none; padding: 4px 8px; border-radius: 4px; background: rgba(37,99,235,0.08); font-weight: 500;">Quick Start</a>
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Configuration</a>
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Deployment</a>
+    </div>
+    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; font-weight: 600;">Core Concepts</div>
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px;">
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Routing</a>
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Data Fetching</a>
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Authentication</a>
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Middleware</a>
+    </div>
+    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; font-weight: 600;">API Reference</div>
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">CLI Commands</a>
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Config Options</a>
+      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Plugin API</a>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main style="flex: 1; padding: 28px 40px; font-family: var(--font-body);">
+    <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Docs <span style="margin: 0 6px;">/</span> Getting Started <span style="margin: 0 6px;">/</span> <span style="color: var(--text);">Quick Start</span></div>
+
+    <h1 style="font-family: var(--font-heading); font-size: 30px; color: var(--text); margin: 0 0 12px; font-weight: 700;">Quick Start</h1>
+    <p style="font-size: 15px; color: var(--muted); line-height: 1.7; margin: 0 0 24px;">Get up and running with DevRef in under five minutes. This guide walks you through creating a new project, starting the dev server, and deploying your first site.</p>
+
+    <h2 style="font-family: var(--font-heading); font-size: 18px; color: var(--text); margin: 0 0 12px; font-weight: 600;">Create a new project</h2>
+    <p style="font-size: 14px; color: var(--text); line-height: 1.7; margin: 0 0 16px;">Run the following commands to scaffold a new project and start developing:</p>
+
+    <!-- Code Block -->
+    <div style="background: #1e293b; border-radius: 8px; padding: 20px 24px; margin-bottom: 28px; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 13px; line-height: 1.8; color: #e2e8f0; overflow: hidden;">
+      <div><span style="color: #94a3b8;">$</span> npx create-app@latest my-project</div>
+      <div><span style="color: #94a3b8;">$</span> cd my-project</div>
+      <div><span style="color: #94a3b8;">$</span> npm run dev</div>
+    </div>
+
+    <h2 style="font-family: var(--font-heading); font-size: 18px; color: var(--text); margin: 0 0 12px; font-weight: 600;">Project structure</h2>
+    <p style="font-size: 14px; color: var(--text); line-height: 1.7; margin: 0 0 16px;">The scaffolded project includes everything you need to get started. Here's what each directory contains:</p>
+
+    <!-- Code Block - File Tree -->
+    <div style="background: #1e293b; border-radius: 8px; padding: 20px 24px; margin-bottom: 28px; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 13px; line-height: 1.8; color: #e2e8f0; overflow: hidden;">
+      <div>my-project/</div>
+      <div>&nbsp;&nbsp;<span style="color: #94a3b8;">&#9500;&#9472;&#9472;</span> src/</div>
+      <div>&nbsp;&nbsp;<span style="color: #94a3b8;">&#9474;</span>&nbsp;&nbsp;&nbsp;<span style="color: #94a3b8;">&#9500;&#9472;&#9472;</span> pages/</div>
+      <div>&nbsp;&nbsp;<span style="color: #94a3b8;">&#9474;</span>&nbsp;&nbsp;&nbsp;<span style="color: #94a3b8;">&#9500;&#9472;&#9472;</span> components/</div>
+      <div>&nbsp;&nbsp;<span style="color: #94a3b8;">&#9474;</span>&nbsp;&nbsp;&nbsp;<span style="color: #94a3b8;">&#9492;&#9472;&#9472;</span> styles/</div>
+      <div>&nbsp;&nbsp;<span style="color: #94a3b8;">&#9500;&#9472;&#9472;</span> public/</div>
+      <div>&nbsp;&nbsp;<span style="color: #94a3b8;">&#9500;&#9472;&#9472;</span> devref.config.ts</div>
+      <div>&nbsp;&nbsp;<span style="color: #94a3b8;">&#9492;&#9472;&#9472;</span> package.json</div>
+    </div>
+
+    <p style="font-size: 14px; color: var(--text); line-height: 1.7; margin: 0 0 16px;">The <code style="background: var(--surface); padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 12px;">src/pages/</code> directory uses file-based routing. Each file becomes a route automatically. Components go in <code style="background: var(--surface); padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 12px;">src/components/</code> and global styles in <code style="background: var(--surface); padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 12px;">src/styles/</code>.</p>
+
+    <div style="background: rgba(37,99,235,0.06); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 0 6px 6px 0; margin-bottom: 28px;">
+      <div style="font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 4px;">Next steps</div>
+      <div style="font-size: 13px; color: var(--text); line-height: 1.6;">Read the <a href="/docs" style="color: var(--accent); text-decoration: none; font-weight: 500;">Configuration</a> guide to customize your project, or jump straight to <a href="/docs" style="color: var(--accent); text-decoration: none; font-weight: 500;">Routing</a> to learn how pages work.</div>
+    </div>
+  </main>
+</div>
+
+{{footer}}

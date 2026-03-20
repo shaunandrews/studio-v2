@@ -1,0 +1,36 @@
+{
+  "name": "DevRef Docs",
+  "description": "API reference documentation site",
+  "favicon": "📘",
+  "theme": {
+    "colors": {
+      "bg": "#fff",
+      "text": "#1a1a1a",
+      "accent": "#2563eb",
+      "muted": "#666",
+      "border": "rgba(0,0,0,0.08)",
+      "surface": "#f8fafc"
+    },
+    "fonts": {
+      "heading": "'Inter', sans-serif",
+      "body": "'Inter', sans-serif"
+    },
+    "spacing": {
+      "content": "680px",
+      "wide": "1000px"
+    }
+  },
+  "parts": ["header", "footer"],
+  "pages": [
+    { "slug": "/", "title": "Home", "template": "home" },
+    {
+      "slug": "/docs", "title": "Docs", "template": "docs",
+      "collection": { "slug": "/docs/:slug", "title": "Article", "template": "docs", "count": 42 }
+    },
+    {
+      "slug": "/blog", "title": "Blog", "template": "blog",
+      "collection": { "slug": "/blog/:slug", "title": "Post", "template": "post", "count": 10 }
+    },
+    { "slug": "/about", "title": "About", "template": "about" }
+  ]
+}
