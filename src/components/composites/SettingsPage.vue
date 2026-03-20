@@ -8,7 +8,6 @@ import Dropdown from '@/components/primitives/Dropdown.vue'
 import Toggle from '@/components/primitives/Toggle.vue'
 import RadioGroup from '@/components/primitives/RadioGroup.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
-import { getAPIKey, setAPIKey, isAIConfigured } from '@/data/ai-service'
 import { codingAgents, installAgent, uninstallAgent } from '@/data/agents'
 import { skills, installSkill, installAllSkills, uninstallSkill, removeCustomSkill } from '@/data/skills'
 import SkillInstaller from '@/components/composites/SkillInstaller.vue'
@@ -117,36 +116,15 @@ function setPersona(id: string) {
 
 const { showAllSitesView, setShowAllSites } = useAllSitesView()
 
-// -- API Key --
-
-const apiKey = ref('')
-const keySaved = ref(false)
-const keyConfigured = ref(isAIConfigured())
-
 watch(() => props.open, (val) => {
   if (val) {
     activeTab.value = props.lockedTab || props.initialTab || 'general'
-    apiKey.value = getAPIKey()
-    keySaved.value = false
   }
 })
 
 // For embedded mode, set initial tab immediately
 if (props.embedded) {
   activeTab.value = props.lockedTab || props.initialTab || 'general'
-}
-
-function saveKey() {
-  setAPIKey(apiKey.value)
-  keyConfigured.value = isAIConfigured()
-  keySaved.value = true
-  setTimeout(() => { keySaved.value = false }, 1500)
-}
-
-function clearKey() {
-  apiKey.value = ''
-  setAPIKey('')
-  keyConfigured.value = false
 }
 
 // -- Default AI model --
@@ -912,16 +890,6 @@ function skillInstallLabel(id: string): string {
             <Toggle v-model="isWindows" label="Windows mode" :surface="surfaceMode" size="small" @update:model-value="(v: boolean) => setOS(v ? 'windows' : 'macos')">
               <template #hint>Switch the app chrome between macOS and Windows styles.</template>
             </Toggle>
-          </div>
-
-          <div class="settings-section">
-            <Text variant="body-small" weight="semibold" :surface="surfaceMode" class="settings-field-label">API key</Text>
-            <div class="proto-row">
-              <input v-model="apiKey" type="password" class="proto-input" placeholder="sk-ant-..." spellcheck="false" autocomplete="off" />
-              <Button v-if="apiKey" variant="primary" size="small" :surface="surfaceMode" :label="keySaved ? 'Saved' : 'Save'" :disabled="keySaved" @click="saveKey" />
-              <Button v-if="keyConfigured && !keySaved" variant="tertiary" size="small" :surface="surfaceMode" label="Clear" @click="clearKey" />
-            </div>
-            <Text variant="body-small" color="muted" :surface="surfaceMode" class="settings-hint">Anthropic API key for AI chat features.</Text>
           </div>
 
           <div class="settings-section">

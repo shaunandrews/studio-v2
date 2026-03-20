@@ -1,6 +1,5 @@
 import { ref, computed, toRaw, type Ref, unref } from 'vue'
-import Anthropic from '@anthropic-ai/sdk'
-import { isAIConfigured, getAPIKey, streamAI } from './ai-service'
+import { streamAI, generateTitle } from './ai-service'
 import { db, isDbAvailable } from './db'
 import type { Task, Message, AgentId, TaskOrigin, TaskStatus } from './types'
 
@@ -64,18 +63,6 @@ function queueAgentResponse(taskId: string) {
 }
 
 async function sendToAI(taskId: string, agentId?: AgentId) {
-  if (!isAIConfigured()) {
-    window.setTimeout(() => {
-      appendMessage(
-        taskId,
-        'agent',
-        "I'm not connected to an AI service yet. Add your Anthropic API key in settings to enable live responses.",
-        agentId,
-      )
-    }, 500)
-    return
-  }
-
   // Add streaming message placeholder
   const streamingId = `msg-streaming-${Date.now()}`
   const streamingMsg: Message = {
@@ -120,32 +107,13 @@ async function generateTaskTitle(taskId: string, userMessage: string) {
     assignWorktree(task, userMessage)
   }
 
-  if (!isAIConfigured()) return
-  try {
-    const client = new Anthropic({
-      apiKey: getAPIKey(),
-      dangerouslyAllowBrowser: true,
-    })
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 30,
-      messages: [
-        {
-          role: 'user',
-          content: `Generate a very short title (2-5 words, no quotes) for a task described as: "${userMessage}"`,
-        },
-      ],
-    })
-    const title = (response.content[0] as { type: 'text'; text: string }).text.trim()
-    if (title) {
-      task.title = title
-      // Update branch name to use the cleaner AI-generated title
-      assignWorktree(task, title)
-      task.updatedAt = new Date().toISOString()
-      persistTask(task)
-    }
-  } catch {
-    // Silent fail — title stays as "New task"
+  const title = await generateTitle(userMessage)
+  if (title) {
+    task.title = title
+    // Update branch name to use the cleaner AI-generated title
+    assignWorktree(task, title)
+    task.updatedAt = new Date().toISOString()
+    persistTask(task)
   }
 }
 
