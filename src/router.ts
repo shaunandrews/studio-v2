@@ -76,6 +76,7 @@ const router = createRouter({
       },
       children: [
         { name: 'site-overview', path: 'overview', component: { render: () => null } },
+        { name: 'site-sitemap', path: 'sitemap', component: { render: () => null } },
         { name: 'site-tasks', path: 'tasks', component: { render: () => null } },
         { name: 'site-task', path: 'tasks/:convoId', component: { render: () => null } },
         { name: 'site-sync', path: 'sync', component: { render: () => null } },

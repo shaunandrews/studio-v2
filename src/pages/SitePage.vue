@@ -13,6 +13,7 @@ import SyncScreen from '@/components/features/SyncScreen.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
+import SiteMapScreen from '@/components/features/SiteMapScreen.vue'
 import { useSettings } from '@/data/useSettings'
 import { useSites, ALL_SITES_ID } from '@/data/useSites'
 import { useResizablePane } from '@/data/useResizablePane'
@@ -54,10 +55,11 @@ onBeforeUnmount(() => {
 
 // -- Screen state (derived from route) --
 
-type Screen = 'overview' | 'tasks' | 'sync' | 'previews' | 'settings'
+type Screen = 'overview' | 'sitemap' | 'tasks' | 'sync' | 'previews' | 'settings'
 
 const ROUTE_TO_SCREEN: Record<string, Screen> = {
   'site-overview': 'overview',
+  'site-sitemap': 'sitemap',
   'site-tasks': 'tasks',
   'site-task': 'tasks',
   'site-sync': 'sync',
@@ -204,6 +206,7 @@ const { openSettings } = useSettings()
       <ResizeHandle :is-dragging="isResizing" @pointerdown="onResizeStart" @dblclick="resetNavWidth" />
       <div class="pane pane-detail">
         <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" :status="currentSite?.status" :loading-target="loadingTarget" @toggle-status="toggleStatus" />
+        <SiteMapScreen v-else-if="!isAllSites && currentScreen === 'sitemap'" :site-id="activeSiteId!" />
         <template v-else-if="currentScreen === 'tasks' && selectedConvoId">
           <TaskBrief
             v-if="!isNewTask"
