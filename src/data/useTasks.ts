@@ -1,7 +1,12 @@
-import { ref, computed, toRaw, type Ref, unref } from 'vue'
-import { streamAI, generateTitle } from './ai-service'
+import { ref, computed, type Ref, unref } from 'vue'
+import { streamAI, streamAIWithTools, generateTitle } from './ai-service'
+import { siteTools, buildSystemPrompt } from './ai-tools'
+import { executeToolCall } from './ai-tool-executor'
+import { useSiteDocument } from './useSiteDocument'
+import { usePreviewSync } from './usePreviewSync'
 import { db, isDbAvailable } from './db'
-import type { Task, Message, AgentId, TaskOrigin, TaskStatus } from './types'
+import { toSerializable } from './utils'
+import type { Task, Message, AgentId, TaskOrigin, TaskStatus, ToolCall } from './types'
 
 // Module-level state (singleton)
 const tasks = ref<Task[]>([])
@@ -22,16 +27,22 @@ function assignWorktree(task: Task, nameSource: string) {
 }
 
 async function persistTask(task: Task) {
-  if (await isDbAvailable()) {
-    const raw = JSON.parse(JSON.stringify(toRaw(task)))
-    await db.tasks.put(raw)
+  try {
+    if (await isDbAvailable()) {
+      await db.tasks.put(toSerializable(task))
+    }
+  } catch (e) {
+    console.error('[persistTask] DB write failed:', e)
   }
 }
 
 async function persistMessage(msg: Message) {
-  if (await isDbAvailable()) {
-    const raw = JSON.parse(JSON.stringify(toRaw(msg)))
-    await db.messages.put(raw)
+  try {
+    if (await isDbAvailable()) {
+      await db.messages.put(toSerializable(msg))
+    }
+  } catch (e) {
+    console.error('[persistMessage] DB write failed:', e)
   }
 }
 
@@ -62,8 +73,7 @@ function queueAgentResponse(taskId: string) {
   sendToAI(taskId, agentId)
 }
 
-async function sendToAI(taskId: string, agentId?: AgentId) {
-  // Add streaming message placeholder
+async function sendToAISimple(taskId: string, agentId?: AgentId) {
   const streamingId = `msg-streaming-${Date.now()}`
   const streamingMsg: Message = {
     id: streamingId,
@@ -75,7 +85,6 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
   }
   messages.value.push(streamingMsg)
 
-  // Build message history
   const history = messages.value
     .filter(m => m.taskId === taskId && m.id !== streamingId)
     .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
@@ -87,14 +96,152 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
   await streamAI(history, (text) => {
     const idx = messages.value.findIndex(m => m.id === streamingId)
     if (idx !== -1) {
-      messages.value[idx]!.content = text
+      if (messages.value[idx]) messages.value[idx].content = text
     }
   })
 
-  // Persist final message to DB after streaming completes
   const finalMsg = messages.value.find(m => m.id === streamingId)
-  if (finalMsg) {
-    persistMessage(finalMsg)
+  if (finalMsg) persistMessage(finalMsg)
+}
+
+async function sendToAI(taskId: string, agentId?: AgentId) {
+  const task = tasks.value.find(t => t.id === taskId)
+  if (!task) return
+
+  const { getContent } = useSiteDocument()
+  const { pushSectionUpdate, pushThemeUpdate, pushPageUpdate } = usePreviewSync()
+
+  // Fall back to simple streaming if no site content
+  if (!getContent(task.siteId).value) {
+    return sendToAISimple(taskId, agentId)
+  }
+
+  let looping = true
+  while (looping) {
+    const currentContent = getContent(task.siteId).value!
+    const system = buildSystemPrompt(currentContent)
+
+    // Build API message history from task messages
+    const apiMessages: Array<{ role: string; content: any }> = []
+    const history = messages.value
+      .filter(m => m.taskId === taskId)
+      .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+
+    for (const m of history) {
+      if (m.role === 'user') {
+        apiMessages.push({ role: 'user', content: m.content })
+      } else {
+        if (m.toolCalls?.length) {
+          const contentBlocks: any[] = []
+          if (m.content) contentBlocks.push({ type: 'text', text: m.content })
+          for (const tc of m.toolCalls) {
+            contentBlocks.push({
+              type: 'tool_use',
+              id: tc.id,
+              name: tc.toolName ?? tc.label,
+              input: tc.args ? JSON.parse(tc.args) : {},
+            })
+          }
+          apiMessages.push({ role: 'assistant', content: contentBlocks })
+          const toolResults = m.toolCalls.map(tc => ({
+            type: 'tool_result',
+            tool_use_id: tc.id,
+            content: tc.result ?? tc.error ?? '',
+            ...(tc.error ? { is_error: true } : {}),
+          }))
+          apiMessages.push({ role: 'user', content: toolResults })
+        } else {
+          apiMessages.push({ role: 'assistant', content: m.content })
+        }
+      }
+    }
+
+    // Create streaming placeholder
+    const streamingId = `msg-streaming-${Date.now()}`
+    const streamingMsg: Message = {
+      id: streamingId,
+      taskId,
+      role: 'agent',
+      agentId,
+      content: '',
+      toolCalls: [],
+      timestamp: new Date().toISOString(),
+    }
+    messages.value.push(streamingMsg)
+
+    const pendingToolCalls: ToolCall[] = []
+
+    const result = await streamAIWithTools(apiMessages, siteTools, system, {
+      onText: (text) => {
+        const idx = messages.value.findIndex(m => m.id === streamingId)
+        if (idx !== -1) messages.value[idx]!.content = text
+      },
+      onToolUseStart: (id, name) => {
+        const tc: ToolCall = {
+          id,
+          label: `Running ${name}...`,
+          status: 'running',
+          toolName: name,
+        }
+        pendingToolCalls.push(tc)
+        const idx = messages.value.findIndex(m => m.id === streamingId)
+        if (idx !== -1) {
+          messages.value[idx]!.toolCalls = [...pendingToolCalls]
+        }
+      },
+      onToolUseComplete: (toolUse) => {
+        const execResult = executeToolCall(task.siteId, toolUse.name, toolUse.input, toolUse.id)
+
+        // Push to preview
+        if (execResult.change && !execResult.isError) {
+          const updatedContent = getContent(task.siteId).value
+          if (updatedContent) {
+            switch (toolUse.name) {
+              case 'update_section':
+              case 'create_section': {
+                const section = updatedContent.sections[toolUse.input.section_id]
+                if (section) {
+                  const page = updatedContent.pages.find(p => p.sections.includes(section.id))
+                  const order = page ? page.sections.indexOf(section.id) : undefined
+                  pushSectionUpdate(section.id, section.html, section.css, order)
+                }
+                break
+              }
+              case 'remove_section':
+                pushPageUpdate(updatedContent, toolUse.input.page_slug)
+                break
+              case 'update_theme':
+                pushThemeUpdate(toolUse.input.variables)
+                break
+            }
+          }
+        }
+
+        // Update tool call in message
+        const tc = pendingToolCalls.find(t => t.id === toolUse.id)
+        if (tc) {
+          tc.status = execResult.isError ? 'error' : 'done'
+          tc.label = execResult.result
+          tc.args = JSON.stringify(toolUse.input, null, 2)
+          tc.result = execResult.isError ? undefined : execResult.result
+          tc.error = execResult.isError ? execResult.result : undefined
+          tc.changeId = execResult.change?.id
+        }
+        const idx = messages.value.findIndex(m => m.id === streamingId)
+        if (idx !== -1) {
+          messages.value[idx]!.toolCalls = [...pendingToolCalls]
+        }
+      },
+    })
+
+    const finalMsg = messages.value.find(m => m.id === streamingId)
+    if (finalMsg) persistMessage(finalMsg)
+
+    if (result.stopReason === 'tool_use') {
+      continue
+    } else {
+      looping = false
+    }
   }
 }
 
@@ -114,24 +261,6 @@ async function generateTaskTitle(taskId: string, userMessage: string) {
     assignWorktree(task, title)
     task.updatedAt = new Date().toISOString()
     persistTask(task)
-  }
-}
-
-/** Load tasks + messages from IndexedDB into reactive refs */
-async function hydrate() {
-  if (await isDbAvailable()) {
-    const [dbTasks, dbMessages] = await Promise.all([
-      db.tasks.toArray(),
-      db.messages.toArray(),
-    ])
-    tasks.value = dbTasks
-    messages.value = dbMessages
-    // Set next worktree port past any existing
-    for (const t of dbTasks) {
-      if (t.worktree && t.worktree.port >= nextWorktreePort) {
-        nextWorktreePort = t.worktree.port + 1
-      }
-    }
   }
 }
 
@@ -318,7 +447,6 @@ export function useTasks() {
   return {
     tasks,
     messages,
-    hydrate,
     getTasksForSite,
     getTask,
     getMessages,
