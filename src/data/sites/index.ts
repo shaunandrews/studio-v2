@@ -6,6 +6,7 @@ import gallery from './gallery/index'
 import landing from './launchpad/index'
 import defaultSite from './default/index'
 import blog from './blog/index'
+import docs from './docs/index'
 
 export const sites: Record<string, SiteFiles> = {
   cafe,
@@ -15,4 +16,5 @@ export const sites: Record<string, SiteFiles> = {
   landing,
   default: defaultSite,
   blog,
+  docs,
 }
