@@ -2,7 +2,6 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { chevronDown, chevronUp, seen as seenIcon, unseen as unseenIcon } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
-import Button from '@/components/primitives/Button.vue'
 import TextInput from '@/components/primitives/TextInput.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
 import Toggle from '@/components/primitives/Toggle.vue'
@@ -11,8 +10,6 @@ import Tooltip from '@/components/primitives/Tooltip.vue'
 const props = defineProps<{
   /** Pre-fill the site name (e.g. from a pulled remote site) */
   initialName?: string
-  /** Label for the submit button */
-  submitLabel?: string
   /** Disable submit externally (e.g. while importing) */
   submitDisabled?: boolean
 }>()
@@ -105,6 +102,8 @@ function submit() {
     enableHttps: enableHttps.value,
   })
 }
+
+defineExpose({ submit, canSubmit })
 </script>
 
 <template>
@@ -118,19 +117,10 @@ function submit() {
       @keydown.enter="submit"
     />
 
-    <div class="form-actions hstack">
-      <button class="advanced-toggle" @click="showAdvanced = !showAdvanced">
-        <WPIcon :icon="showAdvanced ? chevronUp : chevronDown" :size="20" />
-        <span>Advanced settings</span>
-      </button>
-      <Button
-        :label="submitLabel ?? 'Create site'"
-        variant="primary"
-        surface="dark"
-        :disabled="!canSubmit"
-        @click="submit"
-      />
-    </div>
+    <button class="advanced-toggle" @click="showAdvanced = !showAdvanced">
+      <WPIcon :icon="showAdvanced ? chevronUp : chevronDown" :size="20" />
+      <span>Advanced settings</span>
+    </button>
 
     <div v-if="showAdvanced" class="advanced-fields vstack gap-m">
       <TextInput
@@ -270,11 +260,6 @@ function submit() {
     opacity: 0;
     transform: translateY(-5px);
   }
-}
-
-.form-actions {
-  justify-content: space-between;
-  align-items: center;
 }
 
 /* ── Form layout ── */

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useSites } from '@/data/useSites'
 import { usePersona, getInitialPersonaId } from '@/data/usePersona'
 import { useOnboarding } from '@/data/useOnboarding'
+import { useAllSitesView } from '@/data/useAllSitesView'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -13,6 +14,10 @@ const router = createRouter({
         if (!personaChosen.value) return '/choose'
         const { needsOnboarding } = useOnboarding()
         if (needsOnboarding.value) return '/welcome'
+        const { showAllSitesView } = useAllSitesView()
+        if (showAllSitesView.value) return '/all-sites'
+        const { sites } = useSites()
+        if (sites.value.length > 0) return `/site/${sites.value[0].id}`
         return '/all-sites'
       },
     },
@@ -75,7 +80,6 @@ const router = createRouter({
         { name: 'site-task', path: 'tasks/:convoId', component: { render: () => null } },
         { name: 'site-sync', path: 'sync', component: { render: () => null } },
         { name: 'site-previews', path: 'previews', component: { render: () => null } },
-        { name: 'site-import-export', path: 'import-export', component: { render: () => null } },
         { name: 'site-settings', path: 'settings', component: { render: () => null } },
       ],
     },
@@ -145,8 +149,21 @@ router.beforeEach((to) => {
       if (to.path === '/' || to.path === '/choose') {
         const { needsOnboarding } = useOnboarding()
         if (needsOnboarding.value) return '/welcome'
+        const { showAllSitesView: showAll } = useAllSitesView()
+        if (showAll.value) return '/all-sites'
+        const { sites: allSites } = useSites()
+        if (allSites.value.length > 0) return `/site/${allSites.value[0].id}`
         return '/all-sites'
       }
+    }
+  }
+
+  // Redirect away from /all-sites when the setting is off
+  if (to.name === 'all-sites') {
+    const { showAllSitesView: showAll } = useAllSitesView()
+    if (!showAll.value) {
+      const { sites: allSites } = useSites()
+      if (allSites.value.length > 0) return `/site/${allSites.value[0].id}`
     }
   }
 

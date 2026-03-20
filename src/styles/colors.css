@@ -1,6 +1,6 @@
 :root {
   /* Chrome (app frame, sidebar, titlebar) */
-  --color-chrome-bg: #f0f0f0;
+  --color-chrome-bg: #dddddd;
   --color-chrome-theme: #3858e9;
   --color-chrome-fg: #1e1e1e;
   --color-chrome-fg-muted: rgba(0, 0, 0, 0.6);

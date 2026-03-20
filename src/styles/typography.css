@@ -12,6 +12,7 @@
   --font-size-m: 13px;     /* default UI text, buttons */
   --font-size-l: 14px;     /* body text, inputs */
   --font-size-xl: 16px;    /* body-large, chat messages */
+  --font-size-xxl: 24px;   /* page headings */
 
   /* Font weights */
   --font-weight-regular: 400;

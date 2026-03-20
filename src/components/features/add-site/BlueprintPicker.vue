@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { search } from '@wordpress/icons'
-import WPIcon from '@/components/primitives/WPIcon.vue'
+import { ref } from 'vue'
+import { upload } from '@wordpress/icons'
+import Button from '@/components/primitives/Button.vue'
 
 export interface Blueprint {
   id: string
@@ -20,7 +20,6 @@ const emit = defineEmits<{
   select: [blueprint: Blueprint]
 }>()
 
-const query = ref('')
 const selectedId = ref<string | null>(null)
 
 function select(bp: Blueprint) {
@@ -30,22 +29,17 @@ function select(bp: Blueprint) {
 </script>
 
 <template>
-  <div class="blueprint-picker vstack gap-m">
-    <div class="search-bar">
-      <WPIcon :icon="search" :size="20" class="search-icon" />
-      <input
-        v-model="query"
-        class="search-input"
-        type="text"
-        placeholder="Search blueprints..."
-      />
+  <div class="blueprint-picker vstack gap-l">
+    <div class="picker-top vstack gap-xs">
+      <h1 class="picker-heading">Start from a Blueprint</h1>
+      <p class="picker-subtitle">Create a new site from a featured Blueprint on your own. <a href="https://developer.wordpress.com/docs/developer-tools/studio/blueprints/" target="_blank" rel="noopener" class="picker-link">Learn more</a></p>
     </div>
 
     <div class="blueprint-grid">
       <button
-        v-for="bp in blueprints.filter(b => !query || b.title.toLowerCase().includes(query.toLowerCase()))"
+        v-for="bp in blueprints"
         :key="bp.id"
-        class="blueprint-card"
+        class="blueprint-card vstack"
         :class="{ 'is-selected': bp.id === selectedId }"
         @click="select(bp)"
       >
@@ -53,11 +47,21 @@ function select(bp: Blueprint) {
           <img v-if="bp.thumbnail" :src="bp.thumbnail" :alt="bp.title" />
           <div v-else class="blueprint-thumb-placeholder" />
         </div>
-        <div class="blueprint-info vstack gap-xxxs">
+        <div class="blueprint-info vstack gap-xs">
           <span class="blueprint-title">{{ bp.title }}</span>
           <span class="blueprint-desc">{{ bp.description }}</span>
         </div>
       </button>
+    </div>
+
+    <div class="picker-footer hstack justify-center">
+      <Button
+        :icon="upload"
+        label="Choose Blueprint file"
+        variant="secondary"
+        surface="dark"
+        size="small"
+      />
     </div>
   </div>
 </template>
@@ -67,40 +71,30 @@ function select(bp: Blueprint) {
   width: 100%;
 }
 
-.search-bar {
-  position: relative;
+.picker-top {
+  text-align: center;
 }
 
-.search-icon {
-  position: absolute;
-  inset-inline-start: var(--space-xs);
-  inset-block-start: 50%;
-  transform: translateY(-50%);
-  color: var(--color-chrome-fg-muted);
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  height: 40px;
-  padding: 0 var(--space-xs) 0 calc(var(--space-xs) + 24px);
-  border: 1px solid var(--color-chrome-border);
-  border-radius: var(--radius-s);
-  background: var(--color-chrome-fill);
+.picker-heading {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-chrome-fg);
-  font-family: inherit;
-  font-size: var(--font-size-m);
-  outline: none;
-  transition: border-color var(--transition-hover);
+  margin: 0;
 }
 
-.search-input:focus {
-  border-color: var(--color-chrome-theme);
-  box-shadow: 0 0 0 1px var(--color-chrome-theme);
-}
-
-.search-input::placeholder {
+.picker-subtitle {
+  font-size: var(--font-size-s);
   color: var(--color-chrome-fg-muted);
+  margin: 0;
+}
+
+.picker-link {
+  color: var(--color-chrome-theme);
+  text-decoration: none;
+}
+
+.picker-link:hover {
+  text-decoration: underline;
 }
 
 .blueprint-grid {
@@ -110,10 +104,8 @@ function select(bp: Blueprint) {
 }
 
 .blueprint-card {
-  display: flex;
-  flex-direction: column;
   background: var(--color-chrome-fill);
-  border: 2px solid var(--color-chrome-border);
+  border: 1px solid var(--color-chrome-border);
   border-radius: var(--radius-m);
   overflow: hidden;
   cursor: pointer;
@@ -125,13 +117,10 @@ function select(bp: Blueprint) {
     box-shadow var(--transition-hover);
 }
 
-.blueprint-card:hover {
-  border-color: var(--color-chrome-fg-muted);
-}
 
 .blueprint-card.is-selected {
-  border-color: var(--color-chrome-theme);
-  box-shadow: 0 0 0 1px var(--color-chrome-theme);
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--color-chrome-theme);
 }
 
 .blueprint-thumb {
@@ -144,6 +133,11 @@ function select(bp: Blueprint) {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--duration-fast) var(--ease-default);
+}
+
+.blueprint-card:hover .blueprint-thumb img {
+  transform: scale(1.2);
 }
 
 .blueprint-thumb-placeholder {
@@ -153,21 +147,18 @@ function select(bp: Blueprint) {
 }
 
 .blueprint-info {
-  padding: var(--space-xs) var(--space-s);
+  padding: var(--space-m);
 }
 
 .blueprint-title {
   font-size: var(--font-size-m);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-chrome-fg);
 }
 
 .blueprint-desc {
   font-size: var(--font-size-s);
   color: var(--color-chrome-fg-muted);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  line-height: 1.5;
 }
 </style>

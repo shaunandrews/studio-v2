@@ -4,7 +4,6 @@ import { useSites } from './useSites'
 import { useConversations } from './useConversations'
 import { useAddSite } from './useAddSite'
 import { useSettings } from './useSettings'
-import { useSidebarCollapse } from './useSidebarCollapse'
 import { useAuth } from './useAuth'
 import { useOnboarding } from './useOnboarding'
 import type { Router } from 'vue-router'
@@ -41,7 +40,6 @@ export function usePersona() {
     const { resetConversations } = useConversations()
     const { resetAddSite } = useAddSite()
     const { resetSettings } = useSettings()
-    const { show } = useSidebarCollapse()
     const { reset: resetAuth } = useAuth()
     const { reset: resetOnboarding } = useOnboarding()
 
@@ -49,7 +47,6 @@ export function usePersona() {
     resetConversations(persona.conversations, persona.messages)
     resetAddSite()
     resetSettings()
-    show() // Reset sidebar to visible
     resetAuth(persona.auth)
     resetOnboarding(persona.onboardingCompleted)
 

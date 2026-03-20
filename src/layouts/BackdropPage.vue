@@ -47,9 +47,11 @@ defineEmits<{
       />
     </header>
 
-    <div class="backdrop-content">
+    <div class="backdrop-content vstack">
       <slot />
     </div>
+
+    <slot name="footer" />
   </div>
 </template>
 
@@ -59,7 +61,7 @@ defineEmits<{
   inset: 0;
   background: var(--color-chrome-bg);
   color: var(--color-chrome-fg);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .backdrop-header {
@@ -70,7 +72,6 @@ defineEmits<{
   z-index: 2;
   height: 56px;
   padding: 0 var(--space-m);
-  align-items: center;
   pointer-events: none;
 }
 
@@ -91,11 +92,9 @@ defineEmits<{
 }
 
 .backdrop-content {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  min-height: 100%;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
   /* Pages provide their own padding-top to clear the header area */
 }
 </style>

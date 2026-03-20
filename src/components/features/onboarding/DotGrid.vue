@@ -2,249 +2,340 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
-let ctx: CanvasRenderingContext2D | null = null
-let animId = 0
-let running = false
-let mouse = { x: -1000, y: -1000 }
-let dots: { baseX: number; baseY: number; x: number; y: number; vx: number; vy: number }[] = []
 
-const props = defineProps<{
-  restColor?: string
-  activeColor?: string
-}>()
+const SPACING = 32
+const CROSS_HALF = 5
+const CROSS_THICKNESS = .75
+const REPULSION = 6
+const SPRING_K = 0.07
+const DAMPING = 0.8
+const SLEEP_EPS = 0.08
 
-const SPACING = 28
-const DOT_RADIUS = 2
-const INFLUENCE = 100
-const PUSH_STRENGTH = 18
-const RETURN_SPEED = 0.08
-const DAMPING = 0.85
-const REST_THRESHOLD = 0.1
-const GLOW_RADIUS = 180 // Radius for the light-up glow around cursor
+const RADIUS_BASE = 150
+const RADIUS_EXPANDED = 30
+const RADIUS_EXPAND_SPEED = 0.28
+const RADIUS_CONTRACT_SPEED = 0.10
 
-function parseRGBA(color: string): { r: number; g: number; b: number; a: number } {
-  const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/)
-  if (match) {
-    return { r: +match[1], g: +match[2], b: +match[3], a: match[4] != null ? +match[4] : 1 }
-  }
-  return { r: 255, g: 255, b: 255, a: 0.15 }
+const RIPPLE_SPEED = 9
+const RIPPLE_HALF_WIDTH = 32
+const RIPPLE_STRENGTH = 6
+
+const INTRO_SPEED = 18
+const INTRO_FADE_WIDTH = 80
+
+const TARGET_MS = 1000 / 60
+
+interface Ripple {
+  x: number
+  y: number
+  radius: number
+  maxRadius: number
 }
 
-function initDots(w: number, h: number) {
-  dots = []
-  const cols = Math.ceil(w / SPACING) + 2
-  const rows = Math.ceil(h / SPACING) + 2
-  const offsetX = (w - (cols - 1) * SPACING) / 2
-  const offsetY = (h - (rows - 1) * SPACING) / 2
+let ctx: CanvasRenderingContext2D | null = null
+let color = ''
+let mouseX = -9999
+let mouseY = -9999
+let rafId: number | null = null
+let lastTimestamp = 0
+
+let currentRadius = RADIUS_BASE
+let targetRadius = RADIUS_BASE
+let ripples: Ripple[] = []
+
+let introRadius = 0
+let introComplete = false
+
+let cols = 0
+let rows = 0
+let ox: Float32Array
+let oy: Float32Array
+let vx: Float32Array
+let vy: Float32Array
+
+function readColor() {
+  if (!canvas.value) return
+  color = getComputedStyle(canvas.value).color
+}
+
+function initDots() {
+  if (!canvas.value) return
+  cols = Math.ceil(canvas.value.offsetWidth / SPACING) + 1
+  rows = Math.ceil(canvas.value.offsetHeight / SPACING) + 1
+  const n = cols * rows
+  ox = new Float32Array(n)
+  oy = new Float32Array(n)
+  vx = new Float32Array(n)
+  vy = new Float32Array(n)
+}
+
+function tick(timestamp: number): boolean {
+  if (!ctx || !canvas.value) return false
+  const rawDt = lastTimestamp === 0 ? TARGET_MS : timestamp - lastTimestamp
+  lastTimestamp = timestamp
+  const dt = Math.min(rawDt / TARGET_MS, 3)
+
+  const cssW = canvas.value.offsetWidth
+  const cssH = canvas.value.offsetHeight
+  ctx.clearRect(0, 0, cssW, cssH)
+  ctx.fillStyle = color
+
+  const expandFactor = 1 - Math.pow(1 - RADIUS_EXPAND_SPEED, dt)
+  const contractFactor = 1 - Math.pow(1 - RADIUS_CONTRACT_SPEED, dt)
+  const lerpFactor = currentRadius < targetRadius ? expandFactor : contractFactor
+  currentRadius += (targetRadius - currentRadius) * lerpFactor
+  const radiusAnimating = Math.abs(currentRadius - targetRadius) > 0.3
+
+  if (!introComplete) {
+    introRadius += INTRO_SPEED * dt
+    const diag = Math.sqrt(cssW * cssW + cssH * cssH)
+    if (introRadius > diag + INTRO_FADE_WIDTH) {
+      introComplete = true
+      ctx.globalAlpha = 1
+    }
+  }
+
+  const dampFactor = Math.pow(DAMPING, dt)
+  const cursorActive = mouseX > -9998
+  let anyActive = false
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      const x = offsetX + c * SPACING
-      const y = offsetY + r * SPACING
-      dots.push({ baseX: x, baseY: y, x, y, vx: 0, vy: 0 })
+      const i = r * cols + c
+      const rx = c * SPACING
+      const ry = r * SPACING
+
+      let dvx = vx[i]
+      let dvy = vy[i]
+      let dox = ox[i]
+      let doy = oy[i]
+
+      // Hover / drag repulsion
+      if (cursorActive) {
+        const cx = rx + dox
+        const cy = ry + doy
+        const ddx = cx - mouseX
+        const ddy = cy - mouseY
+        const dist = Math.sqrt(ddx * ddx + ddy * ddy)
+        if (dist < currentRadius && dist > 0.5) {
+          const force = REPULSION * (1 - dist / currentRadius) / dist
+          dvx += force * ddx * dt
+          dvy += force * ddy * dt
+        }
+      }
+
+      // Ripple wavefronts
+      for (const ripple of ripples) {
+        const cx = rx + dox
+        const cy = ry + doy
+        const ddx = cx - ripple.x
+        const ddy = cy - ripple.y
+        const dist = Math.sqrt(ddx * ddx + ddy * ddy)
+        if (dist > 0.5) {
+          const delta = dist - ripple.radius
+          const falloff = Math.exp(-0.5 * (delta / RIPPLE_HALF_WIDTH) ** 2)
+          const force = RIPPLE_STRENGTH * falloff / dist
+          dvx += force * ddx * dt
+          dvy += force * ddy * dt
+        }
+      }
+
+      // Spring toward rest position
+      dvx += SPRING_K * -dox * dt
+      dvy += SPRING_K * -doy * dt
+
+      // Framerate-independent damping
+      dvx *= dampFactor
+      dvy *= dampFactor
+
+      // Integrate
+      dox += dvx * dt
+      doy += dvy * dt
+
+      ox[i] = dox
+      oy[i] = doy
+      vx[i] = dvx
+      vy[i] = dvy
+
+      if (
+        Math.abs(dvx) > SLEEP_EPS ||
+        Math.abs(dvy) > SLEEP_EPS ||
+        Math.abs(dox) > SLEEP_EPS ||
+        Math.abs(doy) > SLEEP_EPS
+      ) {
+        anyActive = true
+      }
     }
+  }
+
+  // Draw dotted connecting lines between adjacent crosses
+  ctx.strokeStyle = color
+  ctx.lineWidth = CROSS_THICKNESS
+  ctx.setLineDash([1, 4])
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const i = r * cols + c
+      const x = c * SPACING + ox[i]
+      const y = r * SPACING + oy[i]
+
+      if (!introComplete) {
+        const distFromCorner = Math.sqrt((c * SPACING) ** 2 + (r * SPACING) ** 2)
+        ctx.globalAlpha = Math.max(0, Math.min(1, (introRadius - distFromCorner) / INTRO_FADE_WIDTH))
+      }
+
+      // Horizontal line to right neighbor
+      if (c < cols - 1) {
+        const ni = r * cols + (c + 1)
+        const nx = (c + 1) * SPACING + ox[ni]
+        const ny = r * SPACING + oy[ni]
+        ctx.beginPath()
+        ctx.moveTo(x + CROSS_HALF, y)
+        ctx.lineTo(nx - CROSS_HALF, ny)
+        ctx.stroke()
+      }
+      // Vertical line to bottom neighbor
+      if (r < rows - 1) {
+        const ni = (r + 1) * cols + c
+        const nx = c * SPACING + ox[ni]
+        const ny = (r + 1) * SPACING + oy[ni]
+        ctx.beginPath()
+        ctx.moveTo(x, y + CROSS_HALF)
+        ctx.lineTo(nx, ny - CROSS_HALF)
+        ctx.stroke()
+      }
+    }
+  }
+  ctx.setLineDash([])
+
+  // Draw crosses on top
+  ctx.fillStyle = color
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const i = r * cols + c
+      const x = c * SPACING + ox[i]
+      const y = r * SPACING + oy[i]
+
+      if (!introComplete) {
+        const distFromCorner = Math.sqrt((c * SPACING) ** 2 + (r * SPACING) ** 2)
+        ctx.globalAlpha = Math.max(0, Math.min(1, (introRadius - distFromCorner) / INTRO_FADE_WIDTH))
+      }
+
+      ctx.fillRect(x - CROSS_HALF, y - CROSS_THICKNESS / 2, CROSS_HALF * 2, CROSS_THICKNESS)
+      ctx.fillRect(x - CROSS_THICKNESS / 2, y - CROSS_HALF, CROSS_THICKNESS, CROSS_HALF * 2)
+    }
+  }
+
+  if (!introComplete) ctx.globalAlpha = 1
+
+  for (const ripple of ripples) ripple.radius += RIPPLE_SPEED * dt
+  ripples = ripples.filter(rip => rip.radius < rip.maxRadius)
+
+  return anyActive || cursorActive || radiusAnimating || ripples.length > 0 || !introComplete
+}
+
+function loop(timestamp: number) {
+  if (tick(timestamp)) {
+    rafId = requestAnimationFrame(loop)
+  } else {
+    rafId = null
+    lastTimestamp = 0
+  }
+}
+
+function ensureLoop() {
+  if (rafId === null) {
+    lastTimestamp = 0
+    rafId = requestAnimationFrame(loop)
   }
 }
 
 function resize() {
   if (!canvas.value) return
-  const el = canvas.value.parentElement!
   const dpr = window.devicePixelRatio || 1
-  const w = el.clientWidth
-  const h = el.clientHeight
-  canvas.value.width = w * dpr
-  canvas.value.height = h * dpr
-  canvas.value.style.width = w + 'px'
-  canvas.value.style.height = h + 'px'
+  canvas.value.width = Math.round(canvas.value.offsetWidth * dpr)
+  canvas.value.height = Math.round(canvas.value.offsetHeight * dpr)
   ctx = canvas.value.getContext('2d')!
   ctx.scale(dpr, dpr)
-  initDots(w, h)
-  if (running) return // loop will redraw on next tick
-  drawStatic()
+  readColor()
+  initDots()
+  ensureLoop()
 }
 
-function startLoop() {
-  if (running) return
-  running = true
-  tick()
-}
-
-function getColors() {
-  const rest = props.restColor ?? 'rgba(255, 255, 255, 0.15)'
-  const active = props.activeColor ?? 'rgba(255, 255, 255, 0.8)'
-  return { rest, active }
-}
-
-function drawGrid(color: string) {
-  if (!ctx || !canvas.value) return
-  const w = canvas.value.clientWidth
-  const h = canvas.value.clientHeight
-  const cols = Math.ceil(w / SPACING) + 2
-  const rows = Math.ceil(h / SPACING) + 2
-  const offsetX = (w - (cols - 1) * SPACING) / 2
-  const offsetY = (h - (rows - 1) * SPACING) / 2
-
-  // Parse color for line use at lower opacity
-  const parsed = parseRGBA(color)
-  const lineColor = `rgba(${parsed.r}, ${parsed.g}, ${parsed.b}, ${parsed.a * 1.2})`
-
-  ctx.setLineDash([2, 4])
-  ctx.lineWidth = 1
-  ctx.strokeStyle = lineColor
-
-  // Horizontal lines
-  for (let r = 0; r < rows; r++) {
-    const y = offsetY + r * SPACING
-    ctx.beginPath()
-    ctx.moveTo(0, y)
-    ctx.lineTo(w, y)
-    ctx.stroke()
-  }
-
-  // Vertical lines
-  for (let c = 0; c < cols; c++) {
-    const x = offsetX + c * SPACING
-    ctx.beginPath()
-    ctx.moveTo(x, 0)
-    ctx.lineTo(x, h)
-    ctx.stroke()
-  }
-
-  ctx.setLineDash([])
-}
-
-function drawStatic() {
-  if (!ctx || !canvas.value) return
-  const w = canvas.value.clientWidth
-  const h = canvas.value.clientHeight
-  const { rest } = getColors()
-  ctx.clearRect(0, 0, w, h)
-  drawGrid(rest)
-  for (const dot of dots) {
-    ctx.beginPath()
-    ctx.arc(dot.baseX, dot.baseY, DOT_RADIUS, 0, Math.PI * 2)
-    ctx.fillStyle = rest
-    ctx.fill()
-  }
-}
-
-function tick() {
-  if (!ctx || !canvas.value) return
-  const w = canvas.value.clientWidth
-  const h = canvas.value.clientHeight
-
-  ctx.clearRect(0, 0, w, h)
-
-  const { rest, active } = getColors()
-  drawGrid(rest)
-  // Parse rgba values for interpolation
-  const restParsed = parseRGBA(rest)
-  const activeParsed = parseRGBA(active)
-
-  let totalEnergy = 0
-
-  for (const dot of dots) {
-    // Mouse repulsion
-    const dx = dot.x - mouse.x
-    const dy = dot.y - mouse.y
-    const dist = Math.sqrt(dx * dx + dy * dy)
-
-    if (dist < INFLUENCE && dist > 0) {
-      const force = (1 - dist / INFLUENCE) * PUSH_STRENGTH
-      const angle = Math.atan2(dy, dx)
-      dot.vx += Math.cos(angle) * force * 0.3
-      dot.vy += Math.sin(angle) * force * 0.3
-    }
-
-    // Spring back to base
-    dot.vx += (dot.baseX - dot.x) * RETURN_SPEED
-    dot.vy += (dot.baseY - dot.y) * RETURN_SPEED
-
-    // Damping
-    dot.vx *= DAMPING
-    dot.vy *= DAMPING
-
-    // Integrate
-    dot.x += dot.vx
-    dot.y += dot.vy
-
-    // Track energy (velocity + displacement)
-    const displacement = Math.sqrt(
-      (dot.x - dot.baseX) ** 2 + (dot.y - dot.baseY) ** 2
-    )
-    totalEnergy += Math.abs(dot.vx) + Math.abs(dot.vy) + displacement
-
-    // Proximity glow: blend rest→active based on distance to cursor
-    const glowDist = Math.sqrt(
-      (dot.baseX - mouse.x) ** 2 + (dot.baseY - mouse.y) ** 2
-    )
-    const glow = glowDist < GLOW_RADIUS ? 1 - glowDist / GLOW_RADIUS : 0
-    const t = Math.max(glow, Math.min(displacement * 0.03, 1))
-
-    const r = Math.round(restParsed.r + (activeParsed.r - restParsed.r) * t)
-    const g = Math.round(restParsed.g + (activeParsed.g - restParsed.g) * t)
-    const b = Math.round(restParsed.b + (activeParsed.b - restParsed.b) * t)
-    const a = restParsed.a + (activeParsed.a - restParsed.a) * t
-
-    // Draw
-    const scale = Math.min(1 + displacement * 0.04, 2.5)
-
-    ctx.beginPath()
-    ctx.arc(dot.x, dot.y, DOT_RADIUS * scale, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`
-    ctx.fill()
-  }
-
-  // Stop loop when settled
-  if (totalEnergy < REST_THRESHOLD && mouse.x === -1000) {
-    // Snap to grid and draw one clean frame
-    for (const dot of dots) {
-      dot.x = dot.baseX
-      dot.y = dot.baseY
-      dot.vx = 0
-      dot.vy = 0
-    }
-    drawStatic()
-    running = false
-    return
-  }
-
-  animId = requestAnimationFrame(tick)
-}
-
-function onPointerMove(e: PointerEvent) {
+function onMouseMove(e: MouseEvent) {
   if (!canvas.value) return
   const rect = canvas.value.getBoundingClientRect()
-  mouse.x = e.clientX - rect.left
-  mouse.y = e.clientY - rect.top
-  startLoop()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+  const inside = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height
+  mouseX = inside ? x : -9999
+  mouseY = inside ? y : -9999
+  ensureLoop()
 }
 
-function onPointerLeave() {
-  mouse.x = -1000
-  mouse.y = -1000
-  // Keep running so dots settle back
+function onMouseDown(e: MouseEvent) {
+  if (!canvas.value) return
+  const rect = canvas.value.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+  if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+    targetRadius = RADIUS_EXPANDED
+    ensureLoop()
+  }
 }
+
+function onMouseUp(e: MouseEvent) {
+  if (!canvas.value) return
+  targetRadius = RADIUS_BASE
+  if (mouseX > -9998) {
+    const rect = canvas.value.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const diag = Math.sqrt(rect.width ** 2 + rect.height ** 2)
+    ripples.push({
+      x,
+      y,
+      radius: currentRadius * 0.85,
+      maxRadius: diag + RIPPLE_HALF_WIDTH * 4,
+    })
+  }
+  ensureLoop()
+}
+
+let resizeObserver: ResizeObserver | null = null
+let themeObserver: MutationObserver | null = null
+let mediaQuery: MediaQueryList | null = null
 
 onMounted(() => {
+  if (!canvas.value) return
   resize()
-  drawStatic() // Draw initial resting state without starting the loop
-  window.addEventListener('resize', resize)
+
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mousedown', onMouseDown)
+  document.addEventListener('mouseup', onMouseUp)
+
+  resizeObserver = new ResizeObserver(resize)
+  resizeObserver.observe(canvas.value)
+
+  themeObserver = new MutationObserver(readColor)
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
+  mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+  mediaQuery.addEventListener('change', readColor)
 })
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(animId)
-  window.removeEventListener('resize', resize)
+  if (rafId !== null) cancelAnimationFrame(rafId)
+  document.removeEventListener('mousemove', onMouseMove)
+  document.removeEventListener('mousedown', onMouseDown)
+  document.removeEventListener('mouseup', onMouseUp)
+  resizeObserver?.disconnect()
+  themeObserver?.disconnect()
+  mediaQuery?.removeEventListener('change', readColor)
 })
 </script>
 
 <template>
-  <canvas
-    ref="canvas"
-    class="dot-grid"
-    @pointermove="onPointerMove"
-    @pointerleave="onPointerLeave"
-  />
+  <canvas ref="canvas" class="dot-grid" />
 </template>
 
 <style scoped>
@@ -253,5 +344,6 @@ onBeforeUnmount(() => {
   inset: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 </style>

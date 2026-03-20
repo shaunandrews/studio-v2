@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import { moreVertical, settings as settingsIcon, commentAuthorAvatar, tool, people, bug } from '@wordpress/icons'
+import { moreVertical, settings as settingsIcon, commentAuthorAvatar, tool, people, bug, close as closeIcon } from '@wordpress/icons'
 import BackdropPage from '@/layouts/BackdropPage.vue'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
@@ -680,11 +680,15 @@ function skillInstallLabel(id: string): string {
   <!-- ═══════════════════════════════════════════════════════════
        Chrome backdrop mode: two-column layout behind sidebar/frame
        ═══════════════════════════════════════════════════════════ -->
-  <BackdropPage v-else @close="emit('close')">
+  <BackdropPage v-else hide-header>
     <!-- Two-column layout -->
     <div class="settings-columns" :class="{ 'surface-dark': isDark }">
       <!-- Sidebar nav -->
       <nav class="settings-sidebar">
+        <button class="settings-nav-item sidebar-close" @click="emit('close')">
+          <WPIcon :icon="closeIcon" :size="20" />
+          Close
+        </button>
         <button
           v-for="tab in tabs"
           :key="tab.id"
@@ -939,11 +943,10 @@ function skillInstallLabel(id: string): string {
 
 .settings-columns {
   display: flex;
-  min-height: 0;
   max-width: 840px;
   width: 100%;
   margin-inline: auto;
-  padding-block-start: 56px; /* Clear header height */
+  padding-block-start: var(--space-xxxl);
   flex: 1;
 }
 
@@ -955,7 +958,15 @@ function skillInstallLabel(id: string): string {
   display: flex;
   flex-direction: column;
   gap: var(--space-xxxs);
-  padding: 0 var(--space-m);
+  padding: var(--space-m);
+  padding-block-start: var(--space-l);
+  position: sticky;
+  inset-block-start: 0;
+  align-self: flex-start;
+}
+
+.sidebar-close {
+  margin-block-end: var(--space-xs);
 }
 
 .settings-nav-item {
@@ -1113,7 +1124,6 @@ function skillInstallLabel(id: string): string {
 .settings-content {
   flex: 1;
   min-width: 0;
-  overflow-y: auto;
   padding: var(--space-m) var(--space-xl) var(--space-xl);
 }
 
@@ -1201,16 +1211,17 @@ function skillInstallLabel(id: string): string {
 
 .settings-group {
   margin-block-start: var(--space-m);
-  background: var(--color-frame-fill);
+  background: var(--color-chrome-fill);
   border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-m); 
   overflow: clip;
 }
 
 .surface-dark .settings-group {
-  background: var(--color-chrome-hover);
   border-color: var(--color-chrome-border);
 }
+
+
 
 .settings-group:first-child { margin-block-start: 0; }
 
@@ -1232,7 +1243,7 @@ function skillInstallLabel(id: string): string {
 }
 
 .surface-dark .settings-list {
-  background: var(--color-chrome-fill);
+  background: var(--color-chrome-bg);
   border-top-color: var(--color-chrome-border);
   box-shadow: none;
 }

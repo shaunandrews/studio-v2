@@ -11,7 +11,6 @@ import ResizeHandle from '@/components/primitives/ResizeHandle.vue'
 import TaskBrief from '@/components/composites/task-brief/TaskBrief.vue'
 import SyncScreen from '@/components/features/SyncScreen.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
-import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
 import { useSettings } from '@/data/useSettings'
@@ -55,7 +54,7 @@ onBeforeUnmount(() => {
 
 // -- Screen state (derived from route) --
 
-type Screen = 'overview' | 'tasks' | 'sync' | 'previews' | 'import-export' | 'settings'
+type Screen = 'overview' | 'tasks' | 'sync' | 'previews' | 'settings'
 
 const ROUTE_TO_SCREEN: Record<string, Screen> = {
   'site-overview': 'overview',
@@ -63,7 +62,6 @@ const ROUTE_TO_SCREEN: Record<string, Screen> = {
   'site-task': 'tasks',
   'site-sync': 'sync',
   'site-previews': 'previews',
-  'site-import-export': 'import-export',
   'site-settings': 'settings',
 }
 
@@ -247,7 +245,6 @@ const { openSettings } = useSettings()
         </template>
         <SyncScreen v-else-if="!isAllSites && currentScreen === 'sync'" :site-id="activeSiteId!" />
         <PreviewsScreen v-else-if="!isAllSites && currentScreen === 'previews'" :site-id="activeSiteId!" />
-        <ImportExportScreen v-else-if="!isAllSites && currentScreen === 'import-export'" :site-id="activeSiteId!" />
         <SiteSettingsScreen v-else-if="!isAllSites && currentScreen === 'settings'" :site-id="activeSiteId!" @manage-global-skills="openSettings('skills')" />
         <div v-else class="detail-empty">
           <span class="detail-empty__text">Select a task or start a new one</span>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, defineComponent, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { wordpress, lock, mapMarker, connection } from '@wordpress/icons'
+import { wordpress, lock, globe, connection } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
@@ -137,21 +137,15 @@ function handlePermissionComplete() {
     <div class="split">
       <!-- Left: dark panel with dot grid + morphing content -->
       <div class="split__hero">
-        <DotGrid
-          rest-color="rgba(255, 255, 255, 0.15)"
-          active-color="rgba(255, 255, 255, 0.6)"
-        />
+        <DotGrid class="hero-grid" />
 
         <!-- Hero content crossfades -->
         <Transition name="hero-morph" mode="out-in">
-          <!-- Welcome: WP logo -->
-          <WPIcon
-            v-if="step === 'welcome'"
-            key="wp-logo"
-            :icon="wordpress"
-            :size="120"
-            class="hero-content"
-          />
+          <!-- Welcome: WP logo + Studio wordmark -->
+          <div v-if="step === 'welcome'" key="wp-logo" class="hero-content hero-brand">
+            <WPIcon :icon="wordpress" :size="120" />
+            <span class="hero-brand__label">Studio</span>
+          </div>
 
           <!-- Permissions: lock illustration -->
           <div v-else key="lock-illus" class="hero-content illus-dialog">
@@ -191,21 +185,6 @@ function handlePermissionComplete() {
               </div>
             </div>
 
-            <div class="content-body__actions">
-              <Button
-                variant="primary"
-                size="large"
-                label="Log in with WordPress.com"
-                @click="handleLogin"
-              />
-              <Button
-                variant="tertiary"
-                size="large"
-                label="Continue without account"
-                @click="handleSkip"
-              />
-            </div>
-
           </div>
 
           <!-- Permissions content -->
@@ -219,7 +198,7 @@ function handlePermissionComplete() {
 
             <div class="content-body__perms">
               <div class="perm-item">
-                <WPIcon :icon="mapMarker" :size="20" class="perm-item__icon" />
+                <WPIcon :icon="globe" :size="20" class="perm-item__icon" />
                 <div class="perm-item__text">
                   <span class="perm-item__title">Custom dev URLs</span>
                   <span class="perm-item__desc">So your sites get real hostnames like <em>mysite.local</em> instead of just port numbers.</span>
@@ -234,16 +213,34 @@ function handlePermissionComplete() {
               </div>
             </div>
 
-            <div class="content-body__actions">
+          </div>
+        </Transition>
+
+        <!-- Bottom bar actions -->
+        <div class="content-actions hstack gap-xs">
+          <Transition name="btn-swap" mode="out-in">
+            <div v-if="step === 'welcome'" key="welcome-actions" class="hstack gap-xs">
+              <Button
+                variant="tertiary"
+                label="Skip"
+                @click="handleSkip"
+              />
               <Button
                 variant="primary"
-                size="large"
+                label="Log in with WordPress.com"
+                @click="handleLogin"
+              />
+            </div>
+            <div v-else key="permissions-actions" class="hstack gap-s">
+              <span class="actions-hint">A system dialog will appear to confirm.</span>
+              <Button
+                variant="primary"
                 label="Request permission"
                 @click="handleGrantPermissions"
               />
             </div>
-          </div>
-        </Transition>
+          </Transition>
+        </div>
       </div>
     </div>
 
@@ -316,7 +313,7 @@ function handlePermissionComplete() {
   width: 1400px;
   height: 1400px;
   background: radial-gradient(ellipse at center, var(--color-chrome-theme) 0%, transparent 60%);
-  opacity: 0.06;
+  opacity: 0.6;
   pointer-events: none;
   z-index: 0;
   animation: glow-wander 20s ease-in-out infinite, glow-pulse 8s ease-in-out infinite;
@@ -333,8 +330,8 @@ function handlePermissionComplete() {
 }
 
 @keyframes glow-pulse {
-  0%, 100% { opacity: 0.04; }
-  50% { opacity: 0.08; }
+  0%, 100% { opacity: 0.075; }
+  50% { opacity: 0.2; }
 }
 
 /* ── Split layout ── */
@@ -352,7 +349,8 @@ function handlePermissionComplete() {
 .split__hero {
   flex: 0 0 30%;
   position: relative;
-  background: var(--color-theme-bg);
+  background: #141414;
+  box-shadow: 0 0 0 1px var(--color-chrome-border);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -364,11 +362,29 @@ function handlePermissionComplete() {
   transform: translateX(-100%);
 }
 
+.hero-grid {
+  color: rgba(255, 255, 255, 0.2);
+}
+
 .hero-content {
   position: relative;
   z-index: 2;
-  color: var(--color-theme-fg);
+  color: #fff;
   pointer-events: none;
+}
+
+.hero-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xxs);
+}
+
+.hero-brand__label {
+  font-size: 28px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+  opacity: 0.8;
 }
 
 /* ── Hero content crossfade ── */
@@ -391,14 +407,15 @@ function handlePermissionComplete() {
   flex-direction: column;
   align-items: center;
   gap: var(--space-m);
-  background: #3050d1;
+  background: #313131;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-m);
   padding: var(--space-l) var(--space-m);
 }
 
 .illus-dialog__lock {
-  opacity: 0.8;
-  color: var(--color-theme-fg);
+  opacity: 0.6;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .illus-dialog__lines {
@@ -412,7 +429,7 @@ function handlePermissionComplete() {
 .illus-line {
   height: 8px;
   border-radius: var(--radius-s);
-  background: #5b7bf3;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .illus-line--wide {
@@ -427,8 +444,8 @@ function handlePermissionComplete() {
   width: 100%;
   height: 24px;
   border-radius: var(--radius-s);
-  border: 1px solid #5b7bf3;
-  background: #4e70ed;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .illus-dialog__buttons {
@@ -441,11 +458,11 @@ function handlePermissionComplete() {
   flex: 1;
   height: 20px;
   border-radius: var(--radius-s);
-  background: #5b7bf3;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .illus-btn--primary {
-  background: #8da4f7;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* ── Right content panel ── */
@@ -500,7 +517,7 @@ function handlePermissionComplete() {
 }
 
 .content-body__title {
-  font-size: 36px;
+  font-size: var(--font-size-xxl);
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -530,21 +547,14 @@ function handlePermissionComplete() {
 .content-body__perms {
   display: flex;
   flex-direction: column;
+  gap: var(--space-m);
   width: 100%;
-  max-width: 420px;
-  border: 1px solid var(--color-chrome-border);
-  border-radius: var(--radius-m);
 }
 
 .perm-item {
   display: flex;
   align-items: start;
-  gap: var(--space-m);
-  padding: var(--space-m);
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-chrome-border);
-  }
+  gap: var(--space-s);
 }
 
 .perm-item__icon {
@@ -556,7 +566,8 @@ function handlePermissionComplete() {
 .perm-item__text {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xxxs);
+  gap: var(--space-xxs);
+  padding-top: var(--space-xxs);
 }
 
 .perm-item__title {
@@ -573,16 +584,19 @@ function handlePermissionComplete() {
 .feature-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
-  padding: var(--space-l);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-l);
-  background: var(--color-frame-bg);
+  gap: var(--space-xs);
+  border-radius: var(--radius-s);
 }
 
 .feature-card__illus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-chrome-fill);
+  border-radius: var(--radius-s);
+  padding: var(--space-m);
   color: var(--color-chrome-fg);
-  margin-block-end: var(--space-xs);
+  margin-bottom: var(--space-s);
 }
 
 .feature-card__label {
@@ -598,11 +612,30 @@ function handlePermissionComplete() {
 }
 
 
-.content-body__actions {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-s);
+.actions-hint {
+  font-size: var(--font-size-s);
+  color: var(--color-chrome-fg-muted);
+}
+
+.content-actions {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  padding: var(--space-xxxl) var(--space-xxxl);
+}
+
+/* Button crossfade in bottom bar */
+.btn-swap-enter-active {
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.btn-swap-leave-active {
+  transition: opacity var(--duration-instant) var(--ease-in);
+}
+
+.btn-swap-enter-from,
+.btn-swap-leave-to {
+  opacity: 0;
 }
 
 

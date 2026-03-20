@@ -4,7 +4,6 @@ import { useSites } from '@/data/useSites'
 import { useImportExport } from '@/data/useImportExport'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
-import ScreenLayout from '@/components/composites/ScreenLayout.vue'
 import ContentSelector from '@/components/composites/ContentSelector.vue'
 
 const props = defineProps<{
@@ -163,12 +162,10 @@ const importStateKey = computed(() => {
 </script>
 
 <template>
-  <ScreenLayout title="Import / Export" scrollable class="ie-screen">
-    <div class="ie">
       <!-- ── Import Section ── -->
-      <section class="ie__section">
-        <h3 class="ie__section-title">Import</h3>
-        <div class="ie__card">
+      <section class="settings__section">
+        <h3 class="settings__section-title">Import</h3>
+        <div class="settings__card">
           <Text variant="body-small" color="muted">Restore a site from a backup or migrate from another host.</Text>
         <div
           class="ie__dropzone"
@@ -288,9 +285,9 @@ const importStateKey = computed(() => {
       </section>
 
       <!-- ── Export Section ── -->
-      <section class="ie__section">
-        <h3 class="ie__section-title">Export</h3>
-        <div class="ie__card">
+      <section class="settings__section">
+        <h3 class="settings__section-title">Export</h3>
+        <div class="settings__card">
           <Text variant="body-small" color="muted">Your data, your rules. Take it anywhere.</Text>
         <Transition name="ie-fade" mode="out-in">
           <!-- Empty site -->
@@ -347,27 +344,19 @@ const importStateKey = computed(() => {
         </Transition>
         </div>
       </section>
-    </div>
-  </ScreenLayout>
 </template>
 
 <style scoped>
 /* ── Layout ── */
 
-.ie {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-m);
-}
-
-.ie__section {
+.settings__section {
   background: var(--color-frame-fill);
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
   overflow: clip;
 }
 
-.ie__section-title {
+.settings__section-title {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   color: var(--color-frame-fg-muted);
@@ -377,7 +366,7 @@ const importStateKey = computed(() => {
   padding: var(--space-s) var(--space-m);
 }
 
-.ie__card {
+.settings__card {
   display: flex;
   flex-direction: column;
   gap: var(--space-s);

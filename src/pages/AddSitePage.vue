@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { illustrations } from '@/components/features/add-site/illustrations'
 import BackdropPage from '@/layouts/BackdropPage.vue'
@@ -33,6 +33,15 @@ const {
 } = useAddSite()
 
 const hasSites = computed(() => sites.value.length > 0)
+const detailsFormRef = ref<InstanceType<typeof SiteDetailsForm> | null>(null)
+const pageContentRef = ref<HTMLElement | null>(null)
+const isScrolled = ref(false)
+
+function onScroll() {
+  if (!pageContentRef.value) return
+  const el = pageContentRef.value
+  isScrolled.value = el.scrollTop + el.clientHeight < el.scrollHeight - 2
+}
 
 // Building step state (transient, no route)
 const isBuilding = ref(false)
@@ -65,6 +74,54 @@ const heading = computed(() => {
 
 const canGoBack = computed(() => step.value !== 'choose')
 
+watch(step, () => { nextTick(onScroll) })
+onMounted(() => { nextTick(onScroll) })
+
+const showBottomBar = computed(() => step.value !== 'building')
+
+const steps = computed(() => {
+  if (step.value === 'choose') return []
+  if (!currentPath.value || currentPath.value === 'blank') {
+    return ['Site name & details']
+  }
+  const pickerLabels: Record<string, string> = {
+    blueprint: 'Choose blueprint',
+    pull: 'Pull site',
+    import: 'Import backup',
+  }
+  return [pickerLabels[currentPath.value], 'Site name & details']
+})
+
+const currentStepIndex = computed(() => {
+  if (step.value === 'details') return steps.value.length - 1
+  return 0
+})
+
+const canContinue = computed(() => {
+  if (step.value === 'picker') {
+    if (currentPath.value === 'blueprint') return !!selectedBlueprint.value
+    if (currentPath.value === 'pull') return !!selectedRemoteSite.value
+    if (currentPath.value === 'import') return !!selectedFile.value
+  }
+  if (step.value === 'details') return detailsFormRef.value?.canSubmit ?? false
+  return false
+})
+
+const primaryLabel = computed(() => {
+  if (step.value === 'details') return 'Create site'
+  return 'Continue'
+})
+
+function onPrimaryAction() {
+  if (step.value === 'picker') {
+    if (currentPath.value === 'blueprint') onBlueprintContinue()
+    else if (currentPath.value === 'pull') onRemoteSiteContinue()
+    else if (currentPath.value === 'import') onFileContinue()
+  } else if (step.value === 'details') {
+    detailsFormRef.value?.submit()
+  }
+}
+
 const pathOptions = [
   { id: 'blank' as const, illustration: illustrations.blank, label: 'Blank site', desc: 'Start fresh with a clean WordPress install' },
   { id: 'blueprint' as const, illustration: illustrations.blueprint, label: 'Blueprint', desc: 'Choose a pre-configured site template' },
@@ -74,12 +131,9 @@ const pathOptions = [
 
 // Seed data
 const blueprints: Blueprint[] = [
-  { id: 'developer-blog', title: 'Developer Blog', description: 'A developer-focused blog with code syntax highlighting and dark theme.' },
-  { id: 'business', title: 'Business Site', description: 'Professional business site with services, team, and contact pages.' },
-  { id: 'portfolio', title: 'Portfolio', description: 'Showcase your work with a grid portfolio and project detail pages.' },
-  { id: 'restaurant', title: 'Restaurant', description: 'Menu display, reservations, and location info for restaurants.' },
-  { id: 'ecommerce', title: 'Online Store', description: 'WooCommerce-ready storefront with product pages and checkout.' },
-  { id: 'landing', title: 'Landing Page', description: 'Single-page site with hero, features, and call-to-action sections.' },
+  { id: 'quick-start', title: 'Quick Start', description: 'Start quickly with a WordPress.com-like environment, which includes all plugins and themes that come pre-installed on a Business plan.', thumbnail: 'https://blueprintlibrary.wordpress.com/wp-content/uploads/2025/07/studio-blueprint-quick-start-3.png' },
+  { id: 'development', title: 'Development', description: 'Building a WordPress theme or plugin? Use this blueprint to streamline your development workflow and ship with confidence.', thumbnail: 'https://blueprintlibrary.wordpress.com/wp-content/uploads/2025/07/studio-blueprint-development-2.png' },
+  { id: 'commerce', title: 'Commerce', description: 'Create your next online store with WooCommerce and its companion plugins pre-installed and ready to go.', thumbnail: 'https://blueprintlibrary.wordpress.com/wp-content/uploads/2025/07/studio-blueprint-commerce-1.png' },
 ]
 
 const remoteSites: RemoteSite[] = [
@@ -141,38 +195,38 @@ async function onSubmit(data: { name: string }) {
 <template>
   <div class="add-site-page" :class="{ 'is-windows': isWindows }">
     <WindowsTitlebar v-if="isWindows" />
-    <div v-else class="traffic-lights">
+    <div v-else class="traffic-lights hstack gap-xxs">
       <span class="light close" />
       <span class="light minimize" />
       <span class="light maximize" />
     </div>
 
   <BackdropPage
-    :show-back="canGoBack"
-    :hide-header="step === 'building'"
-    :hide-close="!hasSites"
-    @close="dismiss"
-    @back="goBack"
+    hide-header
   >
     <template #background>
       <div class="accent-glow" />
     </template>
 
     <!-- Content -->
-    <div class="page-content">
+    <div ref="pageContentRef" class="page-content" @scroll="onScroll">
       <Transition name="step-fade" mode="out-in">
 
         <!-- Step: Choose path -->
-        <div v-if="step === 'choose'" key="choose" class="step-content">
+        <div v-if="step === 'choose'" key="choose" class="step-content vstack gap-l">
+          <div class="page-header vstack gap-xs">
+            <h1 class="page-heading">{{ hasSites ? 'Add a new site' : 'Add your first site' }}</h1>
+            <p class="page-subtitle">{{ hasSites ? 'Choose how you\'d like to get started.' : 'Choose how you\'d like to create your first local WordPress site.' }}</p>
+          </div>
           <div class="options-grid">
             <button
               v-for="(opt, idx) in pathOptions"
               :key="opt.id"
-              class="option-card vstack gap-xl"
+              class="option-card vstack gap-xl align-start"
               :style="{ '--card-index': idx }"
               @click="choosePath(opt.id)"
             >
-              <div class="option-illustration">
+              <div class="option-illustration hstack">
                 <component :is="opt.illustration" />
               </div>
               <div class="option-text vstack gap-xxxs">
@@ -184,44 +238,36 @@ async function onSubmit(data: { name: string }) {
         </div>
 
         <!-- Step: Blueprint picker -->
-        <div v-else-if="step === 'picker' && currentPath === 'blueprint'" key="blueprint" class="step-content step-content--wide">
+        <div v-else-if="step === 'picker' && currentPath === 'blueprint'" key="blueprint" class="step-content step-content--wide vstack gap-l">
           <BlueprintPicker :blueprints="blueprints" @select="onBlueprintSelect" />
-          <div class="picker-footer hstack gap-xs">
-            <Button label="Continue" variant="primary" surface="dark" :disabled="!selectedBlueprint" @click="onBlueprintContinue" />
-          </div>
         </div>
 
         <!-- Step: Pull site picker -->
-        <div v-else-if="step === 'picker' && currentPath === 'pull'" key="pull" class="step-content step-content--medium">
+        <div v-else-if="step === 'picker' && currentPath === 'pull'" key="pull" class="step-content step-content--medium vstack gap-l">
           <PullSitePicker
             :authenticated="isAuthenticated"
             :sites="remoteSites"
             @select="onRemoteSiteSelect"
             @login="isAuthenticated = true"
           />
-          <div v-if="isAuthenticated" class="picker-footer hstack gap-xs">
-            <Button label="Continue" variant="primary" surface="dark" :disabled="!selectedRemoteSite" @click="onRemoteSiteContinue" />
-          </div>
         </div>
 
         <!-- Step: Import file picker -->
-        <div v-else-if="step === 'picker' && currentPath === 'import'" key="import" class="step-content step-content--medium">
+        <div v-else-if="step === 'picker' && currentPath === 'import'" key="import" class="step-content step-content--medium vstack gap-l">
           <ImportDropZone @select="onFileSelect" @clear="selectedFile = null" />
-          <div class="picker-footer hstack gap-xs">
-            <Button label="Continue" variant="primary" surface="dark" :disabled="!selectedFile" @click="onFileContinue" />
-          </div>
         </div>
 
         <!-- Step: Site details form -->
-        <div v-else-if="step === 'details'" key="details" class="step-content step-content--narrow">
+        <div v-else-if="step === 'details'" key="details" class="step-content step-content--narrow vstack gap-l align-center">
           <SiteDetailsForm
+            ref="detailsFormRef"
             :initial-name="initialName()"
             @submit="onSubmit"
           />
         </div>
 
         <!-- Step: Building / setup -->
-        <div v-else-if="step === 'building'" key="building" class="step-content step-content--narrow building-step">
+        <div v-else-if="step === 'building'" key="building" class="step-content step-content--narrow building-step vstack gap-s align-center">
           <h2 class="building-site-name">{{ buildingSiteName }}</h2>
           <div class="building-progress-track">
             <div class="building-progress-bar" :style="{ width: buildingProgress + '%' }" />
@@ -231,6 +277,55 @@ async function onSubmit(data: { name: string }) {
 
       </Transition>
     </div>
+
+    <template #footer>
+      <Transition name="bottom-bar">
+        <div v-if="showBottomBar" class="bottom-bar hstack justify-between" :class="{ 'is-scrolled': isScrolled }">
+          <div class="stepper hstack gap-m">
+            <TransitionGroup name="stepper-item">
+              <div
+                v-for="(label, idx) in steps"
+                :key="label"
+                class="stepper-item hstack gap-xxs"
+                :class="{ 'is-current': idx === currentStepIndex, 'is-complete': idx < currentStepIndex }"
+              >
+                <span class="stepper-number hstack align-center justify-center shrink-0">{{ idx + 1 }}</span>
+                <span class="stepper-label">{{ label }}</span>
+              </div>
+            </TransitionGroup>
+          </div>
+          <div class="bottom-bar-actions hstack gap-xs">
+            <Transition name="btn-fade">
+              <Button
+                v-if="canGoBack"
+                label="Back"
+                variant="tertiary"
+                surface="dark"
+                @click="goBack"
+              />
+              <Button
+                v-else-if="hasSites"
+                label="Cancel"
+                variant="tertiary"
+                surface="dark"
+                @click="dismiss"
+              />
+            </Transition>
+            <Transition name="btn-swap" mode="out-in">
+              <Button
+                v-if="step !== 'choose'"
+                :key="primaryLabel"
+                :label="primaryLabel"
+                variant="primary"
+                surface="dark"
+                :disabled="!canContinue"
+                @click="onPrimaryAction"
+              />
+            </Transition>
+          </div>
+        </div>
+      </Transition>
+    </template>
   </BackdropPage>
   </div>
 </template>
@@ -255,9 +350,6 @@ async function onSubmit(data: { name: string }) {
   top: 18px; /* Physical: fixed window position */
   left: 16px; /* Physical: fixed window position */
   z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   -webkit-app-region: drag;
 }
 
@@ -311,21 +403,38 @@ async function onSubmit(data: { name: string }) {
   overflow-y: auto;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 56px var(--space-m) var(--space-m); /* Clear header height */
+  align-items: safe center;
+  padding: 56px var(--space-m) 120px var(--space-m); /* Clear header + bottom bar + scroll breathing room */
 }
 
 .step-content {
   width: 100%;
   max-width: 800px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-l);
 }
 
 .step-content--wide { max-width: 800px; }
 .step-content--medium { max-width: 480px; }
-.step-content--narrow { max-width: 480px; }
+.step-content--narrow {
+  max-width: 480px;
+}
+
+.page-header {
+  text-align: center;
+}
+
+.page-heading {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-chrome-fg);
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: var(--font-size-s);
+  color: var(--color-chrome-fg-muted);
+  margin: 0;
+  margin-block-end: var(--space-s);
+}
 
 /* ── Options grid ── */
 
@@ -345,7 +454,6 @@ async function onSubmit(data: { name: string }) {
   cursor: pointer;
   text-align: start;
   font-family: inherit;
-  align-items: flex-start;
   overflow: hidden;
   transition:
     border-color var(--duration-fast) var(--ease-default),
@@ -371,7 +479,6 @@ async function onSubmit(data: { name: string }) {
 /* Illustration */
 
 .option-illustration {
-  display: flex;
   color: var(--color-chrome-fg);
 }
 
@@ -389,11 +496,151 @@ async function onSubmit(data: { name: string }) {
   line-height: 1.4;
 }
 
-/* ── Picker footer ── */
+/* ── Bottom bar ── */
 
-.picker-footer {
-  justify-content: flex-end;
-  padding-block-start: var(--space-xs);
+.bottom-bar {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  z-index: 10;
+  padding: var(--space-xxxl);
+  padding-block-start: var(--space-xl);
+  backdrop-filter: blur(12px);
+  border-block-start: 1px solid transparent;
+  transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.bottom-bar.is-scrolled {
+  border-block-start-color: var(--color-chrome-border);
+}
+
+.stepper {
+  gap: var(--space-l);
+}
+
+.stepper-item {
+  gap: var(--space-xs);
+  opacity: 0.4;
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.stepper-item.is-current {
+  opacity: 1;
+}
+
+.stepper-item.is-complete {
+  opacity: 0.6;
+}
+
+.stepper-number {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-chrome-fg-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-chrome-fg-muted);
+  transition: border-color var(--duration-moderate) var(--ease-default),
+              color var(--duration-moderate) var(--ease-default);
+}
+
+.stepper-item.is-current .stepper-number {
+  border-color: var(--color-chrome-fg);
+  color: var(--color-chrome-fg);
+}
+
+.stepper-label {
+  font-size: var(--font-size-s);
+  color: var(--color-chrome-fg-muted);
+  white-space: nowrap;
+  transition: color var(--duration-moderate) var(--ease-default);
+}
+
+.stepper-item.is-current .stepper-label {
+  color: var(--color-chrome-fg);
+}
+
+.bottom-bar-actions {
+  flex-shrink: 0;
+}
+
+/* ── Bottom bar transitions ── */
+
+.bottom-bar-enter-active {
+  transition: opacity var(--duration-moderate) var(--ease-out),
+              transform var(--duration-moderate) var(--ease-out);
+}
+
+.bottom-bar-leave-active {
+  transition: opacity var(--duration-fast) var(--ease-in),
+              transform var(--duration-fast) var(--ease-in);
+}
+
+.bottom-bar-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.bottom-bar-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* Stepper items animate in/out individually */
+
+.stepper-item-enter-active {
+  transition: opacity var(--duration-moderate) var(--ease-out),
+              transform var(--duration-moderate) var(--ease-out);
+}
+
+.stepper-item-leave-active {
+  transition: opacity var(--duration-fast) var(--ease-in),
+              transform var(--duration-fast) var(--ease-in);
+}
+
+.stepper-item-enter-from {
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+.stepper-item-leave-to {
+  opacity: 0;
+  transform: translateX(8px);
+}
+
+.stepper-item-move {
+  transition: transform var(--duration-moderate) var(--ease-default);
+}
+
+/* Back button fade */
+
+.btn-fade-enter-active {
+  transition: opacity var(--duration-moderate) var(--ease-out);
+}
+
+.btn-fade-leave-active {
+  transition: opacity var(--duration-fast) var(--ease-in);
+}
+
+.btn-fade-enter-from,
+.btn-fade-leave-to {
+  opacity: 0;
+}
+
+/* Primary button label swap */
+
+.btn-swap-enter-active {
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.btn-swap-leave-active {
+  transition: opacity var(--duration-instant) var(--ease-in);
+}
+
+.btn-swap-enter-from,
+.btn-swap-leave-to {
+  opacity: 0;
 }
 
 /* ── Step transitions ── */
@@ -414,9 +661,7 @@ async function onSubmit(data: { name: string }) {
 /* ── Building step ── */
 
 .building-step {
-  align-items: center;
   text-align: center;
-  gap: var(--space-s);
 }
 
 .building-site-name {

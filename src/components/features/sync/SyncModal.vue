@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Directive } from 'vue'
 import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
@@ -12,7 +12,6 @@ import {
   brush as brushIcon,
   blockTable,
   chevronDownSmall,
-  closeSmall,
 } from '@wordpress/icons'
 import {
   useSiteContent,
@@ -160,30 +159,6 @@ function envColor(label?: string): string {
   return 'var(--color-env-local-bg)'
 }
 
-// ── Scroll-aware borders ──
-
-const contentRef = ref<HTMLElement | null>(null)
-const scrolledTop = ref(false)
-const scrolledBottom = ref(false)
-
-function onContentScroll() {
-  const el = contentRef.value
-  if (!el) return
-  scrolledTop.value = el.scrollTop > 0
-  scrolledBottom.value = el.scrollTop + el.clientHeight < el.scrollHeight - 1
-}
-
-watch(() => props.open, (isOpen) => {
-  if (isOpen) {
-    requestAnimationFrame(() => onContentScroll())
-  }
-})
-
-// Recheck borders when content height changes
-watch([filesEnabled, databaseEnabled, filesScope, databaseScope], () => {
-  nextTick(() => onContentScroll())
-})
-
 // ── Description ──
 
 const title = computed(() => {
@@ -211,17 +186,8 @@ function onSync() {
 </script>
 
 <template>
-  <Modal :open="open" width="510px" @close="$emit('close')">
-    <!-- Header -->
-    <div class="sync-modal__header" :class="{ 'has-border': scrolledTop }">
-      <span class="sync-modal__title">{{ title }}</span>
-      <button class="sync-modal__close" @click="$emit('close')">
-        <WPIcon :icon="closeSmall" :size="24" />
-      </button>
-    </div>
-
-    <!-- Content -->
-    <div ref="contentRef" class="sync-modal__content" @scroll="onContentScroll">
+  <Modal :open="open" :title="title" width="510px" @close="$emit('close')">
+    <div class="sync-modal__body vstack gap-m">
       <!-- Sync mode: segmented control + env picker -->
       <template v-if="mode === 'sync'">
         <div class="segmented-control" :class="{ 'is-pull': direction === 'pull' }">
@@ -236,7 +202,7 @@ function onSync() {
           >Pull</button>
         </div>
 
-        <div class="sync-env-picker">
+        <div class="sync-env-picker hstack align-center justify-center gap-xxs">
           <span class="sync-env-picker__label">
             {{ direction === 'push' ? 'Push to' : 'Pull from' }}
           </span>
@@ -256,17 +222,26 @@ function onSync() {
       <!-- In sync mode: Local always first in DOM, remote always second.
            CSS transforms swap positions on pull so remote visually appears on top.
            In push mode: source/dest from props, no swap needed. -->
-      <div class="sync-visual" :class="{ 'is-pull': mode === 'sync' && direction === 'pull' }">
-        <div class="sync-visual__card sync-visual__top" :style="{ background: envColor(visualTopLabel) }">
+      <div
+        class="sync-visual vstack align-center justify-center gap-xxxs"
+        :class="{ 'is-pull': mode === 'sync' && direction === 'pull' }"
+      >
+        <div
+          class="sync-visual__card sync-visual__top hstack align-center justify-center gap-xxxs"
+          :style="{ background: envColor(visualTopLabel) }"
+        >
           <span class="sync-visual__label">{{ visualTopLabel }}</span>
           <span class="sync-visual__url">{{ (visualTopUrl ?? 'localhost:3920').replace(/^https?:\/\//, '') }}</span>
         </div>
-        <div class="sync-visual__arrow">
+        <div class="sync-visual__arrow hstack align-center justify-center">
           <svg class="sync-visual__arrow-svg" width="21" height="11" viewBox="0 0 20.75 11.047" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M14.6963 0.21967C14.9892 -0.0732234 15.4649 -0.0732234 15.7578 0.21967L20.5303 4.99311C20.8232 5.286 20.8232 5.76076 20.5303 6.05365L15.7578 10.8271C15.4649 11.12 14.9892 11.12 14.6963 10.8271C14.4034 10.5342 14.4034 10.0585 14.6963 9.76557L18.1895 6.27338H0V4.77338H18.1895L14.6963 1.28119C14.4034 0.9883 14.4034 0.512563 14.6963 0.21967Z" fill="currentColor" />
           </svg>
         </div>
-        <div class="sync-visual__card sync-visual__bottom" :style="{ background: envColor(visualBottomLabel) }">
+        <div
+          class="sync-visual__card sync-visual__bottom hstack align-center justify-center gap-xxxs"
+          :style="{ background: envColor(visualBottomLabel) }"
+        >
           <span class="sync-visual__label">{{ visualBottomLabel }}</span>
           <span class="sync-visual__url">{{ (visualBottomUrl ?? '').replace(/^https?:\/\//, '') }}</span>
         </div>
@@ -276,10 +251,10 @@ function onSync() {
       <p class="sync-modal__description">{{ description }}</p>
 
       <!-- Sync options -->
-      <div class="sync-options">
+      <div class="sync-options shrink-0">
         <!-- Files section -->
         <div class="sync-section">
-          <div class="sync-section__header">
+          <div class="sync-section__header hstack align-center gap-xs">
             <Toggle v-model="filesEnabled" label="Files and folders" />
             <Dropdown
               v-if="filesEnabled"
@@ -290,19 +265,19 @@ function onSync() {
               menu-surface="dark"
               placement="below"
               align="end"
-              class="sync-scope-dropdown"
+              class="sync-scope-dropdown shrink-0"
             />
           </div>
-          <div v-if="filesEnabled && filesScope === 'selected'" class="sync-selector">
+          <div v-if="filesEnabled && filesScope === 'selected'" class="sync-selector vstack gap-xxs">
             <div
               v-for="{ node, depth } in flatNodes"
               :key="node.id"
-              class="tree-row"
+              class="tree-row hstack align-center gap-xxs"
               :style="{ marginInlineStart: `${16 + depth * 12}px` }"
             >
               <span
                 v-if="node.type !== 'file'"
-                class="tree-row__collapse"
+                class="tree-row__collapse hstack align-center justify-center shrink-0"
                 @click="toggleExpand(node)"
               >
                 <WPIcon
@@ -328,7 +303,7 @@ function onSync() {
 
         <!-- Database section -->
         <div class="sync-section">
-          <div class="sync-section__header">
+          <div class="sync-section__header hstack align-center gap-xs">
             <Toggle v-model="databaseEnabled" label="Database" />
             <Dropdown
               v-if="databaseEnabled"
@@ -339,11 +314,11 @@ function onSync() {
               menu-surface="dark"
               placement="below"
               align="end"
-              class="sync-scope-dropdown"
+              class="sync-scope-dropdown shrink-0"
             />
           </div>
-          <div v-if="databaseEnabled && databaseScope === 'selected'" class="sync-selector">
-            <div v-for="table in dbTables" :key="table.id" class="table-row">
+          <div v-if="databaseEnabled && databaseScope === 'selected'" class="sync-selector vstack gap-xxs">
+            <div v-for="table in dbTables" :key="table.id" class="table-row hstack align-center gap-xxs">
               <input type="checkbox" class="table-row__checkbox" v-model="table.checked" />
               <WPIcon :icon="blockTable" :size="18" class="table-row__icon" />
               <span class="table-row__label">{{ table.label }}</span>
@@ -353,93 +328,25 @@ function onSync() {
       </div>
     </div>
 
-    <!-- Footer -->
-    <div class="sync-modal__footer" :class="{ 'has-border': scrolledBottom }">
+    <template #footer>
       <Button variant="tertiary" label="Cancel" @click="$emit('close')" />
       <Button
         variant="primary"
         :label="resolvedVerb === 'push' ? 'Push' : 'Pull'"
         @click="onSync"
       />
-    </div>
+    </template>
   </Modal>
 </template>
 
 <style scoped>
-/* ── Modal layout ── */
-
-.sync-modal__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-block-end: 1px solid transparent;
-  flex-shrink: 0;
-  transition: border-color var(--duration-instant) var(--ease-default);
-}
-
-.sync-modal__header.has-border {
-  border-block-end-color: var(--color-frame-border);
-}
-
-.sync-modal__title {
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-semibold);
-  line-height: 20px;
-  color: var(--color-frame-fg);
-}
-
-.sync-modal__close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 4px;
-  background: none;
-  color: var(--color-frame-fg-muted);
-  cursor: pointer;
-  transition:
-    background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
-}
-
-.sync-modal__close:hover {
-  background: var(--color-frame-hover);
-  color: var(--color-frame-fg);
-}
-
-.sync-modal__content {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 0 16px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+/* ── Body layout ── */
 
 .sync-modal__description {
   font-size: var(--font-size-s);
   line-height: 16px;
   color: var(--color-frame-fg-muted);
   margin: 0;
-}
-
-.sync-modal__footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 16px;
-  border-block-start: 1px solid transparent;
-  flex-shrink: 0;
-  transition: border-color var(--duration-instant) var(--ease-default);
-}
-
-.sync-modal__footer.has-border {
-  border-block-start-color: var(--color-frame-border);
 }
 
 /* ── Segmented control ── */
@@ -492,13 +399,6 @@ function onSync() {
 
 /* ── Env picker ── */
 
-.sync-env-picker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
 .sync-env-picker__label {
   font-size: var(--font-size-m);
   color: var(--color-frame-fg-muted);
@@ -508,11 +408,6 @@ function onSync() {
 /* ── Sync visual ── */
 
 .sync-visual {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
   padding: 32px 16px;
   border-radius: 4px;
   /* Figma: radial gradient at 0.2 opacity over flat 5% black */
@@ -523,10 +418,6 @@ function onSync() {
 }
 
 .sync-visual__card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
   padding: 8px 12px;
   border-radius: 4px;
   font-size: var(--font-size-s);
@@ -536,9 +427,6 @@ function onSync() {
 }
 
 .sync-visual__arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   height: 21px;
   color: var(--color-frame-fg-muted);
 }
@@ -548,7 +436,7 @@ function onSync() {
 }
 
 /* Pull animation: swap card positions so remote slides to top, local slides to bottom.
-   Offset = card(~34px) + gap(4px) + arrow(21px) + gap(4px) = 63px */
+   Offset = card(~34px) + gap + arrow(21px) + gap ≈ 63px */
 .sync-visual.is-pull .sync-visual__top {
   transform: translateY(63px);
 }
@@ -570,7 +458,6 @@ function onSync() {
 .sync-options {
   border: 1px solid var(--color-frame-border);
   border-radius: 8px;
-  flex-shrink: 0;
 }
 
 .sync-options__divider {
@@ -581,9 +468,6 @@ function onSync() {
 /* ── Section header ── */
 
 .sync-section__header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
   padding: var(--space-s);
   min-height: 50px;
   box-sizing: border-box;
@@ -591,16 +475,9 @@ function onSync() {
 
 /* ── Sync scope dropdown ── */
 
-.sync-scope-dropdown {
-  flex-shrink: 0;
-}
-
 /* ── Sync selector (tree / table list) ── */
 
 .sync-selector {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   padding-inline-start: 16px;
   padding-block-end: 12px;
 }
@@ -608,9 +485,6 @@ function onSync() {
 /* ── Tree row ── */
 
 .tree-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   position: relative;
 }
 
@@ -618,9 +492,6 @@ function onSync() {
   position: absolute;
   inset-inline-start: -20px;
   inset-block-start: 1px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 18px;
   height: 18px;
   cursor: pointer;
@@ -659,9 +530,6 @@ function onSync() {
 /* ── Table row ── */
 
 .table-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   /* Indent to align with file tree checkboxes (16px base margin + chevron column space) */
   margin-inline-start: 16px;
 }

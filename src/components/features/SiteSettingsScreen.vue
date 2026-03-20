@@ -5,6 +5,7 @@ import SiteSettingsAdmin from '@/components/features/site-settings/SiteSettingsA
 import SiteSettingsSkills from '@/components/features/site-settings/SiteSettingsSkills.vue'
 import SiteSettingsDebugging from '@/components/features/site-settings/SiteSettingsDebugging.vue'
 import SiteSettingsActions from '@/components/features/site-settings/SiteSettingsActions.vue'
+import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
 
 const props = defineProps<{
   siteId: string
@@ -21,6 +22,7 @@ const emit = defineEmits<{
     <SiteSettingsAdmin :site-id="siteId" />
     <SiteSettingsSkills :site-id="siteId" @manage-global-skills="emit('manage-global-skills')" />
     <SiteSettingsDebugging :site-id="siteId" />
+    <ImportExportScreen :site-id="siteId" />
     <SiteSettingsActions :site-id="siteId" />
   </ScreenLayout>
 </template>
