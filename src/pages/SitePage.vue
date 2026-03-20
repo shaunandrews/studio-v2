@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import ChatMessageList from '@/components/composites/ChatMessageList.vue'
@@ -18,6 +18,9 @@ import { useSettings } from '@/data/useSettings'
 import { useSites, ALL_SITES_ID } from '@/data/useSites'
 import { useResizablePane } from '@/data/useResizablePane'
 import { useTasks } from '@/data/useTasks'
+import { useSiteDocument } from '@/data/useSiteDocument'
+import { usePreviewSync } from '@/data/usePreviewSync'
+import { renderSite } from '@/data/site-renderer'
 
 defineProps<{
   sidebarHidden?: boolean
@@ -29,12 +32,18 @@ const { sites, activeSiteId, setStatus } = useSites()
 
 const loadingTarget = ref<'running' | 'stopped'>('running')
 
+let statusTimer: ReturnType<typeof setTimeout> | null = null
+
 function toggleStatus() {
   if (!currentSite.value || currentSite.value.status === 'loading') return
   const target = currentSite.value.status === 'running' ? 'stopped' : 'running'
   loadingTarget.value = target
   setStatus(currentSite.value.id, 'loading')
-  setTimeout(() => setStatus(currentSite.value!.id, target), 1200)
+  if (statusTimer) clearTimeout(statusTimer)
+  statusTimer = setTimeout(() => {
+    setStatus(currentSite.value!.id, target)
+    statusTimer = null
+  }, 1200)
 }
 const { tasks, getTasksForSite, getMessages, sendMessage, streamAgentMessage, createTask, generateTaskTitle, markRead } = useTasks()
 
@@ -50,6 +59,7 @@ watch(() => route.name === 'all-sites' ? ALL_SITES_ID : route.params.id as strin
 
 onBeforeUnmount(() => {
   activeSiteId.value = null
+  if (statusTimer) clearTimeout(statusTimer)
 })
 
 // -- Screen state (derived from route) --
@@ -173,6 +183,37 @@ const { width: navWidth, isDragging: isResizing, onPointerDown: onResizeStart, r
 
 const { openSettings } = useSettings()
 
+// ── Site preview ──
+
+const { getContent } = useSiteDocument()
+const { registerIframe, unregisterIframe } = usePreviewSync()
+
+const previewIframeRef = ref<HTMLIFrameElement | null>(null)
+const currentPageSlug = ref('/')
+
+const previewHtml = computed(() => {
+  if (!activeSiteId.value) return ''
+  const content = getContent(activeSiteId.value).value
+  if (!content) return ''
+  return renderSite(content, currentPageSlug.value)
+})
+
+watch(previewIframeRef, (el) => {
+  if (el) registerIframe(el)
+})
+
+function onIframeMessage(event: MessageEvent) {
+  if (event.data?.type === 'navigate') {
+    currentPageSlug.value = event.data.page
+  }
+}
+
+onMounted(() => window.addEventListener('message', onIframeMessage))
+onBeforeUnmount(() => {
+  window.removeEventListener('message', onIframeMessage)
+  unregisterIframe()
+})
+
 </script>
 
 <template>
@@ -249,6 +290,14 @@ const { openSettings } = useSettings()
           <span class="detail-empty__text">Select a task or start a new one</span>
         </div>
       </div>
+      <div v-if="currentScreen === 'tasks' && selectedTaskId" class="pane pane-preview">
+        <iframe
+          ref="previewIframeRef"
+          :srcdoc="previewHtml"
+          class="preview-iframe"
+          sandbox="allow-same-origin allow-scripts"
+        />
+      </div>
     </div>
 
   </div>
@@ -284,6 +333,18 @@ const { openSettings } = useSettings()
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+.pane-preview {
+  flex: 1;
+  min-width: 0;
+  border-inline-start: 1px solid var(--color-frame-border);
+}
+
+.preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 
 .task-brief-panel {
