@@ -43,7 +43,6 @@ defineEmits<{
 .resize-handle__line {
   position: absolute;
   inset-block: 0;
-  inset-inline-start: 0;
   width: 2px;
   background: var(--color-frame-theme);
   opacity: 0;
