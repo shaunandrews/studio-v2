@@ -74,6 +74,116 @@ export async function streamAI(
   }
 }
 
+// ---- Tool-aware streaming ----
+
+export interface ToolUseResult {
+  id: string
+  name: string
+  input: Record<string, any>
+}
+
+export interface StreamCallbacks {
+  onText: (accumulated: string) => void
+  onToolUseStart: (id: string, name: string) => void
+  onToolUseComplete: (toolUse: ToolUseResult) => void
+}
+
+export interface StreamResult {
+  stopReason: string
+  text: string
+  toolUses: ToolUseResult[]
+}
+
+export async function streamAIWithTools(
+  messages: Array<{ role: string; content: any }>,
+  tools: any[],
+  system: string,
+  callbacks: StreamCallbacks,
+): Promise<StreamResult> {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages, tools, system }),
+  })
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Request failed' }))
+    const errorText = `AI error: ${err.error ?? response.statusText}`
+    callbacks.onText(errorText)
+    return { stopReason: 'error', text: errorText, toolUses: [] }
+  }
+
+  const reader = response.body?.getReader()
+  if (!reader) {
+    callbacks.onText('AI error: No response stream')
+    return { stopReason: 'error', text: '', toolUses: [] }
+  }
+
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let accumulatedText = ''
+  let stopReason = 'end_turn'
+
+  const toolUses: ToolUseResult[] = []
+  let currentToolId = ''
+  let currentToolName = ''
+  let currentToolJson = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue
+      try {
+        const event = JSON.parse(line.slice(6))
+
+        switch (event.type) {
+          case 'text':
+            accumulatedText += event.text
+            callbacks.onText(accumulatedText)
+            break
+
+          case 'tool_use_start':
+            currentToolId = event.id
+            currentToolName = event.name
+            currentToolJson = ''
+            callbacks.onToolUseStart(event.id, event.name)
+            break
+
+          case 'tool_use_delta':
+            currentToolJson += event.partial_json
+            break
+
+          case 'content_block_stop':
+            if (currentToolId) {
+              const input = currentToolJson ? JSON.parse(currentToolJson) : {}
+              const toolUse = { id: currentToolId, name: currentToolName, input }
+              toolUses.push(toolUse)
+              callbacks.onToolUseComplete(toolUse)
+              currentToolId = ''
+              currentToolName = ''
+              currentToolJson = ''
+            }
+            break
+
+          case 'done':
+            stopReason = event.stop_reason ?? 'end_turn'
+            break
+        }
+      } catch {
+        // Skip malformed JSON
+      }
+    }
+  }
+
+  return { stopReason, text: accumulatedText, toolUses }
+}
+
 /**
  * Generate a task title via the proxy.
  */
