@@ -1,0 +1,31 @@
+{
+  "name": "Launchpad",
+  "description": "A SaaS developer platform landing page",
+  "favicon": "🚀",
+  "theme": {
+    "colors": {
+      "bg": "#fff",
+      "text": "#1a1a1a",
+      "accent": "#2563eb",
+      "muted": "#666",
+      "border": "rgba(0,0,0,0.06)",
+      "surface": "#fafafa"
+    },
+    "fonts": {
+      "heading": "'Inter', sans-serif",
+      "body": "'Inter', sans-serif"
+    },
+    "spacing": {
+      "content": "680px",
+      "wide": "1000px"
+    }
+  },
+  "parts": ["header", "footer"],
+  "pages": [
+    { "slug": "/", "title": "Home", "template": "home" },
+    { "slug": "/features", "title": "Features", "template": "features" },
+    { "slug": "/pricing", "title": "Pricing", "template": "pricing" },
+    { "slug": "/about", "title": "About", "template": "about" },
+    { "slug": "/contact", "title": "Contact", "template": "contact" }
+  ]
+}
