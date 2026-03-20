@@ -19,9 +19,8 @@ User message
   → on tool_use:
       → ai-tool-executor.executeToolCall()
           → useSiteContent mutation (Vue ref + IndexedDB)
-          → sendSectionUpdate/sendThemeUpdate/sendPageUpdate (iframe postMessage)
-          ← Change object (captures undo closure)
-          ← tool result string
+          ← Change object + tool result string
+      → SitePage pushes change to iframe via sendSectionUpdate/sendThemeUpdate/sendPageUpdate
       → append tool_result to history
       → if stop_reason === "tool_use": loop (call API again)
       → if stop_reason === "end_turn": done
@@ -31,44 +30,62 @@ User message
 
 Tools mutate client-side state (SiteContent in browser IndexedDB/Vue refs), so tool execution happens in the browser. The Express server stays stateless — it proxies messages and tool definitions to the Claude API and streams events back. The client manages the full message history and agentic loop.
 
+### Type Unification: `SiteContent` = Renderer's `Site`
+
+The renderer (`site-renderer.ts`) already imports a `Site` type from `./site-types` with the exact shape we need: `name`, `theme` (fonts, variables, darkVariables), `pages` (slug, title, sections), `sections` (id, html, css, role). Rather than creating a parallel type, `SiteContent` **is** this type plus a `siteId` field. Define it once in `src/data/site-types.ts` and use it in both the renderer and the content store.
+
 ## New Files
 
-### `src/data/useSiteContent.ts` — Site Content Store
+### `src/data/site-types.ts` — Shared Site Content Types
 
-Mutable site content, separate from the lightweight `Site` record.
-
-**Data model:**
+Defines the content-rich site type used by both the renderer and the content store. This file is already imported by `site-renderer.ts` but doesn't exist on main yet.
 
 ```typescript
-interface SiteContentTheme {
-  fonts: string[]
-  variables: Record<string, string>
-  darkVariables?: Record<string, string>
+export interface SiteContentTheme {
+  fonts: string[]                         // font family names (for Google Fonts links)
+  variables: Record<string, string>       // flat map of all CSS custom properties
+  darkVariables?: Record<string, string>  // dark mode overrides
 }
 
-interface SiteContentPage {
+export interface SiteContentPage {
   slug: string
   title: string
   sections: string[]  // ordered section IDs
 }
 
-interface SiteContentSection {
+export interface SiteContentSection {
   id: string
   html: string
   css: string
   role?: string
 }
 
-interface SiteContent {
-  siteId: string
+// Used by site-renderer.ts (as `Site`) and useSiteContent.ts
+export interface Site {
   name: string
   theme: SiteContentTheme
   pages: SiteContentPage[]
   sections: Record<string, SiteContentSection>
 }
+
+// Extends Site with a persistence key for IndexedDB
+export interface SiteContent extends Site {
+  siteId: string
+}
 ```
 
-**Initialization:** On first load, static `SiteFiles` (from `src/data/sites/{layout}/index.ts`) are transformed into `SiteContent`. The template system (parts + `{{header}}` placeholders) gets flattened into the section-based model the renderer uses. Persisted to a new `db.siteContent` IndexedDB table. On return visits, loads from DB.
+### `src/data/useSiteContent.ts` — Site Content Store
+
+Mutable site content, separate from the lightweight `Site` record in `types.ts`.
+
+**Initialization:** On first load, static `SiteFiles` (from `src/data/sites/{layout}/index.ts`) are transformed into `SiteContent`. The transformation flattens the template-based `SiteTheme` into the renderer's format:
+
+- `SiteTheme.colors` → merged into `variables` as `--key: value`
+- `SiteTheme.fonts` (Record) → font family values extracted into `fonts` array; keys become `--font-key: value` in `variables`
+- `SiteTheme.spacing` → merged into `variables` as `--key: value`
+- Template HTML (`{{header}}`, `{{footer}}`) → resolved via `resolveParts()`, then parsed into sections
+
+Persisted to `db.siteContent` IndexedDB table (primary key: `siteId`). On return visits, loads from DB.
 
 **Composable API:**
 
@@ -109,7 +126,9 @@ interface Change {
 }
 ```
 
-Changes are stored in a per-site array (newest last). Each mutation captures previous state in a closure so `undo()` restores it exactly. Changes can be undone in any order since each captures its own state independently.
+Changes are stored in a per-site array (newest last) **in memory only** — closures can't be serialized to IndexedDB, so the undo stack is ephemeral and lost on refresh. This is acceptable for a prototype.
+
+Each mutation captures previous state in a closure so `undo()` restores it exactly. Changes can be undone in any order since each captures its own snapshot. **Caveat:** if two tool calls modify the same section, undoing the earlier one restores pre-A state, which also reverts B's changes. This is a known tradeoff of snapshot-based undo; acceptable for now.
 
 ### `src/data/ai-tools.ts` — Tool Definitions & System Prompt
 
@@ -149,17 +168,18 @@ function executeToolCall(
 ): { result: string; change: Change }
 ```
 
-After mutating `SiteContent`, the executor pushes changes to the preview iframe using existing `sendSectionUpdate()` / `sendThemeUpdate()` / `sendPageUpdate()`. Returns a result string for Claude's next turn.
+**The executor only mutates data.** It does NOT push changes to the preview iframe directly — it has no access to the iframe DOM element. Instead, the calling code (in `useTasks.sendMessage()`) takes the returned `Change` and calls the appropriate `sendSectionUpdate()` / `sendThemeUpdate()` / `sendPageUpdate()` on the iframe ref held by the SitePage component. The SitePage component provides the iframe ref via a shared composable or callback registered during mount.
 
-On error (nonexistent section/page), returns error result so Claude can recover.
+On error (nonexistent section/page), returns error result (`is_error: true`) so Claude can recover.
 
 ## Modified Files
 
 ### `server.ts` — Express Proxy
 
 - Accept `tools` array in `/api/chat` request body, pass to `client.messages.stream({ tools })`
-- Stream new event types: `tool_use_start` (id + name), `tool_use_delta` (input JSON chunks), `tool_use_done`
-- Stream `stop_reason` so client knows when Claude wants tool results vs. finished
+- Increase `max_tokens` to `16000` (or accept from request body) — current `4096` is too small for HTML-generating tool calls
+- Listen on SDK stream events: `contentBlockStart`, `contentBlockDelta`, `contentBlockStop`, `message` (for stop_reason)
+- Forward as SSE events the client can parse: `tool_use_start` (id + name), `tool_use_delta` (input JSON chunks), `tool_use_done`, `stop` (with stop_reason)
 - Server stays stateless. Each round-trip is a separate HTTP request. Client manages message history.
 
 ### `src/data/ai-service.ts` — AI Service
@@ -200,7 +220,7 @@ Existing `streamAgentMessage()` typing effect stays for seed/demo messages.
 
 ### `src/data/db.ts` — Database
 
-- Add `siteContent` table to Dexie schema
+- Add `siteContent` table to Dexie schema with `siteId` as primary key: `siteContent: 'siteId'`
 
 ### `src/data/useHydration.ts` — Hydration
 
@@ -211,6 +231,10 @@ Existing `streamAgentMessage()` typing effect stays for seed/demo messages.
 - Handle new `reverted` status — greyed out styling, strikethrough label
 - Show undo/revert button on hover for `done` status tool calls
 - Button calls `undoChange()` and marks status as `reverted`
+
+## Known Limitations
+
+- **Context window growth** — each round-trip sends full message history including tool results with HTML. Long sessions with many tool calls could fill the context window. Future optimization: summarize tool results ("Section updated successfully") instead of echoing full HTML back.
 
 ## What This Does NOT Cover
 
