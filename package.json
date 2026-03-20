@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "tsx server.ts",
     "build": "vite build",
-    "preview": "vite preview",
+    "start": "NODE_ENV=production node --import tsx server.ts",
     "deploy": "vercel --prod --yes"
   },
   "dependencies": {
@@ -15,16 +15,20 @@
     "@wordpress/primitives": "^4.39.0",
     "agentation": "^2.3.2",
     "dexie": "^4.3.0",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
     "html-to-image": "^1.11.13",
     "vue": "^3.5.25",
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^6.0.2",
     "@vue/tsconfig": "^0.8.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",
     "vue-tsc": "^3.1.5"
