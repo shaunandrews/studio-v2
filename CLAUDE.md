@@ -46,6 +46,16 @@ src/
 - **ContextMenu** — `groups` (FlyoutMenuGroup[]), `surface` (light/dark). Wraps slot content with right-click menu at cursor position. Reuses FlyoutMenu CSS classes. Singleton (one open at a time). Supports submenus.
 - **InputChat** — Chat input with model selector and action strip. Three action rendering modes: brief cards, card actions, text buttons.
 
+## Data system
+
+Read `DATA-SYSTEM.md` before touching composables. Key rules:
+
+- **Task-first model:** Tasks are the primary entity, not conversations. Messages belong to tasks.
+- **IndexedDB via Dexie** for domain data (sites, tasks, messages). localStorage for UI prefs only.
+- **Write-through:** Mutate the Vue ref first, then persist to DB. Use `toRaw()` + `JSON.parse(JSON.stringify())` before writing to Dexie.
+- **Hydration:** `useHydration.hydrate()` runs on app load. Seeds DB on first visit, reads from DB on return visits.
+- **Persona reset:** `activatePersona()` clears all DB tables and re-seeds. Only called from persona chooser, never on refresh.
+
 ## View transitions (home <> site)
 
 Navigation between home and site uses the View Transitions API via `useSiteTransition.ts`. Site-to-site navigation skips transitions.
