@@ -218,6 +218,10 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         <WPIcon :icon="home" :size="20" class="site-sections__icon" />
         Overview
       </button>
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'sitemap' }" @click="$emit('navigate', 'sitemap')">
+        <WPIcon :icon="listView" :size="20" class="site-sections__icon" />
+        Site Map
+      </button>
       <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'sync' }" @click="$emit('navigate', 'sync')">
         <WPIcon :icon="update" :size="20" class="site-sections__icon" />
         Sync
