@@ -52,35 +52,6 @@
   --shadow-s: 0 1px 3px var(--color-shadow), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-m: 0 4px 12px var(--color-shadow), 0 2px 4px rgba(0, 0, 0, 0.06);
 
-  /* Paper surface (Task Brief card) */
-  --color-paper: #faf9f7;
-  --color-paper-header: #f0ede8;
-  --color-paper-rule: rgba(0, 0, 0, 0.07);
-  --color-paper-dog-ear: #ddd9d1;
-  --color-paper-shadow: rgba(0, 0, 0, 0.08);
-
-  /* Task Brief status band tints */
-  --color-brief-idle: #e8e8e8;
-  --color-brief-running: #fef3c7;
-  --color-brief-review: #dbeafe;
-  --color-brief-approved: #dcfce7;
-  --color-brief-merged: #dcfce7; /* same tint as approved — both are "done successfully" */
-  --color-brief-rejected: #fee2e2;
-
-  /* Task Brief status dot colors */
-  --color-brief-dot-idle: var(--color-frame-fg-muted);
-  --color-brief-dot-running: #d97706;
-  --color-brief-dot-review: #2563eb;
-  --color-brief-dot-approved: #16a34a;
-  --color-brief-dot-rejected: #dc2626;
-
-  /* Task Brief file change type colors */
-  --color-brief-file-added: #16a34a;
-  --color-brief-file-deleted: #dc2626;
-
-  /* Task Brief stamp / watermark */
-  --color-brief-stamp: #16a34a;
-  --color-brief-watermark: #2563eb;
 }
 
 /* Dark tokens — applied by OS preference or manual toggle */
@@ -112,30 +83,7 @@
 
     --color-shadow: rgba(0, 0, 0, 0.25);
 
-    --color-paper: #2a2825;
-    --color-paper-header: #222019;
-    --color-paper-rule: rgba(255, 255, 255, 0.07);
-    --color-paper-dog-ear: #1a1917;
-    --color-paper-shadow: rgba(0, 0, 0, 0.3);
-
-    --color-brief-idle: #3a3a3a;
-    --color-brief-running: #3d2e0a;
-    --color-brief-review: #0f2038;
-    --color-brief-approved: #0f2e1a;
-    --color-brief-merged: #0f2e1a;
-    --color-brief-rejected: #2e0f0f;
-
-    --color-brief-dot-idle: rgba(255, 255, 255, 0.5); /* explicit dark override; light uses var(--color-frame-fg-muted) */
-    --color-brief-dot-running: #f59e0b;
-    --color-brief-dot-review: #60a5fa;
-    --color-brief-dot-approved: #4ade80;
-    --color-brief-dot-rejected: #f87171;
-
-    --color-brief-file-added: #4ade80;
-    --color-brief-file-deleted: #f87171;
-
-    --color-brief-stamp: #4ade80;
-    --color-brief-watermark: #60a5fa;
+    --color-status-warning: #f59e0b;
   }
 }
 
@@ -167,28 +115,5 @@
 
   --color-shadow: rgba(0, 0, 0, 0.25);
 
-  --color-paper: #2a2825;
-  --color-paper-header: #222019;
-  --color-paper-rule: rgba(255, 255, 255, 0.07);
-  --color-paper-dog-ear: #1a1917;
-  --color-paper-shadow: rgba(0, 0, 0, 0.3);
-
-  --color-brief-idle: #3a3a3a;
-  --color-brief-running: #3d2e0a;
-  --color-brief-review: #0f2038;
-  --color-brief-approved: #0f2e1a;
-  --color-brief-merged: #0f2e1a;
-  --color-brief-rejected: #2e0f0f;
-
-  --color-brief-dot-idle: rgba(255, 255, 255, 0.5); /* explicit dark override; light uses var(--color-frame-fg-muted) */
-  --color-brief-dot-running: #f59e0b;
-  --color-brief-dot-review: #60a5fa;
-  --color-brief-dot-approved: #4ade80;
-  --color-brief-dot-rejected: #f87171;
-
-  --color-brief-file-added: #4ade80;
-  --color-brief-file-deleted: #f87171;
-
-  --color-brief-stamp: #4ade80;
-  --color-brief-watermark: #60a5fa;
+  --color-status-warning: #f59e0b;
 }
