@@ -18,7 +18,7 @@ defineEmits<{
       <div class="sync-empty__copy">
         <p class="sync-empty__heading">Build locally, publish confidently</p>
         <p class="sync-empty__subtext">
-          Keep your local site connected to staging and production. Test changes privately before they reach your visitors.
+          Develop on your local site, push to staging to preview and test, then promote to production when it's ready for visitors.
         </p>
       </div>
 
@@ -112,13 +112,14 @@ defineEmits<{
   align-items: center;
   gap: var(--space-m);
   width: 100%;
+  max-width: 400px;
 }
 
 .sync-empty__copy {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-xs);
   text-align: center;
 }
 
@@ -131,6 +132,7 @@ defineEmits<{
 
 .sync-empty__subtext {
   font-size: var(--font-size-m);
+  line-height: var(--line-height-normal);
   color: var(--color-frame-fg-muted);
   margin: 0;
 }
