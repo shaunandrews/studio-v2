@@ -3,10 +3,12 @@ import cafe from './cafe/index'
 import portfolio from './portfolio/index'
 import store from './store/index'
 import gallery from './gallery/index'
+import landing from './launchpad/index'
 
 export const sites: Record<string, SiteFiles> = {
   cafe,
   portfolio,
   store,
   gallery,
+  landing,
 }
