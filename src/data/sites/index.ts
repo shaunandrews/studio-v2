@@ -4,6 +4,7 @@ import portfolio from './portfolio/index'
 import store from './store/index'
 import gallery from './gallery/index'
 import landing from './launchpad/index'
+import docs from './docs/index'
 
 export const sites: Record<string, SiteFiles> = {
   cafe,
@@ -11,4 +12,5 @@ export const sites: Record<string, SiteFiles> = {
   store,
   gallery,
   landing,
+  docs,
 }
