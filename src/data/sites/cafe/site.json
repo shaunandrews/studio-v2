@@ -1,0 +1,35 @@
+{
+  "name": "Downstreet Caf\u00e9",
+  "description": "A cozy neighborhood coffee shop in Brooklyn",
+  "favicon": "\u2615",
+  "theme": {
+    "colors": {
+      "bg": "#faf9f7",
+      "text": "#1a1a1a",
+      "accent": "#8b6f47",
+      "muted": "#888",
+      "border": "rgba(0,0,0,0.08)",
+      "surface": "#f0ece6"
+    },
+    "fonts": {
+      "heading": "'Playfair Display', Georgia, serif",
+      "body": "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "spacing": {
+      "content": "640px",
+      "wide": "800px"
+    }
+  },
+  "parts": ["header", "footer"],
+  "pages": [
+    { "slug": "/", "title": "Home", "template": "home" },
+    { "slug": "/menu", "title": "Menu", "template": "menu" },
+    { "slug": "/about", "title": "About", "template": "about" },
+    {
+      "slug": "/blog", "title": "Blog", "template": "blog",
+      "collection": { "slug": "/blog/:slug", "title": "Post", "template": "post", "count": 12 }
+    },
+    { "slug": "/reservations", "title": "Reservations", "template": "reservations" },
+    { "slug": "/contact", "title": "Contact", "template": "contact" }
+  ]
+}
