@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRef, onMounted, onBeforeUnmount } from 'vue'
-import { plus, archive, update, customLink, tool, home, chevronDown, category } from '@wordpress/icons'
+import { plus, archive, update, customLink, tool, home, chevronDown, category, listView } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
@@ -15,6 +15,7 @@ import { useConversations } from '@/data/useConversations'
 import { useSites } from '@/data/useSites'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useAddSite } from '@/data/useAddSite'
+import { useAllSitesView } from '@/data/useAllSitesView'
 
 const props = defineProps<{
   siteId: string
@@ -35,6 +36,7 @@ const emit = defineEmits<{
 
 const { isMac } = useOperatingSystem()
 const { openAddSite } = useAddSite()
+const { showAllSitesView } = useAllSitesView()
 const { conversations, getConversations, messages, archiveConversation, unarchiveConversation } = useConversations()
 const siteConvos = getConversations(toRef(props, 'siteId'))
 

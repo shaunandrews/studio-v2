@@ -12,6 +12,7 @@ import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useSites } from '@/data/useSites'
 import { useConversations } from '@/data/useConversations'
 import { useAddSite } from '@/data/useAddSite'
+import { useAllSitesView } from '@/data/useAllSitesView'
 
 const openLabel = ref('Browser')
 const openIconUrl = ref('/icons/chrome.svg')
@@ -44,6 +45,7 @@ const { isMac } = useOperatingSystem()
 const { sites } = useSites()
 const { conversations } = useConversations()
 const { openAddSite } = useAddSite()
+const { showAllSitesView } = useAllSitesView()
 
 const currentSite = computed(() => sites.value.find(s => s.id === props.siteId))
 
@@ -153,13 +155,15 @@ const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         </button>
         <Transition name="picker">
           <div v-if="sitePickerOpen" class="site-picker-panel">
-            <button class="picker-row picker-all-sites" :class="{ active: isAllSites }" @click="goAllSites">
-              <span class="picker-all-sites-icon">
-                <WPIcon :icon="category" :size="20" />
-              </span>
-              <span class="picker-row-label">All Sites</span>
-            </button>
-            <div class="picker-divider" />
+            <template v-if="showAllSitesView">
+              <button class="picker-row picker-all-sites" :class="{ active: isAllSites }" @click="goAllSites">
+                <span class="picker-all-sites-icon">
+                  <WPIcon :icon="category" :size="20" />
+                </span>
+                <span class="picker-row-label">All Sites</span>
+              </button>
+              <div class="picker-divider" />
+            </template>
             <div class="picker-sites">
               <SiteItem
                 v-for="site in sites"
