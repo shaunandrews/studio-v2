@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'scroll-state': [atBottom: boolean]
+  'scroll-top': [atTop: boolean]
 }>()
 
 const scrollerRef = ref<HTMLDivElement | null>(null)
@@ -20,6 +21,7 @@ function checkScrollState() {
   const el = scrollerRef.value
   const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 20
   emit('scroll-state', atBottom)
+  emit('scroll-top', el.scrollTop < 5)
 }
 
 function scrollToBottom() {

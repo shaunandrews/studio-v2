@@ -125,6 +125,7 @@ watch(inputWrapRef, (el, _, onCleanup) => {
 
 const draft = ref('')
 const isScrolledUp = ref(false)
+const isAtTop = ref(true)
 
 function onNavigate(screen: string) {
   const id = activeSiteId.value
@@ -209,11 +210,11 @@ const { openSettings } = useSettings()
           <TaskBrief
             v-if="!isNewTask"
             :conversation-id="selectedConvoId"
+            :elevated="!isAtTop"
             class="task-brief-panel"
             @preview="(id) => { /* TODO: open preview */ }"
-            @review="(id) => { /* out of scope: review view not yet built */ }"
           />
-          <ChatMessageList v-if="!isNewTask" :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" />
+          <ChatMessageList v-if="!isNewTask" :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" @scroll-top="(atTop) => isAtTop = atTop" />
           <div ref="inputWrapRef" class="detail-input" :class="{ 'is-new-task': isNewTask }">
             <Transition name="welcome-fade">
               <div v-if="isNewTask" class="new-task-welcome">
@@ -324,7 +325,9 @@ const { openSettings } = useSettings()
   width: 100%;
   max-width: 580px;
   padding: var(--space-xs) var(--space-s);
-  background: var(--color-frame-fill);
+  background: color-mix(in srgb, var(--color-frame-fill) 70%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--color-frame-border);
   border-radius: var(--radius-m);
   margin-block-end: var(--space-xs);
