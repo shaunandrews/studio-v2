@@ -19,9 +19,10 @@ let resizeObserver: ResizeObserver | null = null
 function checkScrollState() {
   if (!scrollerRef.value) return
   const el = scrollerRef.value
+  const isScrollable = el.scrollHeight > el.clientHeight + 5
   const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 20
   emit('scroll-state', atBottom)
-  emit('scroll-top', el.scrollTop < 5)
+  emit('scroll-top', !isScrollable || el.scrollTop < 5)
 }
 
 function scrollToBottom() {
