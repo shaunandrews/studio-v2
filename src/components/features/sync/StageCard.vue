@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { moreVertical } from '@wordpress/icons'
+import Button from '@/components/primitives/Button.vue'
+import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
+import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
 
 const props = withDefaults(defineProps<{
@@ -9,6 +13,7 @@ const props = withDefaults(defineProps<{
   siteName?: string
   connected: boolean
   compact?: boolean
+  showMenu?: boolean
   envColor?: string
   dimmed?: boolean
   syncDisabled?: boolean
@@ -23,10 +28,21 @@ const props = withDefaults(defineProps<{
   syncLabel: '',
 })
 
-defineEmits<{
+const emit = defineEmits<{
   sync: []
   connect: []
+  replace: []
+  disconnect: []
 }>()
+
+const menuGroups = computed<FlyoutMenuGroup[]>(() => [
+  {
+    items: [
+      { label: 'Replace site', action: () => emit('replace') },
+      { label: 'Disconnect', destructive: true, action: () => emit('disconnect') },
+    ],
+  },
+])
 
 // ── Relative time since sync completed ──
 
@@ -104,15 +120,27 @@ const timeSince = computed(() => {
     <!-- Done: time-since label -->
     <span v-else-if="syncPhase === 'done'" class="sync-env__timesince">{{ timeSince }}</span>
 
-    <!-- Connected: Sync button -->
-    <button
-      v-if="connected && syncPhase !== 'syncing'"
-      class="sync-env__action"
-      :disabled="syncDisabled"
-      @click="$emit('sync')"
-    >
-      Sync
-    </button>
+    <!-- Connected: Sync button + optional menu -->
+    <div v-if="connected && syncPhase !== 'syncing'" class="hstack gap-xxs shrink-0">
+      <button
+        class="sync-env__action"
+        :disabled="syncDisabled"
+        @click="$emit('sync')"
+      >
+        Sync
+      </button>
+      <FlyoutMenu v-if="showMenu" :groups="menuGroups" align="end">
+        <template #trigger="{ toggle }">
+          <Button
+            variant="tertiary"
+            :icon="moreVertical"
+            icon-only
+            tooltip="More actions"
+            @click="toggle"
+          />
+        </template>
+      </FlyoutMenu>
+    </div>
 
     <!-- Unconnected: connect button (only when not dimmed) -->
     <button

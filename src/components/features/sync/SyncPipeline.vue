@@ -15,7 +15,7 @@ const props = defineProps<{
 }>()
 
 const { sites } = useSites()
-const { pipeline, setupPhase, skipSetupStep, openSyncModal, openConnectModal, syncAction, syncProgress } = usePipeline(toRef(props, 'siteId'))
+const { pipeline, setupPhase, skipSetupStep, openSyncModal, openConnectModal, disconnectSite, syncAction, syncProgress } = usePipeline(toRef(props, 'siteId'))
 
 const site = computed(() => sites.value.find(p => p.id === props.siteId))
 
@@ -220,6 +220,7 @@ function envColor(environment?: string): string {
               :favicon="site?.favicon"
               :site-name="site?.name"
               :connected="!!stage.site"
+              :show-menu="!!stage.site"
               :env-color="envColor(stage.environment)"
               :dimmed="isSetup && !isIntroStep && index > setupPhase!"
               :sync-phase="getProgress(stage.id).phase"
@@ -229,6 +230,8 @@ function envColor(environment?: string): string {
               :sync-done-verb="getProgress(stage.id).doneVerb"
               @sync="onSync(stage.id)"
               @connect="openConnectModal(stage.id)"
+              @replace="openConnectModal(stage.id)"
+              @disconnect="disconnectSite(stage.id)"
             />
           </template>
         </template>
