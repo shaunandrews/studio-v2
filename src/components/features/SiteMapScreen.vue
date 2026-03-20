@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
-import { plus, fullscreen } from '@wordpress/icons'
+import { plus, fullscreen, arrowUp } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import { useSites } from '@/data/useSites'
+import { useConversations } from '@/data/useConversations'
 import { sites as siteRegistry } from '@/data/sites/index'
 import { assemblePage, deriveSiteMapTree } from '@/data/useSiteTemplates'
 import type { SiteMapNode } from '@/data/useSiteTemplates'
@@ -15,6 +16,7 @@ const props = defineProps<{
 }>()
 
 const { sites } = useSites()
+const { conversations, sendMessage, generateTaskTitle } = useConversations()
 const site = computed(() => sites.value.find(s => s.id === props.siteId))
 const layout = computed<MockLayout>(() => site.value?.mockLayout ?? 'default')
 const siteFiles = computed(() => siteRegistry[layout.value] ?? null)
@@ -36,6 +38,23 @@ const canvasRef = ref<HTMLElement | null>(null)
 const panX = ref(0)
 const panY = ref(0)
 const zoom = ref(1)
+
+/* ── will-change management ── */
+const isMoving = ref(false)
+let settleTimer: ReturnType<typeof setTimeout> | null = null
+
+function startMoving() {
+  isMoving.value = true
+  if (settleTimer) clearTimeout(settleTimer)
+}
+
+function scheduleSettle() {
+  if (settleTimer) clearTimeout(settleTimer)
+  settleTimer = setTimeout(() => {
+    isMoving.value = false
+    computeConnectors()
+  }, 150)
+}
 
 const canvasTransform = computed(() =>
   `translate(${panX.value}px, ${panY.value}px) scale(${zoom.value})`
@@ -61,38 +80,227 @@ function deselectAll() {
   selectedNodeId.value = null
 }
 
+/** Resolve selected node ID → SiteMapNode */
+const selectedNode = computed<SiteMapNode | null>(() => {
+  if (!selectedNodeId.value || !tree.value) return null
+  if (selectedNodeId.value === 'root') return tree.value
+  const parts = selectedNodeId.value.split('-').map(Number)
+  const l1 = tree.value.children?.[parts[0]]
+  if (!l1) return null
+  if (parts.length === 1) return l1
+  return l1.children?.[parts[1]] ?? null
+})
+
+const taskMessage = ref('')
+const taskInputRef = ref<HTMLTextAreaElement | null>(null)
+const canSendTask = computed(() => taskMessage.value.trim().length > 0)
+
+/** Screen-space position of the task input, anchored below the selected node */
+const taskInputPos = ref<{ x: number; y: number } | null>(null)
+
+function updateTaskInputPos() {
+  if (!selectedNodeId.value || !viewportRef.value) {
+    taskInputPos.value = null
+    return
+  }
+  const nodeEl = canvasRef.value?.querySelector(`[data-node-id="${selectedNodeId.value}"]`) as HTMLElement | null
+  if (!nodeEl) { taskInputPos.value = null; return }
+
+  const vpRect = viewportRef.value.getBoundingClientRect()
+  const nodeRect = nodeEl.getBoundingClientRect()
+
+  taskInputPos.value = {
+    x: nodeRect.left + nodeRect.width / 2 - vpRect.left,
+    y: nodeRect.bottom - vpRect.top + 8 * zoom.value,
+  }
+}
+
+function sendTask() {
+  const text = taskMessage.value.trim()
+  if (!text || !selectedNode.value) return
+
+  const pageName = selectedNode.value.label
+  const conv = {
+    id: `conv-${Date.now()}`,
+    siteId: props.siteId,
+    agentId: 'claude-code' as const,
+    createdAt: new Date().toISOString(),
+    title: `${pageName}: ${text.slice(0, 40)}`,
+    status: 'running' as const,
+    unread: true,
+  }
+  conversations.value.push(conv)
+
+  const contextMessage = `[Site Map → ${pageName} page]\n\n${text}`
+  sendMessage(conv.id, contextMessage)
+  generateTaskTitle(conv.id, text)
+
+  taskMessage.value = ''
+  selectedNodeId.value = null
+}
+
+function onTaskKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault()
+    sendTask()
+  }
+  if (e.key === 'Escape') {
+    deselectAll()
+  }
+}
+
+watch(selectedNodeId, (id) => {
+  taskMessage.value = ''
+  if (id) {
+    nextTick(() => {
+      updateTaskInputPos()
+      // Delay focus to run after the click event cycle completes —
+      // the iframe inside SitePageThumb can steal focus back otherwise.
+      setTimeout(() => taskInputRef.value?.focus(), 50)
+    })
+  } else {
+    taskInputPos.value = null
+  }
+})
+
 // Pan via pointer drag (any button except right-click)
+let isPointerDown = false
 let isPanning = false
 let panStartX = 0
 let panStartY = 0
 let panOriginX = 0
 let panOriginY = 0
+let panPointerId = -1
+const PAN_THRESHOLD = 4 // px before a click becomes a drag
 
 function onPointerDown(e: PointerEvent) {
-  // Middle mouse or space+click — but for simplicity, just any click on the background
   if (e.button === 2) return
-  // Only start pan if clicking on the viewport background
   const target = e.target as HTMLElement
-  if (target.closest('.sitemap-node') || target.closest('.sitemap-label') || target.closest('.sitemap-toolbar')) return
+  if (target.closest('.sitemap-toolbar')) return
 
-  deselectAll()
-  isPanning = true
+  isPointerDown = true
+  isPanning = false
   panStartX = e.clientX
   panStartY = e.clientY
   panOriginX = panX.value
   panOriginY = panY.value
-  ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+  panPointerId = e.pointerId
 }
 
 function onPointerMove(e: PointerEvent) {
-  if (!isPanning) return
-  panX.value = panOriginX + (e.clientX - panStartX)
-  panY.value = panOriginY + (e.clientY - panStartY)
-  requestConnectorUpdate()
+  if (!isPointerDown) return
+  const dx = e.clientX - panStartX
+  const dy = e.clientY - panStartY
+
+  if (!isPanning) {
+    if (Math.abs(dx) < PAN_THRESHOLD && Math.abs(dy) < PAN_THRESHOLD) return
+    isPanning = true
+    startMoving()
+    viewportRef.value?.setPointerCapture(panPointerId)
+  }
+
+  panX.value = panOriginX + dx
+  panY.value = panOriginY + dy
+  updateTaskInputPos()
 }
 
-function onPointerUp() {
+function onPointerUp(e: PointerEvent) {
+  const wasPanning = isPanning
   isPanning = false
+  isPointerDown = false
+
+  if (wasPanning) {
+    scheduleSettle()
+    return
+  }
+
+  // It was a click, not a drag — handle selection
+  const target = e.target as HTMLElement
+  const nodeEl = target.closest('.sitemap-node') as HTMLElement | null
+  const labelEl = target.closest('.sitemap-label') as HTMLElement | null
+
+  if (nodeEl) {
+    const id = nodeEl.dataset.nodeId
+    if (id != null) selectNode(id)
+  } else if (labelEl) {
+    // Labels have the same click logic — find the sibling node's ID
+    const branch = labelEl.closest('.sitemap-branch') ?? labelEl.parentElement
+    const siblingNode = branch?.querySelector('.sitemap-node') as HTMLElement | null
+    const id = siblingNode?.dataset.nodeId
+    if (id != null) selectNode(id)
+  } else {
+    deselectAll()
+  }
+}
+
+// Double-click: zoom to fit the clicked page node
+function onDoubleClick(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  const nodeEl = target.closest('.sitemap-node') as HTMLElement | null
+  if (!nodeEl) return
+
+  const thumbEl = nodeEl.querySelector('.page-thumb') as HTMLElement | null
+  if (!thumbEl) return
+
+  const viewport = viewportRef.value!
+  const vw = viewport.clientWidth
+  const vh = viewport.clientHeight
+
+  // Get the thumb's position in canvas-local coords
+  const canvasRect = canvasRef.value!.getBoundingClientRect()
+  const thumbRect = thumbEl.getBoundingClientRect()
+  const s = zoom.value
+
+  const thumbLocalX = (thumbRect.left - canvasRect.left) / s
+  const thumbLocalY = (thumbRect.top - canvasRect.top) / s
+  const thumbLocalW = thumbRect.width / s
+  const thumbLocalH = thumbRect.height / s
+
+  // Fit the thumb in the viewport with padding
+  const pad = 80
+  const scaleX = (vw - pad * 2) / thumbLocalW
+  const scaleY = (vh - pad * 2) / thumbLocalH
+  const targetZoom = Math.min(6, Math.max(0.15, Math.min(scaleX, scaleY)))
+
+  // Center the thumb in the viewport
+  const targetPanX = (vw - thumbLocalW * targetZoom) / 2 - thumbLocalX * targetZoom
+  const targetPanY = (vh - thumbLocalH * targetZoom) / 2 - thumbLocalY * targetZoom
+
+  animateZoomTo(targetPanX, targetPanY, targetZoom)
+}
+
+// Smooth animated zoom transition
+let animFrame: number | null = null
+
+function animateZoomTo(targetX: number, targetY: number, targetZoom: number) {
+  if (animFrame) cancelAnimationFrame(animFrame)
+  startMoving()
+
+  const startX = panX.value
+  const startY = panY.value
+  const startZoom = zoom.value
+  const duration = 300
+  const startTime = performance.now()
+
+  function step(now: number) {
+    const t = Math.min(1, (now - startTime) / duration)
+    // Ease-out cubic
+    const ease = 1 - Math.pow(1 - t, 3)
+
+    panX.value = startX + (targetX - startX) * ease
+    panY.value = startY + (targetY - startY) * ease
+    zoom.value = startZoom + (targetZoom - startZoom) * ease
+
+    if (t < 1) {
+      animFrame = requestAnimationFrame(step)
+    } else {
+      animFrame = null
+      scheduleSettle()
+      updateTaskInputPos()
+    }
+  }
+
+  animFrame = requestAnimationFrame(step)
 }
 
 // Zoom via wheel (Ctrl+wheel = zoom, plain wheel = pan)
@@ -107,7 +315,7 @@ function onWheel(e: WheelEvent) {
     const pointerY = e.clientY - rect.top
 
     const delta = -e.deltaY * 0.005
-    const newZoom = Math.min(3, Math.max(0.15, zoom.value * (1 + delta)))
+    const newZoom = Math.min(6, Math.max(0.15, zoom.value * (1 + delta)))
     const scale = newZoom / zoom.value
 
     // Zoom toward pointer position
@@ -119,7 +327,9 @@ function onWheel(e: WheelEvent) {
     panX.value -= e.deltaX
     panY.value -= e.deltaY
   }
-  requestConnectorUpdate()
+  startMoving()
+  scheduleSettle()
+  updateTaskInputPos()
 }
 
 // Center the tree on mount
@@ -153,7 +363,10 @@ function centerCanvas() {
   panY.value = (vh - ch * zoom.value) / 2
 }
 
-const zoomPercent = computed(() => Math.round(zoom.value * 100))
+// Effective page scale: iframe renders at 800px scaled 0.2× into 160px thumb,
+// so real page scale = 0.2 × canvasZoom. Display 100% when pages are 1:1.
+const THUMB_SCALE = 0.2
+const zoomPercent = computed(() => Math.round(THUMB_SCALE * zoom.value * 100))
 
 function zoomBy(delta: number) {
   const viewport = viewportRef.value
@@ -161,19 +374,23 @@ function zoomBy(delta: number) {
   const rect = viewport.getBoundingClientRect()
   const cx = rect.width / 2
   const cy = rect.height / 2
-  const newZoom = Math.min(3, Math.max(0.15, zoom.value + delta))
+  const newZoom = Math.min(6, Math.max(0.15, zoom.value + delta))
   const scale = newZoom / zoom.value
   panX.value = cx - scale * (cx - panX.value)
   panY.value = cy - scale * (cy - panY.value)
   zoom.value = newZoom
-  requestConnectorUpdate()
+  startMoving()
+  scheduleSettle()
+  updateTaskInputPos()
 }
 
-function zoomIn() { zoomBy(0.15) }
-function zoomOut() { zoomBy(-0.15) }
+function zoomIn() { zoomBy(zoom.value * 0.2) }
+function zoomOut() { zoomBy(zoom.value * -0.2) }
 function zoomFit() {
   centerCanvas()
-  requestConnectorUpdate()
+  startMoving()
+  scheduleSettle()
+  updateTaskInputPos()
 }
 
 /* ── SVG connector system (tree routing — no overlap) ── */
@@ -367,6 +584,8 @@ onMounted(() => {
 onUnmounted(() => {
   ro?.disconnect()
   viewportRef.value?.removeEventListener('wheel', onWheel)
+  if (settleTimer) clearTimeout(settleTimer)
+  if (animFrame) cancelAnimationFrame(animFrame)
 })
 
 watch(tree, () => nextTick(() => {
@@ -382,26 +601,27 @@ watch(tree, () => nextTick(() => {
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"
     @pointerup="onPointerUp"
+    @dblclick="onDoubleClick"
   >
-    <div ref="canvasRef" class="sitemap-canvas" :style="canvasStyle">
+    <div ref="canvasRef" class="sitemap-canvas" :class="{ 'is-moving': isMoving }" :style="canvasStyle">
       <!-- SVG connector layer -->
       <svg class="sitemap-connectors" aria-hidden="true">
         <path :d="connectorPath" />
       </svg>
       <!-- Root / Home -->
       <div v-if="tree" class="sitemap-root">
-        <div class="sitemap-node" :class="{ 'is-selected': selectedNodeId === 'root' }" data-node-id="root" @click.stop="selectNode('root')">
+        <div class="sitemap-node" :class="{ 'is-selected': selectedNodeId === 'root' }" data-node-id="root">
+          <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === 'root' }" :style="{ transform: labelScale }">{{ tree.label }}</span>
           <div class="page-thumb">
             <SitePageThumb v-if="siteFiles" :html="getPageHtml(tree.template)" />
           </div>
-          <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === 'root' }" :style="{ transform: labelScale }" @click.stop="selectNode('root')">{{ tree.label }}</span>
         </div>
 
         <!-- Level 1 -->
         <div v-if="tree.children?.length" class="sitemap-level">
           <div class="sitemap-level__nodes">
             <div v-for="(child, ci) in tree.children" :key="child.label" class="sitemap-branch">
-              <div class="sitemap-node" :data-node-id="ci" :class="{ 'sitemap-node--stack': child.isCollection, 'is-selected': selectedNodeId === String(ci) }" @click.stop="selectNode(String(ci))">
+              <div class="sitemap-node" :data-node-id="String(ci)" :class="{ 'sitemap-node--stack': child.isCollection, 'is-selected': selectedNodeId === String(ci) }">
                 <div v-if="child.isCollection" class="stack-cards">
                   <div class="stack-card" />
                   <div class="stack-card" />
@@ -410,15 +630,15 @@ watch(tree, () => nextTick(() => {
                   <SitePageThumb v-if="siteFiles" :html="getPageHtml(child.template)" />
                 </div>
                 <span v-if="child.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ child.collectionCount }}</span>
+                <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === String(ci) }" :style="{ transform: labelScale }">{{ child.label }}</span>
               </div>
-              <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === String(ci) }" :style="{ transform: labelScale }" @click.stop="selectNode(String(ci))">{{ child.label }}</span>
 
               <!-- Level 2 children -->
               <template v-if="child.children?.length">
                 <div class="sitemap-level sitemap-level--sub">
                   <div class="sitemap-level__nodes">
                     <div v-for="(gc, gci) in child.children" :key="gc.label" class="sitemap-branch">
-                      <div class="sitemap-node" :data-node-id="`${ci}-${gci}`" :class="{ 'sitemap-node--stack': gc.isCollection, 'is-selected': selectedNodeId === `${ci}-${gci}` }" @click.stop="selectNode(`${ci}-${gci}`)">
+                      <div class="sitemap-node" :data-node-id="`${ci}-${gci}`" :class="{ 'sitemap-node--stack': gc.isCollection, 'is-selected': selectedNodeId === `${ci}-${gci}` }">
                         <div v-if="gc.isCollection" class="stack-cards">
                           <div class="stack-card" />
                           <div class="stack-card" />
@@ -427,8 +647,8 @@ watch(tree, () => nextTick(() => {
                           <SitePageThumb v-if="siteFiles" :html="getPageHtml(gc.template)" />
                         </div>
                         <span v-if="gc.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ gc.collectionCount }}</span>
+                        <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `${ci}-${gci}` }" :style="{ transform: labelScale }">{{ gc.label }}</span>
                       </div>
-                      <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `${ci}-${gci}` }" :style="{ transform: labelScale }" @click.stop="selectNode(`${ci}-${gci}`)">{{ gc.label }}</span>
                     </div>
                   </div>
                 </div>
@@ -438,6 +658,25 @@ watch(tree, () => nextTick(() => {
         </div>
       </div>
     </div>
+
+    <!-- Floating task input anchored to selected node -->
+    <Transition name="task-input">
+      <div v-if="selectedNode && taskInputPos" class="task-input-float" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
+        <div class="task-input-wrap">
+          <textarea
+            ref="taskInputRef"
+            v-model="taskMessage"
+            class="task-input-textarea"
+            :placeholder="`What would you like to do with ${selectedNode.label}?`"
+            rows="1"
+            @keydown="onTaskKeydown"
+          />
+          <button class="task-input-send" :class="{ 'is-active': canSendTask }" :disabled="!canSendTask" aria-label="Send" @click="sendTask">
+            <WPIcon :icon="arrowUp" :size="20" />
+          </button>
+        </div>
+      </div>
+    </Transition>
 
     <!-- Floating toolbar -->
     <div class="sitemap-toolbar">
@@ -483,8 +722,7 @@ watch(tree, () => nextTick(() => {
 .sitemap-toolbar {
   position: absolute;
   inset-block-end: var(--space-m);
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+  inset-inline-end: var(--space-m);
   z-index: 10;
   display: flex;
   align-items: center;
@@ -536,6 +774,9 @@ watch(tree, () => nextTick(() => {
   inset-block-start: 0;
   inset-inline-start: 0;
   transform-origin: 0 0;
+}
+
+.sitemap-canvas.is-moving {
   will-change: transform;
 }
 
@@ -612,26 +853,32 @@ watch(tree, () => nextTick(() => {
 
 .sitemap-node .page-thumb {
   transition: outline-color var(--duration-fast) var(--ease-default);
-  outline: calc(2px / var(--zoom, 1)) solid transparent;
+  outline: calc(1.5px / var(--zoom, 1)) solid transparent;
+  outline-offset: calc(2px / var(--zoom, 1));
 }
 
 .sitemap-node.is-selected .page-thumb {
-  outline-color: var(--color-theme-bg);
+  outline-color: var(--color-frame-selected);
 }
 
 .sitemap-label {
-  display: block;
-  margin-block-start: var(--space-s);
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-start: 0;
+  margin-block-end: calc(4px / var(--zoom, 1));
+  transform-origin: bottom left; /* physical: anchored to thumbnail corner */
+  z-index: 2;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
+  font-weight: var(--font-weight-medium);
   color: var(--color-frame-fg);
-  text-align: center;
   white-space: nowrap;
   cursor: pointer;
+  pointer-events: auto;
+  line-height: 1;
 }
 
 .sitemap-label.is-selected {
-  color: var(--color-theme-bg);
+  color: var(--color-frame-selected);
 }
 
 /* ── Collection stack ── */
@@ -690,8 +937,8 @@ watch(tree, () => nextTick(() => {
 .page-thumb {
   width: 160px;
   aspect-ratio: 3 / 4;
-  /* border-radius: calc(var(--radius-s) / var(--zoom, 1)); */
-  border: calc(1px / var(--zoom, 1)) solid var(--color-frame-border);
+  border-radius: calc(0.5px / var(--zoom, 1));
+  /* border: calc(1px / var(--zoom, 1)) solid var(--color-frame-border); */
   overflow: hidden;
   background: white;
   position: relative;
@@ -699,6 +946,93 @@ watch(tree, () => nextTick(() => {
   box-shadow: 0 calc(1px / var(--zoom, 1)) calc(3px / var(--zoom, 1)) var(--color-shadow);
 }
 
+
+/* ── Floating task input ── */
+
+.task-input-float {
+  position: absolute;
+  z-index: 10;
+  transform: translateX(-50%);
+  width: 360px;
+}
+
+.task-input-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs) var(--space-xxs) var(--space-xxs) var(--space-s);
+  background: var(--color-frame-bg);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-m);
+}
+
+.task-input-wrap:focus-within {
+  border-color: var(--color-frame-theme);
+  box-shadow: 0 0 0 1px var(--color-frame-theme), var(--shadow-m);
+}
+
+.task-input-textarea {
+  flex: 1;
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--font-size-m);
+  color: var(--color-frame-fg);
+  resize: none;
+  line-height: 1.5;
+  field-sizing: content;
+  min-height: 0;
+  max-height: 100px;
+  padding: var(--space-xxxs) 0;
+}
+
+.task-input-textarea::placeholder {
+  color: var(--color-frame-fg-muted);
+}
+
+.task-input-send {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-frame-border);
+  color: var(--color-frame-fg-muted);
+  cursor: default;
+  transition: background var(--duration-instant) var(--ease-default),
+    color var(--duration-instant) var(--ease-default);
+}
+
+.task-input-send.is-active {
+  background: var(--color-frame-theme);
+  color: #fff;
+  cursor: pointer;
+}
+
+.task-input-send.is-active:hover {
+  opacity: 0.85;
+}
+
+/* ── Task input transition ── */
+
+.task-input-enter-active,
+.task-input-leave-active {
+  transition: opacity var(--duration-fast) var(--ease-default),
+    transform var(--duration-fast) var(--ease-default);
+}
+
+.task-input-enter-from,
+.task-input-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(calc(-1 * var(--space-xs)));
+}
 
 /* ── Dark mode ── */
 

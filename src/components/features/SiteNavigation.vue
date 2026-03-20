@@ -183,13 +183,15 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         </button>
         <Transition name="picker">
           <div v-if="sitePickerOpen" class="site-picker-panel">
-            <button class="picker-row picker-all-sites" @click="goAllSites">
-              <span class="picker-all-sites-icon">
-                <WPIcon :icon="category" :size="20" />
-              </span>
-              <span class="picker-row-label">All Sites</span>
-            </button>
-            <div class="picker-divider" />
+            <template v-if="showAllSitesView">
+              <button class="picker-row picker-all-sites" @click="goAllSites">
+                <span class="picker-all-sites-icon">
+                  <WPIcon :icon="category" :size="20" />
+                </span>
+                <span class="picker-row-label">All Sites</span>
+              </button>
+              <div class="picker-divider" />
+            </template>
             <div class="picker-sites">
               <SiteItem
                 v-for="s in allSites"
