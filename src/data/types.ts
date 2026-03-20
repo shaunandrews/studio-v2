@@ -14,6 +14,7 @@ export interface Site {
   description?: string
   mockLayout?: MockLayout
   themeType?: ThemeType
+  sortOrder?: number
   features?: string[]
   pipeline?: PipelineStage[]
   skillOverrides?: Record<string, 'enabled' | 'disabled'>
@@ -67,7 +68,7 @@ export interface Agent {
   models?: AgentModel[]
 }
 
-export type ToolCallStatus = 'running' | 'done' | 'error'
+export type ToolCallStatus = 'running' | 'done' | 'error' | 'reverted'
 
 export interface ToolCall {
   id: string
@@ -78,6 +79,7 @@ export interface ToolCall {
   result?: string          // Success detail: "Jetpack 14.3 installed and activated"
   error?: string           // Error detail: "STRIPE_API_KEY not found"
   code?: string            // Code output shown in expandable detail (streams when running)
+  changeId?: string        // Links to undoable Change in useSiteContent
 }
 
 export type TaskStatus = 'queued' | 'running' | 'review' | 'approved' | 'merged' | 'rejected' | 'failed'
