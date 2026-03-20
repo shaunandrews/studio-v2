@@ -1,11 +1,14 @@
 import { ref, computed } from 'vue'
 import { personas, getPersona } from './personas'
 import { useSites } from './useSites'
-import { useConversations } from './useConversations'
+import { useTasks } from './useTasks'
+import { usePreviews } from './usePreviews'
 import { useAddSite } from './useAddSite'
 import { useSettings } from './useSettings'
 import { useAuth } from './useAuth'
 import { useOnboarding } from './useOnboarding'
+import { useHydration } from './useHydration'
+import { db, isDbAvailable } from './db'
 import type { Router } from 'vue-router'
 
 const STORAGE_KEY = 'studio-persona'
@@ -31,20 +34,36 @@ export function getInitialPersonaId(): string | null {
 }
 
 export function usePersona() {
-  function activatePersona(id: string, router?: Router) {
+  async function activatePersona(id: string, router?: Router) {
     const persona = getPersona(id)
     if (!persona) return
 
     // Reset all state
     const { resetSites } = useSites()
-    const { resetConversations } = useConversations()
+    const { resetTasks } = useTasks()
+    const { resetPreviews } = usePreviews()
     const { resetAddSite } = useAddSite()
     const { resetSettings } = useSettings()
     const { reset: resetAuth } = useAuth()
     const { reset: resetOnboarding } = useOnboarding()
 
-    resetSites(persona.sites)
-    resetConversations(persona.conversations, persona.messages)
+    // Clear DB and re-seed from persona
+    if (await isDbAvailable()) {
+      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, async () => {
+        await db.sites.clear()
+        await db.tasks.clear()
+        await db.messages.clear()
+        await db.previews.clear()
+        if (persona.sites.length) await db.sites.bulkPut(persona.sites)
+        if (persona.tasks.length) await db.tasks.bulkPut(persona.tasks)
+        if (persona.messages.length) await db.messages.bulkPut(persona.messages)
+        if (persona.previews.length) await db.previews.bulkPut(persona.previews)
+      })
+    }
+
+    await resetSites(persona.sites)
+    await resetTasks(persona.tasks, persona.messages)
+    await resetPreviews(persona.previews)
     resetAddSite()
     resetSettings()
     resetAuth(persona.auth)
@@ -52,6 +71,10 @@ export function usePersona() {
 
     activePersonaId.value = id
     localStorage.setItem(STORAGE_KEY, id)
+
+    // Mark hydration as ready
+    const { ready } = useHydration()
+    ready.value = true
 
     // Navigate to the right starting point
     if (router) {
@@ -63,9 +86,23 @@ export function usePersona() {
     }
   }
 
-  function clearPersona(router?: Router) {
+  async function clearPersona(router?: Router) {
     activePersonaId.value = null
     localStorage.removeItem(STORAGE_KEY)
+
+    // Clear DB
+    if (await isDbAvailable()) {
+      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, async () => {
+        await db.sites.clear()
+        await db.tasks.clear()
+        await db.messages.clear()
+        await db.previews.clear()
+      })
+    }
+
+    const { ready } = useHydration()
+    ready.value = false
+
     if (router) {
       router.push('/choose')
     }
