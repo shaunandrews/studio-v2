@@ -1,0 +1,33 @@
+{
+  "name": "Wild Lens",
+  "description": "A nature and landscape photography portfolio",
+  "favicon": "📷",
+  "theme": {
+    "colors": {
+      "bg": "#111",
+      "text": "#fff",
+      "accent": "#fff",
+      "muted": "rgba(255,255,255,0.5)",
+      "border": "rgba(255,255,255,0.06)",
+      "surface": "#1a1a1a"
+    },
+    "fonts": {
+      "heading": "'Inter', sans-serif",
+      "body": "'Inter', sans-serif"
+    },
+    "spacing": {
+      "content": "680px",
+      "wide": "1000px"
+    }
+  },
+  "parts": ["header", "footer"],
+  "pages": [
+    { "slug": "/", "title": "Home", "template": "home" },
+    {
+      "slug": "/portfolio", "title": "Portfolio", "template": "gallery",
+      "collection": { "slug": "/portfolio/:slug", "title": "Album", "template": "album", "count": 15 }
+    },
+    { "slug": "/about", "title": "About", "template": "about" },
+    { "slug": "/contact", "title": "Contact", "template": "contact" }
+  ]
+}
