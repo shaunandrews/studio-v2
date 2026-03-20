@@ -4,8 +4,10 @@ import { plus, fullscreen } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import { useSites } from '@/data/useSites'
-import { siteMapTrees } from '@/data/sitemap-content'
-import type { SiteMapNode, PageContent } from '@/data/sitemap-content'
+import { sites as siteRegistry } from '@/data/sites/index'
+import { assemblePage, deriveSiteMapTree } from '@/data/useSiteTemplates'
+import type { SiteMapNode } from '@/data/useSiteTemplates'
+import SitePageThumb from '@/components/composites/SitePageThumb.vue'
 import type { MockLayout } from '@/data/types'
 
 const props = defineProps<{
@@ -17,7 +19,16 @@ const site = computed(() => sites.value.find(s => s.id === props.siteId))
 const layout = computed<MockLayout>(() => site.value?.mockLayout ?? 'default')
 const siteName = computed(() => site.value?.name ?? 'My Site')
 
-const tree = computed(() => siteMapTrees[layout.value] ?? siteMapTrees.default)
+const siteFiles = computed(() => siteRegistry[layout.value] ?? null)
+const tree = computed<SiteMapNode | null>(() => {
+  if (siteFiles.value) return deriveSiteMapTree(siteFiles.value.config)
+  return null
+})
+
+function getPageHtml(templateName: string): string {
+  if (!siteFiles.value) return ''
+  return assemblePage(siteFiles.value, templateName)
+}
 
 /* ── Infinite canvas (pan & zoom) ── */
 
@@ -298,7 +309,7 @@ function computeConnectors() {
   const root = getNodeRect('root')
   if (!root) return
 
-  const children = tree.value.children ?? []
+  const children = tree.value?.children ?? []
   const childCoords: { x: number; y: number }[] = []
 
   for (let i = 0; i < children.length; i++) {
@@ -380,11 +391,12 @@ watch(tree, () => nextTick(() => {
         <path :d="connectorPath" />
       </svg>
       <!-- Root / Home -->
-      <div class="sitemap-root">
+      <div v-if="tree" class="sitemap-root">
         <div class="sitemap-node" :class="{ 'is-selected': selectedNodeId === 'root' }" data-node-id="root" @click.stop="selectNode('root')">
           <div class="page-thumb">
-            <div class="page-mock" :class="`page-mock--${layout}`">
-              <!-- Home page renders a simplified version of each layout -->
+            <SitePageThumb v-if="siteFiles" :html="getPageHtml(tree.template)" />
+            <div v-else class="page-mock" :class="`page-mock--${layout}`">
+              <!-- Home page renders a simplified version of each layout (fallback for unmigrated sites) -->
               <div class="pm-nav">
                 <span class="pm-logo">{{ siteName }}</span>
                 <div class="pm-nav-links">
@@ -392,21 +404,8 @@ watch(tree, () => nextTick(() => {
                 </div>
               </div>
 
-              <!-- Cafe home -->
-              <template v-if="layout === 'cafe' || layout === 'default'">
-                <div class="pm-hero">
-                  <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=240&fit=crop&q=60" alt="" />
-                  <div class="pm-hero-overlay">{{ siteName }}</div>
-                </div>
-                <div class="pm-card-row">
-                  <div class="pm-card"><div class="pm-card-img" /><div class="pm-card-text"><div class="pm-line w60" /><div class="pm-line w40 muted" /></div></div>
-                  <div class="pm-card"><div class="pm-card-img" /><div class="pm-card-text"><div class="pm-line w60" /><div class="pm-line w40 muted" /></div></div>
-                  <div class="pm-card"><div class="pm-card-img" /><div class="pm-card-text"><div class="pm-line w60" /><div class="pm-line w40 muted" /></div></div>
-                </div>
-              </template>
-
               <!-- Blog home -->
-              <template v-else-if="layout === 'blog'">
+              <template v-if="layout === 'blog'">
                 <div class="pm-blog-layout">
                   <div class="pm-blog-main">
                     <div class="pm-featured-img" />
@@ -546,203 +545,13 @@ watch(tree, () => nextTick(() => {
                   <div class="stack-card" />
                 </div>
                 <div class="page-thumb">
-                  <div class="page-mock" :class="`page-mock--${child.pageType}`">
-                    <div class="pm-nav pm-nav--mini">
-                      <span class="pm-nav-logo">{{ siteName }}</span>
-                      <div class="pm-nav-dots"><span /><span /><span /></div>
-                    </div>
-
-                    <!-- Content page -->
-                    <template v-if="child.pageType === 'content'">
-                      <div class="pm-page-body">
-                        <strong class="pm-heading">{{ child.content.heading }}</strong>
-                        <div class="pm-spacer-s" />
-                        <p v-for="(p, pi) in child.content.body" :key="pi" class="pm-body-text">{{ p }}</p>
-                      </div>
-                    </template>
-
-                    <!-- Listing page -->
-                    <template v-else-if="child.pageType === 'listing'">
-                      <div class="pm-page-body">
-                        <strong class="pm-heading pm-heading--s">{{ child.content.heading }}</strong>
-                        <div class="pm-spacer-s" />
-                        <div v-for="item in child.content.items" :key="item.title" class="pm-list-item">
-                          <div class="pm-list-thumb" />
-                          <div class="pm-list-text">
-                            <strong class="pm-item-title">{{ item.title }}</strong>
-                            <span v-if="item.desc" class="pm-item-desc">{{ item.desc }}</span>
-                            <span v-if="item.meta" class="pm-item-meta">{{ item.meta }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
-
-                    <!-- Single post/project -->
-                    <template v-else-if="child.pageType === 'single'">
-                      <div class="pm-page-body">
-                        <div class="pm-featured-img" />
-                        <strong class="pm-heading">{{ child.content.heading }}</strong>
-                        <span v-if="child.content.subheading" class="pm-meta">{{ child.content.subheading }}</span>
-                        <div class="pm-spacer-s" />
-                        <p v-for="(p, pi) in child.content.body" :key="pi" class="pm-body-text">{{ p }}</p>
-                      </div>
-                    </template>
-
-                    <!-- Form page -->
-                    <template v-else-if="child.pageType === 'form'">
-                      <div class="pm-page-body">
-                        <strong class="pm-heading">{{ child.content.heading }}</strong>
-                        <span v-if="child.content.subheading" class="pm-meta pm-meta--wrap">{{ child.content.subheading }}</span>
-                        <div class="pm-spacer-s" />
-                        <div v-for="field in child.content.fields?.slice(0, 4)" :key="field" class="pm-form-row">
-                          <span class="pm-field-label">{{ field }}</span>
-                          <div class="pm-form-field" />
-                        </div>
-                        <div class="pm-spacer-s" />
-                        <div class="pm-btn pm-btn--primary">{{ child.content.submitLabel }}</div>
-                      </div>
-                    </template>
-
-                    <!-- Product grid -->
-                    <template v-else-if="child.pageType === 'product-grid'">
-                      <div class="pm-page-body">
-                        <strong class="pm-heading pm-heading--s">{{ child.content.heading }}</strong>
-                        <div class="pm-spacer-s" />
-                        <div class="pm-product-grid pm-product-grid--compact">
-                          <div v-for="item in child.content.items" :key="item.title" class="pm-product">
-                            <div class="pm-product-img" />
-                            <div class="pm-product-info">
-                              <span class="pm-product-name">{{ item.title }}</span>
-                              <span class="pm-product-price">{{ item.price }}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
-
-                    <!-- Product single -->
-                    <template v-else-if="child.pageType === 'product-single'">
-                      <div class="pm-page-body">
-                        <div class="pm-product-hero" />
-                        <strong class="pm-heading">{{ child.content.productName }}</strong>
-                        <span class="pm-product-price-lg">{{ child.content.productPrice }}</span>
-                        <p class="pm-body-text">{{ child.content.productDesc }}</p>
-                        <div class="pm-btn pm-btn--primary pm-btn--full">Add to cart</div>
-                      </div>
-                    </template>
-
-                    <!-- Menu page -->
-                    <template v-else-if="child.pageType === 'menu'">
-                      <div class="pm-page-body">
-                        <strong class="pm-heading">{{ child.content.heading }}</strong>
-                        <div class="pm-spacer-s" />
-                        <div v-for="cat in child.content.categories" :key="cat.name" class="pm-menu-category">
-                          <span class="pm-menu-cat-name">{{ cat.name }}</span>
-                          <div v-for="item in cat.items" :key="item.title" class="pm-menu-item">
-                            <span class="pm-menu-item-name">{{ item.title }}</span>
-                            <span class="pm-menu-item-price">{{ item.price }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
-
-                    <!-- Services page -->
-                    <template v-else-if="child.pageType === 'services'">
-                      <div class="pm-page-body">
-                        <strong class="pm-heading">{{ child.content.heading }}</strong>
-                        <span v-if="child.content.subheading" class="pm-meta pm-meta--wrap">{{ child.content.subheading }}</span>
-                        <div class="pm-spacer-s" />
-                        <div class="pm-services-grid">
-                          <div v-for="card in child.content.serviceCards" :key="card.title" class="pm-service-card">
-                            <span class="pm-service-icon">{{ card.icon }}</span>
-                            <strong class="pm-service-title">{{ card.title }}</strong>
-                            <span class="pm-service-desc">{{ card.desc }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
-
-                    <!-- Pricing page -->
-                    <template v-else-if="child.pageType === 'pricing'">
-                      <div class="pm-page-body pm-page-body--center">
-                        <strong class="pm-heading pm-heading--center">{{ child.content.heading }}</strong>
-                        <span v-if="child.content.subheading" class="pm-meta pm-meta--center">{{ child.content.subheading }}</span>
-                        <div class="pm-spacer-s" />
-                        <div class="pm-pricing-grid">
-                          <div v-for="tier in child.content.tiers" :key="tier.name" class="pm-pricing-card" :class="{ 'pm-pricing-card--featured': tier.featured }">
-                            <span class="pm-pricing-name">{{ tier.name }}</span>
-                            <span class="pm-pricing-price">{{ tier.price }}<small v-if="tier.period">{{ tier.period }}</small></span>
-                            <div class="pm-btn" :class="{ 'pm-btn--primary': tier.featured }">{{ tier.cta }}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
-
-                    <!-- Gallery page -->
-                    <template v-else-if="child.pageType === 'gallery'">
-                      <div v-if="child.content.heading" class="pm-page-body pm-page-body--tight">
-                        <strong class="pm-heading pm-heading--s">{{ child.content.heading }}</strong>
-                      </div>
-                      <div class="pm-gallery-grid pm-gallery-grid--page">
-                        <div class="pm-gallery-col">
-                          <div class="pm-gallery-placeholder" style="aspect-ratio: 3/4" />
-                          <div class="pm-gallery-placeholder" style="aspect-ratio: 4/3" />
-                        </div>
-                        <div class="pm-gallery-col">
-                          <div class="pm-gallery-placeholder" style="aspect-ratio: 1/1" />
-                          <div class="pm-gallery-placeholder" style="aspect-ratio: 3/4" />
-                        </div>
-                        <div class="pm-gallery-col">
-                          <div class="pm-gallery-placeholder" style="aspect-ratio: 4/3" />
-                          <div class="pm-gallery-placeholder" style="aspect-ratio: 1/1" />
-                        </div>
-                      </div>
-                    </template>
-
-                    <!-- Docs page -->
-                    <template v-else-if="child.pageType === 'docs'">
-                      <div class="pm-docs-layout">
-                        <div class="pm-docs-sidebar pm-docs-sidebar--mini">
-                          <template v-for="section in child.content.sidebarSections" :key="section.title">
-                            <span class="pm-docs-section-label">{{ section.title }}</span>
-                            <a v-for="item in section.items" :key="item.label" class="pm-docs-nav-item" :class="{ 'is-active': item.active }">{{ item.label }}</a>
-                          </template>
-                        </div>
-                        <div class="pm-docs-content">
-                          <strong class="pm-heading pm-heading--s">{{ child.content.heading }}</strong>
-                          <p v-for="(p, pi) in child.content.body" :key="pi" class="pm-body-text">{{ p }}</p>
-                          <div v-if="child.content.code" class="pm-code-block"><code>{{ child.content.code }}</code></div>
-                        </div>
-                      </div>
-                    </template>
-
-                    <!-- Cart page -->
-                    <template v-else-if="child.pageType === 'cart'">
-                      <div class="pm-page-body">
-                        <strong class="pm-heading">{{ child.content.heading }}</strong>
-                        <div class="pm-spacer-s" />
-                        <div v-for="item in child.content.cartItems" :key="item.name" class="pm-cart-item">
-                          <div class="pm-cart-thumb" />
-                          <div class="pm-cart-text">
-                            <span class="pm-item-title">{{ item.name }}</span>
-                            <span class="pm-product-price">{{ item.price }}</span>
-                          </div>
-                        </div>
-                        <div class="pm-divider" />
-                        <div class="pm-cart-total">
-                          <span class="pm-item-title">Total</span>
-                          <span class="pm-product-price-lg">{{ child.content.cartTotal }}</span>
-                        </div>
-                        <div class="pm-btn pm-btn--primary pm-btn--full">{{ child.content.submitLabel }}</div>
-                      </div>
-                    </template>
-                  </div>
+                  <SitePageThumb v-if="siteFiles" :html="getPageHtml(child.template)" />
                 </div>
                 <span v-if="child.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ child.collectionCount }}</span>
               </div>
               <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === String(ci) }" :style="{ transform: labelScale }" @click.stop="selectNode(String(ci))">{{ child.label }}</span>
 
-              <!-- Level 2 children (reuse same templates with gc node) -->
+              <!-- Level 2 children -->
               <template v-if="child.children?.length">
                 <div class="sitemap-level sitemap-level--sub">
                   <div class="sitemap-level__nodes">
@@ -753,68 +562,7 @@ watch(tree, () => nextTick(() => {
                           <div class="stack-card" />
                         </div>
                         <div class="page-thumb">
-                          <div class="page-mock" :class="`page-mock--${gc.pageType}`">
-                            <div class="pm-nav pm-nav--mini">
-                              <span class="pm-nav-logo">{{ siteName }}</span>
-                              <div class="pm-nav-dots"><span /><span /><span /></div>
-                            </div>
-
-                            <!-- Single -->
-                            <template v-if="gc.pageType === 'single'">
-                              <div class="pm-page-body">
-                                <div class="pm-featured-img" />
-                                <strong class="pm-heading">{{ gc.content.heading }}</strong>
-                                <span v-if="gc.content.subheading" class="pm-meta">{{ gc.content.subheading }}</span>
-                                <div class="pm-spacer-s" />
-                                <p v-for="(p, pi) in gc.content.body" :key="pi" class="pm-body-text">{{ p }}</p>
-                              </div>
-                            </template>
-
-                            <!-- Product single -->
-                            <template v-else-if="gc.pageType === 'product-single'">
-                              <div class="pm-page-body">
-                                <div class="pm-product-hero" />
-                                <strong class="pm-heading">{{ gc.content.productName }}</strong>
-                                <span class="pm-product-price-lg">{{ gc.content.productPrice }}</span>
-                                <p class="pm-body-text">{{ gc.content.productDesc }}</p>
-                                <div class="pm-btn pm-btn--primary pm-btn--full">Add to cart</div>
-                              </div>
-                            </template>
-
-                            <!-- Docs -->
-                            <template v-else-if="gc.pageType === 'docs'">
-                              <div class="pm-docs-layout">
-                                <div class="pm-docs-sidebar pm-docs-sidebar--mini">
-                                  <template v-for="section in gc.content.sidebarSections" :key="section.title">
-                                    <span class="pm-docs-section-label">{{ section.title }}</span>
-                                    <a v-for="item in section.items" :key="item.label" class="pm-docs-nav-item" :class="{ 'is-active': item.active }">{{ item.label }}</a>
-                                  </template>
-                                </div>
-                                <div class="pm-docs-content">
-                                  <strong class="pm-heading pm-heading--s">{{ gc.content.heading }}</strong>
-                                  <p v-for="(p, pi) in gc.content.body" :key="pi" class="pm-body-text">{{ p }}</p>
-                                  <div v-if="gc.content.code" class="pm-code-block"><code>{{ gc.content.code }}</code></div>
-                                </div>
-                              </div>
-                            </template>
-
-                            <!-- Gallery -->
-                            <template v-else-if="gc.pageType === 'gallery'">
-                              <div v-if="gc.content.heading" class="pm-page-body pm-page-body--tight">
-                                <strong class="pm-heading pm-heading--s">{{ gc.content.heading }}</strong>
-                              </div>
-                              <div class="pm-gallery-grid pm-gallery-grid--page">
-                                <div class="pm-gallery-col">
-                                  <div class="pm-gallery-placeholder" style="aspect-ratio: 3/4" />
-                                  <div class="pm-gallery-placeholder" style="aspect-ratio: 4/3" />
-                                </div>
-                                <div class="pm-gallery-col">
-                                  <div class="pm-gallery-placeholder" style="aspect-ratio: 1/1" />
-                                  <div class="pm-gallery-placeholder" style="aspect-ratio: 3/4" />
-                                </div>
-                              </div>
-                            </template>
-                          </div>
+                          <SitePageThumb v-if="siteFiles" :html="getPageHtml(gc.template)" />
                         </div>
                         <span v-if="gc.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ gc.collectionCount }}</span>
                       </div>
@@ -1125,10 +873,6 @@ watch(tree, () => nextTick(() => {
   border-block-end-color: rgba(255, 255, 255, 0.08);
 }
 
-.pm-nav--mini {
-  padding: 10px 24px;
-}
-
 .pm-logo {
   font-size: 18px;
   font-weight: 700;
@@ -1136,15 +880,6 @@ watch(tree, () => nextTick(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 200px;
-}
-
-.pm-nav-logo {
-  font-size: 15px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 160px;
 }
 
 .pm-nav-links {
@@ -1159,126 +894,12 @@ watch(tree, () => nextTick(() => {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.pm-nav-dots {
-  display: flex;
-  gap: 16px;
-}
-
-.pm-nav-dots span {
-  width: 32px;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.page-mock--portfolio .pm-nav-dots span,
-.page-mock--gallery .pm-nav-dots span {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* ── Page body ── */
-
-.pm-page-body {
-  padding: 28px 32px;
-}
-
-.pm-page-body--center {
-  text-align: center;
-}
-
-.pm-page-body--tight {
-  padding: 20px 24px 8px;
-}
-
-/* ── Typography ── */
-
-.pm-heading {
-  display: block;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.2;
-  margin: 0 0 6px;
-}
-
-.pm-heading--s { font-size: 18px; }
-.pm-heading--center { text-align: center; }
-
-.pm-meta {
-  display: block;
-  font-size: 12px;
-  color: #999;
-  line-height: 1.4;
-}
-
-.pm-meta--wrap { white-space: pre-line; }
-.pm-meta--center { text-align: center; }
-
-.page-mock--portfolio .pm-meta,
-.page-mock--gallery .pm-meta {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.pm-body-text {
-  font-size: 13px;
-  line-height: 1.6;
-  color: #555;
-  margin: 0 0 10px;
-}
-
-.page-mock--portfolio .pm-body-text,
-.page-mock--gallery .pm-body-text {
-  color: rgba(255, 255, 255, 0.5);
-}
-
 .pm-spacer { height: 20px; }
-.pm-spacer-s { height: 10px; }
 
 .pm-divider {
   height: 1px;
   background: rgba(0, 0, 0, 0.08);
   margin-block: 16px;
-}
-
-/* ── Listing ── */
-
-.pm-list-item {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 12px 0;
-  border-block-end: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.pm-list-thumb {
-  width: 80px;
-  height: 56px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.06);
-  flex-shrink: 0;
-}
-
-.pm-list-text { flex: 1; }
-
-.pm-item-title {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.3;
-  margin-block-end: 2px;
-}
-
-.pm-item-desc {
-  display: block;
-  font-size: 12px;
-  color: #888;
-  line-height: 1.4;
-}
-
-.pm-item-meta {
-  display: block;
-  font-size: 11px;
-  color: #bbb;
-  margin-block-start: 2px;
 }
 
 /* ── Featured image ── */
@@ -1312,155 +933,9 @@ watch(tree, () => nextTick(() => {
   color: #fff;
 }
 
-.pm-btn--full {
-  width: 100%;
-}
-
 .page-mock--portfolio .pm-btn {
   background: #fff;
   color: #111;
-}
-
-/* ── Form ── */
-
-.pm-form-row {
-  margin-block-end: 12px;
-}
-
-.pm-field-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: #555;
-  margin-block-end: 4px;
-}
-
-.pm-form-field {
-  height: 32px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-/* ── Menu ── */
-
-.pm-menu-category {
-  margin-block-end: 20px;
-}
-
-.pm-menu-cat-name {
-  display: block;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #999;
-  padding-block-end: 6px;
-  margin-block-end: 6px;
-  border-block-end: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.pm-menu-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 5px 0;
-}
-
-.pm-menu-item-name {
-  font-size: 14px;
-  color: #333;
-}
-
-.pm-menu-item-price {
-  font-size: 13px;
-  font-weight: 600;
-  color: #555;
-}
-
-/* ── Services grid ── */
-
-.pm-services-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.pm-service-card {
-  padding: 16px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.03);
-}
-
-.page-mock--portfolio .pm-service-card {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.pm-service-icon {
-  font-size: 18px;
-  display: block;
-  margin-block-end: 6px;
-}
-
-.pm-service-title {
-  display: block;
-  font-size: 14px;
-  font-weight: 700;
-  margin-block-end: 4px;
-}
-
-.pm-service-desc {
-  display: block;
-  font-size: 11px;
-  color: #888;
-  line-height: 1.5;
-}
-
-.page-mock--portfolio .pm-service-desc {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-/* ── Pricing ── */
-
-.pm-pricing-grid {
-  display: flex;
-  gap: 10px;
-}
-
-.pm-pricing-card {
-  flex: 1;
-  padding: 16px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.pm-pricing-card--featured {
-  border-color: #2563eb;
-  background: rgba(37, 99, 235, 0.04);
-}
-
-.pm-pricing-name {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #888;
-}
-
-.pm-pricing-price {
-  font-size: 28px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.pm-pricing-price small {
-  font-size: 12px;
-  font-weight: 400;
-  color: #999;
 }
 
 /* ── Product ── */
@@ -1470,10 +945,6 @@ watch(tree, () => nextTick(() => {
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
   padding: 0;
-}
-
-.pm-product-grid--compact {
-  grid-template-columns: repeat(3, 1fr);
 }
 
 .pm-product {
@@ -1491,66 +962,6 @@ watch(tree, () => nextTick(() => {
   padding: 8px 10px;
 }
 
-.pm-product-name {
-  display: block;
-  font-size: 12px;
-  color: #555;
-  line-height: 1.3;
-}
-
-.pm-product-price {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: #1a1a1a;
-}
-
-.pm-product-hero {
-  aspect-ratio: 4 / 3;
-  background: #f0f0f0;
-  border-radius: 8px;
-  margin-block-end: 16px;
-}
-
-.pm-product-price-lg {
-  display: block;
-  font-size: 22px;
-  font-weight: 700;
-  margin-block-end: 8px;
-}
-
-/* ── Cart ── */
-
-.pm-cart-item {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  padding: 12px 0;
-  border-block-end: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.pm-cart-thumb {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
-  background: #f0f0f0;
-  flex-shrink: 0;
-}
-
-.pm-cart-text {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pm-cart-total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-}
-
 /* ── Docs ── */
 
 .pm-docs-layout {
@@ -1565,44 +976,9 @@ watch(tree, () => nextTick(() => {
   border-inline-end: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.pm-docs-sidebar--mini {
-  width: 150px;
-  padding: 14px 10px;
-}
-
 .pm-docs-content {
   flex: 1;
   padding: 16px 24px;
-}
-
-.pm-docs-section-label {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #999;
-  margin: 14px 0 6px;
-}
-
-.pm-docs-section-label:first-child {
-  margin-block-start: 0;
-}
-
-.pm-docs-nav-item {
-  display: block;
-  padding: 4px 8px;
-  font-size: 12px;
-  color: #555;
-  text-decoration: none;
-  border-radius: 4px;
-  line-height: 1.5;
-}
-
-.pm-docs-nav-item.is-active {
-  background: #e8f0fe;
-  color: #1a56db;
-  font-weight: 600;
 }
 
 .pm-code-block {
@@ -1610,15 +986,6 @@ watch(tree, () => nextTick(() => {
   background: #1e293b;
   padding: 14px 16px;
   margin-block-start: 12px;
-}
-
-.pm-code-block code {
-  display: block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  line-height: 1.6;
-  color: #e2e8f0;
-  white-space: pre;
 }
 
 /* ── Gallery ── */
@@ -1629,11 +996,6 @@ watch(tree, () => nextTick(() => {
   padding: 6px;
 }
 
-.pm-gallery-grid--page {
-  padding: 16px;
-  gap: 10px;
-}
-
 .pm-gallery-col {
   flex: 1;
   display: flex;
@@ -1641,21 +1003,11 @@ watch(tree, () => nextTick(() => {
   gap: 6px;
 }
 
-.pm-gallery-grid--page .pm-gallery-col {
-  gap: 10px;
-}
-
 .pm-gallery-col img {
   width: 100%;
   display: block;
   border-radius: 4px;
   object-fit: cover;
-}
-
-.pm-gallery-placeholder {
-  width: 100%;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Home-specific layouts ── */
@@ -1873,44 +1225,17 @@ watch(tree, () => nextTick(() => {
     border-block-end-color: rgba(255, 255, 255, 0.06);
   }
 
-  .pm-nav-dots span {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .pm-body-text { color: rgba(255, 255, 255, 0.45); }
-  .pm-meta { color: rgba(255, 255, 255, 0.35); }
-  .pm-item-title { color: #fff; }
-  .pm-item-desc { color: rgba(255, 255, 255, 0.4); }
-  .pm-item-meta { color: rgba(255, 255, 255, 0.3); }
-  .pm-field-label { color: rgba(255, 255, 255, 0.4); }
-  .pm-product-name { color: rgba(255, 255, 255, 0.6); }
-  .pm-product-price { color: #fff; }
-  .pm-pricing-name { color: rgba(255, 255, 255, 0.4); }
-
   .pm-line { background: #fff; }
   .pm-line.muted { opacity: 0.1; }
   .pm-line.bold { opacity: 0.6; }
 
   .pm-card, .pm-product { background: rgba(255, 255, 255, 0.05); }
-  .pm-card-img, .pm-product-img, .pm-featured-img, .pm-post-thumb,
-  .pm-list-thumb, .pm-cart-thumb, .pm-product-hero { background: rgba(255, 255, 255, 0.07); }
-  .pm-form-field { border-color: rgba(255, 255, 255, 0.1); }
-  .pm-divider, .pm-list-item, .pm-cart-item { border-color: rgba(255, 255, 255, 0.06); }
-  .pm-menu-cat-name { color: rgba(255, 255, 255, 0.4); border-block-end-color: rgba(255, 255, 255, 0.06); }
-  .pm-menu-item-name { color: rgba(255, 255, 255, 0.8); }
-  .pm-menu-item-price { color: rgba(255, 255, 255, 0.5); }
-  .pm-service-card { background: rgba(255, 255, 255, 0.04); }
-  .pm-service-desc { color: rgba(255, 255, 255, 0.35); }
-  .pm-pricing-card { border-color: rgba(255, 255, 255, 0.08); }
-  .pm-pricing-card--featured { border-color: #3b82f6; background: rgba(59, 130, 246, 0.08); }
+  .pm-card-img, .pm-product-img, .pm-featured-img, .pm-post-thumb { background: rgba(255, 255, 255, 0.07); }
+  .pm-divider { border-color: rgba(255, 255, 255, 0.06); }
   .pm-btn { background: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.6); }
   .pm-btn--primary { background: #3b82f6; color: #fff; }
   .pm-docs-sidebar { border-inline-end-color: rgba(255, 255, 255, 0.06); }
-  .pm-docs-section-label { color: rgba(255, 255, 255, 0.35); }
-  .pm-docs-nav-item { color: rgba(255, 255, 255, 0.5); }
-  .pm-docs-nav-item.is-active { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
   .pm-code-block { background: #0f172a; }
-  .pm-gallery-placeholder { background: rgba(255, 255, 255, 0.06); }
   .pm-hero-overlay { background: rgba(0, 0, 0, 0.5); }
   .pm-tag { background: rgba(255, 255, 255, 0.06); }
   .pm-feature-icon { background: rgba(59, 130, 246, 0.15); }
