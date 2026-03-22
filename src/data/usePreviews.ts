@@ -1,7 +1,8 @@
-import { computed, ref, toRaw } from 'vue'
-import type { PreviewSite, PreviewInvite, PreviewOperation, PreviewOperationType } from './types'
+import { computed, ref } from 'vue'
+import type { PreviewSite, PreviewOperation, PreviewOperationType } from './types'
 import { seedPreviews } from './seed-previews'
 import { db, isDbAvailable } from './db'
+import { toSerializable } from './utils'
 
 // --- Helpers ---
 
@@ -40,15 +41,22 @@ function generatePreviewUrl(siteSlug: string): string {
 // --- Persistence ---
 
 async function persistPreview(preview: PreviewSite) {
-  if (await isDbAvailable()) {
-    const raw = JSON.parse(JSON.stringify(toRaw(preview)))
-    await db.previews.put(raw)
+  try {
+    if (await isDbAvailable()) {
+      await db.previews.put(toSerializable(preview))
+    }
+  } catch (e) {
+    console.error('[persistPreview] DB write failed:', e)
   }
 }
 
 async function deletePreviewFromDb(previewId: string) {
-  if (await isDbAvailable()) {
-    await db.previews.delete(previewId)
+  try {
+    if (await isDbAvailable()) {
+      await db.previews.delete(previewId)
+    }
+  } catch (e) {
+    console.error('[deletePreview] DB write failed:', e)
   }
 }
 
@@ -91,6 +99,8 @@ function getStagesForType(type: PreviewOperationType): { stages: StageConfig[]; 
   }
 }
 
+const activeIntervals = new Map<string, ReturnType<typeof setInterval>>()
+
 function simulateProgress(op: PreviewOperation, onComplete: () => void) {
   const { stages, durationMs } = getStagesForType(op.type)
   const tickMs = 100
@@ -108,6 +118,7 @@ function simulateProgress(op: PreviewOperation, onComplete: () => void) {
     const opRef = operations.value.find(o => o.id === op.id)
     if (!opRef) {
       clearInterval(interval)
+      activeIntervals.delete(op.id)
       return
     }
 
@@ -116,10 +127,13 @@ function simulateProgress(op: PreviewOperation, onComplete: () => void) {
 
     if (progress >= 100) {
       clearInterval(interval)
+      activeIntervals.delete(op.id)
       opRef.status = 'fulfilled'
       onComplete()
     }
   }, tickMs)
+
+  activeIntervals.set(op.id, interval)
 }
 
 // --- Expiration ---
@@ -352,6 +366,8 @@ export function usePreviews() {
   }
 
   async function resetPreviews(newPreviews: PreviewSite[]) {
+    for (const interval of activeIntervals.values()) clearInterval(interval)
+    activeIntervals.clear()
     if (await isDbAvailable()) {
       await db.previews.clear()
       if (newPreviews.length) await db.previews.bulkPut(newPreviews)
@@ -361,6 +377,8 @@ export function usePreviews() {
   }
 
   function _setPreviews(newPreviews: PreviewSite[]) {
+    for (const interval of activeIntervals.values()) clearInterval(interval)
+    activeIntervals.clear()
     previews.value = newPreviews
     operations.value = []
   }

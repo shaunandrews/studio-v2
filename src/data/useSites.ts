@@ -1,6 +1,7 @@
 import { ref, computed, toRaw } from 'vue'
 import { seedProjects } from './seed-sites'
 import { db, isDbAvailable } from './db'
+import { toSerializable } from './utils'
 import type { Site, SiteStatus } from './types'
 
 export const ALL_SITES_ID = '__all-sites__'
@@ -14,9 +15,12 @@ const activeProject = computed(() =>
 )
 
 async function persistSite(site: Site) {
-  if (await isDbAvailable()) {
-    const raw = JSON.parse(JSON.stringify(toRaw(site)))
-    await db.sites.put(raw)
+  try {
+    if (await isDbAvailable()) {
+      await db.sites.put(toSerializable(site))
+    }
+  } catch (e) {
+    console.error('[persistSite] DB write failed:', e)
   }
 }
 
