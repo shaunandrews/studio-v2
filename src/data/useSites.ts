@@ -63,6 +63,20 @@ export function useSites() {
     activeSiteId.value = null
   }
 
+  async function reorderSites(fromIndex: number, toIndex: number) {
+    const list = [...sites.value]
+    const [moved] = list.splice(fromIndex, 1)
+    list.splice(toIndex, 0, moved)
+    list.forEach((s, i) => { s.sortOrder = i })
+    sites.value = list
+    if (await isDbAvailable()) {
+      await Promise.all(list.map(s => {
+        const raw = JSON.parse(JSON.stringify(toRaw(s)))
+        return db.sites.put(raw)
+      }))
+    }
+  }
+
   /** Hydration setter — sets refs without touching DB */
   function _setSites(newSites: Site[]) {
     sites.value = newSites
@@ -76,6 +90,7 @@ export function useSites() {
     setStatus,
     createUntitledSite,
     updateSite,
+    reorderSites,
     resetSites,
     _setSites,
   }

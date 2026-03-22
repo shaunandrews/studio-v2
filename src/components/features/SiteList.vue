@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { plus, category } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
@@ -16,7 +16,42 @@ const emit = defineEmits<{
   'new-site': []
 }>()
 
-const { sites, activeSiteId, setStatus } = useSites()
+const { sites, activeSiteId, setStatus, reorderSites } = useSites()
+
+// Drag-and-drop reordering
+const dragIndex = ref<number | null>(null)
+const dropIndex = ref<number | null>(null)
+
+function onDragStart(index: number, e: DragEvent) {
+  dragIndex.value = index
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', String(index))
+  }
+}
+
+function onDragOver(index: number, e: DragEvent) {
+  e.preventDefault()
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+  dropIndex.value = index
+}
+
+function onDragLeave() {
+  dropIndex.value = null
+}
+
+function onDrop(index: number) {
+  if (dragIndex.value !== null && dragIndex.value !== index) {
+    reorderSites(dragIndex.value, index)
+  }
+  dragIndex.value = null
+  dropIndex.value = null
+}
+
+function onDragEnd() {
+  dragIndex.value = null
+  dropIndex.value = null
+}
 const { tasks } = useTasks()
 const { navigateToSite } = useSiteTransition('site')
 
@@ -90,19 +125,34 @@ function goToAllSites() {
     </template>
 
     <div class="items-stack">
-      <ContextMenu
-        v-for="site in sites"
+      <div
+        v-for="(site, index) in sites"
         :key="site.id"
-        :groups="getSiteMenuGroups(site)"
-        surface="dark"
+        class="drag-wrapper"
+        :class="{
+          dragging: dragIndex === index,
+          'drop-above': dropIndex === index && dragIndex !== null && dragIndex > index,
+          'drop-below': dropIndex === index && dragIndex !== null && dragIndex < index,
+        }"
+        draggable="true"
+        @dragstart="onDragStart(index, $event)"
+        @dragover="onDragOver(index, $event)"
+        @dragleave="onDragLeave"
+        @drop="onDrop(index)"
+        @dragend="onDragEnd"
       >
-        <SiteItem
-          :site="site"
-          :active="site.id === activeSiteId"
-          :unread-count="getUnreadCount(site.id)"
-          @select="navigateToSite"
-        />
-      </ContextMenu>
+        <ContextMenu
+          :groups="getSiteMenuGroups(site)"
+          surface="dark"
+        >
+          <SiteItem
+            :site="site"
+            :active="site.id === activeSiteId"
+            :unread-count="getUnreadCount(site.id)"
+            @select="navigateToSite"
+          />
+        </ContextMenu>
+      </div>
     </div>
 
     <div class="add-site-item" @click="emit('new-site')">
@@ -126,6 +176,23 @@ function goToAllSites() {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.drag-wrapper {
+  border-radius: var(--radius-s);
+  transition: transform var(--duration-instant) var(--ease-default);
+}
+
+.drag-wrapper.dragging {
+  opacity: 0.4;
+}
+
+.drag-wrapper.drop-above {
+  box-shadow: 0 -2px 0 0 var(--color-frame-theme);
+}
+
+.drag-wrapper.drop-below {
+  box-shadow: 0 2px 0 0 var(--color-frame-theme);
 }
 
 .add-site-item {
