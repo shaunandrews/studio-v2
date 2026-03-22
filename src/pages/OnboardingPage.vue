@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, defineComponent, computed, ref } from 'vue'
+import { h, defineComponent, computed, ref, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { wordpress, lock, globe, connection } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
@@ -112,12 +112,18 @@ function handlePermissionCancel() {
   showPermissionDialog.value = false
 }
 
+let exitTimer: ReturnType<typeof setTimeout> | null = null
+
 function handlePermissionComplete() {
   exiting.value = true
-  setTimeout(() => {
+  exitTimer = setTimeout(() => {
     router.push('/add-site')
   }, 600)
 }
+
+onBeforeUnmount(() => {
+  if (exitTimer) clearTimeout(exitTimer)
+})
 </script>
 
 <template>

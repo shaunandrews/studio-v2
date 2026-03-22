@@ -171,8 +171,8 @@ const buildSteps: { progress: number; status: string; duration: number }[] = [
 ]
 
 async function onSubmit(data: { name: string }) {
-  const site = createUntitledSite()
-  updateSite(site.id, { name: data.name })
+  const site = await createUntitledSite()
+  await updateSite(site.id, { name: data.name })
 
   buildingSiteName.value = data.name
   buildingProgress.value = 0

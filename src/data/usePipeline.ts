@@ -99,13 +99,16 @@ export function usePipeline(siteId: Ref<string | null>) {
     syncProgress.value = { phase: 'idle', percent: 0, label: '' }
   }
 
+  let syncInterval: ReturnType<typeof setInterval> | null = null
+
   function startSync() {
+    if (syncInterval) clearInterval(syncInterval)
     const categories = ['Plugins', 'Themes', 'Uploads', 'Database']
     const verb = syncAction.value?.verb === 'pull' ? 'Pulling' : 'Pushing'
     let step = 0
     syncProgress.value = { phase: 'syncing', percent: 0, label: `${verb} ${categories[0]}...` }
 
-    const interval = setInterval(() => {
+    syncInterval = setInterval(() => {
       step++
       const percent = Math.min(Math.round((step / (categories.length * 3)) * 100), 100)
       const catIndex = Math.min(Math.floor(step / 3), categories.length - 1)
@@ -115,7 +118,8 @@ export function usePipeline(siteId: Ref<string | null>) {
         label: `${verb} ${categories[catIndex]}...`,
       }
       if (percent >= 100) {
-        clearInterval(interval)
+        clearInterval(syncInterval!)
+        syncInterval = null
         const verb = syncAction.value?.verb === 'pull' ? 'Pulled' : 'Pushed'
         syncProgress.value = { phase: 'done', percent: 100, label: verb, doneAt: Date.now(), doneVerb: verb }
         if (syncAction.value) {

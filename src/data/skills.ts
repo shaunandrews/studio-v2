@@ -149,16 +149,21 @@ export function uninstallSkill(id: string) {
   saveInstalledIds(ids)
 }
 
-/** Install all skills (fake async, staggered) */
+/** Install all skills (fake async, staggered). Returns an abort function. */
+let installAllInterval: ReturnType<typeof setInterval> | null = null
+
 export function installAllSkills(): Promise<void> {
   const uninstalled = skills.filter(s => !s.installed)
   if (!uninstalled.length) return Promise.resolve()
 
+  if (installAllInterval) clearInterval(installAllInterval)
+
   return new Promise((resolve) => {
     let i = 0
-    const interval = setInterval(() => {
+    installAllInterval = setInterval(() => {
       if (i >= uninstalled.length) {
-        clearInterval(interval)
+        clearInterval(installAllInterval!)
+        installAllInterval = null
         resolve()
         return
       }
