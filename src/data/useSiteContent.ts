@@ -127,8 +127,8 @@ export const databaseScopeGroups = [{ label: '', options: [
 // ── Composable ──
 
 export function useSiteContent() {
-  const filesEnabled = ref(true)
-  const databaseEnabled = ref(true)
+  const filesEnabled = ref(false)
+  const databaseEnabled = ref(false)
   const filesScope = ref<'all' | 'selected'>('all')
   const databaseScope = ref<'all' | 'selected'>('all')
   const fileTree = ref<TreeNode[]>(createTree())

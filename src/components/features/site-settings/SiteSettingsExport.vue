@@ -60,9 +60,10 @@ const exportDisabled = computed(() => isImporting.value || isExporting.value || 
       <div v-else-if="!isExporting && !isExportDone" key="export-idle" class="ie__export-options">
         <ContentSelector ref="contentSelectorRef" />
         <Button
+          v-if="canExport"
           variant="primary"
           label="Export"
-          :disabled="exportDisabled || !canExport"
+          :disabled="exportDisabled"
           @click="handleExport"
         />
       </div>

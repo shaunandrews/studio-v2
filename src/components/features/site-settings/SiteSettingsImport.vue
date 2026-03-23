@@ -153,7 +153,7 @@ const importStateKey = computed(() => {
             >{{ item.ext }}</span>
           </div>
           <Button
-            variant="primary"
+            variant="secondary"
             label="Choose file..."
             :disabled="importDisabled"
             @click="openFileSelector"
