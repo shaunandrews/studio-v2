@@ -28,7 +28,7 @@ src/
   styles/            # CSS tokens (colors, space, radius, typography, layout, motion) + overrides
   components/
     primitives/      # Badge, Button, ButtonSplit, ContextMenu, ContextRing, Dropdown, FlyoutMenu, Modal, StatusIndicator, Text, TextInput, Toggle, Tooltip, WPIcon
-    composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, Pane, PanelToolbar, ScreenHeader, SettingsPage, ShortcutsModal, SiteItem, SiteToolbar, chat-cards/, renderers/
+    composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, Pane, PaneGroup, PanelToolbar, ScreenHeader, SettingsPage, ShortcutsModal, SiteItem, SiteToolbar, chat-cards/, renderers/
     features/        # SiteNavigation, SiteList, SiteSettingsScreen, SyncScreen, PreviewsScreen, ImportExportScreen, add-site/, sync/
   layouts/           # MainLayout (app shell), BareLayout (standalone pages)
   pages/             # SitePage, AddSitePage, DesignSystem, Components, Settings, Architecture
@@ -45,6 +45,8 @@ src/
 - **Titlebar** — App titlebar with traffic lights, sidebar toggle, greeting, settings/help
 - **ContextMenu** — `groups` (FlyoutMenuGroup[]), `surface` (light/dark). Wraps slot content with right-click menu at cursor position. Reuses FlyoutMenu CSS classes. Singleton (one open at a time). Supports submenus.
 - **InputChat** — Chat input with model selector and action strip. Three action rendering modes: brief cards, card actions, text buttons.
+- **PaneGroup** — Flex container that arranges child Panes. `direction` (horizontal/vertical, default vertical), `fit` (sizes to content instead of flex-growing).
+- **Pane** — Flex child panel. `scrollable`, `centered` (max-width 680px), `padded`, `fit` (sizes to content). Nest inside PaneGroup. When `centered` or `padded`, wraps content in a constraining div; otherwise slots render as direct flex children.
 
 ## Data system
 
