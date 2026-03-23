@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
+import ConfirmDialog from '@/components/primitives/ConfirmDialog.vue'
 import { usePersona } from '@/data/usePersona'
 
 const route = useRoute()
@@ -41,6 +42,7 @@ onBeforeUnmount(() => {
     <router-view />
   </template>
   <ShortcutsModal :open="showShortcuts" @close="showShortcuts = false" />
+  <ConfirmDialog />
 </template>
 
 <style>

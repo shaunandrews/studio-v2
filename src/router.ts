@@ -4,6 +4,8 @@ import { usePersona, getInitialPersonaId } from '@/data/usePersona'
 import { useOnboarding } from '@/data/useOnboarding'
 import { useAllSitesView } from '@/data/useAllSitesView'
 import { useHydration } from '@/data/useHydration'
+import { hasUnsavedSiteSettings, discardUnsavedSiteSettings } from '@/data/useSiteSettings'
+import { confirm } from '@/data/useConfirm'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -195,6 +197,19 @@ router.beforeEach(async (to) => {
     if (!canAccess(step)) {
       return '/welcome'
     }
+  }
+
+  // Warn when leaving site settings with unsaved changes
+  if (hasUnsavedSiteSettings()) {
+    const leave = await confirm({
+      title: 'Unsaved changes',
+      message: 'You have settings changes that haven\'t been saved. If you leave now, those changes will be lost.',
+      confirmLabel: 'Discard & Leave',
+      cancelLabel: 'Stay',
+      destructive: true,
+    })
+    if (!leave) return false
+    discardUnsavedSiteSettings()
   }
 })
 
