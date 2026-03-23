@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toRef, ref, watch, computed } from 'vue'
 import Pane from '@/components/composites/Pane.vue'
+import PaneGroup from '@/components/composites/PaneGroup.vue'
 import SiteSettingsGeneral from '@/components/features/site-settings/SiteSettingsGeneral.vue'
 import SiteSettingsAdmin from '@/components/features/site-settings/SiteSettingsAdmin.vue'
 import SiteSettingsSkills from '@/components/features/site-settings/SiteSettingsSkills.vue'
@@ -144,18 +145,20 @@ function onBarLeave(el: Element, done: () => void) {
 </script>
 
 <template>
-  <Pane scrollable centered>
-    <div class="settings-sections">
-      <SiteSettingsGeneral :site-id="siteId" />
-      <SiteSettingsAdmin :site-id="siteId" />
-      <SiteSettingsSkills :site-id="siteId" @manage-global-skills="emit('manage-global-skills')" />
-      <SiteSettingsDebugging :site-id="siteId" />
-      <SiteSettingsImport :site-id="siteId" />
-      <SiteSettingsExport :site-id="siteId" />
-      <SiteSettingsActions :site-id="siteId" />
-    </div>
+  <PaneGroup>
+    <Pane scrollable centered>
+      <div class="settings-sections">
+        <SiteSettingsGeneral :site-id="siteId" />
+        <SiteSettingsAdmin :site-id="siteId" />
+        <SiteSettingsSkills :site-id="siteId" @manage-global-skills="emit('manage-global-skills')" />
+        <SiteSettingsDebugging :site-id="siteId" />
+        <SiteSettingsImport :site-id="siteId" />
+        <SiteSettingsExport :site-id="siteId" />
+        <SiteSettingsActions :site-id="siteId" />
+      </div>
+    </Pane>
 
-    <template #footer>
+    <Pane fit>
       <Transition @enter="onBarEnter" @after-enter="onBarAfterEnter" @leave="onBarLeave" @after-leave="onBarAfterLeave" :css="false">
         <div
           v-if="showBar"
@@ -211,8 +214,8 @@ function onBarLeave(el: Element, done: () => void) {
           </div>
         </div>
       </Transition>
-    </template>
-  </Pane>
+    </Pane>
+  </PaneGroup>
 </template>
 
 <style scoped>

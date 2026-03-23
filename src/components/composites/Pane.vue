@@ -1,89 +1,84 @@
 <script setup lang="ts">
-withDefaults(defineProps<{
-  /** Enable vertical scrolling on the body */
+const props = withDefaults(defineProps<{
+  /** Enable vertical scrolling */
   scrollable?: boolean
   /** Constrain content to max-width 680px, centered */
   centered?: boolean
   /** Add standard content padding (default true when centered) */
   padded?: boolean
+  /** Size to content instead of flex-growing */
+  fit?: boolean
 }>(), {
-  scrollable: true,
+  scrollable: false,
   centered: false,
   padded: undefined,
+  fit: false,
 })
+
+const hasWrapper = computed(() => props.centered || (props.padded ?? false))
+</script>
+
+<script lang="ts">
+import { computed } from 'vue'
 </script>
 
 <template>
-  <div class="pane">
-    <div v-if="$slots.header" class="pane__header">
-      <slot name="header" />
+  <div
+    class="pane"
+    :class="{
+      'pane--fit': fit,
+      'pane--scrollable': scrollable,
+    }"
+  >
+    <div
+      v-if="hasWrapper"
+      class="pane__content"
+      :class="{
+        'pane__content--centered': centered,
+        'pane__content--padded': padded ?? centered,
+      }"
+    >
+      <slot />
     </div>
-    <div class="pane__body" :class="{ 'pane__body--scrollable': scrollable }">
-      <div
-        class="pane__content"
-        :class="{
-          'pane__content--centered': centered,
-          'pane__content--padded': padded ?? centered,
-        }"
-      >
-        <slot />
-      </div>
-    </div>
-    <div v-if="$slots.footer" class="pane__footer">
-      <slot name="footer" />
-    </div>
+    <slot v-else />
   </div>
 </template>
 
 <style scoped>
 .pane {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
   overflow: hidden;
 }
 
-/* ── Header (fixed top) ── */
-
-.pane__header {
-  flex-shrink: 0;
+.pane--fit {
+  flex: none;
 }
 
-/* ── Body (scrollable middle) ── */
-
-.pane__body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.pane__body--scrollable {
+.pane--scrollable {
   overflow-y: auto;
 }
 
-/* ── Content ── */
+/* ── Content wrapper (only when centered/padded) ── */
 
 .pane__content {
   width: 100%;
   margin-block: auto;
 }
 
-.pane__body--scrollable .pane__content {
+.pane--scrollable .pane__content {
   margin-block: 0;
 }
 
 .pane__content--centered {
   max-width: 680px;
+  margin-inline: auto;
 }
 
 .pane__content--padded {
   padding: var(--space-m) var(--space-l) var(--space-l);
-}
-
-/* ── Footer (fixed bottom) ── */
-
-.pane__footer {
-  flex-shrink: 0;
 }
 </style>
