@@ -1,19 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import Button from '@/components/primitives/Button.vue'
 import Popover from '@/components/primitives/Popover.vue'
-import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useSettings } from '@/data/useSettings'
 import { useAuth } from '@/data/useAuth'
-import { usePersona } from '@/data/usePersona'
 
 const { mod } = useOperatingSystem()
 const { openSettings } = useSettings()
-const router = useRouter()
 const { user } = useAuth()
-const { clearPersona } = usePersona()
 
 const props = defineProps<{
   open: boolean
@@ -25,8 +20,6 @@ const emit = defineEmits<{
   'update:open': [value: boolean]
 }>()
 
-const showShortcuts = ref(false)
-
 function close() {
   emit('close')
 }
@@ -34,16 +27,6 @@ function close() {
 function openPreferences() {
   close()
   openSettings()
-}
-
-function openShortcuts() {
-  close()
-  showShortcuts.value = true
-}
-
-function switchPersona() {
-  close()
-  clearPersona(router)
 }
 </script>
 
@@ -95,9 +78,6 @@ function switchPersona() {
 
       <!-- Links -->
       <div class="global-menu__section global-menu__nav">
-        <div class="global-menu__item" @click="switchPersona">
-          Switch persona
-        </div>
         <RouterLink to="/overviews" class="global-menu__item" @click="close">
           Design Overviews
         </RouterLink>
@@ -110,45 +90,36 @@ function switchPersona() {
         <RouterLink to="/dev/architecture" class="global-menu__item" @click="close">
           Architecture
         </RouterLink>
-        <div class="global-menu__item" @click="openShortcuts">
-          <span class="global-menu__item-label">Keyboard shortcuts</span>
-          <span class="global-menu__item-shortcut">{{ mod }}/</span>
-        </div>
-        <div class="global-menu__item" @click="openPreferences">
+        <button class="global-menu__item" @click="openPreferences">
           <span class="global-menu__item-label">Settings</span>
           <span class="global-menu__item-shortcut">{{ mod }},</span>
-        </div>
+        </button>
       </div>
     </div>
   </Popover>
-  <ShortcutsModal :open="showShortcuts" @close="showShortcuts = false" />
 </template>
 
 <style>
 /* ── Global Menu (teleported via Popover, unscoped) ── */
 
 .global-menu {
-  --menu-bg: #111;
-  --menu-border: rgba(255, 255, 255, 0.15);
-  --menu-fg: white;
-
   width: 270px;
-  background: var(--menu-bg);
-  border: 1px solid var(--menu-border);
+  background: var(--color-menu-bg);
+  border: 1px solid var(--color-menu-border);
   border-radius: var(--radius-m);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  color: var(--menu-fg);
+  color: var(--color-menu-fg);
   overflow: hidden;
 }
 
 /* ── Sections ── */
 
 .global-menu__section {
-  padding: 12px;
+  padding: var(--space-xs);
 }
 
 .global-menu__section + .global-menu__section {
-  border-block-start: 1px solid var(--menu-border);
+  border-block-start: 1px solid var(--color-menu-border);
 }
 
 /* ── Account row ── */
@@ -233,18 +204,24 @@ function switchPersona() {
 }
 
 .global-menu__nav .global-menu__item {
-  padding-inline: 12px;
+  padding-inline: var(--space-xs);
   text-decoration: none;
-  color: var(--menu-fg);
+  color: var(--color-menu-fg);
 }
 
 /* ── Menu item ── */
 
 .global-menu__item {
   height: 32px;
+  width: 100%;
   display: flex;
   align-items: center;
   font-size: var(--font-size-s);
+  font-family: inherit;
+  border: none;
+  background: none;
+  color: var(--color-menu-fg);
+  text-align: start;
   cursor: pointer;
   transition: background var(--duration-instant) var(--ease-default);
 }

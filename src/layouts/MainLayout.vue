@@ -4,11 +4,11 @@ import { drawerLeft } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import SiteList from '@/components/features/SiteList.vue'
-import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import SettingsPage from '@/components/composites/SettingsPage.vue'
 import { useSettings } from '@/data/useSettings'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
+import TrafficLights from '@/components/primitives/TrafficLights.vue'
 import ResizeHandle from '@/components/primitives/ResizeHandle.vue'
 import { useSidebarCollapse } from '@/data/useSidebarCollapse'
 import { useAddSite } from '@/data/useAddSite'
@@ -28,7 +28,6 @@ const { isWindows } = useOperatingSystem()
 const { openAddSite } = useAddSite()
 const { user } = useAuth()
 
-const showShortcuts = ref(false)
 const showGlobalMenu = ref(false)
 const { isSettingsOpen, settingsTab, openSettings, closeSettings } = useSettings()
 
@@ -38,10 +37,6 @@ const gravatarRef = ref<HTMLElement | null>(null)
 const toggleRef = ref<HTMLElement | null>(null)
 
 function onGlobalKeydown(e: KeyboardEvent) {
-  if ((e.metaKey || e.ctrlKey) && e.key === '/') {
-    e.preventDefault()
-    showShortcuts.value = !showShortcuts.value
-  }
   if ((e.metaKey || e.ctrlKey) && e.key === ',') {
     e.preventDefault()
     if (isSettingsOpen.value) { closeSettings() } else { openSettings() }
@@ -72,11 +67,7 @@ function handleNewSite() {
     <WindowsTitlebar v-if="isWindows" />
 
     <!-- Traffic lights: fixed window position, UI moves around them (macOS only) -->
-    <div v-if="!isWindows" class="traffic-lights">
-      <span class="light close"></span>
-      <span class="light minimize"></span>
-      <span class="light maximize"></span>
-    </div>
+    <TrafficLights v-if="!isWindows" class="traffic-lights" />
 
     <!-- Floating footer buttons: persist outside sidebar so they survive collapse -->
     <button
@@ -138,7 +129,6 @@ function handleNewSite() {
         </router-view>
       </main>
     </div>
-    <ShortcutsModal :open="showShortcuts" @close="showShortcuts = false" />
     <GlobalMenu :open="showGlobalMenu" :anchor="gravatarRef" @close="showGlobalMenu = false" />
   </div>
 </template>
@@ -157,24 +147,11 @@ function handleNewSite() {
 
 .traffic-lights {
   position: absolute;
-  top: 18px;
-  left: 16px;
+  top: 18px; /* Physical: fixed window position */
+  left: 16px; /* Physical: fixed window position */
   z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   -webkit-app-region: drag;
 }
-
-.light {
-  width: 12px; /* OS-native size, not on grid — intentional */
-  height: 12px;
-  border-radius: 50%;
-}
-
-.light.close { background: var(--color-macos-close); }
-.light.minimize { background: var(--color-macos-minimize); }
-.light.maximize { background: var(--color-macos-maximize); }
 
 .app-body {
   position: relative;
