@@ -43,6 +43,11 @@
   --color-status-running: #1fd15b;
   --color-status-stopped: #646970;
   --color-status-stop-hover: #e65054;
+  --color-status-warning: #f59e0b;
+  --color-status-warning-bg: rgba(245, 158, 11, 0.06);
+  --color-status-warning-border: rgba(245, 158, 11, 0.15);
+  --color-status-running-bg: rgba(31, 209, 91, 0.06);
+  --color-status-running-border: rgba(31, 209, 91, 0.15);
 
   /* Environment (sync visual) */
   --color-env-local-bg: #e6e6e6;
@@ -95,6 +100,10 @@
     --color-shadow: rgba(0, 0, 0, 0.25);
 
     --color-status-warning: #f59e0b;
+    --color-status-warning-bg: rgba(245, 158, 11, 0.08);
+    --color-status-warning-border: rgba(245, 158, 11, 0.2);
+    --color-status-running-bg: rgba(31, 209, 91, 0.08);
+    --color-status-running-border: rgba(31, 209, 91, 0.2);
   }
 }
 
@@ -128,4 +137,8 @@
   --color-shadow: rgba(0, 0, 0, 0.25);
 
   --color-status-warning: #f59e0b;
+  --color-status-warning-bg: rgba(245, 158, 11, 0.08);
+  --color-status-warning-border: rgba(245, 158, 11, 0.2);
+  --color-status-running-bg: rgba(31, 209, 91, 0.08);
+  --color-status-running-border: rgba(31, 209, 91, 0.2);
 }
