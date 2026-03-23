@@ -708,7 +708,7 @@ watch(tree, () => nextTick(() => {
   position: relative;
   cursor: grab;
   user-select: none;
-  background-color: var(--color-frame-bg);
+  background-color: var(--color-frame-fill);
 }
 
 .sitemap-viewport:active {
@@ -787,7 +787,7 @@ watch(tree, () => nextTick(() => {
   z-index: -1;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cline x1='13' y1='16' x2='19' y2='16' stroke='%23000' stroke-opacity='0.06' stroke-width='0.75'/%3E%3Cline x1='16' y1='13' x2='16' y2='19' stroke='%23000' stroke-opacity='0.06' stroke-width='0.75'/%3E%3Cline x1='19' y1='16' x2='32' y2='16' stroke='%23000' stroke-opacity='0.03' stroke-width='0.75' stroke-dasharray='1 3'/%3E%3Cline x1='0' y1='16' x2='13' y2='16' stroke='%23000' stroke-opacity='0.03' stroke-width='0.75' stroke-dasharray='1 3'/%3E%3Cline x1='16' y1='19' x2='16' y2='32' stroke='%23000' stroke-opacity='0.03' stroke-width='0.75' stroke-dasharray='1 3'/%3E%3Cline x1='16' y1='0' x2='16' y2='13' stroke='%23000' stroke-opacity='0.03' stroke-width='0.75' stroke-dasharray='1 3'/%3E%3C/svg%3E");
-  background-size: 32px 32px;
+  background-size: 24px 24px;
 }
 
 @media (prefers-color-scheme: dark) {
