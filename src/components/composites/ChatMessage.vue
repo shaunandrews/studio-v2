@@ -51,7 +51,11 @@ function onToolUndo(changeId: string) {
         <span class="thinking-dot" />
       </div>
       <template v-else>
-        <!-- Tool calls render above text content -->
+        <MarkdownText
+          v-if="content"
+          class="chat-message-text"
+          :text="content"
+        />
         <div v-if="toolCalls?.length" class="tool-calls-group">
           <button
             v-if="hiddenCount > 0 && !toolCallsExpanded"
@@ -74,11 +78,6 @@ function onToolUndo(changeId: string) {
             @undo="onToolUndo"
           />
         </div>
-        <MarkdownText
-          v-if="content"
-          class="chat-message-text"
-          :text="content"
-        />
       </template>
     </div>
   </div>
