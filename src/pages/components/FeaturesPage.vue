@@ -2,7 +2,8 @@
 import SiteList from '@/components/features/SiteList.vue'
 import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
-import ImportExportScreen from '@/components/features/ImportExportScreen.vue'
+import SiteSettingsImport from '@/components/features/site-settings/SiteSettingsImport.vue'
+import SiteSettingsExport from '@/components/features/site-settings/SiteSettingsExport.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import Text from '@/components/primitives/Text.vue'
 import '@/pages/dev-docs.css'
@@ -100,7 +101,8 @@ import '@/pages/dev-docs.css'
 
     <h3>Preview</h3>
     <div class="example-section" style="height: 400px; border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <ImportExportScreen site-id="1" />
+      <SiteSettingsImport site-id="1" />
+      <SiteSettingsExport site-id="1" />
     </div>
   </section>
 

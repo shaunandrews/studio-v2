@@ -1,70 +1,40 @@
 <script setup lang="ts">
 import { ref, computed, toRef } from 'vue'
-import { useSites } from '@/data/useSites'
 import { useImportExport } from '@/data/useImportExport'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
-import ContentSelector from '@/components/composites/ContentSelector.vue'
+import SettingsSection from '@/components/composites/SettingsSection.vue'
 
 const props = defineProps<{
   siteId: string
 }>()
 
-const { sites } = useSites()
-const site = computed(() => sites.value.find(p => p.id === props.siteId))
-
 const {
   importState,
-  exportState,
   isConfirming,
   isImporting,
   isExporting,
   isImportDone,
-  isExportDone,
   isValidFile,
   startImport,
   confirmImport,
   cancelImport,
-  startExport,
   clearImport,
-  clearExport,
   formatFileSize,
   ACCEPTED_FILE_TYPES,
   IMPORT_STAGES,
-  EXPORT_STAGES_FULL,
-  EXPORT_STAGES_DB,
-  EXPORT_STAGES_FILES,
 } = useImportExport(toRef(props, 'siteId'))
 
 // --- File extensions for pills ---
 const fileExtensions = computed(() => {
   const exts = [...new Set(ACCEPTED_FILE_TYPES.map(t => t.replace(/^\./, '')))]
-  return exts.map((ext, i) => ({
+  return exts.map((ext) => ({
     ext: `.${ext}`,
     delay: (Math.random() * 2).toFixed(2),
   }))
 })
 
-// --- Content selector ref ---
-const contentSelectorRef = ref<InstanceType<typeof ContentSelector> | null>(null)
-
-function handleExport() {
-  const type = contentSelectorRef.value?.exportType ?? 'full'
-  startExport(type)
-}
-
-const canExport = computed(() => contentSelectorRef.value?.canExport ?? true)
-
-// --- Export stages ---
-const activeExportStages = computed(() => {
-  if (!exportState.value) return EXPORT_STAGES_FULL
-  if (exportState.value.exportType === 'database') return EXPORT_STAGES_DB
-  if (exportState.value.exportType === 'files') return EXPORT_STAGES_FILES
-  return EXPORT_STAGES_FULL
-})
-
 // --- Drag and drop ---
-
 const isDragging = ref(false)
 const fileError = ref<string | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -147,12 +117,8 @@ function truncateFilename(name: string, maxLen = 28): string {
   return base.slice(0, available) + '...' + extStr
 }
 
-const isNewSite = computed(() => !site.value?.mockLayout)
-
 const importDisabled = computed(() => isImporting.value || isExporting.value || isConfirming.value)
-const exportDisabled = computed(() => isImporting.value || isExporting.value || isConfirming.value || isNewSite.value)
 
-// --- Import state key for transitions ---
 const importStateKey = computed(() => {
   if (isImportDone.value) return 'done'
   if (isImporting.value) return 'importing'
@@ -162,221 +128,126 @@ const importStateKey = computed(() => {
 </script>
 
 <template>
-      <!-- ── Import Section ── -->
-      <section class="settings__section">
-        <h3 class="settings__section-title">Import</h3>
-        <div class="settings__card">
-          <Text variant="body-small" color="muted">Restore a site from a backup or migrate from another host.</Text>
-        <div
-          class="ie__dropzone"
-          :class="{
-            'is-dragging': isDragging,
-            'is-active': isConfirming || isImporting || isImportDone,
-          }"
-          @dragenter="handleDragEnter"
-          @dragover="handleDragOver"
-          @dragleave="handleDragLeave"
-          @drop="handleDrop"
-        >
-        <Transition name="ie-fade" mode="out-in">
-          <!-- Idle state -->
-          <div v-if="importStateKey === 'idle'" key="idle" class="ie__dropzone-idle">
-            <div class="ie__pills">
-              <span
-                v-for="item in fileExtensions"
-                :key="item.ext"
-                class="ie__pill"
-                :style="{ '--delay': item.delay + 's' }"
-              >{{ item.ext }}</span>
-            </div>
-            <Button
-              variant="primary"
-              label="Choose file..."
-              :disabled="importDisabled"
-              @click="openFileSelector"
-            />
-            <Text variant="body-small" color="muted">or drag a file anywhere</Text>
+  <SettingsSection title="Import">
+    <Text variant="body-small" color="muted">Restore a site from a backup or migrate from another host.</Text>
+    <div
+      class="ie__dropzone"
+      :class="{
+        'is-dragging': isDragging,
+        'is-active': isConfirming || isImporting || isImportDone,
+      }"
+      @dragenter="handleDragEnter"
+      @dragover="handleDragOver"
+      @dragleave="handleDragLeave"
+      @drop="handleDrop"
+    >
+      <Transition name="ie-fade" mode="out-in">
+        <!-- Idle state -->
+        <div v-if="importStateKey === 'idle'" key="idle" class="ie__dropzone-idle">
+          <div class="ie__pills">
+            <span
+              v-for="item in fileExtensions"
+              :key="item.ext"
+              class="ie__pill"
+              :style="{ '--delay': item.delay + 's' }"
+            >{{ item.ext }}</span>
           </div>
-
-          <!-- Confirm state -->
-          <div v-else-if="importStateKey === 'confirming'" key="confirming" class="ie__confirm">
-            <div class="ie__file-pill">
-              <svg class="ie__file-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M4 1h5l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V2a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" fill="none" />
-                <path d="M9 1v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none" />
-              </svg>
-              <span class="ie__file-name">{{ truncateFilename(importState?.fileName ?? '') }}</span>
-              <span class="ie__file-sep">&mdash;</span>
-              <span class="ie__file-size">{{ formatFileSize(importState?.fileSize ?? 0) }}</span>
-            </div>
-            <Text variant="body-small" color="muted">This will replace the current site.</Text>
-            <div class="ie__confirm-actions">
-              <Button variant="primary" label="Import" @click="confirmImport" />
-              <Button variant="tertiary" label="Cancel" @click="cancelImport" />
-            </div>
-          </div>
-
-          <!-- Importing state -->
-          <div v-else-if="importStateKey === 'importing'" key="importing" class="ie__stepper-wrap">
-            <div class="ie__stepper">
-              <div
-                v-for="(stage, i) in IMPORT_STAGES"
-                :key="stage.key"
-                class="ie__step"
-                :class="{
-                  'is-done': i < (importState?.currentStage ?? 0),
-                  'is-active': i === (importState?.currentStage ?? 0),
-                  'is-pending': i > (importState?.currentStage ?? 0),
-                  'is-last': i === IMPORT_STAGES.length - 1,
-                }"
-              >
-                <div class="ie__step-dot">
-                  <svg v-if="i < (importState?.currentStage ?? 0)" class="ie__step-check" viewBox="0 0 12 12" width="12" height="12">
-                    <path d="M3 6 L5.5 8.5 L9 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                  </svg>
-                </div>
-                <span class="ie__step-label">{{ stage.label }}</span>
-              </div>
-            </div>
-            <Text variant="body-small" color="muted">{{ importState?.statusMessage ?? 'Importing...' }}</Text>
-          </div>
-
-          <!-- Done state -->
-          <div v-else-if="importStateKey === 'done'" key="done" class="ie__done">
-            <svg class="ie__checkmark" viewBox="0 0 36 36" width="36" height="36">
-              <circle cx="18" cy="18" r="16" />
-              <path d="M11 18 L16 23 L25 13" />
-            </svg>
-            <Text variant="body" weight="medium">Import complete!</Text>
-            <div class="ie__done-actions">
-              <Button variant="primary" label="Open site" @click.stop />
-              <button class="ie__text-btn" @click="handleImportAnother">Import another</button>
-            </div>
-          </div>
-        </Transition>
-
-        <!-- Drag overlay -->
-        <Transition name="ie-overlay">
-          <div v-if="isDragging" class="ie__drag-overlay">
-            <div class="ie__drag-overlay-content">
-              <svg class="ie__drag-arrow" width="28" height="28" viewBox="0 0 28 28" fill="none">
-                <path d="M14 4 L14 20 M7 13 L14 20 L21 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              <Text variant="body" weight="medium" color="inherit">Drop file to import</Text>
-            </div>
-          </div>
-        </Transition>
-      </div>
-
-      <!-- Error display -->
-      <div v-if="fileError" class="ie__error">
-        <Text variant="body-small" color="muted">{{ fileError }}</Text>
-      </div>
-
-      <!-- Hidden file input -->
-      <input
-        ref="fileInputRef"
-        type="file"
-        :accept="ACCEPTED_FILE_TYPES.join(',')"
-        class="ie__file-input"
-        @change="onFileSelected"
-      />
+          <Button
+            variant="primary"
+            label="Choose file..."
+            :disabled="importDisabled"
+            @click="openFileSelector"
+          />
+          <Text variant="body-small" color="muted">or drag a file anywhere</Text>
         </div>
-      </section>
 
-      <!-- ── Export Section ── -->
-      <section class="settings__section">
-        <h3 class="settings__section-title">Export</h3>
-        <div class="settings__card">
-          <Text variant="body-small" color="muted">Your data, your rules. Take it anywhere.</Text>
-        <Transition name="ie-fade" mode="out-in">
-          <!-- Empty site -->
-          <div v-if="isNewSite && !isExporting && !isExportDone" key="export-empty" class="ie__export-empty">
-            <Text variant="body-small" color="muted">Nothing to export yet. Start building your site first.</Text>
-          </div>
-
-          <!-- Idle: options panel + button -->
-          <div v-else-if="!isExporting && !isExportDone" key="export-idle" class="ie__export-options">
-            <ContentSelector ref="contentSelectorRef" />
-            <Button
-              variant="primary"
-              label="Export"
-              :disabled="exportDisabled || !canExport"
-              @click="handleExport"
-            />
-          </div>
-
-          <!-- Exporting -->
-          <div v-else-if="isExporting" key="export-progress" class="ie__stepper-wrap">
-            <div class="ie__stepper">
-              <div
-                v-for="(stage, i) in activeExportStages"
-                :key="stage.key"
-                class="ie__step"
-                :class="{
-                  'is-done': i < (exportState?.currentStage ?? 0),
-                  'is-active': i === (exportState?.currentStage ?? 0),
-                  'is-pending': i > (exportState?.currentStage ?? 0),
-                  'is-last': i === activeExportStages.length - 1,
-                }"
-              >
-                <div class="ie__step-dot">
-                  <svg v-if="i < (exportState?.currentStage ?? 0)" class="ie__step-check" viewBox="0 0 12 12" width="12" height="12">
-                    <path d="M3 6 L5.5 8.5 L9 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                  </svg>
-                </div>
-                <span class="ie__step-label">{{ stage.label }}</span>
-              </div>
-            </div>
-            <Text variant="body-small" color="muted">{{ exportState?.statusMessage ?? 'Exporting...' }}</Text>
-          </div>
-
-          <!-- Export done -->
-          <div v-else-if="isExportDone" key="export-done" class="ie__done">
-            <svg class="ie__checkmark" viewBox="0 0 36 36" width="36" height="36">
-              <circle cx="18" cy="18" r="16" />
-              <path d="M11 18 L16 23 L25 13" />
+        <!-- Confirm state -->
+        <div v-else-if="importStateKey === 'confirming'" key="confirming" class="ie__confirm">
+          <div class="ie__file-pill">
+            <svg class="ie__file-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M4 1h5l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V2a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" fill="none" />
+              <path d="M9 1v4h4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none" />
             </svg>
-            <Text variant="body" weight="medium">Export complete!</Text>
-            <Text variant="body-small" color="muted">{{ exportState?.statusMessage }}</Text>
-            <button class="ie__text-btn" @click="clearExport">Export again</button>
+            <span class="ie__file-name">{{ truncateFilename(importState?.fileName ?? '') }}</span>
+            <span class="ie__file-sep">&mdash;</span>
+            <span class="ie__file-size">{{ formatFileSize(importState?.fileSize ?? 0) }}</span>
           </div>
-        </Transition>
+          <Text variant="body-small" color="muted">This will replace the current site.</Text>
+          <div class="ie__confirm-actions">
+            <Button variant="primary" label="Import" @click="confirmImport" />
+            <Button variant="tertiary" label="Cancel" @click="cancelImport" />
+          </div>
         </div>
-      </section>
+
+        <!-- Importing state -->
+        <div v-else-if="importStateKey === 'importing'" key="importing" class="ie__stepper-wrap">
+          <div class="ie__stepper">
+            <div
+              v-for="(stage, i) in IMPORT_STAGES"
+              :key="stage.key"
+              class="ie__step"
+              :class="{
+                'is-done': i < (importState?.currentStage ?? 0),
+                'is-active': i === (importState?.currentStage ?? 0),
+                'is-pending': i > (importState?.currentStage ?? 0),
+                'is-last': i === IMPORT_STAGES.length - 1,
+              }"
+            >
+              <div class="ie__step-dot">
+                <svg v-if="i < (importState?.currentStage ?? 0)" class="ie__step-check" viewBox="0 0 12 12" width="12" height="12">
+                  <path d="M3 6 L5.5 8.5 L9 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                </svg>
+              </div>
+              <span class="ie__step-label">{{ stage.label }}</span>
+            </div>
+          </div>
+          <Text variant="body-small" color="muted">{{ importState?.statusMessage ?? 'Importing...' }}</Text>
+        </div>
+
+        <!-- Done state -->
+        <div v-else-if="importStateKey === 'done'" key="done" class="ie__done">
+          <svg class="ie__checkmark" viewBox="0 0 36 36" width="36" height="36">
+            <circle cx="18" cy="18" r="16" />
+            <path d="M11 18 L16 23 L25 13" />
+          </svg>
+          <Text variant="body" weight="medium">Import complete!</Text>
+          <div class="ie__done-actions">
+            <Button variant="primary" label="Open site" @click.stop />
+            <button class="ie__text-btn" @click="handleImportAnother">Import another</button>
+          </div>
+        </div>
+      </Transition>
+
+      <!-- Drag overlay -->
+      <Transition name="ie-overlay">
+        <div v-if="isDragging" class="ie__drag-overlay">
+          <div class="ie__drag-overlay-content">
+            <svg class="ie__drag-arrow" width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <path d="M14 4 L14 20 M7 13 L14 20 L21 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <Text variant="body" weight="medium" color="inherit">Drop file to import</Text>
+          </div>
+        </div>
+      </Transition>
+    </div>
+
+    <!-- Error display -->
+    <div v-if="fileError" class="ie__error">
+      <Text variant="body-small" color="muted">{{ fileError }}</Text>
+    </div>
+
+    <!-- Hidden file input -->
+    <input
+      ref="fileInputRef"
+      type="file"
+      :accept="ACCEPTED_FILE_TYPES.join(',')"
+      class="ie__file-input"
+      @change="onFileSelected"
+    />
+  </SettingsSection>
 </template>
 
 <style scoped>
-/* ── Layout ── */
-
-.settings__section {
-  background: var(--color-frame-fill);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  overflow: clip;
-}
-
-.settings__section-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin: 0;
-  padding: var(--space-s) var(--space-m);
-}
-
-.settings__card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-  background: var(--color-frame-bg);
-  border-block-start: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.07);
-  padding: var(--space-m);
-}
-
 /* ── Drop Zone ── */
 
 .ie__dropzone {
@@ -524,11 +395,10 @@ const importStateKey = computed(() => {
   min-width: 80px;
 }
 
-/* Connecting line between steps */
 .ie__step:not(.is-last)::after {
   content: '';
   position: absolute;
-  inset-block-start: 10px; /* center of the 20px dot */
+  inset-block-start: 10px;
   inset-inline-start: calc(50% + 14px);
   width: calc(100% - 28px);
   height: 2px;
@@ -721,25 +591,6 @@ const importStateKey = computed(() => {
 .ie-overlay-enter-from,
 .ie-overlay-leave-to {
   opacity: 0;
-}
-
-/* ── Export Empty State ── */
-
-.ie__export-empty {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-xl);
-  text-align: center;
-}
-
-/* ── Export Section ── */
-
-.ie__export-options {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-m);
 }
 
 /* ── State Transitions ── */
