@@ -160,14 +160,26 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
       .filter(m => m.taskId === taskId)
       .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
 
+    const validToolNames = new Set(siteTools.map(t => t.name))
+
     for (const m of history) {
       if (m.role === 'user') {
         apiMessages.push({ role: 'user', content: m.content })
       } else {
-        if (m.toolCalls?.length) {
+        // Only include tool calls that reference valid API tools with parseable args
+        const apiToolCalls = (m.toolCalls ?? []).filter(tc => {
+          const name = tc.toolName ?? tc.label
+          if (!validToolNames.has(name)) return false
+          if (tc.args) {
+            try { JSON.parse(tc.args) } catch { return false }
+          }
+          return true
+        })
+
+        if (apiToolCalls.length) {
           const contentBlocks: any[] = []
           if (m.content) contentBlocks.push({ type: 'text', text: m.content })
-          for (const tc of m.toolCalls) {
+          for (const tc of apiToolCalls) {
             contentBlocks.push({
               type: 'tool_use',
               id: tc.id,
@@ -176,7 +188,7 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
             })
           }
           apiMessages.push({ role: 'assistant', content: contentBlocks })
-          const toolResults = m.toolCalls.map(tc => ({
+          const toolResults = apiToolCalls.map(tc => ({
             type: 'tool_result',
             tool_use_id: tc.id,
             content: tc.result ?? tc.error ?? '',
@@ -184,7 +196,9 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
           }))
           apiMessages.push({ role: 'user', content: toolResults })
         } else {
-          apiMessages.push({ role: 'assistant', content: m.content })
+          // Fall back to text-only if no valid tool calls
+          const text = m.content || '(completed actions)'
+          apiMessages.push({ role: 'assistant', content: text })
         }
       }
     }

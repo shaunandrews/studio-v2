@@ -18,7 +18,7 @@ app.post('/api/chat', async (req, res) => {
     return
   }
 
-  const { messages, system, model, tools, max_tokens } = req.body ?? {}
+  const { messages, system, tools, max_tokens } = req.body ?? {}
   if (!messages || !Array.isArray(messages)) {
     res.status(400).json({ error: 'messages array required' })
     return
@@ -26,53 +26,57 @@ app.post('/api/chat', async (req, res) => {
 
   try {
     const client = new Anthropic({ apiKey })
-    const stream = client.messages.stream({
-      model: model ?? 'claude-sonnet-4-20250514',
+    const stream = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
       max_tokens: max_tokens ?? 16000,
       system: system ?? '',
       messages,
       ...(tools?.length ? { tools } : {}),
+      stream: true,
     })
 
     res.setHeader('Content-Type', 'text/event-stream')
     res.setHeader('Cache-Control', 'no-cache')
     res.setHeader('Connection', 'keep-alive')
 
-    stream.on('contentBlockStart', (event) => {
-      if (event.content_block.type === 'tool_use') {
-        res.write(`data: ${JSON.stringify({
-          type: 'tool_use_start',
-          id: event.content_block.id,
-          name: event.content_block.name,
-        })}\n\n`)
+    let stopReason = 'end_turn'
+
+    for await (const event of stream) {
+      switch (event.type) {
+        case 'content_block_start':
+          if (event.content_block.type === 'tool_use') {
+            res.write(`data: ${JSON.stringify({
+              type: 'tool_use_start',
+              id: event.content_block.id,
+              name: event.content_block.name,
+            })}\n\n`)
+          }
+          break
+
+        case 'content_block_delta':
+          if (event.delta.type === 'text_delta') {
+            res.write(`data: ${JSON.stringify({ type: 'text', text: event.delta.text })}\n\n`)
+          } else if (event.delta.type === 'input_json_delta') {
+            res.write(`data: ${JSON.stringify({
+              type: 'tool_use_delta',
+              partial_json: event.delta.partial_json,
+            })}\n\n`)
+          }
+          break
+
+        case 'content_block_stop':
+          res.write(`data: ${JSON.stringify({ type: 'content_block_stop' })}\n\n`)
+          break
+
+        case 'message_delta':
+          if (event.delta.stop_reason) {
+            stopReason = event.delta.stop_reason
+          }
+          break
       }
-    })
+    }
 
-    stream.on('contentBlockDelta', (event) => {
-      if (event.delta.type === 'text_delta') {
-        res.write(`data: ${JSON.stringify({ type: 'text', text: event.delta.text })}\n\n`)
-      } else if (event.delta.type === 'input_json_delta') {
-        res.write(`data: ${JSON.stringify({
-          type: 'tool_use_delta',
-          partial_json: event.delta.partial_json,
-        })}\n\n`)
-      }
-    })
-
-    stream.on('contentBlockStop', () => {
-      res.write(`data: ${JSON.stringify({ type: 'content_block_stop' })}\n\n`)
-    })
-
-    stream.on('error', (error) => {
-      res.write(`data: ${JSON.stringify({ type: 'error', error: error.message })}\n\n`)
-      res.end()
-    })
-
-    const finalMessage = await stream.finalMessage()
-    res.write(`data: ${JSON.stringify({
-      type: 'done',
-      stop_reason: finalMessage.stop_reason,
-    })}\n\n`)
+    res.write(`data: ${JSON.stringify({ type: 'done', stop_reason: stopReason })}\n\n`)
     res.end()
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
