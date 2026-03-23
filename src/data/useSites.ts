@@ -46,7 +46,7 @@ export function useSites() {
     return newSite
   }
 
-  async function updateSite(id: string, updates: Partial<Pick<Site, 'name' | 'favicon' | 'description'>>) {
+  async function updateSite(id: string, updates: Partial<Pick<Site, 'name' | 'favicon' | 'description' | 'skillOverrides' | 'adminEmail' | 'adminUsername' | 'adminPassword' | 'phpVersion' | 'wpVersion' | 'useCustomDomain' | 'customDomain' | 'xdebug' | 'debugLog' | 'showErrors'>>) {
     const p = sites.value.find(p => p.id === id)
     if (p) {
       Object.assign(p, updates)

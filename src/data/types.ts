@@ -18,6 +18,18 @@ export interface Site {
   features?: string[]
   pipeline?: PipelineStage[]
   skillOverrides?: Record<string, 'enabled' | 'disabled'>
+  // Admin credentials
+  adminEmail?: string
+  adminUsername?: string
+  adminPassword?: string
+  // Server-config settings (require restart to apply)
+  phpVersion?: string
+  wpVersion?: string
+  useCustomDomain?: boolean
+  customDomain?: string
+  xdebug?: boolean
+  debugLog?: boolean
+  showErrors?: boolean
 }
 
 export type EnvironmentType = 'staging' | 'qa' | 'review' | 'production' | 'custom'
