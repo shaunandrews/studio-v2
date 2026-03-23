@@ -1,31 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import Text from '@/components/primitives/Text.vue'
-import type { TaskStatus } from '@/data/types'
 
 const props = defineProps<{
-  status: TaskStatus
   branch?: string
   title: string
 }>()
-
-const statusLabel: Record<TaskStatus, string> = {
-  queued: 'Queued',
-  running: 'Running',
-  review: 'In Review',
-  approved: 'Approved',
-  merged: 'Merged',
-  rejected: 'Rejected',
-  failed: 'Failed',
-}
-
-const label = computed(() => statusLabel[props.status])
 </script>
 
 <template>
   <div class="brief-header hstack justify-between">
-    <Text variant="body-small" color="muted">{{ label }}</Text>
-
     <Text
       tag="h2"
       variant="body"
@@ -48,7 +31,6 @@ const label = computed(() => statusLabel[props.status])
 }
 
 .brief-title {
-  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -37,7 +37,7 @@ const emit = defineEmits<{
 const { isMac } = useOperatingSystem()
 const { openAddSite } = useAddSite()
 const { showAllSitesView } = useAllSitesView()
-const { tasks, getTasksForSite, messages, archiveTask, unarchiveTask } = useTasks()
+const { tasks, getTasksForSite, messages, archiveTask, unarchiveTask, isBusy, busyTaskIds } = useTasks()
 const siteTasks = getTasksForSite(toRef(props, 'siteId'))
 
 const { sites: allSites } = useSites()
@@ -265,7 +265,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         <span v-if="task.unread" class="site-tasks__unread-dot" />
         <span class="site-tasks__item-title">{{ task.title || 'New task' }}</span>
         <span class="site-tasks__item-end">
-          <template v-if="task.status === 'running'">
+          <template v-if="busyTaskIds.has(task.id)">
             <svg class="site-tasks__spinner" width="14" height="14" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="24 12" fill="none" />
             </svg>

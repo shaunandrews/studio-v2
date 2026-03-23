@@ -405,9 +405,8 @@ const shortcutsOpen = ref(false)
       <table>
         <thead><tr><th>Component</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>TaskBriefHeader</code></td><td>Status band — tinted by status, animated pulse dot for running, monospace branch name</td></tr>
-          <tr><td><code>TaskBriefStats</code></td><td>Changed files and entities — compact single-line or expanded two-column grid with expandable sub-lists</td></tr>
-          <tr><td><code>TaskBriefActions</code></td><td>Preview + Review buttons — compact (icon-only) or expanded (labelled); Review is primary when status is <code>review</code></td></tr>
+          <tr><td><code>TaskBriefHeader</code></td><td>Title and monospace branch name</td></tr>
+          <tr><td><code>TaskBriefActions</code></td><td>Preview button linking to worktree port</td></tr>
         </tbody>
       </table>
     </div>

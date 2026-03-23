@@ -123,9 +123,7 @@ async function sendTask() {
   const task = await createTask({
     siteId: props.siteId,
     agentId: 'claude-code',
-    origin: { surface: 'sitemap', context: `Site Map → ${pageName} page` },
     title: `${pageName}: ${text.slice(0, 40)}`,
-    status: 'running',
   })
   task.unread = true
 

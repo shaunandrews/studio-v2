@@ -13,19 +13,15 @@ describe('useTasks', () => {
     it('creates a task with default values', async () => {
       const task = await api.createTask({
         siteId: 'site-1',
-        origin: { surface: 'chat' },
       })
       expect(task.id).toMatch(/^task-/)
       expect(task.siteId).toBe('site-1')
       expect(task.agentId).toBe('wpcom')
-      expect(task.status).toBe('queued')
-      expect(task.origin.surface).toBe('chat')
     })
 
     it('assigns a worktree with branch and port', async () => {
       const task = await api.createTask({
         siteId: 'site-1',
-        origin: { surface: 'chat' },
         title: 'Fix the header',
       })
       expect(task.worktree).toBeTruthy()
@@ -34,48 +30,45 @@ describe('useTasks', () => {
     })
 
     it('increments worktree ports', async () => {
-      const a = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
-      const b = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const a = await api.createTask({ siteId: 's1' })
+      const b = await api.createTask({ siteId: 's1' })
       expect(b.worktree!.port).toBe(a.worktree!.port + 1)
     })
 
     it('adds task to the tasks array', async () => {
-      await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      await api.createTask({ siteId: 's1' })
       expect(api.tasks.value).toHaveLength(1)
     })
 
-    it('respects custom agentId and status', async () => {
+    it('respects custom agentId', async () => {
       const task = await api.createTask({
         siteId: 's1',
         agentId: 'claude-code',
-        status: 'running',
-        origin: { surface: 'chat' },
       })
       expect(task.agentId).toBe('claude-code')
-      expect(task.status).toBe('running')
     })
   })
 
   describe('getTasksForSite', () => {
     it('filters tasks by site id', async () => {
-      await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
-      await api.createTask({ siteId: 's2', origin: { surface: 'chat' } })
-      await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      await api.createTask({ siteId: 's1' })
+      await api.createTask({ siteId: 's2' })
+      await api.createTask({ siteId: 's1' })
 
       const s1Tasks = api.getTasksForSite('s1')
       expect(s1Tasks.value).toHaveLength(2)
     })
 
     it('excludes archived tasks', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const task = await api.createTask({ siteId: 's1' })
       await api.archiveTask(task.id)
       const siteTasks = api.getTasksForSite('s1')
       expect(siteTasks.value).toHaveLength(0)
     })
 
     it('sorts by updatedAt descending', async () => {
-      const a = await api.createTask({ siteId: 's1', origin: { surface: 'chat' }, title: 'First' })
-      const b = await api.createTask({ siteId: 's1', origin: { surface: 'chat' }, title: 'Second' })
+      const a = await api.createTask({ siteId: 's1', title: 'First' })
+      const b = await api.createTask({ siteId: 's1', title: 'Second' })
       // b was created after a, so it should come first
       const siteTasks = api.getTasksForSite('s1')
       expect(siteTasks.value[0].id).toBe(b.id)
@@ -85,7 +78,7 @@ describe('useTasks', () => {
 
   describe('getTask', () => {
     it('returns a task by id', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' }, title: 'Test' })
+      const task = await api.createTask({ siteId: 's1', title: 'Test' })
       const found = api.getTask(task.id)
       expect(found.value).toBeTruthy()
       expect(found.value!.title).toBe('Test')
@@ -104,14 +97,13 @@ describe('useTasks', () => {
 
   describe('updateTask', () => {
     it('updates task properties', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
-      await api.updateTask(task.id, { title: 'Updated', status: 'running' })
+      const task = await api.createTask({ siteId: 's1' })
+      await api.updateTask(task.id, { title: 'Updated' })
       expect(api.tasks.value[0].title).toBe('Updated')
-      expect(api.tasks.value[0].status).toBe('running')
     })
 
     it('updates the updatedAt timestamp', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const task = await api.createTask({ siteId: 's1' })
       const before = task.updatedAt
       // Small delay to ensure timestamp differs
       await new Promise(r => setTimeout(r, 10))
@@ -120,7 +112,7 @@ describe('useTasks', () => {
     })
 
     it('does nothing for unknown task id', async () => {
-      await api.createTask({ siteId: 's1', origin: { surface: 'chat' }, title: 'Original' })
+      await api.createTask({ siteId: 's1', title: 'Original' })
       await api.updateTask('nonexistent', { title: 'Nope' })
       expect(api.tasks.value[0].title).toBe('Original')
     })
@@ -128,7 +120,7 @@ describe('useTasks', () => {
 
   describe('postMessage', () => {
     it('adds a message to the messages array', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const task = await api.createTask({ siteId: 's1' })
       api.postMessage(task.id, 'user', 'Hello')
       expect(api.messages.value).toHaveLength(1)
       expect(api.messages.value[0].content).toBe('Hello')
@@ -136,7 +128,7 @@ describe('useTasks', () => {
     })
 
     it('supports agent messages with agentId', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const task = await api.createTask({ siteId: 's1' })
       api.postMessage(task.id, 'agent', 'Hi there', 'wpcom')
       expect(api.messages.value[0].agentId).toBe('wpcom')
     })
@@ -144,9 +136,9 @@ describe('useTasks', () => {
 
   describe('getMessages', () => {
     it('filters messages by task id', async () => {
-      const t1 = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const t1 = await api.createTask({ siteId: 's1' })
       await new Promise(r => setTimeout(r, 2))
-      const t2 = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const t2 = await api.createTask({ siteId: 's1' })
       // Ensure different IDs
       expect(t1.id).not.toBe(t2.id)
 
@@ -162,7 +154,7 @@ describe('useTasks', () => {
     })
 
     it('sorts by timestamp ascending', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const task = await api.createTask({ siteId: 's1' })
       api.postMessage(task.id, 'user', 'first')
       api.postMessage(task.id, 'agent', 'second')
       const msgs = api.getMessages(task.id)
@@ -178,7 +170,7 @@ describe('useTasks', () => {
 
   describe('removeMessage', () => {
     it('removes a message by id', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const task = await api.createTask({ siteId: 's1' })
       api.postMessage(task.id, 'user', 'hello')
       const msgId = api.messages.value[0].id
       api.removeMessage(msgId)
@@ -186,7 +178,7 @@ describe('useTasks', () => {
     })
 
     it('does nothing for unknown message id', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const task = await api.createTask({ siteId: 's1' })
       api.postMessage(task.id, 'user', 'hello')
       api.removeMessage('nonexistent')
       expect(api.messages.value).toHaveLength(1)
@@ -195,7 +187,7 @@ describe('useTasks', () => {
 
   describe('archiveTask / unarchiveTask', () => {
     it('archives and unarchives a task', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const task = await api.createTask({ siteId: 's1' })
       expect(task.archived).toBeFalsy()
 
       await api.archiveTask(task.id)
@@ -208,7 +200,7 @@ describe('useTasks', () => {
 
   describe('markRead', () => {
     it('sets unread to false', async () => {
-      const task = await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      const task = await api.createTask({ siteId: 's1' })
       await api.updateTask(task.id, { unread: true })
       expect(api.tasks.value[0].unread).toBe(true)
 
@@ -219,14 +211,13 @@ describe('useTasks', () => {
 
   describe('resetTasks', () => {
     it('replaces all tasks and messages', async () => {
-      await api.createTask({ siteId: 's1', origin: { surface: 'chat' } })
+      await api.createTask({ siteId: 's1' })
       api.postMessage(api.tasks.value[0].id, 'user', 'test')
 
       const now = new Date().toISOString()
       const newTasks = [{
         id: 'new-t1', siteId: 's2', agentId: 'wpcom' as const,
-        status: 'queued' as const, createdAt: now, updatedAt: now,
-        origin: { surface: 'chat' as const },
+        createdAt: now, updatedAt: now,
       }]
       await api.resetTasks(newTasks, [])
 
@@ -239,8 +230,7 @@ describe('useTasks', () => {
       const now = new Date().toISOString()
       const input = [{
         id: 't1', siteId: 's1', agentId: 'wpcom' as const,
-        status: 'queued' as const, createdAt: now, updatedAt: now,
-        origin: { surface: 'chat' as const },
+        createdAt: now, updatedAt: now,
       }]
       await api.resetTasks(input, [])
       api.tasks.value[0].siteId = 'changed'
@@ -253,13 +243,23 @@ describe('useTasks', () => {
       const now = new Date().toISOString()
       api._setTasks([{
         id: 't1', siteId: 's1', agentId: 'wpcom',
-        status: 'queued', createdAt: now, updatedAt: now,
-        origin: { surface: 'chat' },
+        createdAt: now, updatedAt: now,
         worktree: { branch: 'task/foo', port: 4010 },
       }], [])
 
       // Next created task should get port 4011
       // We verify indirectly by creating a task
+    })
+  })
+
+  describe('isBusy', () => {
+    it('returns false for idle tasks', async () => {
+      const task = await api.createTask({ siteId: 's1' })
+      expect(api.isBusy(task.id).value).toBe(false)
+    })
+
+    it('returns false for null', () => {
+      expect(api.isBusy(null).value).toBe(false)
     })
   })
 })

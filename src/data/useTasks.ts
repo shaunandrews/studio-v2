@@ -6,11 +6,12 @@ import { useSiteDocument } from './useSiteDocument'
 import { usePreviewSync } from './usePreviewSync'
 import { db, isDbAvailable } from './db'
 import { toSerializable } from './utils'
-import type { Task, Message, AgentId, TaskOrigin, TaskStatus, ToolCall } from './types'
+import type { Task, Message, AgentId, ToolCall } from './types'
 
 // Module-level state (singleton)
 const tasks = ref<Task[]>([])
 const messages = ref<Message[]>([])
+const busyTaskIds = ref<Set<string>>(new Set())
 
 let nextWorktreePort = 4001
 
@@ -73,7 +74,18 @@ function queueAgentResponse(taskId: string) {
   sendToAI(taskId, agentId)
 }
 
+function markBusy(taskId: string) {
+  busyTaskIds.value = new Set([...busyTaskIds.value, taskId])
+}
+
+function markIdle(taskId: string) {
+  const next = new Set(busyTaskIds.value)
+  next.delete(taskId)
+  busyTaskIds.value = next
+}
+
 async function sendToAISimple(taskId: string, agentId?: AgentId) {
+  markBusy(taskId)
   const streamingId = `msg-streaming-${Date.now()}`
   const streamingMsg: Message = {
     id: streamingId,
@@ -102,6 +114,7 @@ async function sendToAISimple(taskId: string, agentId?: AgentId) {
 
   const finalMsg = messages.value.find(m => m.id === streamingId)
   if (finalMsg) persistMessage(finalMsg)
+  markIdle(taskId)
 }
 
 async function sendToAI(taskId: string, agentId?: AgentId) {
@@ -116,6 +129,7 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
     return sendToAISimple(taskId, agentId)
   }
 
+  markBusy(taskId)
   let looping = true
   while (looping) {
     const currentContent = getContent(task.siteId).value!
@@ -243,6 +257,7 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
       looping = false
     }
   }
+  markIdle(taskId)
 }
 
 async function generateTaskTitle(taskId: string, userMessage: string) {
@@ -294,9 +309,7 @@ export function useTasks() {
   async function createTask(opts: {
     siteId: string
     agentId?: AgentId
-    origin: TaskOrigin
     title?: string
-    status?: TaskStatus
   }): Promise<Task> {
     const now = new Date().toISOString()
     const task: Task = {
@@ -304,10 +317,8 @@ export function useTasks() {
       siteId: opts.siteId,
       agentId: opts.agentId ?? 'wpcom',
       title: opts.title,
-      status: opts.status ?? 'queued',
       createdAt: now,
       updatedAt: now,
-      origin: opts.origin,
     }
     assignWorktree(task, opts.title ?? 'new-task')
     tasks.value.push(task)
@@ -315,7 +326,7 @@ export function useTasks() {
     return task
   }
 
-  async function updateTask(taskId: string, updates: Partial<Pick<Task, 'title' | 'status' | 'summary' | 'changedFiles' | 'changedEntities' | 'archived' | 'unread'>>) {
+  async function updateTask(taskId: string, updates: Partial<Pick<Task, 'title' | 'archived' | 'unread'>>) {
     const task = tasks.value.find(t => t.id === taskId)
     if (!task) return
     Object.assign(task, updates, { updatedAt: new Date().toISOString() })
@@ -444,12 +455,18 @@ export function useTasks() {
     }
   }
 
+  function isBusy(taskId: string | null) {
+    return computed(() => taskId ? busyTaskIds.value.has(taskId) : false)
+  }
+
   return {
     tasks,
     messages,
+    busyTaskIds,
     getTasksForSite,
     getTask,
     getMessages,
+    isBusy,
     createTask,
     updateTask,
     sendMessage,

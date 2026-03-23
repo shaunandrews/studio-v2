@@ -94,29 +94,9 @@ export interface ToolCall {
   changeId?: string        // Links to undoable Change in useSiteContent
 }
 
-export type TaskStatus = 'queued' | 'running' | 'review' | 'approved' | 'merged' | 'rejected' | 'failed'
-export type TaskOriginSurface = 'chat' | 'sitemap' | 'preview' | 'overview' | 'quick-action'
-
-export interface TaskOrigin {
-  surface: TaskOriginSurface
-  context?: string      // e.g. "Site Map → About page"
-  entityRef?: string    // specific page/entity ID
-}
-
 export interface TaskWorktree {
   branch: string
   port: number
-}
-
-export interface ChangedFile {
-  path: string                   // e.g. "hero.html"
-  type: 'added' | 'modified' | 'deleted'
-}
-
-export interface ChangedEntity {
-  name: string                   // e.g. "Welcome to Our Site"
-  entityType: string             // e.g. "post", "page", "option", "plugin"
-  action: 'created' | 'updated' | 'deleted' | 'activated' | 'deactivated'
 }
 
 export interface Task {
@@ -124,16 +104,11 @@ export interface Task {
   siteId: string
   agentId: AgentId
   title?: string
-  status: TaskStatus
   createdAt: string
   updatedAt: string
   archived?: boolean
   unread?: boolean
-  origin: TaskOrigin
   worktree?: TaskWorktree
-  summary?: string
-  changedFiles?: ChangedFile[]
-  changedEntities?: ChangedEntity[]
 }
 
 export interface Message {
