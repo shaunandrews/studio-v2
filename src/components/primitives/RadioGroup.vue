@@ -77,6 +77,11 @@ defineEmits<{
 	height: 0;
 }
 
+.radio-option__input:focus-visible ~ .radio-option__indicator {
+	outline: 2px solid var(--color-frame-theme);
+	outline-offset: 2px;
+}
+
 .radio-option__indicator {
 	position: relative;
 	width: 16px;

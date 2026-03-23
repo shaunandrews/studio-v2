@@ -94,6 +94,8 @@ const flyoutGroups = computed<FlyoutMenuGroup[]>(() =>
               `dropdown-trigger--${size}`,
               { 'dropdown-trigger--field': variant === 'field' },
             ]"
+            aria-haspopup="listbox"
+            :aria-expanded="open"
             @click="toggle"
           >
             <WPIcon v-if="triggerIcon" :icon="currentOption()?.icon || triggerIcon" :size="18" />

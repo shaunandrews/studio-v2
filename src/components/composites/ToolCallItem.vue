@@ -39,7 +39,12 @@ function onUndo(e: Event) {
       `tool-call-item--${status}`,
       { 'is-expanded': expanded },
     ]"
+    role="button"
+    tabindex="0"
+    :aria-expanded="expanded"
     @click="toggle()"
+    @keydown.enter="toggle()"
+    @keydown.space.prevent="toggle()"
   >
     <div class="tool-call-item__row hstack gap-xxs">
       <!-- Running: spinner leads -->
@@ -139,24 +144,19 @@ function onUndo(e: Event) {
 
 .tool-call-item__detail {
   min-height: 0;
-  padding: 0 var(--space-m);
+  padding: var(--space-s) var(--space-m);
   padding-inline-start: var(--space-s);
   border: 1px solid transparent;
   border-radius: var(--radius-m);
-  margin-block-start: 0;
+  margin-block-start: var(--space-xs);
   opacity: 0;
   transition:
     opacity var(--duration-fast) var(--ease-default),
-    padding var(--duration-moderate) var(--ease-default),
-    margin var(--duration-moderate) var(--ease-default),
     border-color var(--duration-moderate) var(--ease-default);
 }
 
 .tool-call-item.is-expanded .tool-call-item__detail {
-  padding: var(--space-s) var(--space-m);
-  padding-inline-start: var(--space-s);
   border-color: var(--color-frame-border);
-  margin-block-start: var(--space-xs);
   opacity: 1;
 }
 

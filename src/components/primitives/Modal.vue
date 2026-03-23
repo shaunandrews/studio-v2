@@ -22,6 +22,8 @@ const emit = defineEmits<{
 
 const slots = useSlots()
 
+const panelRef = ref<HTMLElement | null>(null)
+
 function onScrimClick(e: MouseEvent) {
   if (e.target === e.currentTarget) emit('close')
 }
@@ -30,12 +32,44 @@ function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') emit('close')
 }
 
+function trapFocus(e: KeyboardEvent) {
+  if (e.key !== 'Tab' || !panelRef.value) return
+  const focusable = panelRef.value.querySelectorAll<HTMLElement>(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )
+  if (!focusable.length) return
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault()
+    last.focus()
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault()
+    first.focus()
+  }
+}
+
+let previouslyFocused: HTMLElement | null = null
+
 onMounted(() => {
   document.addEventListener('keydown', onKeydown)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', onKeydown)
+})
+
+watch(() => props.open, (isOpen) => {
+  if (isOpen) {
+    previouslyFocused = document.activeElement as HTMLElement
+    nextTick(() => {
+      panelRef.value?.focus()
+      updateScrollBorders()
+    })
+  } else {
+    previouslyFocused?.focus()
+    previouslyFocused = null
+  }
 })
 
 const hasHeader = computed(() => props.title || slots.header)
@@ -53,11 +87,7 @@ function updateScrollBorders() {
   scrolledBottom.value = el.scrollTop + el.clientHeight < el.scrollHeight - 1
 }
 
-watch(() => props.open, (isOpen) => {
-  if (isOpen) {
-    nextTick(() => updateScrollBorders())
-  }
-})
+/* scrollBorders handled by the focus-management watch above */
 
 // For embedded mode, check scroll borders after mount
 onMounted(() => {
@@ -70,7 +100,7 @@ onMounted(() => {
 <template>
   <!-- Embedded: render panel inline, no Teleport/scrim -->
   <div v-if="embedded" class="modal-panel modal-panel--embedded vstack" :style="{ width }">
-    <button v-if="closable" class="modal-close" disabled>
+    <button v-if="closable" class="modal-close" aria-label="Close" disabled>
       <WPIcon :icon="close" :size="20" />
     </button>
     <div v-if="hasHeader" class="modal-header hstack" :class="{ 'modal-header--bordered': scrolledTop }">
@@ -90,10 +120,18 @@ onMounted(() => {
   <Teleport v-else to="body">
     <Transition name="modal">
       <div v-if="open" class="modal-scrim" @click="onScrimClick">
-        <div class="modal-panel vstack" :style="{ width }">
+        <div
+          ref="panelRef"
+          class="modal-panel vstack"
+          role="dialog"
+          :aria-label="title"
+          tabindex="-1"
+          :style="{ width }"
+          @keydown="trapFocus"
+        >
 
           <!-- Close button (absolutely positioned) -->
-          <button v-if="closable" class="modal-close" @click="emit('close')">
+          <button v-if="closable" class="modal-close" aria-label="Close" @click="emit('close')">
             <WPIcon :icon="close" :size="20" />
           </button>
 
@@ -125,7 +163,7 @@ onMounted(() => {
 .modal-scrim {
   position: fixed;
   inset: 0;
-  z-index: 9000;
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;

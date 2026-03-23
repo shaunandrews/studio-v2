@@ -64,6 +64,11 @@ defineEmits<{
 	height: 0;
 }
 
+.toggle__input:focus-visible + .toggle__track {
+	outline: 2px solid var(--color-frame-theme);
+	outline-offset: 2px;
+}
+
 .toggle__track {
 	position: relative;
 	width: 32px;
