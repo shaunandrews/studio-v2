@@ -15,6 +15,7 @@ import Button from '@/components/primitives/Button.vue'
 import { useAuth } from '@/data/useAuth'
 import { useOnboarding } from '@/data/useOnboarding'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
+import TrafficLights from '@/components/primitives/TrafficLights.vue'
 
 const router = useRouter()
 const { login } = useAuth()
@@ -55,11 +56,7 @@ function handleDeny() {
     <div class="browser-window" :class="{ 'is-mac': isMac }">
       <!-- macOS titlebar -->
       <div v-if="isMac" class="browser-titlebar browser-titlebar--mac">
-        <div class="mac-lights">
-          <span class="mac-light mac-light--close" />
-          <span class="mac-light mac-light--minimize" />
-          <span class="mac-light mac-light--maximize" />
-        </div>
+        <TrafficLights class="mac-lights" />
         <div class="browser-url-bar">
           <WPIcon :icon="lock" :size="14" class="browser-url-bar__lock" />
           <span class="browser-url-bar__url">public-api.wordpress.com</span>
@@ -187,22 +184,9 @@ function handleDeny() {
 }
 
 .mac-lights {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   width: 68px;
   flex-shrink: 0;
 }
-
-.mac-light {
-  width: 12px; /* OS-native size */
-  height: 12px;
-  border-radius: 50%;
-}
-
-.mac-light--close { background: var(--color-macos-close); }
-.mac-light--minimize { background: var(--color-macos-minimize); }
-.mac-light--maximize { background: var(--color-macos-maximize); }
 
 .mac-lights-spacer {
   width: 68px;

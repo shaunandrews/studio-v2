@@ -11,6 +11,7 @@ import PullSitePicker from '@/components/features/add-site/PullSitePicker.vue'
 import type { Blueprint } from '@/components/features/add-site/BlueprintPicker.vue'
 import type { RemoteSite } from '@/components/features/add-site/PullSitePicker.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
+import TrafficLights from '@/components/primitives/TrafficLights.vue'
 import { useSites } from '@/data/useSites'
 import { useSiteTransition } from '@/data/useSiteTransition'
 import { useAddSite } from '@/data/useAddSite'
@@ -195,11 +196,7 @@ async function onSubmit(data: { name: string }) {
 <template>
   <div class="add-site-page" :class="{ 'is-windows': isWindows }">
     <WindowsTitlebar v-if="isWindows" />
-    <div v-else class="traffic-lights hstack gap-xxs">
-      <span class="light close" />
-      <span class="light minimize" />
-      <span class="light maximize" />
-    </div>
+    <TrafficLights v-else class="traffic-lights" />
 
   <BackdropPage
     hide-header
@@ -352,16 +349,6 @@ async function onSubmit(data: { name: string }) {
   z-index: 100;
   -webkit-app-region: drag;
 }
-
-.light {
-  width: 12px;
-  height: 12px;
-  border-radius: var(--radius-full);
-}
-
-.light.close { background: var(--color-macos-close); }
-.light.minimize { background: var(--color-macos-minimize); }
-.light.maximize { background: var(--color-macos-maximize); }
 
 /* ── Windows overrides ── */
 

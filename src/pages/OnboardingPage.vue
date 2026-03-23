@@ -5,6 +5,7 @@ import { wordpress, lock, globe, connection } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Button from '@/components/primitives/Button.vue'
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
+import TrafficLights from '@/components/primitives/TrafficLights.vue'
 import DotGrid from '@/components/features/onboarding/DotGrid.vue'
 import AuthSimulation from '@/components/features/onboarding/AuthSimulation.vue'
 import PermissionDialog from '@/components/features/onboarding/PermissionDialog.vue'
@@ -130,11 +131,7 @@ onBeforeUnmount(() => {
   <div class="onboarding-page" :class="{ 'is-windows': isWindows, 'is-exiting': exiting }">
     <!-- Window controls -->
     <WindowsTitlebar v-if="isWindows" />
-    <div v-else class="traffic-lights">
-      <span class="light close" />
-      <span class="light minimize" />
-      <span class="light maximize" />
-    </div>
+    <TrafficLights v-else class="traffic-lights" />
 
     <!-- Accent glow (matches AddSitePage) -->
     <div class="accent-glow" />
@@ -281,21 +278,8 @@ onBeforeUnmount(() => {
   top: 18px; /* Physical: fixed window position */
   left: 16px; /* Physical: fixed window position */
   z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   -webkit-app-region: drag;
 }
-
-.light {
-  width: 12px; /* OS-native size */
-  height: 12px;
-  border-radius: var(--radius-full);
-}
-
-.light.close { background: var(--color-macos-close); }
-.light.minimize { background: var(--color-macos-minimize); }
-.light.maximize { background: var(--color-macos-maximize); }
 
 /* ── Windows overrides ── */
 

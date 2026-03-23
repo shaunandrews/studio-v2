@@ -12,6 +12,7 @@ import { codingAgents, installAgent, uninstallAgent } from '@/data/agents'
 import { skills, installSkill, installAllSkills, uninstallSkill, removeCustomSkill } from '@/data/skills'
 import SkillInstaller from '@/components/composites/SkillInstaller.vue'
 import Badge from '@/components/primitives/Badge.vue'
+import TrafficLights from '@/components/primitives/TrafficLights.vue'
 import { wordpress } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
@@ -425,11 +426,7 @@ function skillInstallLabel(id: string): string {
   <div v-if="embedded" class="settings-window settings-window--embedded" :class="{ 'is-windows': isWindows }">
     <!-- Window chrome: macOS -->
     <div v-if="!isWindows" class="settings-chrome">
-      <div class="settings-traffic-lights">
-        <span class="settings-traffic-dot settings-traffic-dot--close" />
-        <span class="settings-traffic-dot settings-traffic-dot--minimize" />
-        <span class="settings-traffic-dot settings-traffic-dot--maximize" />
-      </div>
+      <TrafficLights class="settings-traffic-lights" dimmed />
       <Text variant="body-small" weight="semibold" class="settings-title">Studio Settings</Text>
     </div>
     <!-- Window chrome: Windows -->
@@ -1009,22 +1006,7 @@ function skillInstallLabel(id: string): string {
   left: 16px; /* Physical: app chrome edge */
   top: 50%;
   transform: translateY(-50%);
-  display: flex;
-  gap: 8px;
 }
-
-.settings-traffic-dot {
-  width: 12px; /* OS-native size, not on grid — intentional */
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  cursor: default;
-}
-
-.settings-traffic-dot--close { background: var(--color-macos-close); cursor: pointer; }
-.settings-traffic-dot--minimize,
-.settings-traffic-dot--maximize { background: var(--color-frame-border); pointer-events: none; }
 
 .settings-title { user-select: none; }
 
