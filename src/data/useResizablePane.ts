@@ -9,6 +9,8 @@ interface ResizablePaneOptions {
   maxWidth?: number
   /** localStorage key to persist width */
   storageKey?: string
+  /** Invert drag direction (for right-side panes where dragging left increases width) */
+  invert?: boolean
 }
 
 export function useResizablePane(options: ResizablePaneOptions = {}) {
@@ -17,6 +19,7 @@ export function useResizablePane(options: ResizablePaneOptions = {}) {
     minWidth = 180,
     maxWidth = 480,
     storageKey,
+    invert = false,
   } = options
 
   const stored = storageKey ? localStorage.getItem(storageKey) : null
@@ -37,7 +40,7 @@ export function useResizablePane(options: ResizablePaneOptions = {}) {
   }
 
   function onPointerMove(e: PointerEvent) {
-    const delta = e.clientX - startX
+    const delta = invert ? startX - e.clientX : e.clientX - startX
     const newWidth = Math.min(maxWidth, Math.max(minWidth, startWidth + delta))
     width.value = newWidth
   }

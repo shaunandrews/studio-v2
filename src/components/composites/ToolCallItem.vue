@@ -88,17 +88,19 @@ function onUndo(e: Event) {
 
     <!-- Expanded detail (grid-row trick for animated height) -->
     <div class="tool-call-item__detail-wrapper">
-      <div class="tool-call-item__detail" :class="{ 'tool-call-item__detail--code-only': code && !toolName && !args && !result && !error }">
-        <div v-if="toolName" class="tool-call-detail__name">{{ toolName }}</div>
-        <div v-if="args" class="tool-call-detail__args">{{ args }}</div>
-        <div v-if="result" class="tool-call-detail__result">{{ result }}</div>
-        <div v-if="error" class="tool-call-detail__error">{{ error }}</div>
-        <StreamingCode
-          v-if="code"
-          :code="code"
-          :active="expanded"
-          :class="{ 'tool-call-detail__stream': true, 'tool-call-detail__stream--solo': !toolName && !args && !result && !error }"
-        />
+      <div class="tool-call-item__detail-collapse">
+        <div class="tool-call-item__detail" :class="{ 'tool-call-item__detail--code-only': code && !toolName && !args && !result && !error }">
+          <div v-if="toolName" class="tool-call-detail__name">{{ toolName }}</div>
+          <div v-if="args" class="tool-call-detail__args">{{ args }}</div>
+          <div v-if="result" class="tool-call-detail__result">{{ result }}</div>
+          <div v-if="error" class="tool-call-detail__error">{{ error }}</div>
+          <StreamingCode
+            v-if="code"
+            :code="code"
+            :active="expanded"
+            :class="{ 'tool-call-detail__stream': true, 'tool-call-detail__stream--solo': !toolName && !args && !result && !error }"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -135,15 +137,18 @@ function onUndo(e: Event) {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows var(--duration-moderate) var(--ease-default);
-  overflow: hidden;
 }
 
 .tool-call-item.is-expanded .tool-call-item__detail-wrapper {
   grid-template-rows: 1fr;
 }
 
-.tool-call-item__detail {
+.tool-call-item__detail-collapse {
   min-height: 0;
+  overflow: hidden;
+}
+
+.tool-call-item__detail {
   padding: var(--space-s) var(--space-m);
   padding-inline-start: var(--space-s);
   border: 1px solid transparent;

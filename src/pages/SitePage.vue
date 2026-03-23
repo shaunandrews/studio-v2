@@ -110,12 +110,6 @@ const isNewTask = computed(() =>
 const selectedTask = computed(() =>
   tasks.value.find(t => t.id === selectedTaskId.value)
 )
-const isReview = computed(() => selectedTask.value?.status === 'review')
-
-function approveAndMerge() {
-  if (!selectedTask.value) return
-  selectedTask.value.status = 'approved'
-}
 
 const inputChatRef = ref<InstanceType<typeof InputChat> | null>(null)
 const inputWrapRef = ref<HTMLDivElement | null>(null)
@@ -155,10 +149,7 @@ function onSelectChat(taskId: string) {
 async function onNewChat() {
   const siteId = activeSiteId.value
   if (!siteId) return
-  const task = await createTask({
-    siteId,
-    origin: { surface: 'chat' },
-  })
+  const task = await createTask({ siteId })
   draft.value = ''
   router.push({ name: 'site-task', params: { id: siteId, taskId: task.id } })
   nextTick(() => inputChatRef.value?.focus())
@@ -182,6 +173,24 @@ const { width: navWidth, isDragging: isResizing, onPointerDown: onResizeStart, r
 })
 
 const { openSettings } = useSettings()
+
+// ── Preview pane visibility & resize ──
+
+const storedPreviewVisible = localStorage.getItem('studio-preview-visible')
+const previewVisible = ref(storedPreviewVisible !== null ? storedPreviewVisible !== 'false' : true)
+
+function togglePreview() {
+  previewVisible.value = !previewVisible.value
+  localStorage.setItem('studio-preview-visible', String(previewVisible.value))
+}
+
+const { width: previewWidth, isDragging: isPreviewResizing, onPointerDown: onPreviewResizeStart, resetWidth: resetPreviewWidth } = useResizablePane({
+  defaultWidth: 480,
+  minWidth: 300,
+  maxWidth: 800,
+  storageKey: 'studio-preview-width',
+  invert: true,
+})
 
 // ── Site preview ──
 
@@ -220,7 +229,7 @@ onBeforeUnmount(() => {
   <div class="site-page vstack">
     <!-- Nested route outlet (children render null — SitePage owns the layout) -->
     <router-view />
-    <div class="panes" :class="{ 'is-resizing': isResizing }">
+    <div class="panes" :class="{ 'is-resizing': isResizing || isPreviewResizing }">
       <div class="pane pane-site-navigation" :style="{ width: navWidth + 'px' }">
         <SiteNavigation
           v-if="activeSiteId"
@@ -249,8 +258,9 @@ onBeforeUnmount(() => {
             v-if="!isNewTask"
             :task-id="selectedTaskId"
             :elevated="!isAtTop"
+            :preview-visible="previewVisible"
             class="task-brief-panel"
-            @preview="(id) => { /* TODO: open preview */ }"
+            @toggle-preview="togglePreview"
           />
           <ChatMessageList v-if="!isNewTask" :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" @scroll-top="(atTop) => isAtTop = atTop" />
           <div ref="inputWrapRef" class="detail-input" :class="{ 'is-new-task': isNewTask }">
@@ -268,10 +278,6 @@ onBeforeUnmount(() => {
               </div>
             </Transition>
             <ProgressiveBlur v-if="!isNewTask" class="input-blur" height="calc(100% + 6px)" />
-            <div v-if="isReview" class="merge-banner">
-              <Text variant="body-small" color="muted">This task is ready for your review.</Text>
-              <Button label="Approve & merge" variant="primary" size="small" @click="approveAndMerge" />
-            </div>
             <InputChat
               ref="inputChatRef"
               v-model="draft"
@@ -290,14 +296,17 @@ onBeforeUnmount(() => {
           <span class="detail-empty__text">Select a task or start a new one</span>
         </div>
       </div>
-      <div v-if="currentScreen === 'tasks' && selectedTaskId" class="pane pane-preview">
-        <iframe
-          ref="previewIframeRef"
-          :srcdoc="previewHtml"
-          class="preview-iframe"
-          sandbox="allow-same-origin allow-scripts"
-        />
-      </div>
+      <template v-if="currentScreen === 'tasks' && selectedTaskId && previewVisible">
+        <ResizeHandle :is-dragging="isPreviewResizing" @pointerdown="onPreviewResizeStart" @dblclick="resetPreviewWidth" />
+        <div class="pane pane-preview" :style="{ width: previewWidth + 'px' }">
+          <iframe
+            ref="previewIframeRef"
+            :srcdoc="previewHtml"
+            class="preview-iframe"
+            sandbox="allow-same-origin allow-scripts"
+          />
+        </div>
+      </template>
     </div>
 
   </div>
@@ -336,9 +345,7 @@ onBeforeUnmount(() => {
 }
 
 .pane-preview {
-  flex: 1;
-  min-width: 0;
-  border-inline-start: 1px solid var(--color-frame-border);
+  flex: 0 0 auto;
 }
 
 .preview-iframe {
@@ -371,23 +378,6 @@ onBeforeUnmount(() => {
   inset-block-end: 50%;
   transform: translateY(50%);
   padding: 0;
-}
-
-/* -- Merge banner -- */
-
-.merge-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 580px;
-  padding: var(--space-xs) var(--space-s);
-  background: color-mix(in srgb, var(--color-frame-fill) 70%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  margin-block-end: var(--space-xs);
 }
 
 /* -- Progressive blur behind input -- */

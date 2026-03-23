@@ -4,17 +4,21 @@ import Tooltip from '@/components/primitives/Tooltip.vue'
 
 const props = defineProps<{
   previewUrl?: string
+  previewVisible?: boolean
 }>()
 
 const emit = defineEmits<{
-  'preview': []
+  'toggle-preview': []
 }>()
 </script>
 
 <template>
   <div v-if="previewUrl" class="brief-actions hstack gap-xxs justify-end">
-    <Tooltip :text="`Preview at ${previewUrl}`" placement="top">
-      <Button label="Preview" size="small" variant="tertiary" @click.stop="emit('preview')" />
-    </Tooltip>
+    <Button
+      :label="previewVisible ? 'Hide preview' : 'Show preview'"
+      size="small"
+      variant="tertiary"
+      @click.stop="emit('toggle-preview')"
+    />
   </div>
 </template>
