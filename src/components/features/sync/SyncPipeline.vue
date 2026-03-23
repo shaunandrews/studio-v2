@@ -2,7 +2,7 @@
 import { computed, ref, watch, nextTick, toRef } from 'vue'
 import { useSites } from '@/data/useSites'
 import { usePipeline } from '@/data/usePipeline'
-import ScreenLayout from '@/components/composites/ScreenLayout.vue'
+import Pane from '@/components/composites/Pane.vue'
 import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
 import StageCard from './StageCard.vue'
@@ -156,7 +156,7 @@ function envColor(environment?: string): string {
 </script>
 
 <template>
-  <ScreenLayout>
+  <Pane :scrollable="false" centered>
     <div class="sync-pipeline__layout" :class="{ 'is-setup': showSetupLayout, 'is-ending': setupEnding, 'is-intro': isIntroStep }">
       <div ref="envContainerRef" class="sync-pipeline__environments">
         <StageCard
@@ -250,7 +250,7 @@ function envColor(environment?: string): string {
       </div>
       </Transition>
     </div>
-  </ScreenLayout>
+  </Pane>
 </template>
 
 <style scoped>

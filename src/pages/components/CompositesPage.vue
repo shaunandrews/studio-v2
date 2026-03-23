@@ -8,7 +8,7 @@ import InputChat from '@/components/composites/InputChat.vue'
 import SettingsPage from '@/components/composites/SettingsPage.vue'
 import PanelToolbar from '@/components/composites/PanelToolbar.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
-import ScreenLayout from '@/components/composites/ScreenLayout.vue'
+import Pane from '@/components/composites/Pane.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import SiteToolbar from '@/components/composites/SiteToolbar.vue'
 import ContentSelector from '@/components/composites/ContentSelector.vue'
@@ -273,35 +273,39 @@ const shortcutsOpen = ref(false)
     </div>
   </section>
 
-  <!-- ScreenLayout -->
+  <!-- Pane -->
   <section id="screen-layout">
-    <h2>ScreenLayout</h2>
-    <p class="section-desc">Full-screen layout with centered, scrollable body area.</p>
+    <h2>Pane</h2>
+    <p class="section-desc">Flex column layout with optional fixed header/footer and scrollable body. Replaces ScreenLayout.</p>
 
     <div class="props-table">
       <h3>Props</h3>
       <table>
         <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>scrollable</code></td><td><code>boolean</code></td><td><code>undefined</code></td><td>Enable vertical scrolling in body</td></tr>
+          <tr><td><code>scrollable</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable vertical scrolling in body</td></tr>
+          <tr><td><code>centered</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Constrain content to 680px centered</td></tr>
+          <tr><td><code>padded</code></td><td><code>boolean</code></td><td><code>auto</code></td><td>Add standard content padding (defaults to true when centered)</td></tr>
         </tbody>
       </table>
       <h3>Slots</h3>
       <table>
         <thead><tr><th>Slot</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td><code>default</code></td><td>Body content</td></tr>
+          <tr><td><code>header</code></td><td>Fixed top area</td></tr>
+          <tr><td><code>default</code></td><td>Scrollable body content</td></tr>
+          <tr><td><code>footer</code></td><td>Fixed bottom area</td></tr>
         </tbody>
       </table>
     </div>
 
     <h3>Preview</h3>
     <div class="example-section" style="height: 200px; border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <ScreenLayout :scrollable="true">
+      <Pane scrollable centered>
         <div class="p-m">
           <Text color="secondary">Scrollable body content goes here.</Text>
         </div>
-      </ScreenLayout>
+      </Pane>
     </div>
   </section>
 

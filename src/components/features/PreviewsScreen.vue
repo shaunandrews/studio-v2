@@ -6,7 +6,7 @@ import { usePreviews } from '@/data/usePreviews'
 import Button from '@/components/primitives/Button.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
-import ScreenLayout from '@/components/composites/ScreenLayout.vue'
+import Pane from '@/components/composites/Pane.vue'
 import PreviewsEmptyState from './previews/PreviewsEmptyState.vue'
 import PreviewCard from './previews/PreviewCard.vue'
 
@@ -130,7 +130,7 @@ function handleClear(previewId: string) {
 <template>
   <PreviewsEmptyState v-if="!hasPreviews" @create="handleCreate" />
 
-  <ScreenLayout v-else>
+  <Pane v-else :scrollable="false" centered>
     <div class="previews-list__header ps-xl pe-s mb-xl">
       <span class="previews-list__description">Share your site with collaborators and clients</span>
       <div class="hstack gap-xxs">
@@ -185,7 +185,7 @@ function handleClear(previewId: string) {
         />
       </div>
     </div>
-  </ScreenLayout>
+  </Pane>
 </template>
 
 <style scoped>

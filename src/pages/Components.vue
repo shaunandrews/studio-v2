@@ -39,7 +39,7 @@ const categories = [
       { id: 'panel-toolbar', label: 'PanelToolbar' },
       { id: 'preferences-modal', label: 'SettingsPage' },
       { id: 'site-item', label: 'SiteItem' },
-      { id: 'screen-layout', label: 'ScreenLayout' },
+      { id: 'screen-layout', label: 'Pane' },
       { id: 'shortcuts-modal', label: 'ShortcutsModal' },
       { id: 'site-toolbar', label: 'SiteToolbar' },
       { id: 'task-brief', label: 'TaskBrief' },
