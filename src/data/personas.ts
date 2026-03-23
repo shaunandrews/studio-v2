@@ -18,6 +18,22 @@ export const personas: Persona[] = [
     previews: [],
   },
   {
+    id: 'single-site',
+    name: 'Jamie',
+    description: '1 site, signed in, just getting started.',
+    icon: '☕',
+    auth: {
+      name: 'Jamie Rivera',
+      email: 'jamie@example.com',
+      avatar: 'https://gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=64',
+    },
+    onboardingCompleted: true,
+    sites: [seedProjects[0]],
+    tasks: [],
+    messages: [],
+    previews: [],
+  },
+  {
     id: 'existing-user',
     name: 'Shaun',
     description: '7 sites, active tasks, fully set up.',
