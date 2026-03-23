@@ -37,7 +37,7 @@ const stats = computed(() => {
 <template>
   <Popover surface="dark" placement="above" align="end">
     <template #trigger="{ toggle, open }">
-      <Tooltip :text="open ? undefined : `Context: ${percent}% used`" placement="bottom">
+      <Tooltip :text="open ? undefined : `Context: ${percent}% used`" placement="top">
         <button
           class="context-ring-trigger"
           :class="[`surface-${surface}`, { active: open, warning: isWarning, critical: isCritical }]"

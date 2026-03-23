@@ -12,6 +12,7 @@ import type { Task, Message, AgentId, ToolCall } from './types'
 const tasks = ref<Task[]>([])
 const messages = ref<Message[]>([])
 const busyTaskIds = ref<Set<string>>(new Set())
+const abortControllers = new Map<string, AbortController>()
 
 let nextWorktreePort = 4001
 
@@ -86,6 +87,9 @@ function markIdle(taskId: string) {
 
 async function sendToAISimple(taskId: string, agentId?: AgentId) {
   markBusy(taskId)
+  const controller = new AbortController()
+  abortControllers.set(taskId, controller)
+
   const streamingId = `msg-streaming-${Date.now()}`
   const streamingMsg: Message = {
     id: streamingId,
@@ -105,12 +109,22 @@ async function sendToAISimple(taskId: string, agentId?: AgentId) {
       content: m.content,
     }))
 
-  await streamAI(history, (text) => {
-    const idx = messages.value.findIndex(m => m.id === streamingId)
-    if (idx !== -1) {
-      if (messages.value[idx]) messages.value[idx].content = text
+  try {
+    await streamAI(history, (text) => {
+      const idx = messages.value.findIndex(m => m.id === streamingId)
+      if (idx !== -1) {
+        if (messages.value[idx]) messages.value[idx].content = text
+      }
+    }, undefined, controller.signal)
+  } catch (e: unknown) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      // Stopped by user — keep partial content
+    } else {
+      throw e
     }
-  })
+  } finally {
+    abortControllers.delete(taskId)
+  }
 
   const finalMsg = messages.value.find(m => m.id === streamingId)
   if (finalMsg) persistMessage(finalMsg)
@@ -130,8 +144,13 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
   }
 
   markBusy(taskId)
+  const controller = new AbortController()
+  abortControllers.set(taskId, controller)
+
   let looping = true
   while (looping) {
+    if (controller.signal.aborted) break
+
     const currentContent = getContent(task.siteId).value!
     const system = buildSystemPrompt(currentContent)
 
@@ -185,68 +204,82 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
 
     const pendingToolCalls: ToolCall[] = []
 
-    const result = await streamAIWithTools(apiMessages, siteTools, system, {
-      onText: (text) => {
-        const idx = messages.value.findIndex(m => m.id === streamingId)
-        if (idx !== -1) messages.value[idx]!.content = text
-      },
-      onToolUseStart: (id, name) => {
-        const tc: ToolCall = {
-          id,
-          label: `Running ${name}...`,
-          status: 'running',
-          toolName: name,
-        }
-        pendingToolCalls.push(tc)
-        const idx = messages.value.findIndex(m => m.id === streamingId)
-        if (idx !== -1) {
-          messages.value[idx]!.toolCalls = [...pendingToolCalls]
-        }
-      },
-      onToolUseComplete: (toolUse) => {
-        const execResult = executeToolCall(task.siteId, toolUse.name, toolUse.input, toolUse.id)
+    let result
+    try {
+      result = await streamAIWithTools(apiMessages, siteTools, system, {
+        onText: (text) => {
+          const idx = messages.value.findIndex(m => m.id === streamingId)
+          if (idx !== -1) messages.value[idx]!.content = text
+        },
+        onToolUseStart: (id, name) => {
+          const tc: ToolCall = {
+            id,
+            label: `Running ${name}...`,
+            status: 'running',
+            toolName: name,
+          }
+          pendingToolCalls.push(tc)
+          const idx = messages.value.findIndex(m => m.id === streamingId)
+          if (idx !== -1) {
+            messages.value[idx]!.toolCalls = [...pendingToolCalls]
+          }
+        },
+        onToolUseComplete: (toolUse) => {
+          const execResult = executeToolCall(task.siteId, toolUse.name, toolUse.input, toolUse.id)
 
-        // Push to preview
-        if (execResult.change && !execResult.isError) {
-          const updatedContent = getContent(task.siteId).value
-          if (updatedContent) {
-            switch (toolUse.name) {
-              case 'update_section':
-              case 'create_section': {
-                const section = updatedContent.sections[toolUse.input.section_id]
-                if (section) {
-                  const page = updatedContent.pages.find(p => p.sections.includes(section.id))
-                  const order = page ? page.sections.indexOf(section.id) : undefined
-                  pushSectionUpdate(section.id, section.html, section.css, order)
+          // Push to preview
+          if (execResult.change && !execResult.isError) {
+            const updatedContent = getContent(task.siteId).value
+            if (updatedContent) {
+              switch (toolUse.name) {
+                case 'update_section':
+                case 'create_section': {
+                  const section = updatedContent.sections[toolUse.input.section_id]
+                  if (section) {
+                    const page = updatedContent.pages.find(p => p.sections.includes(section.id))
+                    const order = page ? page.sections.indexOf(section.id) : undefined
+                    pushSectionUpdate(section.id, section.html, section.css, order)
+                  }
+                  break
                 }
-                break
+                case 'remove_section':
+                  pushPageUpdate(updatedContent, toolUse.input.page_slug)
+                  break
+                case 'update_theme':
+                  pushThemeUpdate(toolUse.input.variables)
+                  break
               }
-              case 'remove_section':
-                pushPageUpdate(updatedContent, toolUse.input.page_slug)
-                break
-              case 'update_theme':
-                pushThemeUpdate(toolUse.input.variables)
-                break
             }
           }
-        }
 
-        // Update tool call in message
-        const tc = pendingToolCalls.find(t => t.id === toolUse.id)
-        if (tc) {
-          tc.status = execResult.isError ? 'error' : 'done'
-          tc.label = execResult.result
-          tc.args = JSON.stringify(toolUse.input, null, 2)
-          tc.result = execResult.isError ? undefined : execResult.result
-          tc.error = execResult.isError ? execResult.result : undefined
-          tc.changeId = execResult.change?.id
+          // Update tool call in message
+          const tc = pendingToolCalls.find(t => t.id === toolUse.id)
+          if (tc) {
+            tc.status = execResult.isError ? 'error' : 'done'
+            tc.label = execResult.result
+            tc.args = JSON.stringify(toolUse.input, null, 2)
+            tc.result = execResult.isError ? undefined : execResult.result
+            tc.error = execResult.isError ? execResult.result : undefined
+            tc.changeId = execResult.change?.id
+          }
+          const idx = messages.value.findIndex(m => m.id === streamingId)
+          if (idx !== -1) {
+            messages.value[idx]!.toolCalls = [...pendingToolCalls]
+          }
+        },
+      }, controller.signal)
+    } catch (e: unknown) {
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        // Stopped by user — keep partial content, mark running tool calls as done
+        for (const tc of pendingToolCalls) {
+          if (tc.status === 'running') tc.status = 'done'
         }
         const idx = messages.value.findIndex(m => m.id === streamingId)
-        if (idx !== -1) {
-          messages.value[idx]!.toolCalls = [...pendingToolCalls]
-        }
-      },
-    })
+        if (idx !== -1) messages.value[idx]!.toolCalls = [...pendingToolCalls]
+        break
+      }
+      throw e
+    }
 
     const finalMsg = messages.value.find(m => m.id === streamingId)
     if (finalMsg) persistMessage(finalMsg)
@@ -257,6 +290,7 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
       looping = false
     }
   }
+  abortControllers.delete(taskId)
   markIdle(taskId)
 }
 
@@ -459,6 +493,11 @@ export function useTasks() {
     return computed(() => taskId ? busyTaskIds.value.has(taskId) : false)
   }
 
+  function stopTask(taskId: string) {
+    const controller = abortControllers.get(taskId)
+    if (controller) controller.abort()
+  }
+
   return {
     tasks,
     messages,
@@ -467,6 +506,7 @@ export function useTasks() {
     getTask,
     getMessages,
     isBusy,
+    stopTask,
     createTask,
     updateTask,
     sendMessage,

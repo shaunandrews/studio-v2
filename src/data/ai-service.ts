@@ -7,6 +7,7 @@ export async function streamAI(
   messages: { role: 'user' | 'assistant'; content: string }[],
   onUpdate: (text: string) => void,
   systemPrompt?: string,
+  signal?: AbortSignal,
 ): Promise<string> {
   try {
     const response = await fetch('/api/chat', {
@@ -16,6 +17,7 @@ export async function streamAI(
         messages,
         system: systemPrompt ?? AI_SYSTEM_PROMPT,
       }),
+      signal,
     })
 
     if (!response.ok) {
@@ -99,11 +101,13 @@ export async function streamAIWithTools(
   tools: any[],
   system: string,
   callbacks: StreamCallbacks,
+  signal?: AbortSignal,
 ): Promise<StreamResult> {
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ messages, tools, system }),
+    signal,
   })
 
   if (!response.ok) {

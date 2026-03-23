@@ -79,6 +79,7 @@ const props = withDefaults(defineProps<{
   modelValue?: string
   placeholder?: string
   elevated?: boolean
+  streaming?: boolean
 }>(), {
   surface: 'light',
   modelValue: '',
@@ -87,6 +88,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   send: [message: string]
+  stop: []
   'update:modelValue': [value: string]
   'manage-agents': []
 }>()
@@ -144,14 +146,14 @@ function focusInput(e: MouseEvent) {
       />
       <div class="input-toolbar">
         <div class="input-toolbar__start">
-          <Tooltip text="Attach" placement="bottom">
+          <Tooltip text="Attach" placement="top">
             <button class="input-icon-btn" aria-label="Attach">
               <WPIcon :icon="plus" :size="24" />
             </button>
           </Tooltip>
           <FlyoutMenu :groups="agentMenuGroups" surface="dark" placement="above" align="start">
             <template #trigger="{ toggle, open }">
-              <Tooltip text="Switch agent" placement="bottom" :delay="600">
+              <Tooltip text="Switch agent" placement="top" :delay="600">
                 <button class="agent-picker" :class="{ 'is-open': open }" @click="toggle">
                   <span class="agent-picker__label">{{ selectedAgentLabel }}</span>
                   <WPIcon :icon="chevronDown" :size="16" class="agent-picker__chevron" />
@@ -169,7 +171,22 @@ function focusInput(e: MouseEvent) {
             :messages="8"
             :surface="props.surface"
           />
-          <button class="input-submit" :class="{ 'is-active': canSend }" :disabled="!canSend" aria-label="Send" @click="send">
+          <button
+            v-if="props.streaming"
+            class="input-submit is-stop"
+            aria-label="Stop"
+            @click="emit('stop')"
+          >
+            <span class="stop-icon" />
+          </button>
+          <button
+            v-else
+            class="input-submit"
+            :class="{ 'is-active': canSend }"
+            :disabled="!canSend"
+            aria-label="Send"
+            @click="send"
+          >
             <WPIcon :icon="arrowUp" :size="24" />
           </button>
         </div>
@@ -323,6 +340,24 @@ function focusInput(e: MouseEvent) {
   opacity: 0.85;
 }
 
+.input-submit.is-stop {
+  background: var(--color-frame-fg);
+  color: var(--color-frame-bg);
+  cursor: pointer;
+}
+
+.input-submit.is-stop:hover {
+  opacity: 0.85;
+}
+
+.stop-icon {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
 /* ── Dark surface variant ── */
 
 .input-chat.surface-dark {
@@ -355,7 +390,8 @@ function focusInput(e: MouseEvent) {
   color: var(--color-chrome-fg-muted);
 }
 
-.input-chat.surface-dark .input-submit.is-active {
+.input-chat.surface-dark .input-submit.is-active,
+.input-chat.surface-dark .input-submit.is-stop {
   background: var(--color-chrome-fg);
   color: var(--color-chrome-bg);
 }
