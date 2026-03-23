@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Button from '@/components/primitives/Button.vue'
+import EmptyState from '@/components/composites/EmptyState.vue'
 
 defineEmits<{
   create: []
@@ -7,57 +7,24 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="previews-empty">
-    <div class="previews-empty__illustration">
-      <div class="previews-empty__card previews-empty__card--back"></div>
-      <div class="previews-empty__card previews-empty__card--front">
-        <div class="previews-empty__dot"></div>
-        <div class="previews-empty__line"></div>
+  <EmptyState
+    heading="Share a preview of your site"
+    subtext="Get feedback from anyone, anywhere with a free hosted preview powered by WordPress.com."
+    action-label="Create preview site"
+    @action="$emit('create')"
+  >
+    <template #illustration>
+      <div class="preview-card preview-card--back"></div>
+      <div class="preview-card preview-card--front">
+        <div class="preview-dot"></div>
+        <div class="preview-line"></div>
       </div>
-    </div>
-
-    <div class="previews-empty__message">
-      <div class="previews-empty__copy">
-        <p class="previews-empty__heading">Share a preview of your site</p>
-        <p class="previews-empty__subtext">
-          Get feedback from anyone, anywhere with a free hosted preview powered by WordPress.com.
-        </p>
-      </div>
-
-      <Button
-        variant="primary"
-        label="Create preview site"
-        @click="$emit('create')"
-      />
-    </div>
-  </div>
+    </template>
+  </EmptyState>
 </template>
 
 <style scoped>
-.previews-empty {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xxl);
-  padding: var(--space-m) var(--space-l);
-}
-
-/* ── Illustration ── */
-
-.previews-empty__illustration {
-  position: relative;
-  width: 320px;
-  height: 114px;
-  border-radius: var(--radius-l);
-  background:
-    radial-gradient(ellipse 320px 114px at center, transparent 60%, rgba(0, 0, 0, 0.06) 100%),
-    rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-}
-
-.previews-empty__card {
+.preview-card {
   position: absolute;
   width: 140px;
   height: 60px;
@@ -67,13 +34,13 @@ defineEmits<{
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
-.previews-empty__card--back {
+.preview-card--back {
   inset-block-start: 15px;
   inset-inline-start: 40px;
   opacity: 0.5;
 }
 
-.previews-empty__card--front {
+.preview-card--front {
   inset-block-end: 15px;
   inset-inline-end: 40px;
   display: flex;
@@ -82,7 +49,7 @@ defineEmits<{
   padding: 0 var(--space-s);
 }
 
-.previews-empty__dot {
+.preview-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -91,41 +58,10 @@ defineEmits<{
   flex-shrink: 0;
 }
 
-.previews-empty__line {
+.preview-line {
   flex: 1;
   height: 4px;
   border-radius: 2px;
   background: var(--color-frame-border);
-}
-
-/* ── Message ── */
-
-.previews-empty__message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-m);
-  width: 100%;
-}
-
-.previews-empty__copy {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  text-align: center;
-}
-
-.previews-empty__heading {
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-  margin: 0;
-}
-
-.previews-empty__subtext {
-  font-size: var(--font-size-m);
-  color: var(--color-frame-fg-muted);
-  margin: 0;
 }
 </style>
