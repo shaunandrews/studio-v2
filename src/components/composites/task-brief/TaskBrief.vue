@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useTasks } from '@/data/useTasks'
-import TaskBriefHeader from './TaskBriefHeader.vue'
-import TaskBriefActions from './TaskBriefActions.vue'
+import Text from '@/components/primitives/Text.vue'
+import Button from '@/components/primitives/Button.vue'
 
 const props = defineProps<{
   taskId: string
-  elevated?: boolean
-  previewVisible?: boolean
+  browserVisible?: boolean
 }>()
 
 const emit = defineEmits<{
-  'toggle-preview': []
+  'toggle-browser': []
 }>()
 
 const { tasks } = useTasks()
@@ -22,23 +21,30 @@ const task = computed(() =>
 
 const title = computed(() => task.value?.title ?? 'New task')
 const worktree = computed(() => task.value?.worktree)
-const previewUrl = computed(() =>
+const browserUrl = computed(() =>
   worktree.value ? `http://localhost:${worktree.value.port}` : undefined
 )
 </script>
 
 <template>
-  <div
-    class="task-brief"
-    :class="{ 'is-elevated': elevated }"
-  >
-    <TaskBriefHeader :branch="worktree?.branch" :title="title" />
+  <div class="task-brief">
+    <Text v-if="worktree?.branch" variant="caption" color="muted" class="brief-branch" :title="worktree.branch">
+      {{ worktree.branch }}
+    </Text>
 
-    <div class="brief-body p-s">
-      <TaskBriefActions
-        :preview-url="previewUrl"
-        :preview-visible="previewVisible"
-        @toggle-preview="emit('toggle-preview')"
+    <Text
+      tag="h2"
+      variant="body-small"
+      weight="semibold"
+      class="brief-title"
+      :title="title"
+    >{{ title }}</Text>
+
+    <div v-if="browserUrl" class="brief-end">
+      <Button
+        :label="browserVisible ? 'Hide browser' : 'Show browser'"
+        variant="tertiary"
+        @click.stop="emit('toggle-browser')"
       />
     </div>
   </div>
@@ -47,20 +53,37 @@ const previewUrl = computed(() =>
 <style scoped>
 .task-brief {
   position: relative;
-  background: var(--color-frame-bg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  box-shadow: none;
+  display: flex;
+  align-items: center;
+  border-block-end: 1px solid var(--color-frame-border);
+  padding: var(--space-xs) var(--space-s);
+}
+
+.brief-title {
+  position: absolute;
+  inset-inline: 0;
+  text-align: center;
+  white-space: nowrap;
   overflow: hidden;
-  flex-shrink: 0;
-  transition: box-shadow var(--duration-moderate) var(--ease-out);
+  text-overflow: ellipsis;
+  pointer-events: none;
+  padding-inline: var(--space-xxxl);
 }
 
-.task-brief.is-elevated {
-  box-shadow: var(--shadow-m);
-}
-
-.brief-body {
+.brief-branch {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xxs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-inline-size: 0;
   position: relative;
+  z-index: 1;
+}
+
+.brief-end {
+  margin-inline-start: auto;
+  position: relative;
+  z-index: 1;
 }
 </style>
