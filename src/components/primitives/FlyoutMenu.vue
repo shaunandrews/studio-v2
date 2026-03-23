@@ -26,6 +26,8 @@ const props = withDefaults(defineProps<{
   surface?: 'light' | 'dark'
   align?: 'start' | 'center' | 'end'
   placement?: 'above' | 'below'
+  width?: string
+  minWidth?: string
   maxWidth?: string
   maxHeight?: string
 }>(), {
@@ -187,6 +189,8 @@ defineExpose({ toggle, close, open })
     :surface="surface"
     :align="align"
     :placement="placement"
+    :width="width"
+    :min-width="minWidth"
     :max-width="maxWidth"
     :max-height="maxHeight"
     bare
@@ -202,7 +206,7 @@ defineExpose({ toggle, close, open })
     <template #default="{ resolvedMaxHeight }">
     <div
       class="flyout-menu vstack"
-      :class="surfaceClass"
+      :class="[surfaceClass, { 'flyout-menu--fill': width }]"
       :style="resolvedMaxHeight ? { maxHeight: resolvedMaxHeight, overflowY: 'auto' } : {}"
       @mouseleave="scheduleDeactivate"
     >
@@ -298,6 +302,10 @@ defineExpose({ toggle, close, open })
   border-radius: var(--radius-m);
   padding: 1px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.flyout-menu--fill {
+  width: auto;
 }
 
 .flyout-submenu {

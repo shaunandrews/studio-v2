@@ -5,6 +5,8 @@ const props = withDefaults(defineProps<{
   surface?: 'light' | 'dark'
   align?: 'start' | 'center' | 'end'
   placement?: 'above' | 'below'
+  width?: string
+  minWidth?: string
   maxWidth?: string
   maxHeight?: string
   bare?: boolean
@@ -89,6 +91,8 @@ function positionPanel() {
     position: 'fixed',
     zIndex: '9999',
   }
+  if (props.width) style.width = props.width
+  if (props.minWidth) style.minWidth = props.minWidth
   if (props.maxWidth) style.maxWidth = props.maxWidth
 
   const propMax = props.maxHeight ? parseInt(props.maxHeight, 10) : Infinity
