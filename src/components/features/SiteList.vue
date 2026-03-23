@@ -110,7 +110,7 @@ function goToAllSites() {
 <template>
   <div class="site-list vstack">
     <template v-if="showAllSites">
-      <div
+      <button
         class="all-sites-item"
         :class="{ active: isAllSitesActive }"
         @click="goToAllSites"
@@ -119,7 +119,7 @@ function goToAllSites() {
           <WPIcon :icon="category" :size="20" />
         </div>
         <span class="all-sites-label">All Sites</span>
-      </div>
+      </button>
 
       <div class="sidebar-divider" />
     </template>
@@ -155,12 +155,12 @@ function goToAllSites() {
       </div>
     </div>
 
-    <div class="add-site-item" @click="emit('new-site')">
+    <button class="add-site-item" @click="emit('new-site')">
       <div class="add-site-icon">
         <WPIcon :icon="plus" :size="16" />
       </div>
       <span class="add-site-label">Add site</span>
-    </div>
+    </button>
   </div>
 </template>
 
@@ -198,16 +198,21 @@ function goToAllSites() {
 .add-site-item {
   display: flex;
   align-items: center;
+  width: 100%;
   gap: 8px;
-  padding: 4px 2px 4px 4px;
-  border-radius: 6px;
+  padding: 4px 2px 4px 4px; /* Optical: match site-list-item spacing */
+  border: none;
+  border-radius: 6px; /* Optical: match site-list-item */
+  background: none;
+  font-family: inherit;
+  text-align: start;
   cursor: pointer;
   color: var(--color-chrome-fg-muted);
   transition: background var(--duration-instant) var(--ease-default);
 }
 
 .add-site-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-chrome-fill);
   color: var(--color-chrome-fg);
 }
 
@@ -221,28 +226,33 @@ function goToAllSites() {
 }
 
 .add-site-label {
-  font-size: 13px;
+  font-size: var(--font-size-m);
   line-height: 20px;
 }
 
 .all-sites-item {
   display: flex;
   align-items: center;
+  width: 100%;
   gap: 8px;
-  padding: 4px 2px 4px 4px;
-  border-radius: 6px;
+  padding: 4px 2px 4px 4px; /* Optical: match site-list-item spacing */
+  border: none;
+  border-radius: 6px; /* Optical: match site-list-item */
+  background: none;
+  font-family: inherit;
+  text-align: start;
   cursor: pointer;
   color: var(--color-chrome-fg-muted);
   transition: background var(--duration-instant) var(--ease-default);
 }
 
 .all-sites-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-chrome-fill);
   color: var(--color-chrome-fg);
 }
 
 .all-sites-item.active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-chrome-hover);
   color: var(--color-chrome-fg);
 }
 
@@ -256,13 +266,13 @@ function goToAllSites() {
 }
 
 .all-sites-label {
-  font-size: 13px;
+  font-size: var(--font-size-m);
   line-height: 20px;
 }
 
 .sidebar-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-chrome-hover);
   margin-block: var(--space-xxs);
 }
 </style>

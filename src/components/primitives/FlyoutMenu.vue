@@ -469,14 +469,14 @@ defineExpose({ toggle, close, open })
 .flyout-item--destructive:hover,
 .flyout--dark .flyout-item--destructive:hover,
 .flyout--light .flyout-item--destructive:hover {
-  background: rgba(214, 54, 56, 0.12);
-  color: #f86368;
+  background: var(--color-menu-danger-bg);
+  color: var(--color-menu-danger);
 }
 
 .flyout-item--destructive:hover .flyout-item-icon,
 .flyout--dark .flyout-item--destructive:hover .flyout-item-icon,
 .flyout--light .flyout-item--destructive:hover .flyout-item-icon {
-  color: #f86368;
+  color: var(--color-menu-danger);
 }
 
 /* ── Submenu transitions ── */

@@ -51,8 +51,8 @@ defineEmits<{
   background: none;
   color: var(--color-frame-fg);
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--font-size-m);
+  font-weight: var(--font-weight-medium);
   line-height: 20px;
   cursor: pointer;
   white-space: nowrap;

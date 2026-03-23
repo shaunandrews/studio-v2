@@ -164,10 +164,10 @@ onUnmounted(() => {
 
 .tooltip {
   position: fixed;
-  z-index: 9999;
+  z-index: var(--z-tooltip);
   padding: var(--space-xxs) var(--space-xs);
-  background: #000;
-  color: #fff;
+  background: var(--color-menu-bg);
+  color: var(--color-menu-fg);
   font-family: var(--font-family);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);

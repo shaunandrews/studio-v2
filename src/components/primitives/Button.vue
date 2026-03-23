@@ -73,6 +73,7 @@ onUnmounted(() => {
         { 'btn--icon-only': icon && !label, 'btn--active': active, 'btn--active-rotate': active && activeRotate, 'btn--destructive': destructive }
       ]"
       :disabled="disabled"
+      :aria-label="!label && tooltip ? tooltip : undefined"
     >
       <WPIcon v-if="icon" :icon="icon" :size="size === 'mini' ? 14 : size === 'small' ? 16 : size === 'large' ? 22 : 20" />
       <span v-if="label" class="btn__label">{{ label }}</span>
@@ -108,8 +109,8 @@ onUnmounted(() => {
 
 .btn--large {
   height: 40px;
-  padding: 0 16px;
-  gap: 6px;
+  padding: 0 var(--space-s);
+  gap: var(--space-xxxs);
   font-size: var(--font-size-m);
   line-height: 20px;
   min-width: 70px;
@@ -117,26 +118,26 @@ onUnmounted(() => {
 
 .btn--default {
   height: 32px;
-  padding: 0 12px;
-  gap: 4px;
-  font-size: 13px;
+  padding: 0 var(--space-xs);
+  gap: 4px; /* Optical: icon-label gap tighter than grid */
+  font-size: var(--font-size-m);
   line-height: 20px;
   min-width: 70px;
 }
 
 .btn--small {
   height: 26px;
-  padding: 0 8px;
-  gap: 2px;
-  font-size: 11px;
+  padding: 0 var(--space-xxs);
+  gap: 4px; /* Optical: tight fit at small size */
+  font-size: var(--font-size-xs);
   line-height: 20px;
 }
 
 .btn--mini {
   height: 22px;
-  padding: 0 6px;
-  gap: 2px;
-  font-size: 11px;
+  padding: 0 var(--space-xxxs);
+  gap: 4px; /* Optical: tight fit at mini size */
+  font-size: var(--font-size-xs);
   line-height: 16px;
   border-radius: var(--radius-s);
 }
@@ -175,12 +176,12 @@ onUnmounted(() => {
 /* ── Shortcut badges ── */
 
 .btn__shortcut {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
   line-height: 1;
-  padding: 2px 4px;
+  padding: 2px var(--space-xxxs); /* Optical: badge padding tighter than grid */
   border-radius: var(--radius-s);
-  margin-inline-start: 4px;
+  margin-inline-start: var(--space-xxxs);
   flex-shrink: 0;
 }
 
