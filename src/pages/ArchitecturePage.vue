@@ -356,7 +356,7 @@ const platform = ref<'mac' | 'windows'>('mac')
   padding: var(--space-xs);
   background: var(--color-chrome-bg);
   height: 280px;
-  transition: padding 300ms var(--ease-default);
+  /* No transition on padding — layout property; collapse snaps */
 }
 
 .bp--collapsed .bp-chrome {

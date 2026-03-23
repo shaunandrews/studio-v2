@@ -345,7 +345,7 @@ function envColor(environment?: string): string {
   gap: var(--space-xxs);
   min-width: 280px;
   max-width: 480px;
-  transition: padding-block-start 200ms var(--ease-default);
+  /* No transition on padding — layout property triggers reflow */
 }
 
 .setup-guide__cta {
