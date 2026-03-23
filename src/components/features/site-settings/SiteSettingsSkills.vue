@@ -6,6 +6,7 @@ import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import SiteSkillsModal from '@/components/features/SiteSkillsModal.vue'
+import SettingsSection from '@/components/composites/SettingsSection.vue'
 
 const props = defineProps<{
   siteId: string
@@ -35,9 +36,8 @@ const overrideEntries = computed(() => {
 </script>
 
 <template>
-  <section class="settings__section">
-    <h3 class="settings__section-title">Site skills</h3>
-    <div class="settings__card" :class="{ 'settings__card--skills-empty': !overrideEntries.length }">
+  <SettingsSection title="Site skills">
+    <div class="skills__layout" :class="{ 'skills__layout--empty': !overrideEntries.length }">
       <div class="skills__content">
         <Text variant="body-small" color="muted">
           Your task agents make use of skills you've installed in <button class="settings__link-btn" @click="emit('manage-global-skills')">Studio Settings</button>.<template v-if="overrideEntries.length"> This site has the following skill overrides:</template><template v-else> You can override global skills for this site.</template>
@@ -90,39 +90,12 @@ const overrideEntries = computed(() => {
     </div>
 
     <SiteSkillsModal :open="showSkillsModal" :site-id="siteId" @close="showSkillsModal = false" />
-  </section>
+  </SettingsSection>
 </template>
 
 <style scoped>
-.settings__section {
-  background: var(--color-frame-fill);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  overflow: clip;
-}
-
-.settings__section-title {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin: 0;
-  padding: var(--space-s) var(--space-m);
-}
-
-.settings__card {
-  background: var(--color-frame-bg);
-  border-block-start: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.07);
-  padding: var(--space-m);
+.skills__layout--empty {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-s);
-}
-
-.settings__card--skills-empty {
   flex-direction: row;
   align-items: center;
 }

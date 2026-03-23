@@ -10,6 +10,7 @@ import RadioGroup from '@/components/primitives/RadioGroup.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import { codingAgents, installAgent, uninstallAgent } from '@/data/agents'
 import { skills, installSkill, installAllSkills, uninstallSkill, removeCustomSkill } from '@/data/skills'
+import SettingsSection from '@/components/composites/SettingsSection.vue'
 import SkillInstaller from '@/components/composites/SkillInstaller.vue'
 import Badge from '@/components/primitives/Badge.vue'
 import TrafficLights from '@/components/primitives/TrafficLights.vue'
@@ -527,52 +528,46 @@ function skillInstallLabel(id: string): string {
         <!-- Agents -->
         <template v-if="activeTab === 'agents'">
           <Text variant="body-small" color="muted" class="settings-description">AI-powered assistants that can complete tasks for you.</Text>
-          <div class="settings-group">
-            <div class="settings-group-header"><Text variant="heading-small" color="muted">Installed</Text></div>
-            <div class="settings-list">
-              <div v-for="agent in installedAgents" :key="agent.id" class="settings-list-item">
-                <img :src="agent.icon" :alt="agent.label" class="settings-list-icon" />
-                <div class="settings-list-info">
-                  <Text variant="body-small" weight="semibold">{{ agent.label }}</Text>
-                  <Text variant="body-small" color="muted">{{ agent.description }}</Text>
-                </div>
-                <FlyoutMenu surface="dark" v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
-                  <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" /></template>
-                </FlyoutMenu>
+          <SettingsSection grouped>
+            <template #header><Text variant="heading-small" color="muted">Installed</Text></template>
+            <div v-for="agent in installedAgents" :key="agent.id" class="settings-list-item">
+              <img :src="agent.icon" :alt="agent.label" class="settings-list-icon" />
+              <div class="settings-list-info">
+                <Text variant="body-small" weight="semibold">{{ agent.label }}</Text>
+                <Text variant="body-small" color="muted">{{ agent.description }}</Text>
               </div>
+              <FlyoutMenu surface="dark" v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
+                <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" /></template>
+              </FlyoutMenu>
             </div>
-          </div>
-          <div v-if="availableAgents.length" class="settings-group">
-            <div class="settings-group-header">
+          </SettingsSection>
+          <SettingsSection v-if="availableAgents.length" grouped>
+            <template #header>
               <Text variant="heading-small" color="muted">Available</Text>
               <Button variant="secondary" size="small" :label="installingAllAgents ? 'Installing…' : 'Install all'" :disabled="installingAllAgents" @click="startInstallAllAgents" />
-            </div>
-            <div class="settings-list">
-              <div v-for="agent in availableAgents" :key="agent.id" class="settings-list-item">
-                <img :src="agent.icon" :alt="agent.label" class="settings-list-icon" />
-                <div class="settings-list-info">
-                  <Text variant="body-small" weight="semibold">{{ agent.label }}</Text>
-                  <Text variant="body-small" color="muted">{{ agent.description }}</Text>
-                </div>
-                <Button variant="secondary" size="small" :label="installLabel(agent.id)" :disabled="getInstallState(agent.id) !== 'idle' || installingAllAgents" @click="startInstall(agent.id)" />
+            </template>
+            <div v-for="agent in availableAgents" :key="agent.id" class="settings-list-item">
+              <img :src="agent.icon" :alt="agent.label" class="settings-list-icon" />
+              <div class="settings-list-info">
+                <Text variant="body-small" weight="semibold">{{ agent.label }}</Text>
+                <Text variant="body-small" color="muted">{{ agent.description }}</Text>
               </div>
+              <Button variant="secondary" size="small" :label="installLabel(agent.id)" :disabled="getInstallState(agent.id) !== 'idle' || installingAllAgents" @click="startInstall(agent.id)" />
             </div>
-          </div>
-          <div class="settings-group">
-            <div class="settings-group-header"><Text variant="heading-small" color="muted">Configuration files</Text></div>
-            <div class="settings-list">
-              <div v-for="cf in configFiles" :key="cf.id" class="settings-list-item settings-list-item--skill">
-                <div class="settings-list-info">
-                  <Text variant="body-small" weight="semibold">{{ cf.name }}</Text>
-                  <Text variant="body-small" color="muted">{{ cf.description }}</Text>
-                </div>
-                <FlyoutMenu v-if="installedConfigFiles.has(cf.id)" surface="dark" :groups="configFileMenuGroups(cf.id)" align="end">
-                  <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" /></template>
-                </FlyoutMenu>
-                <Button v-else variant="secondary" size="small" label="Install" @click="installConfigFile(cf.id)" />
+          </SettingsSection>
+          <SettingsSection grouped>
+            <template #header><Text variant="heading-small" color="muted">Configuration files</Text></template>
+            <div v-for="cf in configFiles" :key="cf.id" class="settings-list-item settings-list-item--skill">
+              <div class="settings-list-info">
+                <Text variant="body-small" weight="semibold">{{ cf.name }}</Text>
+                <Text variant="body-small" color="muted">{{ cf.description }}</Text>
               </div>
+              <FlyoutMenu v-if="installedConfigFiles.has(cf.id)" surface="dark" :groups="configFileMenuGroups(cf.id)" align="end">
+                <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" /></template>
+              </FlyoutMenu>
+              <Button v-else variant="secondary" size="small" label="Install" @click="installConfigFile(cf.id)" />
             </div>
-          </div>
+          </SettingsSection>
           <div class="settings-section">
             <Text variant="body-small" weight="semibold" class="settings-field-label">Default agent</Text>
             <Dropdown :model-value="defaultAgent" :groups="defaultAgentGroups" :show-chevron="true" variant="field" width="fill" @update:model-value="setAgent" />
@@ -583,38 +578,34 @@ function skillInstallLabel(id: string): string {
         <!-- Skills -->
         <template v-if="activeTab === 'skills'">
           <Text variant="body-small" color="muted" class="settings-description">Agents can use skills to help with specialized tasks.</Text>
-          <div v-if="installedSkills.length" class="settings-group">
-            <div class="settings-group-header"><Text variant="heading-small" color="muted">INSTALLED</Text></div>
-            <div class="settings-list">
-              <div v-for="skill in installedSkills" :key="skill.id" :data-skill-id="skill.id" class="settings-list-item settings-list-item--skill">
-                <div class="settings-list-info">
-                  <div class="settings-list-name-row">
-                    <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
-                    <Badge v-if="skill.custom" label="Custom" variant="custom" />
-                  </div>
-                  <Text variant="body-small" color="muted">{{ skill.description }}</Text>
+          <SettingsSection v-if="installedSkills.length" grouped>
+            <template #header><Text variant="heading-small" color="muted">INSTALLED</Text></template>
+            <div v-for="skill in installedSkills" :key="skill.id" :data-skill-id="skill.id" class="settings-list-item settings-list-item--skill">
+              <div class="settings-list-info">
+                <div class="settings-list-name-row">
+                  <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                  <Badge v-if="skill.custom" label="Custom" variant="custom" />
                 </div>
-                <FlyoutMenu surface="dark" :groups="skillMenuGroups(skill.id)" align="end">
-                  <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" /></template>
-                </FlyoutMenu>
+                <Text variant="body-small" color="muted">{{ skill.description }}</Text>
               </div>
+              <FlyoutMenu surface="dark" :groups="skillMenuGroups(skill.id)" align="end">
+                <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :icon="moreVertical" @click="toggle" /></template>
+              </FlyoutMenu>
             </div>
-          </div>
-          <div v-if="availableSkills.length" class="settings-group">
-            <div class="settings-group-header">
+          </SettingsSection>
+          <SettingsSection v-if="availableSkills.length" grouped>
+            <template #header>
               <Text variant="heading-small" color="muted">AVAILABLE</Text>
               <Button variant="secondary" size="small" :label="installingAll ? 'Installing…' : 'Install all'" :disabled="installingAll" @click="startInstallAll" />
-            </div>
-            <div class="settings-list">
-              <div v-for="skill in availableSkills" :key="skill.id" class="settings-list-item settings-list-item--skill">
-                <div class="settings-list-info">
-                  <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
-                  <Text variant="body-small" color="muted" class="settings-list-desc-truncate">{{ skill.description }}</Text>
-                </div>
-                <Button variant="secondary" size="small" :label="skillInstallLabel(skill.id)" :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll" @click="startSkillInstall(skill.id)" />
+            </template>
+            <div v-for="skill in availableSkills" :key="skill.id" class="settings-list-item settings-list-item--skill">
+              <div class="settings-list-info">
+                <Text variant="body-small" weight="semibold">{{ skill.name }}</Text>
+                <Text variant="body-small" color="muted" class="settings-list-desc-truncate">{{ skill.description }}</Text>
               </div>
+              <Button variant="secondary" size="small" :label="skillInstallLabel(skill.id)" :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll" @click="startSkillInstall(skill.id)" />
             </div>
-          </div>
+          </SettingsSection>
           <div class="settings-group"><SkillInstaller @added="scrollToSkill" /></div>
         </template>
 
@@ -744,52 +735,46 @@ function skillInstallLabel(id: string): string {
 
         <!-- ═══ Agents ═══ -->
         <template v-if="activeTab === 'agents'">
-          <div class="settings-group">
-            <div class="settings-group-header"><Text variant="heading-small" color="muted" :surface="surfaceMode">Installed</Text></div>
-            <div class="settings-list">
-              <div v-for="agent in installedAgents" :key="agent.id" class="settings-list-item">
-                <img :src="agent.icon" :alt="agent.label" class="settings-list-icon" />
-                <div class="settings-list-info">
-                  <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ agent.label }}</Text>
-                  <Text variant="body-small" color="muted" :surface="surfaceMode">{{ agent.description }}</Text>
-                </div>
-                <FlyoutMenu surface="dark" v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
-                  <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :surface="surfaceMode" :icon="moreVertical" @click="toggle" /></template>
-                </FlyoutMenu>
+          <SettingsSection :surface="surfaceMode" grouped>
+            <template #header><Text variant="heading-small" color="muted" :surface="surfaceMode">Installed</Text></template>
+            <div v-for="agent in installedAgents" :key="agent.id" class="settings-list-item">
+              <img :src="agent.icon" :alt="agent.label" class="settings-list-icon" />
+              <div class="settings-list-info">
+                <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ agent.label }}</Text>
+                <Text variant="body-small" color="muted" :surface="surfaceMode">{{ agent.description }}</Text>
               </div>
+              <FlyoutMenu surface="dark" v-if="agent.id !== 'wpcom'" :groups="itemMenuGroups(agent.label, () => handleUninstallAgent(agent.id))" align="end">
+                <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :surface="surfaceMode" :icon="moreVertical" @click="toggle" /></template>
+              </FlyoutMenu>
             </div>
-          </div>
-          <div v-if="availableAgents.length" class="settings-group">
-            <div class="settings-group-header">
+          </SettingsSection>
+          <SettingsSection v-if="availableAgents.length" :surface="surfaceMode" grouped>
+            <template #header>
               <Text variant="heading-small" color="muted" :surface="surfaceMode">Available</Text>
               <Button variant="secondary" size="small" :surface="surfaceMode" :label="installingAllAgents ? 'Installing…' : 'Install all'" :disabled="installingAllAgents" @click="startInstallAllAgents" />
-            </div>
-            <div class="settings-list">
-              <div v-for="agent in availableAgents" :key="agent.id" class="settings-list-item">
-                <img :src="agent.icon" :alt="agent.label" class="settings-list-icon" />
-                <div class="settings-list-info">
-                  <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ agent.label }}</Text>
-                  <Text variant="body-small" color="muted" :surface="surfaceMode">{{ agent.description }}</Text>
-                </div>
-                <Button variant="secondary" size="small" :surface="surfaceMode" :label="installLabel(agent.id)" :disabled="getInstallState(agent.id) !== 'idle' || installingAllAgents" @click="startInstall(agent.id)" />
+            </template>
+            <div v-for="agent in availableAgents" :key="agent.id" class="settings-list-item">
+              <img :src="agent.icon" :alt="agent.label" class="settings-list-icon" />
+              <div class="settings-list-info">
+                <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ agent.label }}</Text>
+                <Text variant="body-small" color="muted" :surface="surfaceMode">{{ agent.description }}</Text>
               </div>
+              <Button variant="secondary" size="small" :surface="surfaceMode" :label="installLabel(agent.id)" :disabled="getInstallState(agent.id) !== 'idle' || installingAllAgents" @click="startInstall(agent.id)" />
             </div>
-          </div>
-          <div class="settings-group">
-            <div class="settings-group-header"><Text variant="heading-small" color="muted" :surface="surfaceMode">Configuration files</Text></div>
-            <div class="settings-list">
-              <div v-for="cf in configFiles" :key="cf.id" class="settings-list-item settings-list-item--skill">
-                <div class="settings-list-info">
-                  <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ cf.name }}</Text>
-                  <Text variant="body-small" color="muted" :surface="surfaceMode">{{ cf.description }}</Text>
-                </div>
-                <FlyoutMenu v-if="installedConfigFiles.has(cf.id)" surface="dark" :groups="configFileMenuGroups(cf.id)" align="end">
-                  <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :surface="surfaceMode" :icon="moreVertical" @click="toggle" /></template>
-                </FlyoutMenu>
-                <Button v-else variant="secondary" size="small" :surface="surfaceMode" label="Install" @click="installConfigFile(cf.id)" />
+          </SettingsSection>
+          <SettingsSection :surface="surfaceMode" grouped>
+            <template #header><Text variant="heading-small" color="muted" :surface="surfaceMode">Configuration files</Text></template>
+            <div v-for="cf in configFiles" :key="cf.id" class="settings-list-item settings-list-item--skill">
+              <div class="settings-list-info">
+                <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ cf.name }}</Text>
+                <Text variant="body-small" color="muted" :surface="surfaceMode">{{ cf.description }}</Text>
               </div>
+              <FlyoutMenu v-if="installedConfigFiles.has(cf.id)" surface="dark" :groups="configFileMenuGroups(cf.id)" align="end">
+                <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :surface="surfaceMode" :icon="moreVertical" @click="toggle" /></template>
+              </FlyoutMenu>
+              <Button v-else variant="secondary" size="small" :surface="surfaceMode" label="Install" @click="installConfigFile(cf.id)" />
             </div>
-          </div>
+          </SettingsSection>
           <div class="settings-section">
             <Text variant="body-small" weight="semibold" :surface="surfaceMode" class="settings-field-label">Default agent</Text>
             <Dropdown :model-value="defaultAgent" :groups="defaultAgentGroups" :show-chevron="true" variant="field" width="fill" :surface="surfaceMode" menu-surface="dark" @update:model-value="setAgent" />
@@ -799,38 +784,34 @@ function skillInstallLabel(id: string): string {
 
         <!-- ═══ Skills ═══ -->
         <template v-if="activeTab === 'skills'">
-          <div v-if="installedSkills.length" class="settings-group">
-            <div class="settings-group-header"><Text variant="heading-small" color="muted" :surface="surfaceMode">INSTALLED</Text></div>
-            <div class="settings-list">
-              <div v-for="skill in installedSkills" :key="skill.id" :data-skill-id="skill.id" class="settings-list-item settings-list-item--skill">
-                <div class="settings-list-info">
-                  <div class="settings-list-name-row">
-                    <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ skill.name }}</Text>
-                    <Badge v-if="skill.custom" label="Custom" variant="custom" />
-                  </div>
-                  <Text variant="body-small" color="muted" :surface="surfaceMode">{{ skill.description }}</Text>
+          <SettingsSection v-if="installedSkills.length" :surface="surfaceMode" grouped>
+            <template #header><Text variant="heading-small" color="muted" :surface="surfaceMode">INSTALLED</Text></template>
+            <div v-for="skill in installedSkills" :key="skill.id" :data-skill-id="skill.id" class="settings-list-item settings-list-item--skill">
+              <div class="settings-list-info">
+                <div class="settings-list-name-row">
+                  <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ skill.name }}</Text>
+                  <Badge v-if="skill.custom" label="Custom" variant="custom" />
                 </div>
-                <FlyoutMenu surface="dark" :groups="skillMenuGroups(skill.id)" align="end">
-                  <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :surface="surfaceMode" :icon="moreVertical" @click="toggle" /></template>
-                </FlyoutMenu>
+                <Text variant="body-small" color="muted" :surface="surfaceMode">{{ skill.description }}</Text>
               </div>
+              <FlyoutMenu surface="dark" :groups="skillMenuGroups(skill.id)" align="end">
+                <template #trigger="{ toggle }"><Button variant="tertiary" size="small" :surface="surfaceMode" :icon="moreVertical" @click="toggle" /></template>
+              </FlyoutMenu>
             </div>
-          </div>
-          <div v-if="availableSkills.length" class="settings-group">
-            <div class="settings-group-header">
+          </SettingsSection>
+          <SettingsSection v-if="availableSkills.length" :surface="surfaceMode" grouped>
+            <template #header>
               <Text variant="heading-small" color="muted" :surface="surfaceMode">AVAILABLE</Text>
               <Button variant="secondary" size="small" :surface="surfaceMode" :label="installingAll ? 'Installing…' : 'Install all'" :disabled="installingAll" @click="startInstallAll" />
-            </div>
-            <div class="settings-list">
-              <div v-for="skill in availableSkills" :key="skill.id" class="settings-list-item settings-list-item--skill">
-                <div class="settings-list-info">
-                  <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ skill.name }}</Text>
-                  <Text variant="body-small" color="muted" :surface="surfaceMode" class="settings-list-desc-truncate">{{ skill.description }}</Text>
-                </div>
-                <Button variant="secondary" size="small" :surface="surfaceMode" :label="skillInstallLabel(skill.id)" :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll" @click="startSkillInstall(skill.id)" />
+            </template>
+            <div v-for="skill in availableSkills" :key="skill.id" class="settings-list-item settings-list-item--skill">
+              <div class="settings-list-info">
+                <Text variant="body-small" weight="semibold" :surface="surfaceMode">{{ skill.name }}</Text>
+                <Text variant="body-small" color="muted" :surface="surfaceMode" class="settings-list-desc-truncate">{{ skill.description }}</Text>
               </div>
+              <Button variant="secondary" size="small" :surface="surfaceMode" :label="skillInstallLabel(skill.id)" :disabled="getSkillInstallState(skill.id) !== 'idle' || installingAll" @click="startSkillInstall(skill.id)" />
             </div>
-          </div>
+          </SettingsSection>
           <div class="settings-group"><SkillInstaller @added="scrollToSkill" /></div>
         </template>
 
@@ -1175,27 +1156,12 @@ function skillInstallLabel(id: string): string {
 
 .settings-group:first-child { margin-block-start: 0; }
 
-.settings-group-header {
-  display: flex;
-  align-items: center;
-  min-height: 42px;
-  justify-content: space-between;
-  padding-inline: var(--space-m) var(--space-xs);
-  padding-block: var(--space-xs);
+:deep(.settings-section-wrap) {
+  margin-block-start: var(--space-m);
 }
 
-.settings-list {
-  background: var(--color-frame-bg);
-  border-top: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.07);
-  overflow: hidden;
-}
-
-.surface-dark .settings-list {
-  background: var(--color-chrome-bg);
-  border-top-color: var(--color-chrome-border);
-  box-shadow: none;
+:deep(.settings-section-wrap:first-child) {
+  margin-block-start: 0;
 }
 
 .settings-list-item {
