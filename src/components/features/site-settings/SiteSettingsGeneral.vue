@@ -1,36 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useSites } from '@/data/useSites'
-import Button from '@/components/primitives/Button.vue'
+import { ref } from 'vue'
+import { injectSiteSettings } from '@/data/useSiteSettings'
 import CopyButton from '@/components/primitives/CopyButton.vue'
 import Dropdown from '@/components/primitives/Dropdown.vue'
 import TextInput from '@/components/primitives/TextInput.vue'
-import Toggle from '@/components/primitives/Toggle.vue'
+import Checkbox from '@/components/primitives/Checkbox.vue'
 import SettingsSection from '@/components/composites/SettingsSection.vue'
 
-const props = defineProps<{
+defineProps<{
   siteId: string
 }>()
 
-const { sites, updateSite } = useSites()
-const site = computed(() => sites.value.find(p => p.id === props.siteId))
-
-const siteName = computed({
-  get: () => site.value?.name ?? '',
-  set: (val: string) => { if (site.value) updateSite(site.value.id, { name: val }) },
-})
-
 const localPath = ref('/Users/shaun/Studio/shauns-blog')
-const phpVersion = ref('8.3')
-const wpVersion = ref('latest')
-const useCustomDomain = ref(false)
-const customDomain = ref('shaunandrews.local')
-const savedDomain = ref('')
-const domainDirty = computed(() => useCustomDomain.value && customDomain.value !== savedDomain.value)
 
-function saveDomain() {
-  savedDomain.value = customDomain.value
-}
+const { name: siteName, phpVersion, wpVersion, useCustomDomain, customDomain } = injectSiteSettings()
 
 const phpVersionOptions = [{ label: '', options: ['8.3', '8.2', '8.1', '8.0', '7.4'] }]
 const wpVersionOptions = [
@@ -61,16 +44,13 @@ const wpVersionOptions = [
         </div>
       </div>
       <div class="settings__group">
-        <Toggle v-model="useCustomDomain" label="Use a custom domain" hint="Access this site from a nicer URL" />
-        <div v-if="useCustomDomain" class="settings__toggle-indent">
+        <Checkbox v-model="useCustomDomain" label="Use a custom domain" hint="Access this site from a nicer URL" />
+        <div v-if="useCustomDomain" class="settings__checkbox-indent">
           <TextInput id="custom-domain" v-model="customDomain" label="Domain name" placeholder="my-site.local" hint="You'll be asked for your system password to update.">
             <template #suffix>
               <CopyButton :text="customDomain" label="Copy domain" />
             </template>
           </TextInput>
-          <div v-if="domainDirty">
-            <Button variant="primary" label="Update domain" @click="saveDomain" />
-          </div>
         </div>
       </div>
   </SettingsSection>
@@ -108,11 +88,11 @@ const wpVersionOptions = [
   margin-block-end: var(--space-xs);
 }
 
-.settings__toggle-indent {
+.settings__checkbox-indent {
   display: flex;
   flex-direction: column;
   gap: var(--space-s);
-  padding-inline-start: calc(32px + var(--space-s));
+  padding-inline-start: calc(16px + var(--space-s));
 }
 
 </style>

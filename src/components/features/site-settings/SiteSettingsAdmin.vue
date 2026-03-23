@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { injectSiteSettings } from '@/data/useSiteSettings'
 import CopyButton from '@/components/primitives/CopyButton.vue'
 import TextInput from '@/components/primitives/TextInput.vue'
 import SettingsSection from '@/components/composites/SettingsSection.vue'
@@ -8,9 +8,7 @@ defineProps<{
   siteId: string
 }>()
 
-const adminUsername = ref('admin')
-const adminPassword = ref('pTz8#kL!mQ2xNv')
-const adminEmail = ref('admin@localhost.com')
+const { adminEmail, adminUsername, adminPassword } = injectSiteSettings()
 </script>
 
 <template>
