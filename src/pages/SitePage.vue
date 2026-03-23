@@ -6,14 +6,18 @@ import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import InputChat from '@/components/composites/InputChat.vue'
 import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
+import UrlInput from '@/components/primitives/UrlInput.vue'
 import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import ResizeHandle from '@/components/primitives/ResizeHandle.vue'
+import Pane from '@/components/composites/Pane.vue'
+import PaneGroup from '@/components/composites/PaneGroup.vue'
 import TaskBrief from '@/components/composites/task-brief/TaskBrief.vue'
 import SyncScreen from '@/components/features/SyncScreen.vue'
 import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
 import SiteMapScreen from '@/components/features/SiteMapScreen.vue'
+import { chevronLeft, chevronRight } from '@wordpress/icons'
 import { useSettings } from '@/data/useSettings'
 import { useSites, ALL_SITES_ID } from '@/data/useSites'
 import { useResizablePane } from '@/data/useResizablePane'
@@ -45,7 +49,11 @@ function toggleStatus() {
     statusTimer = null
   }, 1200)
 }
-const { tasks, getTasksForSite, getMessages, sendMessage, streamAgentMessage, createTask, generateTaskTitle, markRead } = useTasks()
+const { tasks, getTasksForSite, getMessages, sendMessage, streamAgentMessage, createTask, generateTaskTitle, markRead, isBusy, stopTask } = useTasks()
+
+const isTaskStreaming = computed(() =>
+  selectedTaskId.value ? isBusy(selectedTaskId.value).value : false
+)
 
 const currentSite = computed(() =>
   sites.value.find(p => p.id === activeSiteId.value)
@@ -114,21 +122,19 @@ const selectedTask = computed(() =>
 const inputChatRef = ref<InstanceType<typeof InputChat> | null>(null)
 const inputWrapRef = ref<HTMLDivElement | null>(null)
 const inputHeight = ref(0)
-let inputResizeObserver: ResizeObserver | null = null
 
 watch(inputWrapRef, (el, _, onCleanup) => {
   if (!el) return
   inputHeight.value = el.offsetHeight
-  inputResizeObserver = new ResizeObserver(() => {
+  const observer = new ResizeObserver(() => {
     inputHeight.value = el.offsetHeight
   })
-  inputResizeObserver.observe(el)
-  onCleanup(() => inputResizeObserver?.disconnect())
+  observer.observe(el)
+  onCleanup(() => observer.disconnect())
 })
 
 const draft = ref('')
 const isScrolledUp = ref(false)
-const isAtTop = ref(true)
 
 function onNavigate(screen: string) {
   const id = activeSiteId.value
@@ -174,46 +180,107 @@ const { width: navWidth, isDragging: isResizing, onPointerDown: onResizeStart, r
 
 const { openSettings } = useSettings()
 
-// ── Preview pane visibility & resize ──
+// ── Browser pane visibility & resize ──
 
-const storedPreviewVisible = localStorage.getItem('studio-preview-visible')
-const previewVisible = ref(storedPreviewVisible !== null ? storedPreviewVisible !== 'false' : true)
+const storedBrowserVisible = localStorage.getItem('studio-browser-visible')
+const browserVisible = ref(storedBrowserVisible !== null ? storedBrowserVisible !== 'false' : true)
 
-function togglePreview() {
-  previewVisible.value = !previewVisible.value
-  localStorage.setItem('studio-preview-visible', String(previewVisible.value))
+function toggleBrowser() {
+  browserVisible.value = !browserVisible.value
+  localStorage.setItem('studio-browser-visible', String(browserVisible.value))
 }
 
-const { width: previewWidth, isDragging: isPreviewResizing, onPointerDown: onPreviewResizeStart, resetWidth: resetPreviewWidth } = useResizablePane({
+const { width: browserWidth, isDragging: isBrowserResizing, onPointerDown: onBrowserResizeStart, resetWidth: resetBrowserWidth } = useResizablePane({
   defaultWidth: 480,
   minWidth: 300,
   maxWidth: 800,
-  storageKey: 'studio-preview-width',
+  storageKey: 'studio-browser-width',
   invert: true,
 })
 
-// ── Site preview ──
+// ── Browser iframe & navigation ──
 
 const { getContent } = useSiteDocument()
 const { registerIframe, unregisterIframe } = usePreviewSync()
 
-const previewIframeRef = ref<HTMLIFrameElement | null>(null)
+const browserIframeRef = ref<HTMLIFrameElement | null>(null)
 const currentPageSlug = ref('/')
 
-const previewHtml = computed(() => {
+// Navigation history
+const browserHistory = ref<string[]>(['/'])
+const browserHistoryIndex = ref(0)
+let isHistoryNavigation = false
+
+// Reset browser state when switching sites
+watch(activeSiteId, () => {
+  currentPageSlug.value = '/'
+  browserHistory.value = ['/']
+  browserHistoryIndex.value = 0
+  isHistoryNavigation = false
+})
+
+const canGoBack = computed(() => browserHistoryIndex.value > 0)
+const canGoForward = computed(() => browserHistoryIndex.value < browserHistory.value.length - 1)
+
+function goBack() {
+  if (!canGoBack.value) return
+  isHistoryNavigation = true
+  browserHistoryIndex.value--
+  currentPageSlug.value = browserHistory.value[browserHistoryIndex.value]
+}
+
+function goForward() {
+  if (!canGoForward.value) return
+  isHistoryNavigation = true
+  browserHistoryIndex.value++
+  currentPageSlug.value = browserHistory.value[browserHistoryIndex.value]
+}
+
+const browserDisplayUrl = computed(() => {
+  const site = currentSite.value
+  if (!site) return ''
+  const base = site.url || site.name
+  const slug = currentPageSlug.value === '/' ? '' : currentPageSlug.value
+  return base + slug
+})
+
+const browserPages = computed(() => {
+  if (!activeSiteId.value) return []
+  const content = getContent(activeSiteId.value).value
+  if (!content) return []
+  return content.pages.map(p => ({ slug: p.slug, title: p.title }))
+})
+
+const browserHtml = computed(() => {
   if (!activeSiteId.value) return ''
   const content = getContent(activeSiteId.value).value
   if (!content) return ''
   return renderSite(content, currentPageSlug.value)
 })
 
-watch(previewIframeRef, (el) => {
+function navigateToPage(slug: string) {
+  if (slug === currentPageSlug.value) return
+  browserHistory.value = browserHistory.value.slice(0, browserHistoryIndex.value + 1)
+  browserHistory.value.push(slug)
+  browserHistoryIndex.value = browserHistory.value.length - 1
+  currentPageSlug.value = slug
+}
+
+watch(browserIframeRef, (el) => {
   if (el) registerIframe(el)
 })
 
 function onIframeMessage(event: MessageEvent) {
   if (event.data?.type === 'navigate') {
-    currentPageSlug.value = event.data.page
+    const page = event.data.page
+    currentPageSlug.value = page
+    if (!isHistoryNavigation) {
+      // Trim forward history and push new entry
+      browserHistory.value = browserHistory.value.slice(0, browserHistoryIndex.value + 1)
+      browserHistory.value.push(page)
+      browserHistoryIndex.value = browserHistory.value.length - 1
+    }
+    isHistoryNavigation = false
   }
 }
 
@@ -229,8 +296,8 @@ onBeforeUnmount(() => {
   <div class="site-page vstack">
     <!-- Nested route outlet (children render null — SitePage owns the layout) -->
     <router-view />
-    <div class="panes" :class="{ 'is-resizing': isResizing || isPreviewResizing }">
-      <div class="pane pane-site-navigation" :style="{ width: navWidth + 'px' }">
+    <PaneGroup direction="horizontal" :class="{ 'is-resizing': isResizing || isBrowserResizing }">
+      <Pane fit :style="{ width: navWidth + 'px' }">
         <SiteNavigation
           v-if="activeSiteId"
           :site-id="activeSiteId"
@@ -248,46 +315,63 @@ onBeforeUnmount(() => {
           }"
           @navigate-all-sites="router.push({ name: 'all-sites' })"
         />
-      </div>
+      </Pane>
       <ResizeHandle :is-dragging="isResizing" @pointerdown="onResizeStart" @dblclick="resetNavWidth" />
-      <div class="pane pane-detail">
+
+      <!-- Detail area -->
+      <PaneGroup>
         <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" :status="currentSite?.status" :loading-target="loadingTarget" @toggle-status="toggleStatus" />
         <SiteMapScreen v-else-if="!isAllSites && currentScreen === 'sitemap'" :site-id="activeSiteId!" />
         <template v-else-if="currentScreen === 'tasks' && selectedTaskId">
-          <TaskBrief
-            v-if="!isNewTask"
-            :task-id="selectedTaskId"
-            :elevated="!isAtTop"
-            :preview-visible="previewVisible"
-            class="task-brief-panel"
-            @toggle-preview="togglePreview"
-          />
-          <ChatMessageList v-if="!isNewTask" :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" @scroll-top="(atTop) => isAtTop = atTop" />
-          <div ref="inputWrapRef" class="detail-input" :class="{ 'is-new-task': isNewTask }">
-            <Transition name="welcome-fade">
-              <div v-if="isNewTask" class="new-task-welcome">
-                <div class="new-task-illustration" aria-hidden="true">
-                  <div class="new-task-illustration__user" />
-                  <div class="new-task-illustration__agent" />
-                  <div class="new-task-illustration__user" />
-                </div>
-                <div class="new-task-welcome__copy">
-                  <Text tag="p" variant="body-large" weight="semibold">New task</Text>
-                  <Text tag="p" color="muted">An AI assistant can complete your task for you. Then you can review and approve the changes, merging them into your main Studio site.</Text>
-                </div>
-              </div>
-            </Transition>
-            <ProgressiveBlur v-if="!isNewTask" class="input-blur" height="calc(100% + 6px)" />
-            <InputChat
-              ref="inputChatRef"
-              v-model="draft"
-              :site-id="activeSiteId"
-              :elevated="isScrolledUp"
-              :placeholder="isNewTask ? 'Describe what this task should do...' : 'Ask anything...'"
-              @send="onSend"
-              @manage-agents="openSettings('agents')"
+          <Pane v-if="!isNewTask" fit>
+            <TaskBrief
+              :task-id="selectedTaskId"
+              :browser-visible="browserVisible"
+              @toggle-browser="toggleBrowser"
             />
-          </div>
+          </Pane>
+          <Pane v-if="!isNewTask" class="chat-pane">
+            <ChatMessageList :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" />
+            <div ref="inputWrapRef" class="detail-input">
+              <ProgressiveBlur class="input-blur" height="calc(100% + 6px)" />
+              <InputChat
+                ref="inputChatRef"
+                v-model="draft"
+                :site-id="activeSiteId"
+                :elevated="isScrolledUp"
+                :streaming="isTaskStreaming"
+                placeholder="Ask anything..."
+                @send="onSend"
+                @stop="selectedTaskId && stopTask(selectedTaskId)"
+                @manage-agents="openSettings('agents')"
+              />
+            </div>
+          </Pane>
+          <Pane v-if="isNewTask" class="new-task-welcome-wrap">
+            <div class="new-task-welcome">
+              <div class="new-task-illustration" aria-hidden="true">
+                <div class="new-task-illustration__user" />
+                <div class="new-task-illustration__agent" />
+                <div class="new-task-illustration__user" />
+              </div>
+              <div class="new-task-welcome__copy">
+                <Text tag="p" variant="body-large" weight="semibold">New task</Text>
+                <Text tag="p" color="muted">An AI assistant can complete your task for you. Then you can review and approve the changes, merging them into your main Studio site.</Text>
+              </div>
+            </div>
+            <div class="detail-input detail-input--centered">
+              <InputChat
+                ref="inputChatRef"
+                v-model="draft"
+                :site-id="activeSiteId"
+                :streaming="isTaskStreaming"
+                placeholder="Describe what this task should do..."
+                @send="onSend"
+                @stop="selectedTaskId && stopTask(selectedTaskId)"
+                @manage-agents="openSettings('agents')"
+              />
+            </div>
+          </Pane>
         </template>
         <SyncScreen v-else-if="!isAllSites && currentScreen === 'sync'" :site-id="activeSiteId!" />
         <PreviewsScreen v-else-if="!isAllSites && currentScreen === 'previews'" :site-id="activeSiteId!" />
@@ -295,20 +379,30 @@ onBeforeUnmount(() => {
         <div v-else class="detail-empty">
           <span class="detail-empty__text">Select a task or start a new one</span>
         </div>
-      </div>
-      <template v-if="currentScreen === 'tasks' && selectedTaskId && previewVisible">
-        <ResizeHandle :is-dragging="isPreviewResizing" @pointerdown="onPreviewResizeStart" @dblclick="resetPreviewWidth" />
-        <div class="pane pane-preview" :style="{ width: previewWidth + 'px' }">
-          <iframe
-            ref="previewIframeRef"
-            :srcdoc="previewHtml"
-            class="preview-iframe"
-            sandbox="allow-same-origin allow-scripts"
-          />
-        </div>
-      </template>
-    </div>
+      </PaneGroup>
 
+      <!-- Browser pane -->
+      <template v-if="currentScreen === 'tasks' && selectedTaskId && browserVisible">
+        <ResizeHandle :is-dragging="isBrowserResizing" @pointerdown="onBrowserResizeStart" @dblclick="resetBrowserWidth" />
+        <PaneGroup fit :style="{ width: browserWidth + 'px' }">
+          <Pane fit>
+            <div class="browser-toolbar">
+              <Button variant="tertiary" :icon="chevronLeft" icon-only :disabled="!canGoBack" tooltip="Back" @click="goBack" />
+              <Button variant="tertiary" :icon="chevronRight" icon-only :disabled="!canGoForward" tooltip="Forward" @click="goForward" />
+              <UrlInput :model-value="browserDisplayUrl" :pages="browserPages" placeholder="URL" @navigate="navigateToPage" />
+            </div>
+          </Pane>
+          <Pane>
+            <iframe
+              ref="browserIframeRef"
+              :srcdoc="browserHtml"
+              class="browser-iframe"
+              sandbox="allow-same-origin allow-scripts"
+            />
+          </Pane>
+        </PaneGroup>
+      </template>
+    </PaneGroup>
   </div>
 </template>
 
@@ -317,67 +411,44 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-.panes {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-
-.pane {
-  overflow: hidden;
-}
-
-.pane-site-navigation {
-  flex: 0 0 auto;
-}
-
-.panes.is-resizing {
+.is-resizing {
   user-select: none;
   cursor: col-resize;
 }
 
-.pane-detail {
-  flex: 1;
-  min-width: 0;
+.browser-toolbar {
   display: flex;
-  flex-direction: column;
-  position: relative;
+  align-items: center;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs) var(--space-s) var(--space-xxs) var(--space-xxs);
+  border-block-end: 1px solid var(--color-frame-border);
 }
 
-.pane-preview {
-  flex: 0 0 auto;
-}
-
-.preview-iframe {
+.browser-iframe {
+  flex: 1;
   width: 100%;
-  height: 100%;
   border: none;
 }
 
-.task-brief-panel {
-  flex-shrink: 0;
-  margin: var(--space-s);
-  margin-block-end: 0;
+.chat-pane {
+  position: relative;
 }
 
 .detail-input {
   position: absolute;
   inset-block-end: 0;
   inset-inline: 0;
-  width: 100%;
-  padding: var(--space-xl) 0 var(--space-m);
+  padding: var(--space-xl) var(--space-s) var(--space-m);
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: inset-block-end var(--duration-slow) cubic-bezier(0.22, 1, 0.36, 1),
-    transform var(--duration-slow) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.detail-input.is-new-task {
-  inset-block-end: 50%;
-  transform: translateY(50%);
+.detail-input--centered {
+  position: relative;
   padding: 0;
+}
+
+.detail-input--centered :deep(.input-chat) {
+  max-width: 500px;
 }
 
 /* -- Progressive blur behind input -- */
@@ -386,10 +457,6 @@ onBeforeUnmount(() => {
   inset-inline-start: calc(-1 * var(--space-xl));
   inset-inline-end: 16px;
   z-index: -1;
-}
-
-.detail-input.is-new-task :deep(.input-chat) {
-  max-width: 500px;
 }
 
 .detail-empty {
@@ -402,6 +469,12 @@ onBeforeUnmount(() => {
 }
 
 /* -- New task welcome -- */
+
+.new-task-welcome-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .new-task-welcome {
   display: flex;
@@ -418,17 +491,6 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: var(--space-xxxs);
   text-align: center;
-}
-
-/* Welcome fade transition */
-.welcome-fade-leave-active {
-  transition: opacity var(--duration-slow) var(--ease-default),
-    transform var(--duration-slow) var(--ease-default);
-}
-
-.welcome-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
 }
 
 /* -- New task illustration -- */
