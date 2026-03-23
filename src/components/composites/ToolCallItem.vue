@@ -111,10 +111,19 @@ function onUndo(e: Event) {
   cursor: pointer;
   user-select: none;
   margin-block-end: var(--space-xs);
+  width: fit-content;
 }
 
 .tool-call-item__row {
   padding: var(--space-xxxs) 0;
+}
+
+.tool-call-item:hover .tool-call-item__label {
+  color: var(--color-frame-theme);
+}
+
+.tool-call-item:hover .tool-call-item__chevron {
+  color: var(--color-frame-theme);
 }
 
 .tool-call-item__label {

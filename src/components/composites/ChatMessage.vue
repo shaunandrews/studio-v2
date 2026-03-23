@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import MarkdownText from '@/components/composites/renderers/MarkdownText.vue'
 import ToolCallItem from '@/components/composites/ToolCallItem.vue'
 import { useSiteDocument } from '@/data/useSiteDocument'
 import type { AgentId, ToolCall } from '@/data/types'
+
+const VISIBLE_TAIL = 3
 
 const props = defineProps<{
   role: 'user' | 'agent'
@@ -13,6 +16,20 @@ const props = defineProps<{
 }>()
 
 const { undoChange } = useSiteDocument()
+
+const toolCallsExpanded = ref(false)
+
+const hiddenCount = computed(() => {
+  const total = props.toolCalls?.length ?? 0
+  if (total <= VISIBLE_TAIL) return 0
+  return total - VISIBLE_TAIL
+})
+
+const visibleToolCalls = computed(() => {
+  if (!props.toolCalls) return []
+  if (toolCallsExpanded.value || hiddenCount.value === 0) return props.toolCalls
+  return props.toolCalls.slice(-VISIBLE_TAIL)
+})
 
 function onToolUndo(changeId: string) {
   if (!props.siteId) return
@@ -36,8 +53,15 @@ function onToolUndo(changeId: string) {
       <template v-else>
         <!-- Tool calls render above text content -->
         <div v-if="toolCalls?.length" class="tool-calls-group">
+          <button
+            v-if="hiddenCount > 0 && !toolCallsExpanded"
+            class="tool-calls-expand"
+            @click="toolCallsExpanded = true"
+          >
+            Show {{ hiddenCount }} more step{{ hiddenCount === 1 ? '' : 's' }}
+          </button>
           <ToolCallItem
-            v-for="tc in toolCalls"
+            v-for="tc in visibleToolCalls"
             :key="tc.id"
             :label="tc.label"
             :status="tc.status"
@@ -125,5 +149,23 @@ function onToolUndo(changeId: string) {
 
 .tool-calls-group {
   padding: var(--space-xxs) 0;
+}
+
+.tool-calls-expand {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: var(--space-xxxs) 0;
+  margin-block-end: var(--space-xs);
+  font-family: inherit;
+  font-size: var(--font-size-s);
+  color: var(--color-frame-fg-muted);
+  cursor: pointer;
+  transition: color var(--duration-instant) var(--ease-default);
+}
+
+.tool-calls-expand:hover {
+  color: var(--color-frame-theme);
 }
 </style>
