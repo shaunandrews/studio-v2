@@ -6,8 +6,10 @@ import Tooltip from '@/components/primitives/Tooltip.vue'
 import InputChatMini from '@/components/composites/InputChatMini.vue'
 import { useSites } from '@/data/useSites'
 import { useTasks } from '@/data/useTasks'
+import { useSiteDocument } from '@/data/useSiteDocument'
+import { renderSite } from '@/data/site-renderer'
 import { sites as siteRegistry } from '@/data/sites/index'
-import { assemblePage, deriveSiteMapTree } from '@/data/useSiteTemplates'
+import { deriveSiteMapTree } from '@/data/useSiteTemplates'
 import type { SiteMapNode } from '@/data/useSiteTemplates'
 import SitePageThumb from '@/components/composites/SitePageThumb.vue'
 import type { MockLayout } from '@/data/types'
@@ -18,17 +20,22 @@ const props = defineProps<{
 
 const { sites } = useSites()
 const { tasks, sendMessage, generateTaskTitle, createTask } = useTasks()
+const { getContent } = useSiteDocument()
 const site = computed(() => sites.value.find(s => s.id === props.siteId))
 const layout = computed<MockLayout>(() => site.value?.mockLayout ?? 'default')
 const siteFiles = computed(() => siteRegistry[layout.value] ?? null)
+const siteContent = computed(() => getContent(props.siteId).value)
 const tree = computed<SiteMapNode | null>(() => {
   if (siteFiles.value) return deriveSiteMapTree(siteFiles.value.config)
   return null
 })
 
-function getPageHtml(templateName: string): string {
-  if (!siteFiles.value) return ''
-  return assemblePage(siteFiles.value, templateName)
+function getPageHtml(slug: string): string {
+  if (!siteContent.value) return ''
+  // Collection slugs with params (e.g. "/blog/:slug") won't match a real page.
+  // Fall back to the parent path so the thumbnail shows something useful.
+  const resolvedSlug = slug.includes(':') ? slug.replace(/\/:[^/]+$/, '') || '/' : slug
+  return renderSite(siteContent.value, resolvedSlug)
 }
 
 /* ── Infinite canvas (pan & zoom) ── */
@@ -598,7 +605,7 @@ watch(tree, () => nextTick(() => {
         <div class="sitemap-node" :class="{ 'is-selected': selectedNodeId === 'root' }" data-node-id="root">
           <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === 'root' }" :style="{ transform: labelScale }">{{ tree.label }}</span>
           <div class="page-thumb">
-            <SitePageThumb v-if="siteFiles" :html="getPageHtml(tree.template)" />
+            <SitePageThumb v-if="siteContent" :html="getPageHtml(tree.slug)" />
           </div>
         </div>
 
@@ -612,7 +619,7 @@ watch(tree, () => nextTick(() => {
                   <div class="stack-card" />
                 </div>
                 <div class="page-thumb">
-                  <SitePageThumb v-if="siteFiles" :html="getPageHtml(child.template)" />
+                  <SitePageThumb v-if="siteContent" :html="getPageHtml(child.slug)" />
                 </div>
                 <span v-if="child.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ child.collectionCount }}</span>
                 <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === String(ci) }" :style="{ transform: labelScale }">{{ child.label }}</span>
@@ -629,7 +636,7 @@ watch(tree, () => nextTick(() => {
                           <div class="stack-card" />
                         </div>
                         <div class="page-thumb">
-                          <SitePageThumb v-if="siteFiles" :html="getPageHtml(gc.template)" />
+                          <SitePageThumb v-if="siteContent" :html="getPageHtml(gc.slug)" />
                         </div>
                         <span v-if="gc.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ gc.collectionCount }}</span>
                         <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `${ci}-${gci}` }" :style="{ transform: labelScale }">{{ gc.label }}</span>
