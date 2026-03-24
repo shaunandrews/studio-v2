@@ -244,9 +244,7 @@ function envColor(environment?: string): string {
         <Text variant="body" color="muted" tag="p">{{ currentStep.subtitle }}</Text>
         <Button v-if="isIntroStep" label="Get started" variant="primary" size="small" class="setup-guide__cta" @click="skipSetupStep" />
         <Button v-else-if="isLocalStep" label="Continue" variant="secondary" size="small" class="setup-guide__cta" @click="skipSetupStep" />
-        <button v-else class="setup-guide__skip" @click="skipSetupStep">
-          Skip this step
-        </button>
+        <Button v-else variant="tertiary" size="small" label="Skip this step" class="setup-guide__skip" @click="skipSetupStep" />
       </div>
       </Transition>
     </div>
@@ -269,7 +267,7 @@ function envColor(environment?: string): string {
 .sync-pipeline__environments {
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: stretch;
   gap: 4px;
   width: 100%;
@@ -292,7 +290,7 @@ function envColor(environment?: string): string {
 
 .sync-pipeline__skip-zone {
   position: relative;
-  padding-block: var(--space-s);
+  padding-block: var(--space-xxxs);
 }
 
 .sync-pipeline__skip-card {
@@ -373,22 +371,6 @@ function envColor(environment?: string): string {
 
 .setup-guide__skip {
   align-self: flex-start;
-  height: 28px;
-  padding-inline: 0;
   margin-block-start: var(--space-xs);
-  border: none;
-  border-radius: var(--radius-m);
-  background: none;
-  color: var(--color-frame-fg-muted);
-  font-family: inherit;
-  font-size: var(--font-size-m);
-  line-height: 20px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color var(--duration-instant) var(--ease-default);
-}
-
-.setup-guide__skip:hover {
-  color: var(--color-frame-fg);
 }
 </style>

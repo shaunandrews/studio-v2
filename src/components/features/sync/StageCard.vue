@@ -72,14 +72,15 @@ const timeSince = computed(() => {
 
 <template>
   <!-- Compact: just a subtle "Add staging site" button -->
-  <button
+  <Button
     v-if="compact"
+    variant="tertiary"
+    size="small"
+    :label="`+ Add ${label.toLowerCase()} site`"
     class="sync-env-add"
     :style="{ '--env-accent': envColor }"
     @click="$emit('connect')"
-  >
-    + Add {{ label.toLowerCase() }} site
-  </button>
+  />
 
   <!-- Full card -->
   <div
@@ -122,13 +123,12 @@ const timeSince = computed(() => {
 
     <!-- Connected: Sync button + optional menu -->
     <div v-if="connected && syncPhase !== 'syncing'" class="hstack gap-xxs shrink-0">
-      <button
-        class="sync-env__action"
+      <Button
+        variant="tertiary"
+        label="Sync"
         :disabled="syncDisabled"
         @click="$emit('sync')"
-      >
-        Sync
-      </button>
+      />
       <FlyoutMenu v-if="showMenu" :groups="menuGroups" align="end">
         <template #trigger="{ toggle }">
           <Button
@@ -143,13 +143,12 @@ const timeSince = computed(() => {
     </div>
 
     <!-- Unconnected: connect button (only when not dimmed) -->
-    <button
+    <Button
       v-if="!connected && !dimmed && syncPhase !== 'syncing'"
-      class="sync-env__action"
+      variant="secondary"
+      label="Connect site"
       @click="$emit('connect')"
-    >
-      Connect site
-    </button>
+    />
   </div>
 </template>
 
@@ -172,34 +171,18 @@ const timeSince = computed(() => {
   box-shadow: none;
 }
 
-/* ── Compact: subtle add button ── */
+/* ── Compact: add button with env color tint ── */
 
 .sync-env-add {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding-inline: var(--space-xs);
   border: 1px dashed color-mix(in srgb, var(--env-accent, transparent) 40%, var(--color-frame-border));
   border-radius: var(--radius-m);
   background: color-mix(in srgb, var(--env-accent, transparent) 8%, transparent);
-  color: var(--color-frame-fg-muted);
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  line-height: 20px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default),
-    border-color var(--duration-instant) var(--ease-default);
 }
 
 .sync-env-add:hover {
-  background: var(--color-frame-hover);
-  color: var(--color-frame-fg);
-  border-color: var(--color-frame-fg-muted);
+  background: color-mix(in srgb, var(--env-accent, transparent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--env-accent, transparent) 60%, var(--color-frame-border));
 }
-
 
 .sync-env__site {
   display: inline-flex;
@@ -238,7 +221,7 @@ const timeSince = computed(() => {
   font-weight: var(--font-weight-semibold);
   line-height: 20px;
   color: rgba(0, 0, 0, 0.8);
-  padding-inline: 4px;
+  padding-inline: var(--space-xxxs);
   border-radius: var(--radius-s);
   white-space: nowrap;
   overflow: hidden;
@@ -247,7 +230,7 @@ const timeSince = computed(() => {
 }
 
 .sync-env__url {
-  font-size: 12px;
+  font-size: var(--font-size-s);
   line-height: 16px;
   color: var(--color-frame-fg-muted);
   text-decoration: underline;
@@ -260,45 +243,15 @@ const timeSince = computed(() => {
   text-decoration: none;
 }
 
-/* ── Action button ── */
-
-.sync-env__action {
-  flex-shrink: 0;
-  height: 32px;
-  padding-inline: 12px;
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  background: var(--color-frame-bg);
-  color: var(--color-frame-fg-muted);
-  font-family: inherit;
-  font-size: var(--font-size-m);
-  line-height: 20px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
-}
-
-.sync-env__action:hover:not(:disabled) {
-  background: var(--color-frame-hover);
-  color: var(--color-frame-fg);
-}
-
-.sync-env__action:disabled {
-  opacity: 0.3;
-  cursor: default;
-  pointer-events: none;
-}
 
 /* ── Syncing status ── */
 
 .sync-env__status {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-xxs);
   flex-shrink: 0;
-  padding-inline-end: 12px;
+  padding-inline-end: var(--space-xxs);
 }
 
 .sync-env__status-label {

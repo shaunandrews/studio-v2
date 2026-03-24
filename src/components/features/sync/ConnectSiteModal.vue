@@ -181,9 +181,7 @@ function onConnect() {
       </div>
       <div class="csm__suggestion-actions">
         <Button variant="primary" label="Connect" @click="onConnectSuggested" />
-        <button class="csm__browse-toggle" @click="browsing = true">
-          Don't see your site? Browse all
-        </button>
+        <Button variant="tertiary" size="small" label="Don't see your site? Browse all" @click="browsing = true" />
       </div>
     </div>
 
@@ -282,20 +280,6 @@ function onConnect() {
   gap: var(--space-m);
 }
 
-.csm__browse-toggle {
-  border: none;
-  background: none;
-  padding: 0;
-  font-family: inherit;
-  font-size: var(--font-size-s);
-  color: var(--color-frame-fg-muted);
-  cursor: pointer;
-  transition: color var(--duration-instant) var(--ease-default);
-}
-
-.csm__browse-toggle:hover {
-  color: var(--color-frame-fg);
-}
 
 /* ── Search ── */
 

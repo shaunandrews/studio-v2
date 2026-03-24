@@ -78,23 +78,23 @@ const resolvedVerb = computed(() => {
 // In push mode (from connectors): source/dest come from props, no animation.
 
 const visualTopLabel = computed(() => {
-  if (props.mode === 'push') return props.sourceLabel ?? 'Studio'
-  return 'Studio'
-})
-
-const visualTopUrl = computed(() => {
-  if (props.mode === 'push') return props.sourceUrl
-  return props.localUrl
-})
-
-const visualBottomLabel = computed(() => {
   if (props.mode === 'push') return props.destLabel ?? 'Remote'
   return selectedEnv.value?.label ?? 'Remote'
 })
 
-const visualBottomUrl = computed(() => {
+const visualTopUrl = computed(() => {
   if (props.mode === 'push') return props.destUrl
   return selectedEnv.value?.url
+})
+
+const visualBottomLabel = computed(() => {
+  if (props.mode === 'push') return props.sourceLabel ?? 'Studio'
+  return 'Studio'
+})
+
+const visualBottomUrl = computed(() => {
+  if (props.mode === 'push') return props.sourceUrl
+  return props.localUrl
 })
 
 // ── Description text uses actual source/dest (not visual position) ──
@@ -432,10 +432,10 @@ function onSync() {
 }
 
 .sync-visual__arrow-svg {
-  transform: rotate(90deg);
+  transform: rotate(-90deg);
 }
 
-/* Pull animation: swap card positions so remote slides to top, local slides to bottom.
+/* Pull animation: swap card positions so Studio slides to top, remote slides to bottom.
    Offset = card(~34px) + gap + arrow(21px) + gap ≈ 63px */
 .sync-visual.is-pull .sync-visual__top {
   transform: translateY(63px);
