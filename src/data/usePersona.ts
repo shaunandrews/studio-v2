@@ -8,6 +8,7 @@ import { useSettings } from './useSettings'
 import { useAuth } from './useAuth'
 import { useOnboarding } from './useOnboarding'
 import { useHydration } from './useHydration'
+import { useSiteDocument } from './useSiteDocument'
 import { db, isDbAvailable } from './db'
 import type { Router } from 'vue-router'
 
@@ -49,11 +50,12 @@ export function usePersona() {
 
     // Clear DB and re-seed from persona
     if (await isDbAvailable()) {
-      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, async () => {
+      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, async () => {
         await db.sites.clear()
         await db.tasks.clear()
         await db.messages.clear()
         await db.previews.clear()
+        await db.siteContent.clear()
         if (persona.sites.length) await db.sites.bulkPut(persona.sites)
         if (persona.tasks.length) await db.tasks.bulkPut(persona.tasks)
         if (persona.messages.length) await db.messages.bulkPut(persona.messages)
@@ -61,6 +63,8 @@ export function usePersona() {
       })
     }
 
+    const { _setContent } = useSiteDocument()
+    _setContent([])
     await resetSites(persona.sites)
     await resetTasks(persona.tasks, persona.messages)
     await resetPreviews(persona.previews)
@@ -92,13 +96,17 @@ export function usePersona() {
 
     // Clear DB
     if (await isDbAvailable()) {
-      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, async () => {
+      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, async () => {
         await db.sites.clear()
         await db.tasks.clear()
         await db.messages.clear()
         await db.previews.clear()
+        await db.siteContent.clear()
       })
     }
+
+    const { _setContent } = useSiteDocument()
+    _setContent([])
 
     const { ready } = useHydration()
     ready.value = false

@@ -5,7 +5,7 @@ import { usePersona } from '@/data/usePersona'
 import type { Persona } from '@/data/types'
 
 const router = useRouter()
-const { activatePersona } = usePersona()
+const { activatePersona, clearPersona } = usePersona()
 
 function isUrl(str: string): boolean {
   return str.startsWith('http') || str.startsWith('/')
@@ -14,6 +14,11 @@ function isUrl(str: string): boolean {
 function selectPersona(persona: Persona) {
   activatePersona(persona.id, router)
 }
+
+async function resetAll() {
+  await clearPersona()
+}
+
 </script>
 
 <template>
@@ -54,6 +59,10 @@ function selectPersona(persona: Persona) {
           </div>
         </button>
       </div>
+
+      <button class="persona-chooser__reset" @click="resetAll">
+        Reset local data
+      </button>
     </div>
   </div>
 </template>
@@ -169,6 +178,21 @@ function selectPersona(persona: Persona) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.persona-chooser__reset {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: var(--font-size-s);
+  cursor: pointer;
+  padding: var(--space-xs) var(--space-s);
+  border-radius: var(--radius-s);
+  transition: color 150ms ease;
+}
+
+.persona-chooser__reset:hover {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .persona-slot__meta {
