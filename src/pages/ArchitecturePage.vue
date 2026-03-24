@@ -131,7 +131,7 @@ const platform = ref<'mac' | 'windows'>('mac')
         <p class="arch-body">Detail pane shows <code>SiteSettingsScreen</code>. Four groups: general (name, PHP, WP version, domain), admin credentials, debugging, and git repository.</p>
 
         <h3>Add Site <code>/add-site</code></h3>
-        <p class="arch-body">Standalone full-screen flow — no sidebar, no chrome. Three steps: choose a path (Blank, Blueprint, Pull, Import), select from a picker, then name and create.</p>
+        <p class="arch-body">Standalone full-screen flow — no sidebar, no chrome. Three steps: choose a path (Empty, Blueprint, Pull, Import), select from a picker, then name and create.</p>
       </section>
 
       <!-- ═══════════════════════ -->

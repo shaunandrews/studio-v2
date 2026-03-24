@@ -15,10 +15,10 @@ function svg(viewBox: string, children: ReturnType<typeof h>[]) {
 // viewBox includes 1px padding on all sides.
 
 /**
- * Blank site — empty browser window with a cursor blinking
+ * Empty site — empty browser window with a cursor blinking
  */
-export const IllustrationBlank = defineComponent({
-  name: 'IllustrationBlank',
+export const IllustrationEmpty = defineComponent({
+  name: 'IllustrationEmpty',
   setup() {
     return () => svg('-1 -1 82 74', [
       h('rect', { x: 0, y: 0, width: 80, height: 72, rx: 8, stroke: 'currentColor', 'stroke-width': 1.5, opacity: 0.3 }),
@@ -95,7 +95,7 @@ export const IllustrationImport = defineComponent({
 })
 
 export const illustrations = {
-  blank: IllustrationBlank,
+  empty: IllustrationEmpty,
   blueprint: IllustrationBlueprint,
   pull: IllustrationPull,
   import: IllustrationImport,

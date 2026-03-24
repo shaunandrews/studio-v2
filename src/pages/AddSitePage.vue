@@ -83,7 +83,7 @@ const showBottomBar = computed(() => step.value !== 'building')
 
 const steps = computed(() => {
   if (step.value === 'choose') return []
-  if (!currentPath.value || currentPath.value === 'blank') {
+  if (!currentPath.value || currentPath.value === 'empty') {
     return ['Site name & details']
   }
   const pickerLabels: Record<string, string> = {
@@ -125,7 +125,7 @@ function onPrimaryAction() {
 }
 
 const pathOptions = [
-  { id: 'blank' as const, illustration: illustrations.blank, label: 'Blank site', desc: 'Start fresh with a clean WordPress install' },
+  { id: 'empty' as const, illustration: illustrations.empty, label: 'Empty site', desc: 'Start fresh with a clean WordPress install' },
   { id: 'blueprint' as const, illustration: illustrations.blueprint, label: 'Blueprint', desc: 'Choose a pre-configured site template' },
   { id: 'pull' as const, illustration: illustrations.pull, label: 'Pull existing', desc: 'Download from WordPress.com or Pressable' },
   { id: 'import' as const, illustration: illustrations.import, label: 'Import backup', desc: 'Import a Jetpack backup or full-site export' },

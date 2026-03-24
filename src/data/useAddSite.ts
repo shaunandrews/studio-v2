@@ -4,7 +4,7 @@ import type { Blueprint } from '@/components/features/add-site/BlueprintPicker.v
 import type { RemoteSite } from '@/components/features/add-site/PullSitePicker.vue'
 import type { SelectedFile } from '@/components/features/add-site/ImportDropZone.vue'
 
-export type AddSitePath = 'blank' | 'blueprint' | 'pull' | 'import'
+export type AddSitePath = 'empty' | 'blueprint' | 'pull' | 'import'
 
 // Shared state across route transitions
 const currentPath = ref<AddSitePath | null>(null)
@@ -34,7 +34,7 @@ export function useAddSite() {
 
   function choosePath(path: AddSitePath) {
     currentPath.value = path
-    if (path === 'blank') {
+    if (path === 'empty') {
       router.push('/add-site/details')
     } else {
       router.push(`/add-site/${path}`)
