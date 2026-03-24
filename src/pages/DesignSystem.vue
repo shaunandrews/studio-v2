@@ -140,7 +140,7 @@ function scrollTo(e: Event, id: string) {
           <div class="type-sample hstack gap-m">
             <div class="type-meta">
               <code>heading-small</code>
-              <span class="type-spec">--font-size-xxs / semibold / uppercase</span>
+              <span class="type-spec">--font-size-xxs / semibold / uppercase / 0.025em</span>
             </div>
             <Text variant="heading-small" color="muted">The quick brown fox jumps over the lazy dog</Text>
           </div>
@@ -182,7 +182,7 @@ function scrollTo(e: Event, id: string) {
           { name: 's', val: '4px', desc: 'Buttons, inputs, tags' },
           { name: 'm', val: '8px', desc: 'Cards, panels, dropdowns' },
           { name: 'l', val: '12px', desc: 'Modals, large containers' },
-          { name: 'full', val: '9999px', desc: 'Pill shapes, badges, avatars' },
+          { name: 'full', val: '9999px', desc: 'Pill shapes, badges, tags' },
         ]" :key="r.name">
           <div class="radius-preview" :style="{ borderRadius: `var(--radius-${r.name})` }"></div>
           <div class="radius-info">

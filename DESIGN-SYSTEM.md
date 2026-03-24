@@ -23,8 +23,8 @@
 ## Border Radius
 
 - **Use `--radius-s` (4px), `--radius-m` (8px), `--radius-l` (12px), or `--radius-full` (9999px)** from `styles/radius.css`.
-- `--radius-full` creates pill shapes for badges, avatars, etc.
-- **Exception:** `border-radius: 50%` for circles (status dots) is fine.
+- `--radius-full` creates pill shapes for badges, tags, etc.
+- **Exception:** `border-radius: 50%` for true circles (avatars, status dots) is fine.
 
 ## Motion
 
