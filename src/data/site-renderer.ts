@@ -245,7 +245,7 @@ export function renderSite(site: Site, pageSlug: string, colorMode?: 'light' | '
     }
   }
 
-  parts.push('<style>body { margin: 0; }</style>')
+  parts.push('<style>body { margin: 0; background: var(--bg, #fff); color-scheme: light; }</style>')
   parts.push('</head>')
 
   // Body with sections
