@@ -8,6 +8,7 @@ import { useSettings } from './useSettings'
 import { useAuth } from './useAuth'
 import { useOnboarding } from './useOnboarding'
 import { useHydration } from './useHydration'
+import { useAllSitesView } from './useAllSitesView'
 import { useSiteDocument } from './useSiteDocument'
 import { useRevisions } from './useRevisions'
 import { useBranches } from './useBranches'
@@ -91,7 +92,13 @@ export function usePersona() {
     // Navigate to the right starting point
     if (router) {
       if (persona.onboardingCompleted) {
-        router.push('/all-sites')
+        const { showAllSitesView } = useAllSitesView()
+        if (showAllSitesView.value) {
+          router.push('/all-sites')
+        } else {
+          const firstSite = persona.sites[0]
+          router.push(firstSite ? `/sites/${firstSite.id}/overview` : '/all-sites')
+        }
       } else {
         router.push('/welcome')
       }
