@@ -6,8 +6,10 @@ import { usePreviews } from './usePreviews'
 import { useAuth } from './useAuth'
 import { useOnboarding } from './useOnboarding'
 import { getPersona } from './personas'
+import type { SiteContent } from './site-types'
 import { useSiteDocument } from './useSiteDocument'
 import { useRevisions } from './useRevisions'
+import { generateSeedRevisions } from './seed-revisions'
 
 const ready = ref(false)
 
@@ -65,11 +67,8 @@ export function useHydration() {
       const { _setPreviews } = usePreviews()
       _setPreviews(dbPreviews)
 
-      const { _setRevisions } = useRevisions()
-      _setRevisions(dbRevisions)
-
       // Hydrate site content
-      const { initFromTemplate, _setContent } = useSiteDocument()
+      const { initFromTemplate, _setContent, getContent } = useSiteDocument()
       const dbContent = await db.siteContent.toArray()
       if (dbContent.length > 0) {
         _setContent(dbContent)
@@ -78,6 +77,23 @@ export function useHydration() {
           if (site.mockLayout) {
             await initFromTemplate(site.id, site.mockLayout)
           }
+        }
+      }
+
+      // Hydrate revisions — generate seed data on first load
+      const { _setRevisions } = useRevisions()
+      if (dbRevisions.length > 0) {
+        _setRevisions(dbRevisions)
+      } else if (count === 0 && persona.messages.length > 0) {
+        const contentMap: Record<string, SiteContent> = {}
+        for (const site of dbSites) {
+          const c = getContent(site.id).value
+          if (c) contentMap[site.id] = c
+        }
+        const seedRevs = generateSeedRevisions(persona.messages, persona.tasks, contentMap)
+        if (seedRevs.length) {
+          await db.revisions.bulkPut(seedRevs)
+          _setRevisions(seedRevs)
         }
       }
     } else {
@@ -95,11 +111,22 @@ export function useHydration() {
       _setPreviews(persona.previews.map(p => ({ ...p })))
 
       // Hydrate site content from templates in memory
-      const { initFromTemplate } = useSiteDocument()
+      const { initFromTemplate, getContent } = useSiteDocument()
       for (const site of persona.sites) {
         if (site.mockLayout) {
           await initFromTemplate(site.id, site.mockLayout ?? 'default')
         }
+      }
+
+      // Generate seed revisions in memory
+      if (persona.messages.length > 0) {
+        const contentMap: Record<string, SiteContent> = {}
+        for (const site of persona.sites) {
+          const c = getContent(site.id).value
+          if (c) contentMap[site.id] = c
+        }
+        const { _setRevisions } = useRevisions()
+        _setRevisions(generateSeedRevisions(persona.messages, persona.tasks, contentMap))
       }
     }
 
