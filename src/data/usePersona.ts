@@ -119,10 +119,12 @@ export function usePersona() {
 
     // Navigate to the right starting point
     if (router) {
-      if (persona.onboardingCompleted) {
-        router.push('/all-sites')
-      } else {
+      if (!persona.onboardingCompleted) {
         router.push('/welcome')
+      } else if (persona.sites.length > 0) {
+        router.push(`/sites/${persona.sites[0].id}`)
+      } else {
+        router.push('/add-site')
       }
     }
   }

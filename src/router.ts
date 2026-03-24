@@ -18,10 +18,10 @@ const router = createRouter({
         const { needsOnboarding } = useOnboarding()
         if (needsOnboarding.value) return '/welcome'
         const { showAllSitesView } = useAllSitesView()
-        if (showAllSitesView.value) return '/all-sites'
         const { sites } = useSites()
-        if (sites.value.length > 0) return `/site/${sites.value[0].id}`
-        return '/all-sites'
+        if (showAllSitesView.value && sites.value.length > 1) return '/all-sites'
+        if (sites.value.length > 0) return `/sites/${sites.value[0].id}`
+        return '/add-site'
       },
     },
 
@@ -157,10 +157,10 @@ router.beforeEach(async (to) => {
         const { needsOnboarding } = useOnboarding()
         if (needsOnboarding.value) return '/welcome'
         const { showAllSitesView: showAll } = useAllSitesView()
-        if (showAll.value) return '/all-sites'
         const { sites: allSites } = useSites()
-        if (allSites.value.length > 0) return `/site/${allSites.value[0].id}`
-        return '/all-sites'
+        if (showAll.value && allSites.value.length > 1) return '/all-sites'
+        if (allSites.value.length > 0) return `/sites/${allSites.value[0].id}`
+        return '/add-site'
       }
     }
   }
@@ -170,7 +170,7 @@ router.beforeEach(async (to) => {
     const { showAllSitesView: showAll } = useAllSitesView()
     if (!showAll.value) {
       const { sites: allSites } = useSites()
-      if (allSites.value.length > 0) return `/site/${allSites.value[0].id}`
+      if (allSites.value.length > 0) return `/sites/${allSites.value[0].id}`
     }
   }
 

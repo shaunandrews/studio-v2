@@ -1,8 +1,9 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Blueprint } from '@/components/features/add-site/BlueprintPicker.vue'
 import type { RemoteSite } from '@/components/features/add-site/PullSitePicker.vue'
 import type { SelectedFile } from '@/components/features/add-site/ImportDropZone.vue'
+import { useSites } from './useSites'
 
 export type AddSitePath = 'empty' | 'blueprint' | 'pull' | 'import'
 
@@ -22,7 +23,12 @@ export function useAddSite() {
 
   function closeAddSite() {
     resetState()
-    router.push('/all-sites')
+    const { sites } = useSites()
+    if (sites.value.length > 0) {
+      router.push(`/sites/${sites.value[0].id}`)
+    } else {
+      router.push('/add-site')
+    }
   }
 
   function resetState() {
