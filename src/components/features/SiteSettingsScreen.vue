@@ -222,7 +222,7 @@ function onBarLeave(el: Element, done: () => void) {
 .settings-sections {
   display: flex;
   flex-direction: column;
-  gap: var(--space-s);
+  gap: var(--space-xxl);
 }
 
 /* ══════════════════════════════════════
