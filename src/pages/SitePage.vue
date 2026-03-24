@@ -478,11 +478,9 @@ onBeforeUnmount(() => {
 
 .detail-input--centered {
   position: relative;
-  padding: 0;
-}
-
-.detail-input--centered :deep(.input-chat) {
-  max-width: 500px;
+  padding: 0 var(--space-s) var(--space-m);
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* -- Progressive blur behind input -- */
