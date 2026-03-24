@@ -8,22 +8,23 @@
 
 ### Scale
 
-| Token          | Value |
-|----------------|-------|
-| `--space-xxxs` | 5px   |
-| `--space-xxs`  | 10px  |
-| `--space-xs`   | 15px  |
-| `--space-s`    | 20px  |
-| `--space-m`    | 25px  |
-| `--space-l`    | 30px  |
-| `--space-xl`   | 40px  |
-| `--space-xxl`  | 50px  |
-| `--space-xxxl` | 60px  |
+| Token          | Value | Grid units |
+|----------------|-------|------------|
+| `--space-xxxs` | 2px   | 0.5        |
+| `--space-xxs`  | 4px   | 1          |
+| `--space-xs`   | 8px   | 2          |
+| `--space-s`    | 12px  | 3          |
+| `--space-m`    | 16px  | 4          |
+| `--space-l`    | 20px  | 5          |
+| `--space-xl`   | 24px  | 6          |
+| `--space-xxl`  | 32px  | 8          |
+| `--space-xxxl` | 48px  | 12         |
 
 ## Border Radius
 
-- **Use `--radius-s` (4px), `--radius-m` (8px), or `--radius-l` (12px)** from `styles/radius.css`.
-- **Exception:** `border-radius: 50%` for circles (avatars, status dots) is fine.
+- **Use `--radius-s` (4px), `--radius-m` (8px), `--radius-l` (12px), or `--radius-full` (9999px)** from `styles/radius.css`.
+- `--radius-full` creates pill shapes for badges, avatars, etc.
+- **Exception:** `border-radius: 50%` for circles (status dots) is fine.
 
 ## Motion
 
@@ -115,6 +116,7 @@ Maps directly to space tokens:
 | `.flex-none` | `flex: none`       |
 | `.shrink-0`  | `flex-shrink: 0`   |
 | `.min-w-0`   | `min-width: 0`     |
+| `.min-h-0`   | `min-height: 0`    |
 
 #### Wrap
 
@@ -128,7 +130,7 @@ Maps directly to space tokens:
 
 `.w-full` · `.h-full`
 
-### Spacing (`styles/spacing.css`)
+### Spacing (`styles/space.css`)
 
 Padding and margin utilities mapped to space tokens. Naming convention:
 
@@ -148,15 +150,15 @@ Padding and margin utilities mapped to space tokens. Naming convention:
 | `.ps-{size}` | `.ps-s` | `padding-inline-start: var(--space-s)` |
 | `.pe-{size}` | `.pe-xxs` | `padding-inline-end: var(--space-xxs)` |
 
-All sizes from `0` through `xxxl` (uniform), `xxxs` through `xl` (axis), `xxxs` through `s` (individual sides).
+All sizes from `0` through `xxxl` (uniform), `0` through `xl` (axis), `xxxs` through `xxxl` (block-start/end), `xxxs` through `xl` (inline-start/end).
 
 #### Margin
 
-Same pattern as padding: `.m-{size}`, `.mx-{size}`, `.my-{size}`, `.mt-{size}`, `.mb-{size}`, `.me-{size}`
+Same pattern as padding: `.m-{size}`, `.mx-{size}`, `.my-{size}`, `.mt-{size}`, `.mb-{size}`, `.ms-{size}`, `.me-{size}`
 
 Plus `.mx-auto` for centering.
 
-Margin utilities cover `0` through `s` (uniform), `xxxs` through `xs` (axis/sides).
+Margin utilities cover `0` through `s` (uniform), `xxxs` through `xs` (axis), `xxxs` through `xl` (block-start/end), `xxxs` through `l` (inline-start/end).
 
 ### Usage Pattern
 
@@ -194,11 +196,13 @@ All typography values flow through tokens in `styles/typography.css`. No raw `fo
 
 | Token | Value | Use for |
 |-------|-------|---------|
+| `--font-size-xxs` | 10px | Heading-small variant, tiny labels |
 | `--font-size-xs` | 11px | Labels, shortcut hints |
 | `--font-size-s` | 12px | Captions, small controls |
 | `--font-size-m` | 13px | Default UI text, buttons |
 | `--font-size-l` | 14px | Body text, inputs |
 | `--font-size-xl` | 16px | Body-large, chat messages |
+| `--font-size-xxl` | 24px | Page headings |
 
 ### Font Weights
 
@@ -206,7 +210,7 @@ All typography values flow through tokens in `styles/typography.css`. No raw `fo
 |-------|-------|
 | `--font-weight-regular` | 400 |
 | `--font-weight-medium` | 500 |
-| `--font-weight-semibold` | 600 |
+| `--font-weight-semibold` | 550 |
 
 ### Line Heights
 
@@ -226,7 +230,7 @@ Use the `<Text>` component for all text rendering. It maps to the tokens above.
 | `body` | `--font-size-l` | regular | — | Default UI text, descriptions |
 | `body-large` | `--font-size-xl` | regular | line-height normal | Input text, longer content |
 | `body-small` | `--font-size-s` | regular | — | Secondary info, descriptions |
-| `heading-small` | `--font-size-xs` | semibold | uppercase, letter-spacing 0.05em | Section headings, group labels |
+| `heading-small` | `--font-size-xxs` | semibold | uppercase, letter-spacing 0.025em | Section headings, group labels |
 
 #### Colors
 
@@ -236,61 +240,53 @@ Use the `<Text>` component for all text rendering. It maps to the tokens above.
 
 `regular` · `medium` · `semibold`
 
+#### Surface
+
+`light` · `dark` — Controls whether text colors map to frame (light) or chrome (dark) context.
+
 #### Polymorphic tag
 
-Use `tag` prop to control the rendered element: `<Text variant="label" tag="h2">` renders an `<h2>` with label styles.
+Use `tag` prop to control the rendered element: `<Text variant="heading-small" tag="h2">` renders an `<h2>` with heading-small styles.
 
 ---
 
 ## Components
 
-### AgentPanel
-- **Structure:** PanelToolbar with scrolling tabs + ChatMessage list + InputChat
-- Tabs represent different agent chats (Site Assistant, Code Agent, Design Agent)
-- Messages area is max-width constrained and auto-scrolls
-- InputChat wrapped in `p-xs` for breathing room
-
-### ChatMessage
-- **Props:** `role` (user/agent), `content` (string), `agentName` (string, optional)
-- Agent messages: left-aligned, show agent name label above, thumbs up/down + copy actions on hover
-- User messages: right-aligned with `surface-secondary` background bubble, copy action on hover
-- Actions are invisible until hover (opacity transition)
-- Uses `body-large` Text for message content
-
 ### Button
-- **Props:** `variant` (primary/secondary/tertiary), `surface` (light/dark), `size` (default/small), `width` (hug/full), `icon`, `label`, `shortcut`
+- **Props:** `variant` (primary/secondary/tertiary), `surface` (light/dark), `size` (mini/small/default/large), `width` (hug/full), `icon`, `label`, `shortcut`, `iconOnly`, `active`, `activeRotate`, `destructive`, `disabled`, `tooltip`, `tooltipPlacement`
 - `shortcut` — e.g. `"mod+enter"` — registers global keydown listener and displays formatted badge (⌘↵ on Mac, Ctrl↵ on Windows). Supports `mod`, `shift`, `alt` modifiers.
 - Icon-only buttons auto-square to match height
 - Surface controls color scheme, not a separate variant
 - Keeps its own inline-flex + padding styles (variant-coupled, not utility-friendly)
 
+### ChatMessage
+- **Props:** `role` (user/agent), `content` (string), `toolCalls` (ToolCall[], optional), `agentId` (AgentId, optional), `siteId` (string, optional)
+- Agent messages: left-aligned, show agent name label above, thumbs up/down + copy actions on hover
+- User messages: right-aligned with `surface-secondary` background bubble, copy action on hover
+- Actions are invisible until hover (opacity transition)
+- Uses `body-large` Text for message content
+
 ### Dropdown
-- **Props:** `modelValue` (string, v-model), `groups` ({ label, options[] }[]), `placement` ('above' | 'below')
+- **Props:** `modelValue` (string, v-model), `groups` (DropdownGroup[]), `placement` ('above' | 'below'), `align` ('start' | 'center' | 'end'), `triggerIcon`, `showChevron` (default true), `surface` (light/dark), `menuSurface` (light/dark), `size` (small/default), `variant` (inline/field), `width` (hug/fill), `tooltip`, `maxHeight`
 - Grouped option picker with labeled sections and dividers
 - Click-outside to dismiss, animated open/close (slide + fade)
 - Above/below placement (default: above, natural for bottom-anchored inputs)
 - Active option highlighted in primary color
 
 ### InputChat
-- **Events:** `send` (message: string, model: string)
+- **Props:** `surface` (light/dark), `siteId`, `modelValue` (v-model), `placeholder`, `elevated`, `streaming`
+- **Events:** `send` (message: string), `stop`, `update:modelValue`, `manage-agents`
 - Entire component looks like a single large textarea
 - Click anywhere to focus the textarea (unless clicking a button)
 - Auto-growing textarea via `field-sizing: content`, capped at ~7 lines
-- Bottom toolbar with Dropdown (model selector) and send Button
 - Hover darkens border, focus-within shows primary ring
 - Enter to send, Shift+Enter for newline
 
-### ProjectListItem
-- **Props:** `name` (string), `favicon` (string URL), `status` (stopped/loading/running), `active` (boolean)
-- **Events:** `select`, `toggle`
+### SiteItem
+- **Props:** `site` (Site), `active` (boolean, optional), `unreadCount` (number, optional), `surface` ('chrome' | 'frame', optional)
+- **Events:** `select` (id: string)
 - Single sidebar row: favicon + name + status indicator
 - Uses `hstack gap-xs p-xs`, `flex-1 min-w-0` on name for truncation
-
-### Sidebar
-- **Structure:** heading + project list + footer with add button
-- Uses `vstack shrink-0` for vertical layout
-- Fixed width: 210px (42 grid units)
-- Project list uses `vstack gap-xxxs flex-1 overflow-auto`
 
 ### StatusIndicator
 - **Props:** `status` (stopped/loading/running)
@@ -302,17 +298,11 @@ Use `tag` prop to control the rendered element: `<Text variant="label" tag="h2">
 - Fixed container size (`--space-m`)
 
 ### Text
-- **Props:** `variant` (body/body-large/body-small/heading-small), `tag` (string, default 'span'), `color` (default/secondary/muted/inherit), `weight` (regular/medium/semibold)
+- **Props:** `variant` (body/body-large/body-small/heading-small), `tag` (string, default 'span'), `color` (default/secondary/muted/inherit), `weight` (regular/medium/semibold), `surface` (light/dark)
 - Polymorphic — renders as any HTML element via `tag`
 - Use for all UI text; replaces raw font-size/weight in component styles
 - `heading-small` variant includes uppercase + letter-spacing (section headings, group labels)
-
-### Titlebar
-- **Regions:** `titlebar-start` (traffic lights), `titlebar-center` (app title), `titlebar-end` (settings/help)
-- Center is absolutely positioned for true centering
-- All regions use `hstack` utility; traffic lights use `me-xxs` for margin
-- `-webkit-app-region: drag` on titlebar, `no-drag` on interactive regions
-- Traffic lights: 12px circles (OS-native size — intentional exception)
+- `surface` switches color context between frame (light) and chrome (dark)
 
 ### WPIcon
 - **Props:** `icon` (from @wordpress/icons), `size` (number, default 24)

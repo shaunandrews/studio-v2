@@ -9,8 +9,11 @@ const dsNav = [
   { id: 'chrome', label: 'Chrome' },
   { id: 'frame', label: 'Frame' },
   { id: 'menu', label: 'Menu' },
+  { id: 'theme', label: 'Theme' },
   { id: 'macos', label: 'macOS Controls' },
   { id: 'status', label: 'Status' },
+  { id: 'environment', label: 'Environment' },
+  { id: 'elevation', label: 'Elevation' },
   { id: 'layout-utilities', label: 'Layout Utilities' },
   { id: 'motion', label: 'Motion' },
 ]
@@ -61,11 +64,13 @@ function scrollTo(e: Event, id: string) {
           </thead>
           <tbody>
             <tr v-for="t in [
+              { token: '--font-size-xxs', val: '10px', use: 'Heading-small variant, tiny labels' },
               { token: '--font-size-xs', val: '11px', use: 'Labels, shortcut hints' },
               { token: '--font-size-s', val: '12px', use: 'Captions, small controls' },
               { token: '--font-size-m', val: '13px', use: 'Default UI text, buttons' },
               { token: '--font-size-l', val: '14px', use: 'Body text, inputs' },
               { token: '--font-size-xl', val: '16px', use: 'Body-large, chat messages' },
+              { token: '--font-size-xxl', val: '24px', use: 'Page headings' },
             ]" :key="t.token">
               <td><code>{{ t.token }}</code></td>
               <td class="token-val">{{ t.val }}</td>
@@ -89,7 +94,7 @@ function scrollTo(e: Event, id: string) {
           </div>
           <div class="vstack gap-xxxs">
             <Text weight="semibold">Semibold</Text>
-            <Text variant="body-small" color="muted">--font-weight-semibold (600)</Text>
+            <Text variant="body-small" color="muted">--font-weight-semibold (550)</Text>
           </div>
         </div>
       </div>
@@ -127,15 +132,15 @@ function scrollTo(e: Event, id: string) {
           </div>
           <div class="type-sample hstack gap-m">
             <div class="type-meta">
-              <code>caption</code>
+              <code>body-small</code>
               <span class="type-spec">--font-size-s / regular</span>
             </div>
             <Text variant="body-small" color="secondary">The quick brown fox jumps over the lazy dog</Text>
           </div>
           <div class="type-sample hstack gap-m">
             <div class="type-meta">
-              <code>label</code>
-              <span class="type-spec">--font-size-xs / semibold / uppercase</span>
+              <code>heading-small</code>
+              <span class="type-spec">--font-size-xxs / semibold / uppercase</span>
             </div>
             <Text variant="heading-small" color="muted">The quick brown fox jumps over the lazy dog</Text>
           </div>
@@ -177,6 +182,7 @@ function scrollTo(e: Event, id: string) {
           { name: 's', val: '4px', desc: 'Buttons, inputs, tags' },
           { name: 'm', val: '8px', desc: 'Cards, panels, dropdowns' },
           { name: 'l', val: '12px', desc: 'Modals, large containers' },
+          { name: 'full', val: '9999px', desc: 'Pill shapes, badges, avatars' },
         ]" :key="r.name">
           <div class="radius-preview" :style="{ borderRadius: `var(--radius-${r.name})` }"></div>
           <div class="radius-info">
@@ -196,7 +202,7 @@ function scrollTo(e: Event, id: string) {
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-chrome-bg)"></div>
           <span class="swatch-name">chrome-bg</span>
-          <code class="swatch-value">#1e1e1e</code>
+          <code class="swatch-value">#dddddd</code>
         </div>
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-chrome-theme)"></div>
@@ -206,27 +212,27 @@ function scrollTo(e: Event, id: string) {
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-chrome-fg)"></div>
           <span class="swatch-name">chrome-fg</span>
-          <code class="swatch-value">#fff</code>
+          <code class="swatch-value">#1e1e1e</code>
         </div>
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-chrome-fg-muted)"></div>
           <span class="swatch-name">chrome-fg-muted</span>
-          <code class="swatch-value">rgba(255,255,255,0.7)</code>
+          <code class="swatch-value">rgba(0,0,0,0.6)</code>
         </div>
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-chrome-border)"></div>
           <span class="swatch-name">chrome-border</span>
-          <code class="swatch-value">rgba(255,255,255,0.1)</code>
+          <code class="swatch-value">rgba(0,0,0,0.08)</code>
         </div>
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-chrome-hover)"></div>
           <span class="swatch-name">chrome-hover</span>
-          <code class="swatch-value">rgba(255,255,255,0.05)</code>
+          <code class="swatch-value">rgba(0,0,0,0.06)</code>
         </div>
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-chrome-fill)"></div>
           <span class="swatch-name">chrome-fill</span>
-          <code class="swatch-value">rgba(255,255,255,0.02)</code>
+          <code class="swatch-value">rgba(0,0,0,0.03)</code>
         </div>
       </div>
     </section>
@@ -271,6 +277,16 @@ function scrollTo(e: Event, id: string) {
           <span class="swatch-name">frame-fill</span>
           <code class="swatch-value">rgba(0,0,0,0.02)</code>
         </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-frame-danger)"></div>
+          <span class="swatch-name">frame-danger</span>
+          <code class="swatch-value">#cc1818</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-frame-selected)"></div>
+          <span class="swatch-name">frame-selected</span>
+          <code class="swatch-value">rgba(157,6,250,1)</code>
+        </div>
       </div>
     </section>
 
@@ -297,6 +313,54 @@ function scrollTo(e: Event, id: string) {
         <div class="swatch">
           <div class="swatch-color" style="background: var(--color-menu-border)"></div>
           <span class="swatch-name">menu-border</span>
+          <code class="swatch-value">rgba(255,255,255,0.15)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-menu-danger)"></div>
+          <span class="swatch-name">menu-danger</span>
+          <code class="swatch-value">#f86368</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-menu-danger-bg)"></div>
+          <span class="swatch-name">menu-danger-bg</span>
+          <code class="swatch-value">rgba(214,54,56,0.12)</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- Theme -->
+    <section id="theme">
+      <h2>Theme</h2>
+      <p class="section-desc">Onboarding, accent backgrounds — white on brand.</p>
+      <div class="swatches">
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-theme-bg)"></div>
+          <span class="swatch-name">theme-bg</span>
+          <code class="swatch-value">#3858e9</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-theme-fg)"></div>
+          <span class="swatch-name">theme-fg</span>
+          <code class="swatch-value">#fff</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-theme-fg-muted)"></div>
+          <span class="swatch-name">theme-fg-muted</span>
+          <code class="swatch-value">rgba(255,255,255,0.7)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-theme-border)"></div>
+          <span class="swatch-name">theme-border</span>
+          <code class="swatch-value">rgba(255,255,255,0.2)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-theme-fill)"></div>
+          <span class="swatch-name">theme-fill</span>
+          <code class="swatch-value">rgba(255,255,255,0.1)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-theme-hover)"></div>
+          <span class="swatch-name">theme-hover</span>
           <code class="swatch-value">rgba(255,255,255,0.15)</code>
         </div>
       </div>
@@ -344,6 +408,92 @@ function scrollTo(e: Event, id: string) {
           <div class="swatch-color" style="background: var(--color-status-stop-hover)"></div>
           <span class="swatch-name">status-stop-hover</span>
           <code class="swatch-value">#e65054</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-status-warning)"></div>
+          <span class="swatch-name">status-warning</span>
+          <code class="swatch-value">#f59e0b</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-status-warning-bg)"></div>
+          <span class="swatch-name">status-warning-bg</span>
+          <code class="swatch-value">rgba(245,158,11,0.06)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-status-warning-border)"></div>
+          <span class="swatch-name">status-warning-border</span>
+          <code class="swatch-value">rgba(245,158,11,0.15)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-status-running-bg)"></div>
+          <span class="swatch-name">status-running-bg</span>
+          <code class="swatch-value">rgba(31,209,91,0.06)</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-status-running-border)"></div>
+          <span class="swatch-name">status-running-border</span>
+          <code class="swatch-value">rgba(31,209,91,0.15)</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- Environment -->
+    <section id="environment">
+      <h2>Environment</h2>
+      <p class="section-desc">Sync visual environment indicators.</p>
+      <div class="swatches">
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-env-local-bg)"></div>
+          <span class="swatch-name">env-local-bg</span>
+          <code class="swatch-value">#e6e6e6</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-env-staging-bg)"></div>
+          <span class="swatch-name">env-staging-bg</span>
+          <code class="swatch-value">#f2d76b</code>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-env-production-bg)"></div>
+          <span class="swatch-name">env-production-bg</span>
+          <code class="swatch-value">#b8e6bf</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- Elevation -->
+    <section id="elevation">
+      <h2>Elevation</h2>
+      <p class="section-desc">Shadows and z-index layering.</p>
+      <div class="subsection">
+        <h3>Shadows</h3>
+        <div class="utility-grid mt-xs">
+          <div class="utility-item">
+            <code>--shadow-s</code>
+            <Text variant="body-small" color="secondary">Subtle elevation for cards and dropdowns</Text>
+            <div class="shadow-preview" style="box-shadow: var(--shadow-s)"></div>
+          </div>
+          <div class="utility-item">
+            <code>--shadow-m</code>
+            <Text variant="body-small" color="secondary">Higher elevation for modals and popovers</Text>
+            <div class="shadow-preview" style="box-shadow: var(--shadow-m)"></div>
+          </div>
+        </div>
+      </div>
+      <div class="subsection">
+        <h3>Z-Index Scale</h3>
+        <div class="utility-grid mt-xs">
+          <div class="utility-item">
+            <code>--z-dropdown</code>
+            <Text variant="body-small" color="secondary">100 — Dropdowns, flyout menus</Text>
+          </div>
+          <div class="utility-item">
+            <code>--z-modal</code>
+            <Text variant="body-small" color="secondary">200 — Modals, dialogs</Text>
+          </div>
+          <div class="utility-item">
+            <code>--z-tooltip</code>
+            <Text variant="body-small" color="secondary">300 — Tooltips</Text>
+          </div>
         </div>
       </div>
     </section>
@@ -405,6 +555,10 @@ function scrollTo(e: Event, id: string) {
           <Text variant="body-small" color="secondary">flex: 1</Text>
         </div>
         <div class="utility-item">
+          <code>.flex-none</code>
+          <Text variant="body-small" color="secondary">flex: none</Text>
+        </div>
+        <div class="utility-item">
           <code>.shrink-0</code>
           <Text variant="body-small" color="secondary">flex-shrink: 0</Text>
         </div>
@@ -413,28 +567,72 @@ function scrollTo(e: Event, id: string) {
           <Text variant="body-small" color="secondary">min-width: 0</Text>
         </div>
         <div class="utility-item">
+          <code>.min-h-0</code>
+          <Text variant="body-small" color="secondary">min-height: 0</Text>
+        </div>
+        <div class="utility-item">
           <code>.flex-wrap</code>
           <Text variant="body-small" color="secondary">flex-wrap: wrap</Text>
+        </div>
+        <div class="utility-item">
+          <code>.flex-nowrap</code>
+          <Text variant="body-small" color="secondary">flex-wrap: nowrap</Text>
         </div>
       </div>
 
       <h3>Alignment</h3>
       <div class="utility-grid mt-xs">
         <div class="utility-item">
-          <code>.justify-between</code>
-          <Text variant="body-small" color="secondary">space-between</Text>
+          <code>.justify-start</code>
+          <Text variant="body-small" color="secondary">flex-start</Text>
         </div>
         <div class="utility-item">
           <code>.justify-center</code>
           <Text variant="body-small" color="secondary">center</Text>
         </div>
         <div class="utility-item">
-          <code>.align-stretch</code>
-          <Text variant="body-small" color="secondary">Override hstack's center</Text>
+          <code>.justify-end</code>
+          <Text variant="body-small" color="secondary">flex-end</Text>
+        </div>
+        <div class="utility-item">
+          <code>.justify-between</code>
+          <Text variant="body-small" color="secondary">space-between</Text>
+        </div>
+        <div class="utility-item">
+          <code>.align-start</code>
+          <Text variant="body-small" color="secondary">flex-start</Text>
         </div>
         <div class="utility-item">
           <code>.align-center</code>
           <Text variant="body-small" color="secondary">center (for vstack)</Text>
+        </div>
+        <div class="utility-item">
+          <code>.align-end</code>
+          <Text variant="body-small" color="secondary">flex-end</Text>
+        </div>
+        <div class="utility-item">
+          <code>.align-stretch</code>
+          <Text variant="body-small" color="secondary">Override hstack's center</Text>
+        </div>
+      </div>
+
+      <h3>Overflow &amp; Dimensions</h3>
+      <div class="utility-grid mt-xs">
+        <div class="utility-item">
+          <code>.overflow-hidden</code>
+          <Text variant="body-small" color="secondary">overflow: hidden</Text>
+        </div>
+        <div class="utility-item">
+          <code>.overflow-auto</code>
+          <Text variant="body-small" color="secondary">overflow: auto</Text>
+        </div>
+        <div class="utility-item">
+          <code>.w-full</code>
+          <Text variant="body-small" color="secondary">width: 100%</Text>
+        </div>
+        <div class="utility-item">
+          <code>.h-full</code>
+          <Text variant="body-small" color="secondary">height: 100%</Text>
         </div>
       </div>
     </section>
@@ -728,5 +926,14 @@ function scrollTo(e: Event, id: string) {
   color: var(--color-frame-fg-muted);
   width: 50px;
   flex-shrink: 0;
+}
+
+/* Shadow previews */
+.shadow-preview {
+  width: 100%;
+  height: 40px;
+  border-radius: var(--radius-m);
+  background: var(--color-frame-bg);
+  margin-block-start: var(--space-xxs);
 }
 </style>
