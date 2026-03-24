@@ -4,6 +4,7 @@ import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
+import Pane from '@/components/composites/Pane.vue'
 import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
 import SiteTimeline from '@/components/features/SiteTimeline.vue'
 import { useSites } from '@/data/useSites'
@@ -75,7 +76,7 @@ const openInLinks = [
 </script>
 
 <template>
-  <div class="overview">
+  <Pane fit>
     <header class="overview__header hstack justify-between align-center">
         <h1 class="overview__title">Site Overview</h1>
         <div class="overview__status">
@@ -104,7 +105,9 @@ const openInLinks = [
           </Tooltip>
         </div>
     </header>
+  </Pane>
 
+  <Pane scrollable>
     <div class="overview__content">
       <!-- Site preview + credentials -->
       <div class="site-overview vstack align-center gap-xs">
@@ -146,19 +149,11 @@ const openInLinks = [
       <SiteTimeline :site-id="siteId" />
 
     </div>
-  </div>
+  </Pane>
 </template>
 
 <style scoped>
-.overview {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
 .overview__header {
-  flex-shrink: 0;
   padding: var(--space-s) var(--space-m);
   border-block-end: 1px solid var(--color-frame-border);
 }
@@ -170,7 +165,6 @@ const openInLinks = [
 }
 
 .overview__content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -179,7 +173,6 @@ const openInLinks = [
   max-width: 480px;
   margin: 0 auto;
   padding: var(--space-xl);
-  overflow-y: auto;
 }
 
 /* ── Site overview ── */
