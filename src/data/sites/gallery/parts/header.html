@@ -1,9 +1,41 @@
-<header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: var(--bg); border-bottom: 1px solid var(--border); font-family: var(--font-body);">
-  <a href="/" style="font-family: var(--font-heading); font-size: 18px; color: var(--text); text-decoration: none; font-weight: 600; letter-spacing: 0.5px;">Wild Lens</a>
-  <nav style="display: flex; gap: 24px;">
-    <a href="/portfolio" style="font-size: 13px; color: var(--muted); text-decoration: none;">Portfolio</a>
-    <a href="/prints" style="font-size: 13px; color: var(--muted); text-decoration: none;">Prints</a>
-    <a href="/about" style="font-size: 13px; color: var(--muted); text-decoration: none;">About</a>
-    <a href="/contact" style="font-size: 13px; color: var(--muted); text-decoration: none;">Contact</a>
+<header class="site-header">
+  <a href="/" class="site-logo">Wild Lens</a>
+  <nav class="site-nav">
+    <a href="/portfolio" class="site-nav-link">Portfolio</a>
+    <a href="/prints" class="site-nav-link">Prints</a>
+    <a href="/about" class="site-nav-link">About</a>
+    <a href="/contact" class="site-nav-link">Contact</a>
   </nav>
 </header>
+
+<style>
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-body);
+}
+
+.site-logo {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.site-nav {
+  display: flex;
+  gap: 24px;
+}
+
+.site-nav-link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+}
+</style>

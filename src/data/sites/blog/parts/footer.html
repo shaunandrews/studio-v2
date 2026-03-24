@@ -1,31 +1,73 @@
-<footer style="background: var(--surface); font-family: var(--font-body); padding: 40px 32px 24px;">
-  <div style="display: flex; gap: 32px; max-width: var(--wide); margin: 0 auto;">
-    <div style="flex: 1;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;">Arlo Writes</div>
-      <div style="font-size: 13px; color: var(--muted); line-height: 1.7;">
+<footer class="site-footer">
+  <div class="site-footer-columns">
+    <div class="site-footer-column">
+      <div class="site-footer-heading">Arlo Writes</div>
+      <div class="site-footer-text">
         A personal blog about design,<br>
         engineering, and the space<br>
         where they overlap.
       </div>
     </div>
-    <div style="flex: 1;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;">Navigate</div>
-      <div style="font-size: 13px; color: var(--muted); line-height: 1.7;">
-        <a href="/blog" style="color: var(--muted); text-decoration: none;">Articles</a><br>
-        <a href="/about" style="color: var(--muted); text-decoration: none;">About</a><br>
-        <a href="/contact" style="color: var(--muted); text-decoration: none;">Contact</a>
+    <div class="site-footer-column">
+      <div class="site-footer-heading">Navigate</div>
+      <div class="site-footer-text">
+        <a href="/blog" class="site-footer-link">Articles</a><br>
+        <a href="/about" class="site-footer-link">About</a><br>
+        <a href="/contact" class="site-footer-link">Contact</a>
       </div>
     </div>
-    <div style="flex: 1;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;">Connect</div>
-      <div style="font-size: 13px; color: var(--muted); line-height: 1.7;">
+    <div class="site-footer-column">
+      <div class="site-footer-heading">Connect</div>
+      <div class="site-footer-text">
         Twitter / X<br>
         GitHub<br>
         hello@arlowrites.com
       </div>
     </div>
   </div>
-  <div style="max-width: var(--wide); margin: 24px auto 0; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); text-align: center;">
+  <div class="site-footer-copyright">
     &copy; 2026 Arlo Writes. All rights reserved.
   </div>
 </footer>
+
+<style>
+.site-footer {
+  background: var(--surface);
+  font-family: var(--font-body);
+  padding: 40px 32px 24px;
+}
+.site-footer-columns {
+  display: flex;
+  gap: 32px;
+  max-width: var(--wide);
+  margin: 0 auto;
+}
+.site-footer-column {
+  flex: 1;
+}
+.site-footer-heading {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.site-footer-text {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.site-footer-link {
+  color: var(--muted);
+  text-decoration: none;
+}
+.site-footer-copyright {
+  max-width: var(--wide);
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+</style>

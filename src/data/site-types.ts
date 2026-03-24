@@ -15,6 +15,7 @@ export interface SiteContentSection {
   html: string
   css: string
   role?: string
+  shared?: boolean
 }
 
 // The content-rich site type (pages, sections, theme).

@@ -1,42 +1,145 @@
 {{header}}
 
-<div style="max-width: var(--content); margin: 0 auto; padding: 60px 32px; font-family: var(--font-body);">
-  <h1 style="font-family: var(--font-heading); font-size: 32px; color: var(--text); margin: 0 0 16px; font-weight: 700; text-align: center;">About DevRef</h1>
-  <p style="font-size: 16px; color: var(--muted); line-height: 1.7; margin: 0 0 32px; text-align: center; max-width: 520px; margin-left: auto; margin-right: auto;">
+<div data-section="about-hero" data-role="hero">
+<div class="about-page">
+  <h1 class="about-title">About DevRef</h1>
+  <p class="about-subtitle">
     An open-source documentation platform built for developer teams who care about great docs.
   </p>
+</div>
 
-  <div style="border-top: 1px solid var(--border); padding-top: 32px;">
-    <p style="font-size: 15px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+<style>
+.about-page {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 60px 32px 0;
+  font-family: var(--font-body);
+}
+.about-title {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  color: var(--text);
+  margin: 0 0 16px;
+  font-weight: 700;
+  text-align: center;
+}
+.about-subtitle {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0 0 32px;
+  text-align: center;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+</div>
+
+<div data-section="about-story" data-role="content">
+<div class="about-body-wrap">
+  <div class="about-body">
+    <p class="about-text">
       DevRef started as an internal tool at a small startup that was tired of wrestling with docs tooling. We wanted something that felt like writing code — file-based, version-controlled, and fast to iterate on. Two years later, over 2,000 teams use DevRef to build and maintain their documentation.
     </p>
-    <p style="font-size: 15px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+    <p class="about-text">
       The project is fully open source and funded by an optional hosted plan for teams that want managed search, analytics, and custom domains. The core framework will always be free.
     </p>
-    <p style="font-size: 15px; color: var(--text); line-height: 1.8; margin: 0 0 32px;">
+    <p class="about-text about-text--last">
       We believe documentation is a product, not an afterthought. Every feature we build is designed to make docs easier to write, easier to find, and easier to keep up to date. If that resonates, we'd love for you to contribute — or just use it and tell us what's missing.
     </p>
   </div>
+</div>
 
-  <!-- Stats -->
-  <div style="display: flex; gap: 24px; margin-bottom: 32px;">
-    <div style="flex: 1; background: var(--surface); border-radius: 8px; padding: 24px; text-align: center;">
-      <div style="font-family: var(--font-heading); font-size: 28px; color: var(--text); font-weight: 700;">2,000+</div>
-      <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">Teams</div>
+<style>
+.about-body-wrap {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 0 32px;
+  font-family: var(--font-body);
+}
+.about-body {
+  border-top: 1px solid var(--border);
+  padding-top: 32px;
+}
+.about-text {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.8;
+  margin: 0 0 20px;
+}
+.about-text--last {
+  margin: 0 0 32px;
+}
+</style>
+</div>
+
+<div data-section="about-stats" data-role="stats">
+<div class="about-stats-wrap">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">2,000+</div>
+      <div class="stat-label">Teams</div>
     </div>
-    <div style="flex: 1; background: var(--surface); border-radius: 8px; padding: 24px; text-align: center;">
-      <div style="font-family: var(--font-heading); font-size: 28px; color: var(--text); font-weight: 700;">18k</div>
-      <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">GitHub Stars</div>
+    <div class="stat-card">
+      <div class="stat-value">18k</div>
+      <div class="stat-label">GitHub Stars</div>
     </div>
-    <div style="flex: 1; background: var(--surface); border-radius: 8px; padding: 24px; text-align: center;">
-      <div style="font-family: var(--font-heading); font-size: 28px; color: var(--text); font-weight: 700;">340+</div>
-      <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">Contributors</div>
+    <div class="stat-card">
+      <div class="stat-value">340+</div>
+      <div class="stat-label">Contributors</div>
     </div>
   </div>
 
-  <div style="text-align: center;">
-    <a href="https://github.com" style="display: inline-block; background: var(--text); color: var(--bg); font-size: 14px; font-weight: 600; padding: 10px 24px; border-radius: 6px; text-decoration: none;">View on GitHub</a>
+  <div class="about-cta">
+    <a href="https://github.com" class="about-cta-button">View on GitHub</a>
   </div>
+</div>
+
+<style>
+.about-stats-wrap {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 0 32px 60px;
+  font-family: var(--font-body);
+}
+.stats-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.stat-card {
+  flex: 1;
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+}
+.stat-value {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  color: var(--text);
+  font-weight: 700;
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.about-cta {
+  text-align: center;
+}
+.about-cta-button {
+  display: inline-block;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+</style>
 </div>
 
 {{footer}}

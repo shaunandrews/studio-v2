@@ -1,52 +1,114 @@
 {{header}}
 
-<!-- Hero -->
-<div style="padding: 52px 32px 40px; text-align: center; max-width: var(--content); margin: 0 auto;">
-  <h1 style="font-family: var(--font-heading); font-size: 36px; font-weight: 800; color: var(--text); margin: 0 0 12px; letter-spacing: -0.5px;">Everything You Need</h1>
-  <p style="font-family: var(--font-body); font-size: 15px; color: var(--muted); margin: 0; line-height: 1.5;">A complete platform for building, deploying, and scaling your applications.</p>
+<div data-section="features-hero" data-role="hero">
+<div class="features-hero">
+  <h1 class="features-hero-title">Everything You Need</h1>
+  <p class="features-hero-subtitle">A complete platform for building, deploying, and scaling your applications.</p>
 </div>
 
-<!-- Feature Grid -->
-<div style="padding: 0 32px 48px; max-width: var(--wide); margin: 0 auto;">
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+<style>
+.features-hero {
+  padding: 52px 32px 40px;
+  text-align: center;
+  max-width: var(--content);
+  margin: 0 auto;
+}
+.features-hero-title {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 12px;
+  letter-spacing: -0.5px;
+}
+.features-hero-subtitle {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+</style>
+</div>
 
-    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px;">
-      <div style="font-size: 24px; margin-bottom: 14px;">&#9889;</div>
-      <div style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Instant Deploys</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.6;">Push to your main branch and watch your changes go live in seconds. Automatic rollbacks if anything goes wrong.</div>
+<div data-section="features-grid" data-role="features">
+<div class="feature-grid-wrap">
+  <div class="feature-grid">
+
+    <div class="feature-grid-card">
+      <div class="feature-grid-icon">&#9889;</div>
+      <div class="feature-grid-title">Instant Deploys</div>
+      <div class="feature-grid-desc">Push to your main branch and watch your changes go live in seconds. Automatic rollbacks if anything goes wrong.</div>
     </div>
 
-    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px;">
-      <div style="font-size: 24px; margin-bottom: 14px;">&#127760;</div>
-      <div style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Edge Network</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.6;">Serve your app from 200+ locations worldwide. Smart routing delivers content from the node nearest to your users.</div>
+    <div class="feature-grid-card">
+      <div class="feature-grid-icon">&#127760;</div>
+      <div class="feature-grid-title">Edge Network</div>
+      <div class="feature-grid-desc">Serve your app from 200+ locations worldwide. Smart routing delivers content from the node nearest to your users.</div>
     </div>
 
-    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px;">
-      <div style="font-size: 24px; margin-bottom: 14px;">&#128274;</div>
-      <div style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Security Built In</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.6;">Automatic SSL, DDoS mitigation, and WAF protection. SOC 2 Type II compliant infrastructure out of the box.</div>
+    <div class="feature-grid-card">
+      <div class="feature-grid-icon">&#128274;</div>
+      <div class="feature-grid-title">Security Built In</div>
+      <div class="feature-grid-desc">Automatic SSL, DDoS mitigation, and WAF protection. SOC 2 Type II compliant infrastructure out of the box.</div>
     </div>
 
-    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px;">
-      <div style="font-size: 24px; margin-bottom: 14px;">&#128202;</div>
-      <div style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Analytics Dashboard</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.6;">Real-time metrics for performance, errors, and usage. Set up alerts and track deployments without third-party tools.</div>
+    <div class="feature-grid-card">
+      <div class="feature-grid-icon">&#128202;</div>
+      <div class="feature-grid-title">Analytics Dashboard</div>
+      <div class="feature-grid-desc">Real-time metrics for performance, errors, and usage. Set up alerts and track deployments without third-party tools.</div>
     </div>
 
-    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px;">
-      <div style="font-size: 24px; margin-bottom: 14px;">&#128268;</div>
-      <div style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">50+ Integrations</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.6;">Connect with GitHub, GitLab, Slack, Datadog, PagerDuty, and dozens more. Or build your own with our API.</div>
+    <div class="feature-grid-card">
+      <div class="feature-grid-icon">&#128268;</div>
+      <div class="feature-grid-title">50+ Integrations</div>
+      <div class="feature-grid-desc">Connect with GitHub, GitLab, Slack, Datadog, PagerDuty, and dozens more. Or build your own with our API.</div>
     </div>
 
-    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 28px;">
-      <div style="font-size: 24px; margin-bottom: 14px;">&#128101;</div>
-      <div style="font-family: var(--font-heading); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Team Collaboration</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.6;">Preview deployments for every PR, shared environment variables, and role-based access controls for your whole team.</div>
+    <div class="feature-grid-card">
+      <div class="feature-grid-icon">&#128101;</div>
+      <div class="feature-grid-title">Team Collaboration</div>
+      <div class="feature-grid-desc">Preview deployments for every PR, shared environment variables, and role-based access controls for your whole team.</div>
     </div>
 
   </div>
+</div>
+
+<style>
+.feature-grid-wrap {
+  padding: 0 32px 48px;
+  max-width: var(--wide);
+  margin: 0 auto;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.feature-grid-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px;
+}
+.feature-grid-icon {
+  font-size: 24px;
+  margin-bottom: 14px;
+}
+.feature-grid-title {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.feature-grid-desc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+</style>
 </div>
 
 {{footer}}

@@ -1,14 +1,68 @@
-<header style="display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: var(--bg); border-bottom: 1px solid var(--border); font-family: var(--font-body);">
-  <div style="display: flex; align-items: center; gap: 32px;">
-    <a href="/" style="font-family: var(--font-heading); font-size: 17px; color: var(--text); text-decoration: none; font-weight: 700; letter-spacing: -0.3px;">&#9670; Launchpad</a>
-    <nav style="display: flex; gap: 20px;">
-      <a href="/features" style="font-size: 13px; color: var(--muted); text-decoration: none;">Features</a>
-      <a href="/pricing" style="font-size: 13px; color: var(--muted); text-decoration: none;">Pricing</a>
-      <a href="/about" style="font-size: 13px; color: var(--muted); text-decoration: none;">Docs</a>
+<header class="site-header">
+  <div class="header-left">
+    <a href="/" class="header-logo">&#9670; Launchpad</a>
+    <nav class="header-nav">
+      <a href="/features" class="header-nav-link">Features</a>
+      <a href="/pricing" class="header-nav-link">Pricing</a>
+      <a href="/about" class="header-nav-link">Docs</a>
     </nav>
   </div>
-  <div style="display: flex; align-items: center; gap: 16px;">
-    <a href="/contact" style="font-size: 13px; color: var(--muted); text-decoration: none;">Log in</a>
-    <a href="/" style="display: inline-block; padding: 7px 16px; background: var(--accent); color: #fff; font-size: 13px; font-weight: 600; border-radius: 6px; text-decoration: none;">Sign up</a>
+  <div class="header-right">
+    <a href="/contact" class="header-login">Log in</a>
+    <a href="/" class="header-signup">Sign up</a>
   </div>
 </header>
+
+<style>
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 32px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-body);
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.header-logo {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.header-nav {
+  display: flex;
+  gap: 20px;
+}
+.header-nav-link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-login {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.header-signup {
+  display: inline-block;
+  padding: 7px 16px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+}
+</style>

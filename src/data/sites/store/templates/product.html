@@ -1,28 +1,26 @@
 {{header}}
 
-<div style="max-width: var(--wide); margin: 0 auto; padding: 40px 32px;">
-  <div style="display: flex; gap: 40px;">
-    <!-- Product Image -->
-    <div style="flex: 1; border-radius: 8px; overflow: hidden; background: var(--surface);">
-      <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=600&fit=crop&q=80" alt="Classic Watch" style="width: 100%; height: 420px; object-fit: cover; display: block;">
+<div data-section="product-content" data-role="content">
+<div class="product-page">
+  <div class="product-layout">
+    <div class="product-image-wrap">
+      <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=600&fit=crop&q=80" alt="Classic Watch" class="product-image">
     </div>
 
-    <!-- Product Details -->
-    <div style="flex: 1; padding-top: 16px;">
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Accessories</div>
-      <h1 style="font-family: var(--font-heading); font-size: 28px; color: var(--text); margin: 0 0 8px; font-weight: 700;">Classic Watch</h1>
-      <div style="font-family: var(--font-body); font-size: 20px; color: var(--text); margin-bottom: 20px;">$89</div>
+    <div class="product-details">
+      <div class="product-category">Accessories</div>
+      <h1 class="product-title">Classic Watch</h1>
+      <div class="product-detail-price">$89</div>
 
-      <p style="font-family: var(--font-body); font-size: 14px; color: var(--muted); line-height: 1.7; margin: 0 0 24px;">
+      <p class="product-description">
         A timeless analog watch with a clean dial, brushed stainless steel case, and genuine leather strap. Water-resistant to 50 meters. Designed to go anywhere, from the office to the weekend.
       </p>
 
-      <button style="width: 100%; padding: 14px 24px; background: var(--accent); color: var(--bg); border: none; border-radius: 6px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 32px;">Add to Cart</button>
+      <button class="product-add-to-cart">Add to Cart</button>
 
-      <!-- Product Details Accordion -->
-      <div style="border-top: 1px solid var(--border); padding-top: 20px;">
-        <div style="font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px;">Product Details</div>
-        <ul style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.8; margin: 0; padding-left: 16px;">
+      <div class="product-specs">
+        <div class="product-specs-title">Product Details</div>
+        <ul class="product-specs-list">
           <li>Japanese quartz movement</li>
           <li>40mm brushed steel case</li>
           <li>Genuine Italian leather strap</li>
@@ -31,12 +29,119 @@
         </ul>
       </div>
 
-      <div style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px;">
-        <div style="font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px;">Shipping</div>
-        <p style="font-family: var(--font-body); font-size: 13px; color: var(--muted); margin: 0; line-height: 1.6;">Free shipping on orders over $75. Standard delivery in 3-5 business days.</p>
+      <div class="product-shipping">
+        <div class="product-shipping-title">Shipping</div>
+        <p class="product-shipping-text">Free shipping on orders over $75. Standard delivery in 3-5 business days.</p>
       </div>
     </div>
   </div>
+</div>
+<style>
+.product-page {
+  max-width: var(--wide);
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+.product-layout {
+  display: flex;
+  gap: 40px;
+}
+.product-image-wrap {
+  flex: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.product-image {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  display: block;
+}
+.product-details {
+  flex: 1;
+  padding-top: 16px;
+}
+.product-category {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.product-title {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  color: var(--text);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.product-detail-price {
+  font-family: var(--font-body);
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.product-description {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+.product-add-to-cart {
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 32px;
+}
+.product-specs {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+.product-specs-title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.product-specs-list {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin: 0;
+  padding-left: 16px;
+}
+.product-shipping {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+.product-shipping-title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.product-shipping-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.6;
+}
+</style>
 </div>
 
 {{footer}}

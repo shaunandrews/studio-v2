@@ -1,31 +1,106 @@
 {{header}}
 
-<div style="max-width: var(--content); margin: 0 auto; padding: 48px 32px;">
-  <h1 style="font-family: var(--font-heading); font-size: 36px; color: var(--text); margin: 0 0 24px; font-weight: 700; letter-spacing: -0.5px;">About the Studio</h1>
+<div data-section="about-intro" data-role="content">
+<div class="about-page">
+  <h1 class="about-title">About the Studio</h1>
 
-  <p style="font-family: var(--font-body); font-size: 14px; color: var(--text); line-height: 1.7; margin: 0 0 16px; opacity: 0.85;">Studio Meridian was founded in 2018 with a simple belief: great design is the intersection of clarity, craft, and empathy. We're a tight-knit team of strategists, designers, and engineers who partner with brands at pivotal moments — launches, pivots, and scale.</p>
+  <p class="about-text">Studio Meridian was founded in 2018 with a simple belief: great design is the intersection of clarity, craft, and empathy. We're a tight-knit team of strategists, designers, and engineers who partner with brands at pivotal moments — launches, pivots, and scale.</p>
 
-  <p style="font-family: var(--font-body); font-size: 14px; color: var(--text); line-height: 1.7; margin: 0 0 48px; opacity: 0.85;">Our work spans identity systems, digital products, and immersive web experiences. We approach every project with the same rigor, whether it's a two-week sprint or a year-long engagement. The result is work that's thoughtful, lasting, and unmistakably intentional.</p>
+  <p class="about-text about-text-last">Our work spans identity systems, digital products, and immersive web experiences. We approach every project with the same rigor, whether it's a two-week sprint or a year-long engagement. The result is work that's thoughtful, lasting, and unmistakably intentional.</p>
+</div>
+<style>
+.about-page {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+.about-title {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  color: var(--text);
+  margin: 0 0 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.about-text {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
+  margin: 0 0 16px;
+  opacity: 0.85;
+}
+.about-text-last {
+  margin: 0 0 48px;
+}
+</style>
+</div>
 
-  <!-- Team -->
-  <div style="font-family: var(--font-body); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 20px;">The Team</div>
-  <div style="display: flex; gap: 20px;">
-    <div style="flex: 1; background: var(--surface); border-radius: 8px; padding: 24px;">
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1); margin-bottom: 16px;"></div>
-      <div style="font-family: var(--font-heading); font-size: 15px; color: var(--text); font-weight: 600;">Elena Torres</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Creative Director</div>
+<div data-section="about-team" data-role="team">
+<div class="about-team-section">
+  <div class="section-label">The Team</div>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-avatar"></div>
+      <div class="team-name">Elena Torres</div>
+      <div class="team-role">Creative Director</div>
     </div>
-    <div style="flex: 1; background: var(--surface); border-radius: 8px; padding: 24px;">
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1); margin-bottom: 16px;"></div>
-      <div style="font-family: var(--font-heading); font-size: 15px; color: var(--text); font-weight: 600;">James Chen</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Lead Engineer</div>
+    <div class="team-card">
+      <div class="team-avatar"></div>
+      <div class="team-name">James Chen</div>
+      <div class="team-role">Lead Engineer</div>
     </div>
-    <div style="flex: 1; background: var(--surface); border-radius: 8px; padding: 24px;">
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.1); margin-bottom: 16px;"></div>
-      <div style="font-family: var(--font-heading); font-size: 15px; color: var(--text); font-weight: 600;">Ava Lindqvist</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Strategy Lead</div>
+    <div class="team-card">
+      <div class="team-avatar"></div>
+      <div class="team-name">Ava Lindqvist</div>
+      <div class="team-role">Strategy Lead</div>
     </div>
   </div>
+</div>
+<style>
+.about-team-section {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 0 32px 48px;
+}
+.section-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.team-grid {
+  display: flex;
+  gap: 20px;
+}
+.team-card {
+  flex: 1;
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 24px;
+}
+.team-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  margin-bottom: 16px;
+}
+.team-name {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 600;
+}
+.team-role {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+</style>
 </div>
 
 {{footer}}

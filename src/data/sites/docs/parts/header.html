@@ -1,13 +1,59 @@
-<header style="display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; background: var(--bg); border-bottom: 1px solid var(--border); font-family: var(--font-body);">
-  <div style="display: flex; align-items: center; gap: 28px;">
-    <a href="/" style="font-family: var(--font-heading); font-size: 17px; color: var(--text); text-decoration: none; font-weight: 700;">DevRef</a>
-    <nav style="display: flex; gap: 20px;">
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none;">Guides</a>
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none;">API</a>
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none;">Examples</a>
+<header class="site-header">
+  <div class="header-left">
+    <a href="/" class="header-logo">DevRef</a>
+    <nav class="header-nav">
+      <a href="/docs" class="header-nav-link">Guides</a>
+      <a href="/docs" class="header-nav-link">API</a>
+      <a href="/docs" class="header-nav-link">Examples</a>
     </nav>
   </div>
-  <div style="display: flex; align-items: center;">
-    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 12px; color: var(--muted); min-width: 160px;">Search docs...</div>
+  <div class="header-right">
+    <div class="header-search">Search docs...</div>
   </div>
 </header>
+
+<style>
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 32px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-body);
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.header-logo {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+}
+.header-nav {
+  display: flex;
+  gap: 20px;
+}
+.header-nav-link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+}
+.header-search {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 160px;
+}
+</style>

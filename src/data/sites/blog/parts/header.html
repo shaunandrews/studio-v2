@@ -1,9 +1,38 @@
-<header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: var(--bg); border-bottom: 1px solid var(--border); font-family: var(--font-body);">
-  <a href="/" style="font-family: var(--font-heading); font-size: 18px; color: var(--text); text-decoration: none; font-weight: 700; letter-spacing: -0.3px;">Arlo Writes</a>
-  <nav style="display: flex; gap: 24px;">
-    <a href="/blog" style="font-size: 13px; color: var(--muted); text-decoration: none;">Articles</a>
-    <a href="#topics" style="font-size: 13px; color: var(--muted); text-decoration: none;">Topics</a>
-    <a href="#newsletter" style="font-size: 13px; color: var(--muted); text-decoration: none;">Newsletter</a>
-    <a href="/about" style="font-size: 13px; color: var(--muted); text-decoration: none;">About</a>
+<header class="site-header">
+  <a href="/" class="site-header-logo">Arlo Writes</a>
+  <nav class="site-header-nav">
+    <a href="/blog" class="site-header-nav-link">Articles</a>
+    <a href="#topics" class="site-header-nav-link">Topics</a>
+    <a href="#newsletter" class="site-header-nav-link">Newsletter</a>
+    <a href="/about" class="site-header-nav-link">About</a>
   </nav>
 </header>
+
+<style>
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-body);
+}
+.site-header-logo {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.site-header-nav {
+  display: flex;
+  gap: 24px;
+}
+.site-header-nav-link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+}
+</style>

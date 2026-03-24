@@ -1,44 +1,116 @@
 {{header}}
 
-<!-- Split Layout -->
-<div style="display: flex; min-height: 700px;">
-  <!-- Left: Image -->
-  <div style="flex: 1; overflow: hidden;">
-    <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=800&fit=crop&q=80" alt="Restaurant interior" style="width: 100%; height: 100%; object-fit: cover;">
+<div data-section="reservations-form" data-role="form">
+<div class="reservation-split">
+  <div class="reservation-image">
+    <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=800&fit=crop&q=80" alt="Restaurant interior" class="reservation-image-img">
   </div>
 
-  <!-- Right: Form -->
-  <div style="flex: 1; padding: 40px 32px; display: flex; flex-direction: column; justify-content: center;">
-    <h1 style="font-family: var(--font-heading); font-size: 28px; color: var(--text); margin: 0 0 8px; font-weight: 700;">Reserve a Table</h1>
-    <p style="font-family: var(--font-body); font-size: 13px; color: var(--muted); margin: 0 0 28px; line-height: 1.5;">Book ahead for brunch or private events.</p>
+  <div class="reservation-form">
+    <h1 class="reservation-heading">Reserve a Table</h1>
+    <p class="reservation-subheading">Book ahead for brunch or private events.</p>
 
-    <!-- Date -->
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Date</label>
-    <input type="date" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 16px; box-sizing: border-box;">
+    <label class="form-label">Date</label>
+    <input type="date" class="form-input">
 
-    <!-- Time -->
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Time</label>
-    <input type="time" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 16px; box-sizing: border-box;">
+    <label class="form-label">Time</label>
+    <input type="time" class="form-input">
 
-    <!-- Party Size -->
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Party Size</label>
-    <input type="number" min="1" max="20" placeholder="2" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 16px; box-sizing: border-box;">
+    <label class="form-label">Party Size</label>
+    <input type="number" min="1" max="20" placeholder="2" class="form-input">
 
-    <!-- Name -->
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Name</label>
-    <input type="text" placeholder="Your name" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 16px; box-sizing: border-box;">
+    <label class="form-label">Name</label>
+    <input type="text" placeholder="Your name" class="form-input">
 
-    <!-- Email -->
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Email</label>
-    <input type="email" placeholder="you@email.com" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 16px; box-sizing: border-box;">
+    <label class="form-label">Email</label>
+    <input type="email" placeholder="you@email.com" class="form-input">
 
-    <!-- Special Requests -->
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Special Requests</label>
-    <textarea rows="3" placeholder="Dietary needs, occasion, seating preference..." style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 20px; box-sizing: border-box; resize: vertical;"></textarea>
+    <label class="form-label">Special Requests</label>
+    <textarea rows="3" placeholder="Dietary needs, occasion, seating preference..." class="form-textarea"></textarea>
 
-    <!-- Submit -->
-    <button style="padding: 12px 24px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer;">Request Reservation</button>
+    <button class="form-button">Request Reservation</button>
   </div>
+</div>
+<style>
+.reservation-split {
+  display: flex;
+  min-height: 700px;
+}
+.reservation-image {
+  flex: 1;
+  overflow: hidden;
+}
+.reservation-image-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.reservation-form {
+  flex: 1;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.reservation-heading {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  color: var(--text);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.reservation-subheading {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 28px;
+  line-height: 1.5;
+}
+.form-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 20px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+.form-button {
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>
 </div>
 
 {{footer}}

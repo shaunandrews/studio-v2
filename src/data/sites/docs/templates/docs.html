@@ -1,73 +1,218 @@
 {{header}}
 
-<div style="display: flex; max-width: var(--wide); margin: 0 auto; min-height: 800px;">
+<div data-section="docs-content" data-role="content">
+<div class="docs-layout">
   <!-- Sidebar -->
-  <aside style="width: 220px; padding: 24px 20px; border-right: 1px solid var(--border); font-family: var(--font-body); flex-shrink: 0;">
-    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; font-weight: 600;">Getting Started</div>
-    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px;">
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Installation</a>
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Quick Start</a>
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Configuration</a>
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Deployment</a>
+  <aside class="sidebar">
+    <div class="sidebar-section-title">Getting Started</div>
+    <div class="sidebar-links">
+      <a href="/docs" class="sidebar-link">Installation</a>
+      <a href="/docs" class="sidebar-link">Quick Start</a>
+      <a href="/docs" class="sidebar-link">Configuration</a>
+      <a href="/docs" class="sidebar-link">Deployment</a>
     </div>
-    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; font-weight: 600;">Core Concepts</div>
-    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px;">
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Routing</a>
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Data Fetching</a>
-      <a href="/docs" style="font-size: 13px; color: var(--accent); text-decoration: none; padding: 4px 8px; border-radius: 4px; background: rgba(37,99,235,0.08); font-weight: 500;">Authentication</a>
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Middleware</a>
+    <div class="sidebar-section-title">Core Concepts</div>
+    <div class="sidebar-links">
+      <a href="/docs" class="sidebar-link">Routing</a>
+      <a href="/docs" class="sidebar-link">Data Fetching</a>
+      <a href="/docs" class="sidebar-link active">Authentication</a>
+      <a href="/docs" class="sidebar-link">Middleware</a>
     </div>
-    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; font-weight: 600;">API Reference</div>
-    <div style="display: flex; flex-direction: column; gap: 4px;">
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">CLI Commands</a>
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Config Options</a>
-      <a href="/docs" style="font-size: 13px; color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px;">Plugin API</a>
+    <div class="sidebar-section-title">API Reference</div>
+    <div class="sidebar-links sidebar-links--last">
+      <a href="/docs" class="sidebar-link">CLI Commands</a>
+      <a href="/docs" class="sidebar-link">Config Options</a>
+      <a href="/docs" class="sidebar-link">Plugin API</a>
     </div>
   </aside>
 
   <!-- Content -->
-  <main style="flex: 1; padding: 28px 40px; font-family: var(--font-body);">
-    <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Docs <span style="margin: 0 6px;">/</span> Core Concepts <span style="margin: 0 6px;">/</span> <span style="color: var(--text);">Authentication</span></div>
+  <main class="doc-content">
+    <div class="breadcrumb">Docs <span class="breadcrumb-separator">/</span> Core Concepts <span class="breadcrumb-separator">/</span> <span class="breadcrumb-current">Authentication</span></div>
 
-    <h1 style="font-family: var(--font-heading); font-size: 30px; color: var(--text); margin: 0 0 12px; font-weight: 700;">Authentication</h1>
-    <p style="font-size: 15px; color: var(--muted); line-height: 1.7; margin: 0 0 28px;">DevRef includes built-in authentication with support for OAuth providers, API keys, and session-based auth. No external dependencies required.</p>
+    <h1 class="doc-title">Authentication</h1>
+    <p class="doc-lead">DevRef includes built-in authentication with support for OAuth providers, API keys, and session-based auth. No external dependencies required.</p>
 
-    <h2 style="font-family: var(--font-heading); font-size: 18px; color: var(--text); margin: 0 0 12px; font-weight: 600;">OAuth Providers</h2>
-    <p style="font-size: 14px; color: var(--text); line-height: 1.7; margin: 0 0 16px;">Connect any OAuth 2.0 provider with a few lines of configuration. GitHub, Google, and GitLab are supported out of the box.</p>
+    <h2 class="doc-heading">OAuth Providers</h2>
+    <p class="doc-text">Connect any OAuth 2.0 provider with a few lines of configuration. GitHub, Google, and GitLab are supported out of the box.</p>
 
     <!-- Code Block -->
-    <div style="background: #1e293b; border-radius: 8px; padding: 20px 24px; margin-bottom: 28px; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 13px; line-height: 1.8; color: #e2e8f0; overflow: hidden;">
-      <div><span style="color: #7dd3fc;">import</span> { <span style="color: #fde68a;">createAuth</span> } <span style="color: #7dd3fc;">from</span> <span style="color: #86efac;">'devref/auth'</span></div>
-      <div style="height: 8px;"></div>
-      <div><span style="color: #7dd3fc;">const</span> auth = <span style="color: #fde68a;">createAuth</span>({</div>
+    <div class="code-block">
+      <div><span class="code-keyword">import</span> { <span class="code-function">createAuth</span> } <span class="code-keyword">from</span> <span class="code-string">'devref/auth'</span></div>
+      <div class="code-spacer"></div>
+      <div><span class="code-keyword">const</span> auth = <span class="code-function">createAuth</span>({</div>
       <div>&nbsp;&nbsp;providers: [</div>
-      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #86efac;">'github'</span>,</div>
-      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #86efac;">'google'</span>,</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">'github'</span>,</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">'google'</span>,</div>
       <div>&nbsp;&nbsp;],</div>
-      <div>&nbsp;&nbsp;secret: process.env.<span style="color: #fde68a;">AUTH_SECRET</span>,</div>
+      <div>&nbsp;&nbsp;secret: process.env.<span class="code-function">AUTH_SECRET</span>,</div>
       <div>})</div>
     </div>
 
-    <h2 style="font-family: var(--font-heading); font-size: 18px; color: var(--text); margin: 0 0 12px; font-weight: 600;">API Keys</h2>
-    <p style="font-size: 14px; color: var(--text); line-height: 1.7; margin: 0 0 16px;">For server-to-server communication, use API key authentication. Keys are scoped to specific permissions and can be rotated without downtime.</p>
+    <h2 class="doc-heading">API Keys</h2>
+    <p class="doc-text">For server-to-server communication, use API key authentication. Keys are scoped to specific permissions and can be rotated without downtime.</p>
 
     <!-- Code Block -->
-    <div style="background: #1e293b; border-radius: 8px; padding: 20px 24px; margin-bottom: 28px; font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 13px; line-height: 1.8; color: #e2e8f0; overflow: hidden;">
-      <div><span style="color: #7dd3fc;">const</span> key = <span style="color: #7dd3fc;">await</span> auth.<span style="color: #fde68a;">createApiKey</span>({</div>
-      <div>&nbsp;&nbsp;name: <span style="color: #86efac;">'CI Pipeline'</span>,</div>
-      <div>&nbsp;&nbsp;scopes: [<span style="color: #86efac;">'read:docs'</span>, <span style="color: #86efac;">'write:deploy'</span>],</div>
-      <div>&nbsp;&nbsp;expiresIn: <span style="color: #86efac;">'90d'</span>,</div>
+    <div class="code-block">
+      <div><span class="code-keyword">const</span> key = <span class="code-keyword">await</span> auth.<span class="code-function">createApiKey</span>({</div>
+      <div>&nbsp;&nbsp;name: <span class="code-string">'CI Pipeline'</span>,</div>
+      <div>&nbsp;&nbsp;scopes: [<span class="code-string">'read:docs'</span>, <span class="code-string">'write:deploy'</span>],</div>
+      <div>&nbsp;&nbsp;expiresIn: <span class="code-string">'90d'</span>,</div>
       <div>})</div>
     </div>
 
-    <h2 style="font-family: var(--font-heading); font-size: 18px; color: var(--text); margin: 0 0 12px; font-weight: 600;">Session Management</h2>
-    <p style="font-size: 14px; color: var(--text); line-height: 1.7; margin: 0 0 16px;">Sessions are stored server-side by default with automatic cookie handling. You can switch to JWT-based sessions for stateless deployments.</p>
+    <h2 class="doc-heading">Session Management</h2>
+    <p class="doc-text">Sessions are stored server-side by default with automatic cookie handling. You can switch to JWT-based sessions for stateless deployments.</p>
 
-    <div style="background: rgba(37,99,235,0.06); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 0 6px 6px 0; margin-bottom: 28px;">
-      <div style="font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 4px;">Tip</div>
-      <div style="font-size: 13px; color: var(--text); line-height: 1.6;">Use the <code style="background: rgba(37,99,235,0.06); padding: 2px 6px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 12px;">useSession()</code> hook in any page component to access the current user and auth state.</div>
+    <div class="callout">
+      <div class="callout-title">Tip</div>
+      <div class="callout-text">Use the <code class="callout-code">useSession()</code> hook in any page component to access the current user and auth state.</div>
     </div>
   </main>
+</div>
+
+<style>
+.docs-layout {
+  display: flex;
+  max-width: var(--wide);
+  margin: 0 auto;
+  min-height: 800px;
+}
+.sidebar {
+  width: 220px;
+  padding: 24px 20px;
+  border-right: 1px solid var(--border);
+  font-family: var(--font-body);
+  flex-shrink: 0;
+}
+.sidebar-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.sidebar-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+.sidebar-links--last {
+  margin-bottom: 0;
+}
+.sidebar-link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.sidebar-link.active {
+  color: var(--accent);
+  background: rgba(37,99,235,0.08);
+  font-weight: 500;
+}
+.doc-content {
+  flex: 1;
+  padding: 28px 40px;
+  font-family: var(--font-body);
+}
+.breadcrumb {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.breadcrumb-separator {
+  margin: 0 6px;
+}
+.breadcrumb-current {
+  color: var(--text);
+}
+.doc-title {
+  font-family: var(--font-heading);
+  font-size: 30px;
+  color: var(--text);
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+.doc-lead {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0 0 28px;
+}
+.doc-heading {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  color: var(--text);
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+.doc-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
+  margin: 0 0 16px;
+}
+.code-block {
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #e2e8f0;
+  overflow: hidden;
+}
+.code-muted {
+  color: #94a3b8;
+}
+.code-keyword {
+  color: #7dd3fc;
+}
+.code-function {
+  color: #fde68a;
+}
+.code-string {
+  color: #86efac;
+}
+.code-spacer {
+  height: 8px;
+}
+.callout {
+  background: rgba(37,99,235,0.06);
+  border-left: 3px solid var(--accent);
+  padding: 14px 18px;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 28px;
+}
+.callout-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.callout-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.callout-code {
+  background: rgba(37,99,235,0.06);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'SF Mono', monospace;
+  font-size: 12px;
+}
+.callout-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+</style>
 </div>
 
 {{footer}}

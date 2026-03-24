@@ -1,13 +1,60 @@
-<header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: var(--bg); border-bottom: 1px solid var(--border); font-family: var(--font-body);">
-  <a href="/" style="font-family: var(--font-heading); font-size: 18px; color: var(--text); text-decoration: none; font-weight: 700; letter-spacing: -0.3px;">Thread &amp; Co.</a>
-  <nav style="display: flex; gap: 24px; align-items: center;">
-    <a href="/shop" style="font-size: 13px; color: var(--muted); text-decoration: none;">New In</a>
-    <a href="/shop" style="font-size: 13px; color: var(--muted); text-decoration: none;">Women</a>
-    <a href="/shop" style="font-size: 13px; color: var(--muted); text-decoration: none;">Men</a>
-    <a href="/shop" style="font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 600;">Sale</a>
+<header class="site-header">
+  <a href="/" class="site-logo">Thread &amp; Co.</a>
+  <nav class="site-nav">
+    <a href="/shop" class="nav-link">New In</a>
+    <a href="/shop" class="nav-link">Women</a>
+    <a href="/shop" class="nav-link">Men</a>
+    <a href="/shop" class="nav-link nav-link--sale">Sale</a>
   </nav>
-  <div style="display: flex; gap: 16px; align-items: center;">
-    <span style="font-size: 13px; color: var(--muted); cursor: pointer;">Search</span>
-    <span style="font-size: 13px; color: var(--text); cursor: pointer;">Cart (2)</span>
+  <div class="header-actions">
+    <span class="header-action header-action--muted">Search</span>
+    <span class="header-action">Cart (2)</span>
   </div>
 </header>
+
+<style>
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-body);
+}
+.site-logo {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.site-nav {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+.nav-link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.nav-link--sale {
+  color: var(--accent);
+  font-weight: 600;
+}
+.header-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.header-action {
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+.header-action--muted {
+  color: var(--muted);
+}
+</style>

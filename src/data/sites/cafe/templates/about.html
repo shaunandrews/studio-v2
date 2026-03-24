@@ -1,43 +1,127 @@
 {{header}}
 
-<!-- Hero -->
-<div style="position: relative; height: 250px; overflow: hidden;">
-  <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&h=400&fit=crop&q=80" alt="Caf&#233; interior" style="width: 100%; height: 100%; object-fit: cover;">
-  <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;">
-    <h1 style="font-family: var(--font-heading); font-size: 36px; color: #fff; margin: 0; font-weight: 700;">Our Story</h1>
+<div data-section="about-hero" data-role="hero">
+<div class="about-hero">
+  <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&h=400&fit=crop&q=80" alt="Caf&#233; interior" class="about-hero-img">
+  <div class="about-hero-overlay">
+    <h1 class="about-hero-title">Our Story</h1>
   </div>
 </div>
+<style>
+.about-hero {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+}
+.about-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.about-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.about-hero-title {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  color: #fff;
+  margin: 0;
+  font-weight: 700;
+}
+</style>
+</div>
 
-<!-- Content -->
-<div style="max-width: var(--content); margin: 0 auto; padding: 36px 32px;">
-  <p style="font-family: var(--font-body); font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+<div data-section="about-content" data-role="content">
+<div class="about-content">
+  <p class="about-text">
     Downstreet Caf&#233; started in 2018 as a tiny espresso counter on Oak Street in Brooklyn. What began as a passion project between two friends — a roaster and a baker — quickly became a neighborhood fixture. We believed that a great cup of coffee could anchor a community, and seven years later, that idea still drives everything we do.
   </p>
-  <p style="font-family: var(--font-body); font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 32px;">
+  <p class="about-text about-text-last">
     We source single-origin beans from small farms in Colombia, Ethiopia, and Guatemala, roasting them in-house every week. Our kitchen runs on the same philosophy: seasonal ingredients, honest preparation, nothing unnecessary. The menu changes with what's fresh — stone fruit in summer, root vegetables in winter, and Rosa's pastries all year round.
   </p>
 
-  <!-- Pull Quote -->
-  <blockquote style="margin: 0 0 36px; padding: 20px 24px; border-left: 3px solid var(--accent); font-family: var(--font-heading); font-size: 20px; font-style: italic; color: var(--text); line-height: 1.6;">
+  <blockquote class="about-quote">
     &#8220;Great coffee, honest food, and a place to slow down.&#8221;
   </blockquote>
 
-  <!-- The Team -->
-  <h2 style="font-family: var(--font-heading); font-size: 24px; color: var(--text); margin: 0 0 24px; font-weight: 700;">The Team</h2>
-  <div style="display: flex; gap: 24px;">
-    <div style="flex: 1; text-align: center; padding: 24px 16px; background: var(--surface); border-radius: 8px;">
-      <div style="font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px;">Rosa Martinez</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted);">Head Baker</div>
+  <h2 class="about-team-heading">The Team</h2>
+  <div class="about-team">
+    <div class="about-team-member">
+      <div class="about-team-name">Rosa Martinez</div>
+      <div class="about-team-role">Head Baker</div>
     </div>
-    <div style="flex: 1; text-align: center; padding: 24px 16px; background: var(--surface); border-radius: 8px;">
-      <div style="font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px;">James Chen</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted);">Head Roaster</div>
+    <div class="about-team-member">
+      <div class="about-team-name">James Chen</div>
+      <div class="about-team-role">Head Roaster</div>
     </div>
-    <div style="flex: 1; text-align: center; padding: 24px 16px; background: var(--surface); border-radius: 8px;">
-      <div style="font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px;">Sofia Alvarez</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted);">Kitchen Lead</div>
+    <div class="about-team-member">
+      <div class="about-team-name">Sofia Alvarez</div>
+      <div class="about-team-role">Kitchen Lead</div>
     </div>
   </div>
+</div>
+<style>
+.about-content {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 36px 32px;
+}
+.about-text {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.8;
+  margin: 0 0 20px;
+}
+.about-text-last {
+  margin: 0 0 32px;
+}
+.about-quote {
+  margin: 0 0 36px;
+  padding: 20px 24px;
+  border-left: 3px solid var(--accent);
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.6;
+}
+.about-team-heading {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  color: var(--text);
+  margin: 0 0 24px;
+  font-weight: 700;
+}
+.about-team {
+  display: flex;
+  gap: 24px;
+}
+.about-team-member {
+  flex: 1;
+  text-align: center;
+  padding: 24px 16px;
+  background: var(--surface);
+  border-radius: 8px;
+}
+.about-team-name {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.about-team-role {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+}
+</style>
 </div>
 
 {{footer}}

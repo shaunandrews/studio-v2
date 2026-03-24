@@ -1,27 +1,52 @@
 {{header}}
 
-<!-- Masonry Gallery Grid -->
-<div style="padding: 8px; max-width: var(--wide); margin: 0 auto;">
-  <div style="column-count: 3; column-gap: 8px;">
-    <div style="margin-bottom: 8px; break-inside: avoid;">
-      <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=500&fit=crop&q=80" alt="Mountains" style="width: 100%; display: block; border-radius: 2px;">
+<div data-section="home-gallery" data-role="gallery">
+<div class="masonry-wrapper">
+  <div class="masonry-grid">
+    <div class="masonry-item">
+      <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=500&fit=crop&q=80" alt="Mountains" class="masonry-image">
     </div>
-    <div style="margin-bottom: 8px; break-inside: avoid;">
-      <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=280&fit=crop&q=80" alt="Misty forest" style="width: 100%; display: block; border-radius: 2px;">
+    <div class="masonry-item">
+      <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=280&fit=crop&q=80" alt="Misty forest" class="masonry-image">
     </div>
-    <div style="margin-bottom: 8px; break-inside: avoid;">
-      <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&h=300&fit=crop&q=80" alt="Forest path" style="width: 100%; display: block; border-radius: 2px;">
+    <div class="masonry-item">
+      <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&h=300&fit=crop&q=80" alt="Forest path" class="masonry-image">
     </div>
-    <div style="margin-bottom: 8px; break-inside: avoid;">
-      <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=400&h=450&fit=crop&q=80" alt="Waterfall" style="width: 100%; display: block; border-radius: 2px;">
+    <div class="masonry-item">
+      <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=400&h=450&fit=crop&q=80" alt="Waterfall" class="masonry-image">
     </div>
-    <div style="margin-bottom: 8px; break-inside: avoid;">
-      <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&h=420&fit=crop&q=80" alt="Lake sunset" style="width: 100%; display: block; border-radius: 2px;">
+    <div class="masonry-item">
+      <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&h=420&fit=crop&q=80" alt="Lake sunset" class="masonry-image">
     </div>
-    <div style="margin-bottom: 8px; break-inside: avoid;">
-      <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&h=320&fit=crop&q=80" alt="Green valley" style="width: 100%; display: block; border-radius: 2px;">
+    <div class="masonry-item">
+      <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&h=320&fit=crop&q=80" alt="Green valley" class="masonry-image">
     </div>
   </div>
+</div>
+
+<style>
+.masonry-wrapper {
+  padding: 8px;
+  max-width: var(--wide);
+  margin: 0 auto;
+}
+
+.masonry-grid {
+  column-count: 3;
+  column-gap: 8px;
+}
+
+.masonry-item {
+  margin-bottom: 8px;
+  break-inside: avoid;
+}
+
+.masonry-image {
+  width: 100%;
+  display: block;
+  border-radius: 2px;
+}
+</style>
 </div>
 
 {{footer}}

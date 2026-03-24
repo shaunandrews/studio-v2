@@ -53,8 +53,7 @@ const LISTENER_SCRIPT = `
         section.setAttribute('data-section', msg.sectionId);
         if (msg.role) section.setAttribute('data-role', msg.role);
         if (typeof msg.order === 'number') section.setAttribute('data-order', String(msg.order));
-        section.style.opacity = '0';
-        section.style.transition = 'opacity 0.4s ease-in-out';
+        section.style.display = 'contents';
 
         // Insert at correct position based on order
         var inserted = false;
@@ -147,6 +146,7 @@ const LISTENER_SCRIPT = `
         div.setAttribute('data-section', s.id);
         if (s.role) div.setAttribute('data-role', s.role);
         div.setAttribute('data-order', String(typeof s.order === 'number' ? s.order : i));
+        div.style.display = 'contents';
         div.innerHTML = s.html;
         body.appendChild(div);
       });
@@ -256,7 +256,7 @@ export function renderSite(site: Site, pageSlug: string, colorMode?: 'light' | '
     const section = site.sections[sectionId]
     if (section) {
       const roleAttr = section.role ? ` data-role="${escapeAttr(section.role)}"` : ''
-      parts.push(`<div data-section="${escapeAttr(sectionId)}"${roleAttr} data-order="${i}">`)
+      parts.push(`<div data-section="${escapeAttr(sectionId)}"${roleAttr} data-order="${i}" style="display:contents">`)
       parts.push(section.html)
       parts.push('</div>')
     }

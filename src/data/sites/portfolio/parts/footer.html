@@ -1,29 +1,67 @@
-<footer style="background: var(--surface); font-family: var(--font-body); padding: 40px 32px 24px;">
-  <div style="display: flex; gap: 32px; max-width: var(--wide); margin: 0 auto;">
-    <div style="flex: 1;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;">Studio</div>
-      <div style="font-size: 13px; color: var(--text); line-height: 1.7;">
+<footer class="site-footer">
+  <div class="footer-columns">
+    <div class="footer-column">
+      <div class="footer-heading">Studio</div>
+      <div class="footer-text">
         We craft digital experiences<br>
         that move brands forward.
       </div>
     </div>
-    <div style="flex: 1;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;">Contact</div>
-      <div style="font-size: 13px; color: var(--text); line-height: 1.7;">
+    <div class="footer-column">
+      <div class="footer-heading">Contact</div>
+      <div class="footer-text">
         hello@studiomeridian.com<br>
         +1 (212) 555-0147
       </div>
     </div>
-    <div style="flex: 1;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;">Social</div>
-      <div style="font-size: 13px; color: var(--text); line-height: 1.7;">
+    <div class="footer-column">
+      <div class="footer-heading">Social</div>
+      <div class="footer-text">
         Instagram<br>
         Dribbble<br>
         LinkedIn
       </div>
     </div>
   </div>
-  <div style="max-width: var(--wide); margin: 24px auto 0; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); text-align: center;">
+  <div class="footer-copyright">
     &copy; 2026 Studio Meridian. All rights reserved.
   </div>
 </footer>
+
+<style>
+.site-footer {
+  background: var(--surface);
+  font-family: var(--font-body);
+  padding: 40px 32px 24px;
+}
+.footer-columns {
+  display: flex;
+  gap: 32px;
+  max-width: var(--wide);
+  margin: 0 auto;
+}
+.footer-column {
+  flex: 1;
+}
+.footer-heading {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.footer-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+}
+.footer-copyright {
+  max-width: var(--wide);
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+</style>

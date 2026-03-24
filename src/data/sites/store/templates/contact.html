@@ -1,31 +1,101 @@
 {{header}}
 
-<div style="max-width: var(--content); margin: 0 auto; padding: 48px 32px;">
-  <h1 style="font-family: var(--font-heading); font-size: 28px; color: var(--text); margin: 0 0 8px; font-weight: 700;">Customer Support</h1>
-  <p style="font-family: var(--font-body); font-size: 14px; color: var(--muted); margin: 0 0 32px; line-height: 1.6;">We typically respond within 24 hours.</p>
+<div data-section="contact-form" data-role="form">
+<div class="contact-page">
+  <h1 class="contact-title">Customer Support</h1>
+  <p class="contact-subtitle">We typically respond within 24 hours.</p>
 
-  <!-- Form -->
-  <div style="margin-bottom: 20px;">
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Name</label>
-    <input type="text" placeholder="Your name" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); box-sizing: border-box;">
+  <div class="form-field">
+    <label class="form-label">Name</label>
+    <input type="text" placeholder="Your name" class="form-input">
   </div>
 
-  <div style="margin-bottom: 20px;">
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Email</label>
-    <input type="email" placeholder="you@email.com" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); box-sizing: border-box;">
+  <div class="form-field">
+    <label class="form-label">Email</label>
+    <input type="email" placeholder="you@email.com" class="form-input">
   </div>
 
-  <div style="margin-bottom: 20px;">
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Order Number</label>
-    <input type="text" placeholder="#TC-00000" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); box-sizing: border-box;">
+  <div class="form-field">
+    <label class="form-label">Order Number</label>
+    <input type="text" placeholder="#TC-00000" class="form-input">
   </div>
 
-  <div style="margin-bottom: 24px;">
-    <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Message</label>
-    <textarea rows="5" placeholder="How can we help?" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); box-sizing: border-box; resize: vertical;"></textarea>
+  <div class="form-field form-field--last">
+    <label class="form-label">Message</label>
+    <textarea rows="5" placeholder="How can we help?" class="form-textarea"></textarea>
   </div>
 
-  <button style="padding: 12px 24px; background: var(--accent); color: var(--bg); border: none; border-radius: 6px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer;">Send Message</button>
+  <button class="contact-submit">Send Message</button>
+</div>
+<style>
+.contact-page {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+.contact-title {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  color: var(--text);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.contact-subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 32px;
+  line-height: 1.6;
+}
+.form-field {
+  margin-bottom: 20px;
+}
+.form-field--last {
+  margin-bottom: 24px;
+}
+.form-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  box-sizing: border-box;
+}
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  box-sizing: border-box;
+  resize: vertical;
+}
+.contact-submit {
+  padding: 12px 24px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>
 </div>
 
 {{footer}}

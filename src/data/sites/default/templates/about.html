@@ -1,13 +1,43 @@
 {{header}}
 
-<div style="max-width: var(--content); margin: 0 auto; padding: 48px 32px;">
-  <h1 style="font-family: var(--font-heading); font-size: 32px; color: var(--text); margin: 0 0 24px; font-weight: 700;">About</h1>
+<div data-section="about-content" data-role="content">
+<div class="about-page">
+  <h1 class="about-heading">About</h1>
 
-  <p style="font-family: var(--font-body); font-size: 16px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">Welcome to our site. We're glad you're here.</p>
+  <p class="about-text">Welcome to our site. We're glad you're here.</p>
 
-  <p style="font-family: var(--font-body); font-size: 16px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">This is a place where we share our ideas, stories, and perspectives with the world. Whether you stumbled upon this site by chance or followed a link from somewhere else, we hope you'll find something here that resonates with you.</p>
+  <p class="about-text">This is a place where we share our ideas, stories, and perspectives with the world. Whether you stumbled upon this site by chance or followed a link from somewhere else, we hope you'll find something here that resonates with you.</p>
 
-  <p style="font-family: var(--font-body); font-size: 16px; color: var(--text); line-height: 1.8; margin: 0;">We believe in the power of words, the importance of community, and the value of sharing what we know. Feel free to look around, leave a comment, or get in touch. We'd love to hear from you.</p>
+  <p class="about-text about-text--last">We believe in the power of words, the importance of community, and the value of sharing what we know. Feel free to look around, leave a comment, or get in touch. We'd love to hear from you.</p>
+</div>
+
+<style>
+.about-page {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+
+.about-heading {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  color: var(--text);
+  margin: 0 0 24px;
+  font-weight: 700;
+}
+
+.about-text {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text);
+  line-height: 1.8;
+  margin: 0 0 20px;
+}
+
+.about-text--last {
+  margin: 0;
+}
+</style>
 </div>
 
 {{footer}}

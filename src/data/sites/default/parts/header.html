@@ -1,8 +1,39 @@
-<header style="display: flex; align-items: center; justify-content: space-between; padding: 20px 32px; background: var(--bg); border-bottom: 1px solid var(--border); font-family: var(--font-body);">
-  <a href="/" style="font-family: var(--font-heading); font-size: 18px; color: var(--text); text-decoration: none; font-weight: 700;">My WordPress Site</a>
-  <nav style="display: flex; gap: 24px;">
-    <a href="/blog" style="font-size: 14px; color: var(--muted); text-decoration: none;">Blog</a>
-    <a href="/about" style="font-size: 14px; color: var(--muted); text-decoration: none;">About</a>
-    <a href="/contact" style="font-size: 14px; color: var(--muted); text-decoration: none;">Contact</a>
+<header class="site-header">
+  <a href="/" class="site-title">My WordPress Site</a>
+  <nav class="site-nav">
+    <a href="/blog" class="nav-link">Blog</a>
+    <a href="/about" class="nav-link">About</a>
+    <a href="/contact" class="nav-link">Contact</a>
   </nav>
 </header>
+
+<style>
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-body);
+}
+
+.site-title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.site-nav {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-link {
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+}
+</style>

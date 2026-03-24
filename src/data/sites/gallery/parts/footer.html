@@ -1,29 +1,82 @@
-<footer style="background: var(--surface); font-family: var(--font-body); padding: 40px 32px 24px;">
-  <div style="max-width: var(--wide); margin: 0 auto; display: flex; gap: 32px;">
-    <div style="flex: 1;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;">Wild Lens</div>
-      <div style="font-size: 13px; color: var(--muted); line-height: 1.7;">
+<footer class="site-footer">
+  <div class="footer-columns">
+    <div class="footer-column">
+      <div class="footer-heading">Wild Lens</div>
+      <div class="footer-text">
         Nature &amp; landscape photography<br>
         by Jordan Atwell
       </div>
     </div>
-    <div style="flex: 1;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;">Work</div>
-      <div style="font-size: 13px; color: var(--muted); line-height: 1.7;">
-        <a href="/portfolio" style="color: var(--muted); text-decoration: none;">Portfolio</a><br>
-        <a href="/prints" style="color: var(--muted); text-decoration: none;">Prints</a><br>
-        <a href="/about" style="color: var(--muted); text-decoration: none;">About</a>
+    <div class="footer-column">
+      <div class="footer-heading">Work</div>
+      <div class="footer-text">
+        <a href="/portfolio" class="footer-link">Portfolio</a><br>
+        <a href="/prints" class="footer-link">Prints</a><br>
+        <a href="/about" class="footer-link">About</a>
       </div>
     </div>
-    <div style="flex: 1;">
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;">Contact</div>
-      <div style="font-size: 13px; color: var(--muted); line-height: 1.7;">
+    <div class="footer-column">
+      <div class="footer-heading">Contact</div>
+      <div class="footer-text">
         hello@wildlens.photo<br><br>
-        <a href="/contact" style="color: var(--text); text-decoration: none;">Get in touch &rarr;</a>
+        <a href="/contact" class="footer-cta">Get in touch &rarr;</a>
       </div>
     </div>
   </div>
-  <div style="max-width: var(--wide); margin: 24px auto 0; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); text-align: center;">
+  <div class="footer-copyright">
     &copy; 2026 Wild Lens. All rights reserved.
   </div>
 </footer>
+
+<style>
+.site-footer {
+  background: var(--surface);
+  font-family: var(--font-body);
+  padding: 40px 32px 24px;
+}
+
+.footer-columns {
+  max-width: var(--wide);
+  margin: 0 auto;
+  display: flex;
+  gap: 32px;
+}
+
+.footer-column {
+  flex: 1;
+}
+
+.footer-heading {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.footer-text {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.footer-link {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.footer-cta {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.footer-copyright {
+  max-width: var(--wide);
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+</style>

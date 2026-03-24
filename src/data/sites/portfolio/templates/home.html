@@ -1,67 +1,198 @@
 {{header}}
 
-<!-- Hero -->
-<div style="padding: 64px 32px 48px; max-width: var(--wide); margin: 0 auto; display: flex; gap: 40px; align-items: center;">
-  <div style="flex: 1;">
-    <h1 style="font-family: var(--font-heading); font-size: 42px; color: var(--text); margin: 0 0 16px; font-weight: 700; letter-spacing: -1px; line-height: 1.1;">We craft digital experiences</h1>
-    <p style="font-family: var(--font-body); font-size: 15px; color: var(--muted); line-height: 1.6; margin: 0 0 24px;">Studio Meridian is a design agency that partners with ambitious brands to create memorable digital products, identities, and experiences.</p>
-    <a href="/work" style="display: inline-block; padding: 12px 28px; background: var(--accent); color: var(--bg); font-family: var(--font-body); font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 6px;">View Our Work</a>
+<div data-section="home-hero" data-role="hero">
+<div class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">We craft digital experiences</h1>
+    <p class="hero-description">Studio Meridian is a design agency that partners with ambitious brands to create memorable digital products, identities, and experiences.</p>
+    <a href="/work" class="hero-cta">View Our Work</a>
   </div>
-  <div style="flex: 1;">
-    <img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=500&h=400&fit=crop&q=80" alt="Abstract" style="width: 100%; height: 320px; object-fit: cover; border-radius: 8px;">
-  </div>
-</div>
-
-<!-- Portfolio Grid -->
-<div style="padding: 32px; max-width: var(--wide); margin: 0 auto;">
-  <div style="font-family: var(--font-body); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 20px;">Selected Work</div>
-  <div style="display: flex; gap: 16px;">
-    <div style="flex: 1; position: relative; border-radius: 8px; overflow: hidden;">
-      <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=400&fit=crop&q=80" alt="Finova Banking" style="width: 100%; height: 200px; object-fit: cover; display: block;">
-      <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%); display: flex; align-items: flex-end; padding: 16px;">
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 15px; color: #fff; font-weight: 600;">Finova Banking</div>
-          <div style="font-family: var(--font-body); font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 4px;">Branding &middot; Web</div>
-        </div>
-      </div>
-    </div>
-    <div style="flex: 1; position: relative; border-radius: 8px; overflow: hidden;">
-      <img src="https://images.unsplash.com/photo-1545235617-9465d2a55698?w=600&h=400&fit=crop&q=80" alt="Relay Health" style="width: 100%; height: 200px; object-fit: cover; display: block;">
-      <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%); display: flex; align-items: flex-end; padding: 16px;">
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 15px; color: #fff; font-weight: 600;">Relay Health</div>
-          <div style="font-family: var(--font-body); font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 4px;">Product &middot; Design System</div>
-        </div>
-      </div>
-    </div>
-    <div style="flex: 1; position: relative; border-radius: 8px; overflow: hidden;">
-      <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop&q=80" alt="Onda Surf Co." style="width: 100%; height: 200px; object-fit: cover; display: block;">
-      <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%); display: flex; align-items: flex-end; padding: 16px;">
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 15px; color: #fff; font-weight: 600;">Onda Surf Co.</div>
-          <div style="font-family: var(--font-body); font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 4px;">E-commerce &middot; Branding</div>
-        </div>
-      </div>
-    </div>
+  <div class="hero-image-wrapper">
+    <img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=500&h=400&fit=crop&q=80" alt="Abstract" class="hero-image">
   </div>
 </div>
+<style>
+.hero {
+  padding: 64px 32px 48px;
+  max-width: var(--wide);
+  margin: 0 auto;
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+.hero-content {
+  flex: 1;
+}
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: 42px;
+  color: var(--text);
+  margin: 0 0 16px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+.hero-description {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+.hero-cta {
+  display: inline-block;
+  padding: 12px 28px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+}
+.hero-image-wrapper {
+  flex: 1;
+}
+.hero-image {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+</style>
+</div>
 
-<!-- Stats Bar -->
-<div style="background: var(--surface); padding: 32px;">
-  <div style="max-width: var(--wide); margin: 0 auto; display: flex; gap: 32px; text-align: center;">
-    <div style="flex: 1;">
-      <div style="font-family: var(--font-heading); font-size: 32px; color: var(--text); font-weight: 700;">120+</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Projects Delivered</div>
+<div data-section="home-portfolio-grid" data-role="portfolio">
+<div class="portfolio-section">
+  <div class="section-label">Selected Work</div>
+  <div class="portfolio-grid">
+    <div class="portfolio-card">
+      <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=400&fit=crop&q=80" alt="Finova Banking" class="portfolio-card-image">
+      <div class="portfolio-card-overlay">
+        <div>
+          <div class="portfolio-card-title">Finova Banking</div>
+          <div class="portfolio-card-meta">Branding &middot; Web</div>
+        </div>
+      </div>
     </div>
-    <div style="flex: 1;">
-      <div style="font-family: var(--font-heading); font-size: 32px; color: var(--text); font-weight: 700;">8</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Years in Business</div>
+    <div class="portfolio-card">
+      <img src="https://images.unsplash.com/photo-1545235617-9465d2a55698?w=600&h=400&fit=crop&q=80" alt="Relay Health" class="portfolio-card-image">
+      <div class="portfolio-card-overlay">
+        <div>
+          <div class="portfolio-card-title">Relay Health</div>
+          <div class="portfolio-card-meta">Product &middot; Design System</div>
+        </div>
+      </div>
     </div>
-    <div style="flex: 1;">
-      <div style="font-family: var(--font-heading); font-size: 32px; color: var(--text); font-weight: 700;">40+</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Awards Won</div>
+    <div class="portfolio-card">
+      <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop&q=80" alt="Onda Surf Co." class="portfolio-card-image">
+      <div class="portfolio-card-overlay">
+        <div>
+          <div class="portfolio-card-title">Onda Surf Co.</div>
+          <div class="portfolio-card-meta">E-commerce &middot; Branding</div>
+        </div>
+      </div>
     </div>
   </div>
+</div>
+<style>
+.portfolio-section {
+  padding: 32px;
+  max-width: var(--wide);
+  margin: 0 auto;
+}
+.section-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.portfolio-grid {
+  display: flex;
+  gap: 16px;
+}
+.portfolio-card {
+  flex: 1;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.portfolio-card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+.portfolio-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+}
+.portfolio-card-title {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  color: #fff;
+  font-weight: 600;
+}
+.portfolio-card-meta {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 4px;
+}
+</style>
+</div>
+
+<div data-section="home-stats" data-role="stats">
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat">
+      <div class="stat-value">120+</div>
+      <div class="stat-label">Projects Delivered</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">8</div>
+      <div class="stat-label">Years in Business</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">40+</div>
+      <div class="stat-label">Awards Won</div>
+    </div>
+  </div>
+</div>
+<style>
+.stats-bar {
+  background: var(--surface);
+  padding: 32px;
+}
+.stats-bar-inner {
+  max-width: var(--wide);
+  margin: 0 auto;
+  display: flex;
+  gap: 32px;
+  text-align: center;
+}
+.stat {
+  flex: 1;
+}
+.stat-value {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  color: var(--text);
+  font-weight: 700;
+}
+.stat-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+</style>
 </div>
 
 {{footer}}

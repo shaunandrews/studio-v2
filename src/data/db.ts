@@ -38,6 +38,18 @@ class StudioDatabase extends Dexie {
       siteContent: 'siteId',
       revisions: 'id, siteId, taskId, timestamp',
     })
+    // v5: Section refactor — shared sections, proper CSS, roles.
+    // Clear siteContent to force re-transform from templates on next hydration.
+    this.version(5).stores({
+      sites: 'id',
+      tasks: 'id, siteId, status, updatedAt, [siteId+archived]',
+      messages: 'id, taskId, timestamp',
+      previews: 'id, siteId, status',
+      siteContent: 'siteId',
+      revisions: 'id, siteId, taskId, timestamp',
+    }).upgrade(tx => {
+      return tx.table('siteContent').clear()
+    })
   }
 }
 

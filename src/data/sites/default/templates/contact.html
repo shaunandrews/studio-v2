@@ -1,21 +1,98 @@
 {{header}}
 
-<div style="max-width: var(--content); margin: 0 auto; padding: 48px 32px;">
-  <h1 style="font-family: var(--font-heading); font-size: 32px; color: var(--text); margin: 0 0 12px; font-weight: 700;">Contact</h1>
-  <p style="font-family: var(--font-body); font-size: 15px; color: var(--muted); margin: 0 0 32px;">Have a question or just want to say hello? Drop us a message below.</p>
+<div data-section="contact-form" data-role="form">
+<div class="contact-page">
+  <h1 class="contact-heading">Contact</h1>
+  <p class="contact-subheading">Have a question or just want to say hello? Drop us a message below.</p>
 
-  <div style="max-width: 480px;">
-    <label style="font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Name</label>
-    <input type="text" placeholder="Your name" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 14px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); margin-bottom: 20px; box-sizing: border-box;">
+  <div class="contact-form">
+    <label class="form-label">Name</label>
+    <input type="text" placeholder="Your name" class="form-input">
 
-    <label style="font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Email</label>
-    <input type="email" placeholder="you@example.com" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 14px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); margin-bottom: 20px; box-sizing: border-box;">
+    <label class="form-label">Email</label>
+    <input type="email" placeholder="you@example.com" class="form-input">
 
-    <label style="font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Message</label>
-    <textarea rows="6" placeholder="Your message..." style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 14px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); margin-bottom: 24px; box-sizing: border-box; resize: vertical;"></textarea>
+    <label class="form-label">Message</label>
+    <textarea rows="6" placeholder="Your message..." class="form-textarea"></textarea>
 
-    <button style="padding: 12px 24px; background: var(--accent); color: #fff; border: none; border-radius: 4px; font-family: var(--font-body); font-size: 15px; font-weight: 600; cursor: pointer;">Submit</button>
+    <button class="form-submit">Submit</button>
   </div>
+</div>
+
+<style>
+.contact-page {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+
+.contact-heading {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  color: var(--text);
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+
+.contact-subheading {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0 0 32px;
+}
+
+.contact-form {
+  max-width: 480px;
+}
+
+.form-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 24px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.form-submit {
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>
 </div>
 
 {{footer}}

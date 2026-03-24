@@ -1,56 +1,113 @@
 {{header}}
 
-<div style="max-width: var(--content); margin: 0 auto; padding: 40px 32px; font-family: var(--font-body);">
-  <h1 style="font-family: var(--font-heading); font-size: 28px; color: var(--text); margin: 0 0 32px; font-weight: 700; letter-spacing: -0.3px;">All Articles</h1>
+<div data-section="blog-listing" data-role="listing">
+<div class="blog-listing">
+  <h1 class="blog-listing-title">All Articles</h1>
 
-  <!-- Post 1 -->
-  <div style="display: flex; gap: 20px; padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--border);">
-    <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&h=300&fit=crop&q=80" alt="Laptop and notebook" style="width: 160px; height: 110px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
-    <div style="min-width: 0;">
-      <h2 style="font-family: var(--font-heading); font-size: 17px; color: var(--text); margin: 0 0 6px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3;">
-        <a href="/blog/design-systems-creativity" style="color: var(--text); text-decoration: none;">Design Systems Don't Kill Creativity</a>
+  <div class="blog-post-row blog-post-row-bordered">
+    <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&h=300&fit=crop&q=80" alt="Laptop and notebook" class="blog-post-thumb">
+    <div class="blog-post-body">
+      <h2 class="blog-post-title">
+        <a href="/blog/design-systems-creativity" class="blog-post-link">Design Systems Don't Kill Creativity</a>
       </h2>
-      <p style="font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 8px;">There's a persistent myth that design systems are creativity killers. After a decade of building and maintaining systems, I think the opposite is true.</p>
-      <span style="font-size: 12px; color: var(--muted);">March 2, 2026</span>
+      <p class="blog-post-excerpt">There's a persistent myth that design systems are creativity killers. After a decade of building and maintaining systems, I think the opposite is true.</p>
+      <span class="blog-post-date">March 2, 2026</span>
     </div>
   </div>
 
-  <!-- Post 2 -->
-  <div style="display: flex; gap: 20px; padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--border);">
-    <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop&q=80" alt="Coding on laptop" style="width: 160px; height: 110px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
-    <div style="min-width: 0;">
-      <h2 style="font-family: var(--font-heading); font-size: 17px; color: var(--text); margin: 0 0 6px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3;">
-        <a href="/blog/css-you-need" style="color: var(--text); text-decoration: none;">The Only CSS You Actually Need</a>
+  <div class="blog-post-row blog-post-row-bordered">
+    <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop&q=80" alt="Coding on laptop" class="blog-post-thumb">
+    <div class="blog-post-body">
+      <h2 class="blog-post-title">
+        <a href="/blog/css-you-need" class="blog-post-link">The Only CSS You Actually Need</a>
       </h2>
-      <p style="font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 8px;">Most projects ship ten times the CSS they need. Here's the minimal set that covers 90% of real-world layouts.</p>
-      <span style="font-size: 12px; color: var(--muted);">February 18, 2026</span>
+      <p class="blog-post-excerpt">Most projects ship ten times the CSS they need. Here's the minimal set that covers 90% of real-world layouts.</p>
+      <span class="blog-post-date">February 18, 2026</span>
     </div>
   </div>
 
-  <!-- Post 3 -->
-  <div style="display: flex; gap: 20px; padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--border);">
-    <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=400&h=300&fit=crop&q=80" alt="Code on screen" style="width: 160px; height: 110px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
-    <div style="min-width: 0;">
-      <h2 style="font-family: var(--font-heading); font-size: 17px; color: var(--text); margin: 0 0 6px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3;">
-        <a href="/blog/side-projects" style="color: var(--text); text-decoration: none;">Why I Still Build Side Projects</a>
+  <div class="blog-post-row blog-post-row-bordered">
+    <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=400&h=300&fit=crop&q=80" alt="Code on screen" class="blog-post-thumb">
+    <div class="blog-post-body">
+      <h2 class="blog-post-title">
+        <a href="/blog/side-projects" class="blog-post-link">Why I Still Build Side Projects</a>
       </h2>
-      <p style="font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 8px;">Side projects aren't about shipping products. They're about staying curious and learning things your day job won't teach you.</p>
-      <span style="font-size: 12px; color: var(--muted);">February 5, 2026</span>
+      <p class="blog-post-excerpt">Side projects aren't about shipping products. They're about staying curious and learning things your day job won't teach you.</p>
+      <span class="blog-post-date">February 5, 2026</span>
     </div>
   </div>
 
-  <!-- Post 4 -->
-  <div style="display: flex; gap: 20px; padding-bottom: 24px;">
-    <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&q=80" alt="Monitor with code" style="width: 160px; height: 110px; object-fit: cover; border-radius: 8px; flex-shrink: 0;">
-    <div style="min-width: 0;">
-      <h2 style="font-family: var(--font-heading); font-size: 17px; color: var(--text); margin: 0 0 6px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.3;">
-        <a href="/blog/shipping-fast" style="color: var(--text); text-decoration: none;">Shipping Fast Without Breaking Things</a>
+  <div class="blog-post-row">
+    <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&q=80" alt="Monitor with code" class="blog-post-thumb">
+    <div class="blog-post-body">
+      <h2 class="blog-post-title">
+        <a href="/blog/shipping-fast" class="blog-post-link">Shipping Fast Without Breaking Things</a>
       </h2>
-      <p style="font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 8px;">Speed and quality aren't opposites. The teams that ship fastest are usually the ones with the best foundations.</p>
-      <span style="font-size: 12px; color: var(--muted);">January 21, 2026</span>
+      <p class="blog-post-excerpt">Speed and quality aren't opposites. The teams that ship fastest are usually the ones with the best foundations.</p>
+      <span class="blog-post-date">January 21, 2026</span>
     </div>
   </div>
 
+</div>
+
+<style>
+.blog-listing {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 40px 32px;
+  font-family: var(--font-body);
+}
+.blog-listing-title {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  color: var(--text);
+  margin: 0 0 32px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.blog-post-row {
+  display: flex;
+  gap: 20px;
+  padding-bottom: 24px;
+}
+.blog-post-row-bordered {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.blog-post-thumb {
+  width: 160px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.blog-post-body {
+  min-width: 0;
+}
+.blog-post-title {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  color: var(--text);
+  margin: 0 0 6px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  line-height: 1.3;
+}
+.blog-post-link {
+  color: var(--text);
+  text-decoration: none;
+}
+.blog-post-excerpt {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+.blog-post-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+</style>
 </div>
 
 {{footer}}

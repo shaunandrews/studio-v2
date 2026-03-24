@@ -1,33 +1,58 @@
 {{header}}
 
-<!-- Hero -->
-<div style="padding: 52px 32px 0; text-align: center; max-width: var(--content); margin: 0 auto;">
-  <h1 style="font-family: var(--font-heading); font-size: 36px; font-weight: 800; color: var(--text); margin: 0 0 12px; letter-spacing: -0.5px;">Talk to Us</h1>
-  <p style="font-family: var(--font-body); font-size: 15px; color: var(--muted); margin: 0; line-height: 1.5;">Questions about enterprise, sales, or partnerships? We'd love to hear from you.</p>
+<div data-section="contact-hero" data-role="hero">
+<div class="contact-hero">
+  <h1 class="contact-hero-title">Talk to Us</h1>
+  <p class="contact-hero-subtitle">Questions about enterprise, sales, or partnerships? We'd love to hear from you.</p>
 </div>
 
-<!-- Form -->
-<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">
+<style>
+.contact-hero {
+  padding: 52px 32px 0;
+  text-align: center;
+  max-width: var(--content);
+  margin: 0 auto;
+}
+.contact-hero-title {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 12px;
+  letter-spacing: -0.5px;
+}
+.contact-hero-subtitle {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+</style>
+</div>
 
-  <div style="display: flex; gap: 16px; margin-bottom: 16px;">
-    <div style="flex: 1;">
-      <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Name</label>
-      <input type="text" placeholder="Jane Smith" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); box-sizing: border-box;">
+<div data-section="contact-form" data-role="form">
+<div class="contact-form">
+
+  <div class="contact-form-row">
+    <div class="contact-form-field">
+      <label class="contact-label">Name</label>
+      <input type="text" placeholder="Jane Smith" class="contact-input">
     </div>
-    <div style="flex: 1;">
-      <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Work email</label>
-      <input type="email" placeholder="jane@company.com" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); box-sizing: border-box;">
+    <div class="contact-form-field">
+      <label class="contact-label">Work email</label>
+      <input type="email" placeholder="jane@company.com" class="contact-input">
     </div>
   </div>
 
-  <div style="display: flex; gap: 16px; margin-bottom: 16px;">
-    <div style="flex: 1;">
-      <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Company</label>
-      <input type="text" placeholder="Acme Inc." style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); box-sizing: border-box;">
+  <div class="contact-form-row">
+    <div class="contact-form-field">
+      <label class="contact-label">Company</label>
+      <input type="text" placeholder="Acme Inc." class="contact-input">
     </div>
-    <div style="flex: 1;">
-      <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Team size</label>
-      <select style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); box-sizing: border-box; appearance: auto;">
+    <div class="contact-form-field">
+      <label class="contact-label">Team size</label>
+      <select class="contact-select">
         <option>1-10</option>
         <option>11-50</option>
         <option>51-200</option>
@@ -36,14 +61,98 @@
     </div>
   </div>
 
-  <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Message</label>
-  <textarea rows="5" placeholder="Tell us about your project and how we can help..." style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 24px; box-sizing: border-box; resize: vertical;"></textarea>
+  <label class="contact-label">Message</label>
+  <textarea rows="5" placeholder="Tell us about your project and how we can help..." class="contact-textarea"></textarea>
 
-  <button style="width: 100%; padding: 12px 24px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer;">Send message</button>
+  <button class="contact-submit">Send message</button>
 
-  <div style="text-align: center; margin-top: 24px; font-family: var(--font-body); font-size: 12px; color: var(--muted);">
-    Or email us directly at <a href="mailto:hello@launchpad.dev" style="color: var(--accent); text-decoration: none;">hello@launchpad.dev</a>
+  <div class="contact-alt">
+    Or email us directly at <a href="mailto:hello@launchpad.dev" class="contact-alt-link">hello@launchpad.dev</a>
   </div>
+</div>
+
+<style>
+.contact-form {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+.contact-form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.contact-form-field {
+  flex: 1;
+}
+.contact-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+  margin-bottom: 6px;
+}
+.contact-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  box-sizing: border-box;
+}
+.contact-select {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  box-sizing: border-box;
+  appearance: auto;
+}
+.contact-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 24px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+.contact-submit {
+  width: 100%;
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.contact-alt {
+  text-align: center;
+  margin-top: 24px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+}
+.contact-alt-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+</style>
 </div>
 
 {{footer}}

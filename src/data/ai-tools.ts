@@ -103,11 +103,21 @@ export function buildSystemPrompt(content: SiteContent): string {
     .map(([k, v]) => `  ${k}: ${v}`)
     .join('\n')
 
+  // Separate shared sections from page-specific ones
+  const sharedSections = Object.values(content.sections).filter(s => s.shared)
+  const sharedDesc = sharedSections.length > 0
+    ? sharedSections.map(s => {
+        const preview = s.html.replace(/<[^>]*>/g, '').trim().slice(0, 80)
+        return `  - ${s.id} [${s.role}] (shared): "${preview}..."`
+      }).join('\n')
+    : '  (none)'
+
   const pagesDesc = content.pages.map(page => {
     const sectionList = page.sections
       .map(id => {
         const s = content.sections[id]
         if (!s) return `  - ${id} (missing)`
+        if (s.shared) return `  - ${id} [${s.role}] (shared)`
         const role = s.role ? ` [${s.role}]` : ''
         const preview = s.html.replace(/<[^>]*>/g, '').trim().slice(0, 80)
         return `  - ${id}${role}: "${preview}..."`
@@ -123,6 +133,10 @@ export function buildSystemPrompt(content: SiteContent): string {
 ## Theme Variables
 ${themeVars}
 
+## Shared Sections
+These sections appear on every page. Updating one applies the change site-wide.
+${sharedDesc}
+
 ## Pages & Sections
 ${pagesDesc}
 
@@ -131,5 +145,6 @@ ${pagesDesc}
 - When updating a section, provide COMPLETE HTML and CSS — not partial diffs or snippets.
 - Use the site's theme variables (e.g., var(--bg), var(--accent)) in your CSS.
 - Keep the existing design language unless explicitly asked to change it.
+- Sections marked (shared) appear on every page. Updating one updates all pages. Do not use remove_section on shared sections.
 - Be concise in your text responses. The tools do the work.`
 }

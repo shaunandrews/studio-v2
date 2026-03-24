@@ -1,62 +1,181 @@
 {{header}}
 
-<!-- Hero -->
-<div style="padding: 52px 32px 40px; text-align: center; max-width: var(--content); margin: 0 auto;">
-  <h1 style="font-family: var(--font-heading); font-size: 36px; font-weight: 800; color: var(--text); margin: 0 0 12px; letter-spacing: -0.5px;">Simple, Transparent Pricing</h1>
-  <p style="font-family: var(--font-body); font-size: 15px; color: var(--muted); margin: 0; line-height: 1.5;">Start free, scale as you grow. No surprises.</p>
+<div data-section="pricing-hero" data-role="hero">
+<div class="pricing-hero">
+  <h1 class="pricing-hero-title">Simple, Transparent Pricing</h1>
+  <p class="pricing-hero-subtitle">Start free, scale as you grow. No surprises.</p>
 </div>
 
-<!-- Pricing Tiers -->
-<div style="padding: 0 32px 48px; max-width: var(--wide); margin: 0 auto;">
-  <div style="display: flex; gap: 16px; align-items: flex-start;">
+<style>
+.pricing-hero {
+  padding: 52px 32px 40px;
+  text-align: center;
+  max-width: var(--content);
+  margin: 0 auto;
+}
+.pricing-hero-title {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 12px;
+  letter-spacing: -0.5px;
+}
+.pricing-hero-subtitle {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+</style>
+</div>
+
+<div data-section="pricing-tiers" data-role="pricing">
+<div class="pricing-grid-wrap">
+  <div class="pricing-grid">
 
     <!-- Starter -->
-    <div style="flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 28px; background: var(--bg);">
-      <div style="font-family: var(--font-heading); font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Starter</div>
-      <div style="font-family: var(--font-heading); font-size: 36px; font-weight: 800; color: var(--text); margin-bottom: 4px;">$0<span style="font-size: 14px; font-weight: 500; color: var(--muted);">/mo</span></div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); margin-bottom: 24px;">Perfect for side projects</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--text); line-height: 2.2;">
+    <div class="pricing-tier">
+      <div class="pricing-tier-name">Starter</div>
+      <div class="pricing-tier-price">$0<span class="pricing-tier-period">/mo</span></div>
+      <div class="pricing-tier-desc">Perfect for side projects</div>
+      <div class="pricing-tier-features">
         &#10003; 3 projects<br>
         &#10003; 100 GB bandwidth<br>
         &#10003; Automatic SSL<br>
         &#10003; Community support<br>
         &#10003; Basic analytics
       </div>
-      <a href="/" style="display: block; text-align: center; margin-top: 24px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none;">Get started</a>
+      <a href="/" class="pricing-tier-btn">Get started</a>
     </div>
 
     <!-- Pro (Featured) -->
-    <div style="flex: 1; border: 2px solid var(--accent); border-radius: 10px; padding: 28px; background: var(--bg); position: relative;">
-      <div style="position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-family: var(--font-body); font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Popular</div>
-      <div style="font-family: var(--font-heading); font-size: 14px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Pro</div>
-      <div style="font-family: var(--font-heading); font-size: 36px; font-weight: 800; color: var(--text); margin-bottom: 4px;">$29<span style="font-size: 14px; font-weight: 500; color: var(--muted);">/mo</span></div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); margin-bottom: 24px;">For growing teams</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--text); line-height: 2.2;">
+    <div class="pricing-tier pricing-tier-featured">
+      <div class="pricing-tier-badge">Popular</div>
+      <div class="pricing-tier-name pricing-tier-name-accent">Pro</div>
+      <div class="pricing-tier-price">$29<span class="pricing-tier-period">/mo</span></div>
+      <div class="pricing-tier-desc">For growing teams</div>
+      <div class="pricing-tier-features">
         &#10003; Unlimited projects<br>
         &#10003; 1 TB bandwidth<br>
         &#10003; Preview deployments<br>
         &#10003; Priority support<br>
         &#10003; Advanced analytics
       </div>
-      <a href="/" style="display: block; text-align: center; margin-top: 24px; padding: 10px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-family: var(--font-body); font-size: 13px; font-weight: 600; text-decoration: none;">Start free trial</a>
+      <a href="/" class="pricing-tier-btn pricing-tier-btn-primary">Start free trial</a>
     </div>
 
     <!-- Enterprise -->
-    <div style="flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 28px; background: var(--bg);">
-      <div style="font-family: var(--font-heading); font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Enterprise</div>
-      <div style="font-family: var(--font-heading); font-size: 36px; font-weight: 800; color: var(--text); margin-bottom: 4px;">Custom</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); margin-bottom: 24px;">For large organizations</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--text); line-height: 2.2;">
+    <div class="pricing-tier">
+      <div class="pricing-tier-name">Enterprise</div>
+      <div class="pricing-tier-price">Custom</div>
+      <div class="pricing-tier-desc">For large organizations</div>
+      <div class="pricing-tier-features">
         &#10003; Everything in Pro<br>
         &#10003; Unlimited bandwidth<br>
         &#10003; SSO &amp; SAML<br>
         &#10003; Dedicated support<br>
         &#10003; Custom SLAs
       </div>
-      <a href="/contact" style="display: block; text-align: center; margin-top: 24px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none;">Contact sales</a>
+      <a href="/contact" class="pricing-tier-btn">Contact sales</a>
     </div>
 
   </div>
+</div>
+
+<style>
+.pricing-grid-wrap {
+  padding: 0 32px 48px;
+  max-width: var(--wide);
+  margin: 0 auto;
+}
+.pricing-grid {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.pricing-tier {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px;
+  background: var(--bg);
+}
+.pricing-tier-featured {
+  border: 2px solid var(--accent);
+  position: relative;
+}
+.pricing-tier-badge {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.pricing-tier-name {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.pricing-tier-name-accent {
+  color: var(--accent);
+}
+.pricing-tier-price {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.pricing-tier-period {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.pricing-tier-desc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.pricing-tier-features {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text);
+  line-height: 2.2;
+}
+.pricing-tier-btn {
+  display: block;
+  text-align: center;
+  margin-top: 24px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.pricing-tier-btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+</style>
 </div>
 
 {{footer}}

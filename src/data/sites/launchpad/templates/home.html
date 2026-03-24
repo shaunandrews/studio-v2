@@ -1,56 +1,180 @@
 {{header}}
 
-<!-- Hero -->
-<div style="padding: 64px 32px 48px; text-align: center; max-width: var(--content); margin: 0 auto;">
-  <h1 style="font-family: var(--font-heading); font-size: 44px; font-weight: 800; color: var(--text); margin: 0 0 16px; letter-spacing: -1px; line-height: 1.1;">Ship faster with<br>less complexity</h1>
-  <p style="font-family: var(--font-body); font-size: 16px; color: var(--muted); margin: 0 0 32px; line-height: 1.5; max-width: 480px; margin-left: auto; margin-right: auto;">The modern deployment platform that lets your team focus on building great software instead of managing infrastructure.</p>
-  <div style="display: flex; gap: 12px; justify-content: center;">
-    <a href="/" style="display: inline-block; padding: 12px 28px; background: var(--accent); color: #fff; font-family: var(--font-body); font-size: 14px; font-weight: 600; border-radius: 8px; text-decoration: none;">Get started free</a>
-    <a href="/features" style="display: inline-block; padding: 12px 28px; background: transparent; color: var(--text); font-family: var(--font-body); font-size: 14px; font-weight: 500; border-radius: 8px; text-decoration: none;">View demo &#8594;</a>
+<div data-section="home-hero" data-role="hero">
+<div class="hero">
+  <h1 class="hero-title">Ship faster with<br>less complexity</h1>
+  <p class="hero-subtitle">The modern deployment platform that lets your team focus on building great software instead of managing infrastructure.</p>
+  <div class="hero-actions">
+    <a href="/" class="hero-btn-primary">Get started free</a>
+    <a href="/features" class="hero-btn-secondary">View demo &#8594;</a>
   </div>
 </div>
 
-<!-- Feature Cards -->
-<div style="padding: 0 32px 40px; max-width: var(--wide); margin: 0 auto;">
-  <div style="display: flex; gap: 16px;">
-    <div style="flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px;">
-      <div style="font-size: 24px; margin-bottom: 12px;">&#9889;</div>
-      <div style="font-family: var(--font-heading); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Instant deploys</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.5;">Push to git and your changes are live in seconds. Zero-downtime deployments, every time.</div>
+<style>
+.hero {
+  padding: 64px 32px 48px;
+  text-align: center;
+  max-width: var(--content);
+  margin: 0 auto;
+}
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 16px;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+.hero-subtitle {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--muted);
+  margin: 0 0 32px;
+  line-height: 1.5;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.hero-btn-primary {
+  display: inline-block;
+  padding: 12px 28px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+}
+.hero-btn-secondary {
+  display: inline-block;
+  padding: 12px 28px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+}
+</style>
+</div>
+
+<div data-section="home-feature-cards" data-role="features">
+<div class="feature-cards">
+  <div class="feature-cards-grid">
+    <div class="feature-card">
+      <div class="feature-card-icon">&#9889;</div>
+      <div class="feature-card-title">Instant deploys</div>
+      <div class="feature-card-desc">Push to git and your changes are live in seconds. Zero-downtime deployments, every time.</div>
     </div>
-    <div style="flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px;">
-      <div style="font-size: 24px; margin-bottom: 12px;">&#128274;</div>
-      <div style="font-family: var(--font-heading); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Secure by default</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.5;">SSL certificates, DDoS protection, and SOC 2 compliance out of the box. No configuration needed.</div>
+    <div class="feature-card">
+      <div class="feature-card-icon">&#128274;</div>
+      <div class="feature-card-title">Secure by default</div>
+      <div class="feature-card-desc">SSL certificates, DDoS protection, and SOC 2 compliance out of the box. No configuration needed.</div>
     </div>
-    <div style="flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px;">
-      <div style="font-size: 24px; margin-bottom: 12px;">&#128202;</div>
-      <div style="font-family: var(--font-heading); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Built-in analytics</div>
-      <div style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.5;">Real-time performance metrics, error tracking, and usage insights without any third-party tools.</div>
+    <div class="feature-card">
+      <div class="feature-card-icon">&#128202;</div>
+      <div class="feature-card-title">Built-in analytics</div>
+      <div class="feature-card-desc">Real-time performance metrics, error tracking, and usage insights without any third-party tools.</div>
     </div>
   </div>
 </div>
 
-<!-- Stats Bar -->
-<div style="background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 32px;">
-  <div style="max-width: var(--wide); margin: 0 auto; display: flex; justify-content: center; gap: 48px; text-align: center;">
+<style>
+.feature-cards {
+  padding: 0 32px 40px;
+  max-width: var(--wide);
+  margin: 0 auto;
+}
+.feature-cards-grid {
+  display: flex;
+  gap: 16px;
+}
+.feature-card {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+}
+.feature-card-icon {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+.feature-card-title {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.feature-card-desc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+</style>
+</div>
+
+<div data-section="home-stats-bar" data-role="stats">
+<div class="stats-bar">
+  <div class="stats-bar-inner">
     <div>
-      <div style="font-family: var(--font-heading); font-size: 28px; font-weight: 800; color: var(--text); letter-spacing: -0.5px;">12k+</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Developers</div>
+      <div class="stats-bar-value">12k+</div>
+      <div class="stats-bar-label">Developers</div>
     </div>
     <div>
-      <div style="font-family: var(--font-heading); font-size: 28px; font-weight: 800; color: var(--text); letter-spacing: -0.5px;">99.9%</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Uptime</div>
+      <div class="stats-bar-value">99.9%</div>
+      <div class="stats-bar-label">Uptime</div>
     </div>
     <div>
-      <div style="font-family: var(--font-heading); font-size: 28px; font-weight: 800; color: var(--text); letter-spacing: -0.5px;">2.4s</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Avg deploy</div>
+      <div class="stats-bar-value">2.4s</div>
+      <div class="stats-bar-label">Avg deploy</div>
     </div>
     <div>
-      <div style="font-family: var(--font-heading); font-size: 28px; font-weight: 800; color: var(--text); letter-spacing: -0.5px;">50+</div>
-      <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-top: 4px;">Integrations</div>
+      <div class="stats-bar-value">50+</div>
+      <div class="stats-bar-label">Integrations</div>
     </div>
   </div>
+</div>
+
+<style>
+.stats-bar {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 32px;
+}
+.stats-bar-inner {
+  max-width: var(--wide);
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  text-align: center;
+}
+.stats-bar-value {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+.stats-bar-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+</style>
 </div>
 
 {{footer}}

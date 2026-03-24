@@ -1,26 +1,81 @@
 {{header}}
 
-<div style="max-width: var(--content); margin: 0 auto; padding: 48px 32px; font-family: var(--font-body);">
-  <h1 style="font-family: var(--font-heading); font-size: 32px; color: var(--text); margin: 0 0 8px; font-weight: 700; letter-spacing: -0.5px;">About Arlo</h1>
-  <p style="font-size: 14px; color: var(--muted); margin: 0 0 32px;">Designer, engineer, and occasional writer.</p>
+<div data-section="about-content" data-role="content">
+<div class="about-page">
+  <h1 class="about-title">About Arlo</h1>
+  <p class="about-subtitle">Designer, engineer, and occasional writer.</p>
 
-  <p style="font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+  <p class="about-body">
     I'm a designer and engineer who has spent the last decade working at startups and agencies, building products for the web. I care about the intersection of design and code &mdash; the craft of turning ideas into interfaces that feel right, work well, and ship on time.
   </p>
-  <p style="font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+  <p class="about-body">
     This blog is where I write about the things I'm learning and thinking about: design systems, CSS architecture, frontend engineering, the creative process, and what it means to do good work over a long career. Some posts are technical deep dives, others are just observations from building things every day.
   </p>
-  <p style="font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 32px;">
+  <p class="about-body about-body-last">
     I believe that constraints fuel creativity, that shipping is a muscle, and that the best products come from people who care about both the pixels and the code underneath. When I'm not working, I'm usually reading, running, or tinkering with a side project that may or may not see the light of day.
   </p>
 
   <!-- Contact Nudge -->
-  <div style="background: var(--surface); border-radius: 8px; padding: 24px;">
-    <div style="font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px;">Get in touch</div>
-    <p style="font-size: 13px; color: var(--muted); line-height: 1.6; margin: 0;">
-      Have a question, want to collaborate, or just want to say hello? Drop me a note at <a href="mailto:hello@arlowrites.com" style="color: var(--text); font-weight: 500; text-decoration: none;">hello@arlowrites.com</a> or find me on <a href="#" style="color: var(--text); font-weight: 500; text-decoration: none;">Twitter</a> and <a href="#" style="color: var(--text); font-weight: 500; text-decoration: none;">GitHub</a>.
+  <div class="about-contact-nudge">
+    <div class="about-contact-nudge-title">Get in touch</div>
+    <p class="about-contact-nudge-text">
+      Have a question, want to collaborate, or just want to say hello? Drop me a note at <a href="mailto:hello@arlowrites.com" class="about-inline-link">hello@arlowrites.com</a> or find me on <a href="#" class="about-inline-link">Twitter</a> and <a href="#" class="about-inline-link">GitHub</a>.
     </p>
   </div>
+</div>
+
+<style>
+.about-page {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 48px 32px;
+  font-family: var(--font-body);
+}
+.about-title {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  color: var(--text);
+  margin: 0 0 8px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.about-subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 32px;
+}
+.about-body {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.8;
+  margin: 0 0 20px;
+}
+.about-body-last {
+  margin: 0 0 32px;
+}
+.about-contact-nudge {
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 24px;
+}
+.about-contact-nudge-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.about-contact-nudge-text {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+}
+.about-inline-link {
+  color: var(--text);
+  font-weight: 500;
+  text-decoration: none;
+}
+</style>
 </div>
 
 {{footer}}

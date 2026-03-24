@@ -1,29 +1,84 @@
 {{header}}
 
-<!-- Featured Image -->
-<div style="height: 280px; overflow: hidden;">
-  <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop&q=80" alt="Laptop and notebook on desk" style="width: 100%; height: 100%; object-fit: cover;">
+<div data-section="post-featured-image" data-role="hero">
+<div class="post-hero">
+  <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&h=400&fit=crop&q=80" alt="Laptop and notebook on desk" class="post-hero-image">
+</div>
+<style>
+.post-hero {
+  height: 280px;
+  overflow: hidden;
+}
+.post-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>
 </div>
 
-<!-- Content -->
-<div style="max-width: var(--content); margin: 0 auto; padding: 36px 32px; font-family: var(--font-body);">
-  <div style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">March 2, 2026 &middot; 8 min read</div>
-  <h1 style="font-family: var(--font-heading); font-size: 32px; color: var(--text); margin: 0 0 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.5px;">Design Systems Don't Kill Creativity</h1>
+<div data-section="post-content" data-role="content">
+<div class="post-content">
+  <div class="post-meta">March 2, 2026 &middot; 8 min read</div>
+  <h1 class="post-title">Design Systems Don't Kill Creativity</h1>
 
-  <p style="font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+  <p class="post-body">
     There's a persistent myth in our industry that design systems are creativity killers &mdash; that once you formalize your components, define your tokens, and publish your guidelines, every product built on that system ends up looking the same. I've heard it from designers at every company I've worked at, and after a decade of building and maintaining these systems, I think the opposite is true.
   </p>
-  <p style="font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+  <p class="post-body">
     The best analogy I've found is music. Every musician works within constraints &mdash; scales, time signatures, the physical range of their instrument. Nobody argues that learning scales kills musical creativity. The constraints are what make improvisation possible. You internalize the rules so deeply that you stop thinking about them, and that frees your mind to focus on expression. Design systems work the same way. When your team doesn't have to debate button styles or spacing values in every project, they can spend that energy on the problems that actually matter: information architecture, interaction patterns, content strategy, and the thousand small decisions that make a product feel alive.
   </p>
-  <p style="font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 32px;">
+  <p class="post-body post-body-last">
     The systems that fail &mdash; the ones that genuinely do stifle creativity &mdash; are the ones built as rigid rule books instead of flexible toolkits. If your system dictates exactly how every page should look, you've built a template, not a system. A good design system gives teams a shared vocabulary and a set of reliable building blocks, then trusts them to compose those blocks in new ways. The creativity isn't in choosing the color of a button. It's in deciding what the button should do, where it should appear, and what story the whole page tells. That's where the real design work lives, and a good system gets out of the way so you can focus on it.
   </p>
 
   <!-- Author Byline -->
-  <div style="border-top: 1px solid var(--border); padding-top: 20px; font-size: 13px; color: var(--muted);">
-    Written by <span style="color: var(--text); font-weight: 600;">Arlo</span> &middot; Designer &amp; Engineer
+  <div class="post-byline">
+    Written by <span class="post-byline-author">Arlo</span> &middot; Designer &amp; Engineer
   </div>
+</div>
+
+<style>
+.post-content {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 36px 32px;
+  font-family: var(--font-body);
+}
+.post-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.post-title {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  color: var(--text);
+  margin: 0 0 24px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+}
+.post-body {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.8;
+  margin: 0 0 20px;
+}
+.post-body-last {
+  margin: 0 0 32px;
+}
+.post-byline {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.post-byline-author {
+  color: var(--text);
+  font-weight: 600;
+}
+</style>
 </div>
 
 {{footer}}

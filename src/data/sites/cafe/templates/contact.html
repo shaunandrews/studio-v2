@@ -1,55 +1,162 @@
 {{header}}
 
-<div style="max-width: var(--content); margin: 0 auto; padding: 40px 32px;">
-  <h1 style="font-family: var(--font-heading); font-size: 32px; color: var(--text); margin: 0 0 32px; font-weight: 700; text-align: center;">Get in Touch</h1>
+<div data-section="contact-form" data-role="form">
+<div class="contact-page">
+  <h1 class="contact-heading">Get in Touch</h1>
 
-  <!-- Two Column Layout -->
-  <div style="display: flex; gap: 40px; margin-bottom: 36px;">
-    <!-- Left: Info -->
-    <div style="flex: 1;">
-      <div style="margin-bottom: 24px;">
-        <div style="font-family: var(--font-body); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px;">Address</div>
-        <div style="font-family: var(--font-body); font-size: 14px; color: var(--text); line-height: 1.7;">
+  <div class="contact-columns">
+    <div class="contact-info">
+      <div class="contact-info-group">
+        <div class="contact-label">Address</div>
+        <div class="contact-value">
           147 Oak Street<br>
           Brooklyn, NY 11201
         </div>
       </div>
-      <div style="margin-bottom: 24px;">
-        <div style="font-family: var(--font-body); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px;">Hours</div>
-        <div style="font-family: var(--font-body); font-size: 14px; color: var(--text); line-height: 1.7;">
+      <div class="contact-info-group">
+        <div class="contact-label">Hours</div>
+        <div class="contact-value">
           Mon – Fri: 7am – 6pm<br>
           Sat – Sun: 8am – 5pm
         </div>
       </div>
-      <div style="margin-bottom: 24px;">
-        <div style="font-family: var(--font-body); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px;">Phone</div>
-        <div style="font-family: var(--font-body); font-size: 14px; color: var(--text);">(718) 555-0192</div>
+      <div class="contact-info-group">
+        <div class="contact-label">Phone</div>
+        <div class="contact-value">(718) 555-0192</div>
       </div>
       <div>
-        <div style="font-family: var(--font-body); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px;">Email</div>
-        <div style="font-family: var(--font-body); font-size: 14px; color: var(--accent);">hello@downstreetcafe.com</div>
+        <div class="contact-label">Email</div>
+        <div class="contact-email">hello@downstreetcafe.com</div>
       </div>
     </div>
 
-    <!-- Right: Form -->
-    <div style="flex: 1;">
-      <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Name</label>
-      <input type="text" placeholder="Your name" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 16px; box-sizing: border-box;">
+    <div class="contact-form">
+      <label class="form-label">Name</label>
+      <input type="text" placeholder="Your name" class="form-input">
 
-      <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Email</label>
-      <input type="email" placeholder="you@email.com" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 16px; box-sizing: border-box;">
+      <label class="form-label">Email</label>
+      <input type="email" placeholder="you@email.com" class="form-input">
 
-      <label style="font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px;">Message</label>
-      <textarea rows="5" placeholder="How can we help?" style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: 13px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 20px; box-sizing: border-box; resize: vertical;"></textarea>
+      <label class="form-label">Message</label>
+      <textarea rows="5" placeholder="How can we help?" class="form-textarea"></textarea>
 
-      <button style="padding: 12px 24px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer;">Send</button>
+      <button class="form-button">Send</button>
     </div>
   </div>
 </div>
+<style>
+.contact-page {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+.contact-heading {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  color: var(--text);
+  margin: 0 0 32px;
+  font-weight: 700;
+  text-align: center;
+}
+.contact-columns {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 36px;
+}
+.contact-info {
+  flex: 1;
+}
+.contact-info-group {
+  margin-bottom: 24px;
+}
+.contact-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.contact-value {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
+}
+.contact-email {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--accent);
+}
+.contact-form {
+  flex: 1;
+}
+.form-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 20px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+.form-button {
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>
+</div>
 
-<!-- Map Placeholder -->
-<div style="width: 100%; height: 200px; background: var(--surface); display: flex; align-items: center; justify-content: center;">
-  <span style="font-family: var(--font-body); font-size: 14px; color: var(--muted);">Map</span>
+<div data-section="contact-map" data-role="map">
+<div class="map-placeholder">
+  <span class="map-placeholder-text">Map</span>
+</div>
+<style>
+.map-placeholder {
+  width: 100%;
+  height: 200px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-placeholder-text {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--muted);
+}
+</style>
 </div>
 
 {{footer}}

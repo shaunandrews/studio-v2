@@ -14,6 +14,7 @@ export function executeToolCall(
   toolCallId: string,
 ): ExecutionResult {
   const {
+    getContent,
     updateSection,
     createSection,
     removeSection,
@@ -48,11 +49,18 @@ export function executeToolCall(
         change.toolCallId = toolCallId
         return { result: `Created section "${args.section_id}" on page "${args.page_slug}"`, isError: false, change }
 
-      case 'remove_section':
+      case 'remove_section': {
+        // Check if section is shared before attempting removal
+        const content = getContent(siteId).value
+        const targetSection = content?.sections[args.section_id]
+        if (targetSection?.shared) {
+          return { result: `Cannot remove shared section "${args.section_id}" — it appears on all pages. Use update_section to modify it instead.`, isError: true, change: null }
+        }
         change = removeSection(siteId, args.page_slug, args.section_id)
         if (!change) return { result: 'Section or page not found', isError: true, change: null }
         change.toolCallId = toolCallId
         return { result: `Removed section "${args.section_id}"`, isError: false, change }
+      }
 
       case 'update_theme':
         change = updateTheme(siteId, args.variables)

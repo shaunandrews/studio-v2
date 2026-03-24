@@ -1,46 +1,129 @@
 {{header}}
 
-<div style="max-width: var(--content); margin: 0 auto; padding: 40px 32px;">
-  <h1 style="font-family: var(--font-heading); font-size: 28px; color: var(--text); margin: 0 0 32px; font-weight: 700;">From the Kitchen</h1>
+<div data-section="blog-content" data-role="content">
+<div class="blog-page">
+  <h1 class="blog-heading">From the Kitchen</h1>
 
-  <!-- Featured Post -->
-  <div style="margin-bottom: 32px;">
-    <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800&h=400&fit=crop&q=80" alt="Iced coffee" style="width: 100%; height: 240px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;">
-    <h2 style="font-family: var(--font-heading); font-size: 20px; color: var(--text); margin: 0 0 8px; font-weight: 700;">
-      <a href="/blog/summer-cold-brew" style="color: var(--text); text-decoration: none;">Our New Summer Cold Brew</a>
+  <div class="blog-featured">
+    <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800&h=400&fit=crop&q=80" alt="Iced coffee" class="blog-featured-img">
+    <h2 class="blog-featured-title">
+      <a href="/blog/summer-cold-brew" class="blog-post-link">Our New Summer Cold Brew</a>
     </h2>
-    <p style="font-family: var(--font-body); font-size: 13px; color: var(--muted); line-height: 1.6; margin: 0 0 8px;">
+    <p class="blog-featured-excerpt">
       This summer we're introducing three new cold brew options — a classic black, a vanilla oat milk blend, and a sparkling espresso tonic. Each one starts with beans from our latest Colombian single-origin lot.
     </p>
-    <span style="font-family: var(--font-body); font-size: 12px; color: var(--muted);">June 4, 2026</span>
+    <span class="blog-featured-date">June 4, 2026</span>
   </div>
 
-  <!-- Divider -->
-  <div style="border-top: 1px solid var(--border); margin-bottom: 28px;"></div>
+  <div class="blog-divider"></div>
 
-  <!-- Two Posts Row -->
-  <div style="display: flex; gap: 24px;">
-    <div style="flex: 1;">
-      <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&q=80" alt="Pastries" style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;">
-      <h3 style="font-family: var(--font-heading); font-size: 16px; color: var(--text); margin: 0 0 6px; font-weight: 700;">
-        <a href="/blog/meet-our-head-baker" style="color: var(--text); text-decoration: none;">Meet Our Head Baker</a>
+  <div class="blog-posts-row">
+    <div class="blog-post">
+      <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&q=80" alt="Pastries" class="blog-post-img">
+      <h3 class="blog-post-title">
+        <a href="/blog/meet-our-head-baker" class="blog-post-link">Meet Our Head Baker</a>
       </h3>
-      <p style="font-family: var(--font-body); font-size: 12px; color: var(--muted); line-height: 1.5; margin: 0 0 6px;">
+      <p class="blog-post-excerpt">
         Rosa Martinez shares her journey from Mexico City pastry kitchens to running the morning bake at Downstreet.
       </p>
-      <span style="font-family: var(--font-body); font-size: 11px; color: var(--muted);">May 20, 2026</span>
+      <span class="blog-post-date">May 20, 2026</span>
     </div>
-    <div style="flex: 1;">
-      <img src="https://images.unsplash.com/photo-1559305616-3f99cd43e353?w=400&h=300&fit=crop&q=80" alt="Outdoor caf&#233;" style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;">
-      <h3 style="font-family: var(--font-heading); font-size: 16px; color: var(--text); margin: 0 0 6px; font-weight: 700;">
-        <a href="/blog/patio-season" style="color: var(--text); text-decoration: none;">Patio Season Is Here</a>
+    <div class="blog-post">
+      <img src="https://images.unsplash.com/photo-1559305616-3f99cd43e353?w=400&h=300&fit=crop&q=80" alt="Outdoor caf&#233;" class="blog-post-img">
+      <h3 class="blog-post-title">
+        <a href="/blog/patio-season" class="blog-post-link">Patio Season Is Here</a>
       </h3>
-      <p style="font-family: var(--font-body); font-size: 12px; color: var(--muted); line-height: 1.5; margin: 0 0 6px;">
+      <p class="blog-post-excerpt">
         Our sidewalk garden is open for the season. New planters, string lights, and a dedicated iced drinks menu.
       </p>
-      <span style="font-family: var(--font-body); font-size: 11px; color: var(--muted);">May 12, 2026</span>
+      <span class="blog-post-date">May 12, 2026</span>
     </div>
   </div>
+</div>
+<style>
+.blog-page {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+.blog-heading {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  color: var(--text);
+  margin: 0 0 32px;
+  font-weight: 700;
+}
+.blog-featured {
+  margin-bottom: 32px;
+}
+.blog-featured-img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.blog-featured-title {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  color: var(--text);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.blog-featured-excerpt {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+.blog-featured-date {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+}
+.blog-divider {
+  border-top: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+.blog-posts-row {
+  display: flex;
+  gap: 24px;
+}
+.blog-post {
+  flex: 1;
+}
+.blog-post-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.blog-post-title {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  color: var(--text);
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+.blog-post-link {
+  color: var(--text);
+  text-decoration: none;
+}
+.blog-post-excerpt {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0 0 6px;
+}
+.blog-post-date {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--muted);
+}
+</style>
 </div>
 
 {{footer}}

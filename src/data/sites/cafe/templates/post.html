@@ -1,29 +1,83 @@
 {{header}}
 
-<!-- Featured Image -->
-<div style="height: 280px; overflow: hidden;">
-  <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800&h=400&fit=crop&q=80" alt="Cold brew coffee" style="width: 100%; height: 100%; object-fit: cover;">
+<div data-section="post-featured-image" data-role="hero">
+<div class="post-featured-image">
+  <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800&h=400&fit=crop&q=80" alt="Cold brew coffee" class="post-featured-img">
+</div>
+<style>
+.post-featured-image {
+  height: 280px;
+  overflow: hidden;
+}
+.post-featured-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>
 </div>
 
-<!-- Content -->
-<div style="max-width: var(--content); margin: 0 auto; padding: 36px 32px;">
-  <div style="font-family: var(--font-body); font-size: 12px; color: var(--muted); margin-bottom: 12px;">June 4, 2026 &middot; 3 min read</div>
-  <h1 style="font-family: var(--font-heading); font-size: 32px; color: var(--text); margin: 0 0 24px; font-weight: 700; line-height: 1.3;">Our New Summer Cold Brew</h1>
+<div data-section="post-content" data-role="content">
+<div class="post-content">
+  <div class="post-meta">June 4, 2026 &middot; 3 min read</div>
+  <h1 class="post-title">Our New Summer Cold Brew</h1>
 
-  <p style="font-family: var(--font-body); font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+  <p class="post-text">
     Every summer we rethink our cold drinks menu, and this year we went deeper than ever. Our head roaster James spent three months dialing in a new cold brew blend — a washed Colombian lot from Huila with notes of dark cherry, chocolate, and brown sugar. It's smooth enough to drink straight and complex enough to stand up to milk.
   </p>
-  <p style="font-family: var(--font-body); font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 20px;">
+  <p class="post-text">
     We're offering it three ways this summer. The classic black cold brew is steeped for 18 hours and served over ice — simple and clean. The vanilla oat milk version adds house-made vanilla syrup and Oatly Barista for something creamy without being heavy. And then there's the espresso tonic: a double shot pulled over tonic water and ice, finished with a lemon twist. It's bright, fizzy, and surprisingly refreshing on a hot afternoon.
   </p>
-  <p style="font-family: var(--font-body); font-size: 14px; color: var(--text); line-height: 1.8; margin: 0 0 32px;">
+  <p class="post-text post-text-last">
     All three are available starting today, and we'll be running them through September. If you're curious about the beans, James does a tasting every Saturday morning at 9am — swing by the bar and he'll walk you through the lot. We also have a limited batch of the same Colombian in retail bags if you want to brew at home.
   </p>
 
-  <!-- Author Byline -->
-  <div style="border-top: 1px solid var(--border); padding-top: 20px; font-family: var(--font-body); font-size: 13px; color: var(--muted);">
-    Written by <span style="color: var(--text); font-weight: 600;">James Chen</span>, Head Roaster
+  <div class="post-byline">
+    Written by <span class="post-byline-author">James Chen</span>, Head Roaster
   </div>
+</div>
+<style>
+.post-content {
+  max-width: var(--content);
+  margin: 0 auto;
+  padding: 36px 32px;
+}
+.post-meta {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.post-title {
+  font-family: var(--font-heading);
+  font-size: 32px;
+  color: var(--text);
+  margin: 0 0 24px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.post-text {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.8;
+  margin: 0 0 20px;
+}
+.post-text-last {
+  margin: 0 0 32px;
+}
+.post-byline {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+}
+.post-byline-author {
+  color: var(--text);
+  font-weight: 600;
+}
+</style>
 </div>
 
 {{footer}}
