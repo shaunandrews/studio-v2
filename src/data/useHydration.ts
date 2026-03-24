@@ -9,6 +9,7 @@ import { getPersona } from './personas'
 import type { SiteContent } from './site-types'
 import { useSiteDocument } from './useSiteDocument'
 import { useRevisions } from './useRevisions'
+import { useBranches } from './useBranches'
 import { generateSeedRevisions } from './seed-revisions'
 
 const ready = ref(false)
@@ -43,12 +44,13 @@ export function useHydration() {
       }
 
       // Load from DB into refs
-      const [dbSites, dbTasks, dbMessages, dbPreviews, dbRevisions] = await Promise.all([
+      const [dbSites, dbTasks, dbMessages, dbPreviews, dbRevisions, dbBranches] = await Promise.all([
         db.sites.toArray(),
         db.tasks.toArray(),
         db.messages.toArray(),
         db.previews.toArray(),
         db.revisions.toArray(),
+        db.taskBranches.toArray(),
       ])
 
       const { _setSites } = useSites()
@@ -79,6 +81,10 @@ export function useHydration() {
           }
         }
       }
+
+      // Hydrate task branches
+      const { _setBranches } = useBranches()
+      _setBranches(dbBranches)
 
       // Hydrate revisions — generate seed data if table is empty
       const { _setRevisions } = useRevisions()

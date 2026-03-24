@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import type { Site, Task, Message, PreviewSite } from './types'
-import type { SiteContent, Revision } from './site-types'
+import type { SiteContent, Revision, TaskBranch } from './site-types'
 
 class StudioDatabase extends Dexie {
   sites!: Table<Site, string>
@@ -9,6 +9,7 @@ class StudioDatabase extends Dexie {
   previews!: Table<PreviewSite, string>
   siteContent!: Table<SiteContent, string>
   revisions!: Table<Revision, string>
+  taskBranches!: Table<TaskBranch, string>
 
   constructor() {
     super('studio-v2')
@@ -49,6 +50,16 @@ class StudioDatabase extends Dexie {
       revisions: 'id, siteId, taskId, timestamp',
     }).upgrade(tx => {
       return tx.table('siteContent').clear()
+    })
+    // v6: Task branching — per-task forks of site content with base snapshots.
+    this.version(6).stores({
+      sites: 'id',
+      tasks: 'id, siteId, status, updatedAt, [siteId+archived]',
+      messages: 'id, taskId, timestamp',
+      previews: 'id, siteId, status',
+      siteContent: 'siteId',
+      revisions: 'id, siteId, taskId, timestamp',
+      taskBranches: 'taskId, siteId',
     })
   }
 }

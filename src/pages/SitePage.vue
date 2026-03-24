@@ -17,6 +17,7 @@ import SharingScreen from '@/components/features/SharingScreen.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
 import SiteMapScreen from '@/components/features/SiteMapScreen.vue'
+import MergeConflictModal from '@/components/features/MergeConflictModal.vue'
 import { chevronLeft, chevronRight } from '@wordpress/icons'
 import { useSettings } from '@/data/useSettings'
 import { useSites, ALL_SITES_ID } from '@/data/useSites'
@@ -25,6 +26,7 @@ import { useTasks } from '@/data/useTasks'
 import { useSiteDocument } from '@/data/useSiteDocument'
 import { usePreviewSync } from '@/data/usePreviewSync'
 import { useRevisions } from '@/data/useRevisions'
+import { contentKey, useBranches } from '@/data/useBranches'
 import { renderSite } from '@/data/site-renderer'
 
 defineProps<{
@@ -202,7 +204,7 @@ const { width: browserWidth, isDragging: isBrowserResizing, onPointerDown: onBro
 
 // ── Browser iframe & navigation ──
 
-const { getContent } = useSiteDocument()
+const { getContent, readContent } = useSiteDocument()
 const { getRevisionSnapshot } = useRevisions()
 const { registerIframe, unregisterIframe } = usePreviewSync()
 
@@ -215,6 +217,44 @@ function onPreviewRevision(revisionId: string) {
 
 function exitRevisionPreview() {
   previewingRevisionId.value = null
+}
+
+// ── Task merge ──
+
+const { mergeTask, applyMerge } = useBranches()
+
+const mergeModalOpen = ref(false)
+const pendingMergeResult = ref<import('@/data/site-types').MergeResult | null>(null)
+
+// Theme for section previews in the conflict modal
+const mergePreviewTheme = computed(() => {
+  if (!activeSiteId.value) return undefined
+  return readContent(activeSiteId.value)?.theme
+})
+
+async function onMergeTask() {
+  if (!selectedTaskId.value) return
+  const result = mergeTask(selectedTaskId.value)
+  if (!result) return
+
+  if (result.conflicts.length === 0) {
+    await applyMerge(selectedTaskId.value, result)
+  } else {
+    pendingMergeResult.value = result
+    mergeModalOpen.value = true
+  }
+}
+
+async function onMergeResolved(result: import('@/data/site-types').MergeResult) {
+  if (!selectedTaskId.value) return
+  await applyMerge(selectedTaskId.value, result)
+  mergeModalOpen.value = false
+  pendingMergeResult.value = null
+}
+
+function onMergeModalClose() {
+  mergeModalOpen.value = false
+  pendingMergeResult.value = null
 }
 
 const browserIframeRef = ref<HTMLIFrameElement | null>(null)
@@ -258,9 +298,16 @@ const browserDisplayUrl = computed(() => {
   return base + slug
 })
 
+// When viewing a task, read from the task's forked content; otherwise read main
+const browserContentKey = computed(() => {
+  if (!activeSiteId.value) return null
+  const taskId = currentScreen.value === 'tasks' ? selectedTaskId.value : null
+  return contentKey(activeSiteId.value, taskId)
+})
+
 const browserPages = computed(() => {
-  if (!activeSiteId.value) return []
-  const content = getContent(activeSiteId.value).value
+  if (!browserContentKey.value) return []
+  const content = readContent(browserContentKey.value)
   if (!content) return []
   return content.pages.map(p => ({ slug: p.slug, title: p.title }))
 })
@@ -270,8 +317,8 @@ const browserHtml = computed(() => {
     const snapshot = getRevisionSnapshot(previewingRevisionId.value)
     if (snapshot) return renderSite(snapshot, currentPageSlug.value)
   }
-  if (!activeSiteId.value) return ''
-  const content = getContent(activeSiteId.value).value
+  if (!browserContentKey.value) return ''
+  const content = readContent(browserContentKey.value)
   if (!content) return ''
   return renderSite(content, currentPageSlug.value)
 })
@@ -347,6 +394,7 @@ onBeforeUnmount(() => {
               :browser-visible="browserVisible"
               @toggle-browser="toggleBrowser"
               @preview-revision="onPreviewRevision"
+              @merge-task="onMergeTask"
             />
           </Pane>
           <Pane v-if="!isNewTask" class="chat-pane">
@@ -428,6 +476,13 @@ onBeforeUnmount(() => {
         </PaneGroup>
       </template>
     </PaneGroup>
+    <MergeConflictModal
+      :open="mergeModalOpen"
+      :result="pendingMergeResult"
+      :theme="mergePreviewTheme"
+      @close="onMergeModalClose"
+      @resolve="onMergeResolved"
+    />
   </div>
 </template>
 

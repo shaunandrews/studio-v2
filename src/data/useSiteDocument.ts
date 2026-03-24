@@ -496,6 +496,11 @@ export function useSiteDocument() {
     return computed(() => contentMap.value[siteId] ?? null)
   }
 
+  /** Direct read from contentMap — safe to call inside other computeds. */
+  function readContent(siteId: string): SiteContent | null {
+    return contentMap.value[siteId] ?? null
+  }
+
   function getChanges(siteId: string) {
     return computed(() => changeStacks.value[siteId] ?? [])
   }
@@ -522,8 +527,17 @@ export function useSiteDocument() {
     contentMap.value = map
   }
 
+  function _setContentForKey(key: string, content: SiteContent) {
+    contentMap.value[key] = content
+  }
+
+  function _removeContent(key: string) {
+    delete contentMap.value[key]
+  }
+
   return {
     getContent,
+    readContent,
     getChanges,
     updateSection,
     createSection,
@@ -535,5 +549,7 @@ export function useSiteDocument() {
     undoChange,
     initFromTemplate,
     _setContent,
+    _setContentForKey,
+    _removeContent,
   }
 }
