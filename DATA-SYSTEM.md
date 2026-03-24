@@ -19,7 +19,7 @@ Studio v2 uses a site-first data model with IndexedDB persistence. The Site is t
 
 | Tier | Mechanism | What belongs here |
 |------|-----------|-------------------|
-| **DB** | IndexedDB via Dexie | Domain data: sites, tasks, messages, previews |
+| **DB** | IndexedDB via Dexie | Domain data: sites, tasks, messages, previews, site content, revisions |
 | **Prefs** | localStorage | UI preferences: sidebar state, OS mode, view toggles, agent/skill installs |
 | **Memory** | Vue refs only | Transient UI: modals, wizards, drag state, transitions |
 
@@ -56,13 +56,18 @@ async function archiveTask(id: string) {
 }
 ```
 
-**Persist helpers** must strip Vue's reactive Proxy before writing to Dexie:
+**Persist helpers** must strip Vue's reactive Proxy before writing to Dexie. The shared `toSerializable()` utility in `src/data/utils.ts` wraps this pattern:
 
 ```typescript
+// src/data/utils.ts
+export function toSerializable<T>(item: T): T {
+  return JSON.parse(JSON.stringify(toRaw(item)))
+}
+
+// Usage in persist helpers
 async function persistTask(task: Task) {
   if (await isDbAvailable()) {
-    const raw = JSON.parse(JSON.stringify(toRaw(task)))
-    await db.tasks.put(raw)
+    await db.tasks.put(toSerializable(task))
   }
 }
 ```
@@ -76,21 +81,23 @@ async function persistTask(task: Task) {
 Boot sequence on app load:
 
 1. Router `beforeEach` calls `hydrate(personaId)`
-2. Check `db.sites.count()`
-3. If 0 → first load: seed all tables from persona data via `bulkPut`
-4. If >0 → returning visit: read all rows into Vue refs
-5. Restore auth + onboarding state from persona (not persisted in DB)
-6. Set `ready = true`
+2. Restore auth + onboarding state from persona (not persisted in DB)
+3. Check `db.sites.count()`
+4. If 0 → first load: seed sites, tasks, messages, previews from persona data via `bulkPut`
+5. If >0 → returning visit: read all rows into Vue refs
+6. Hydrate site content — load from `db.siteContent` or initialize from site templates
+7. Hydrate revisions — load from `db.revisions` or generate seed revisions from messages
+8. Set `ready = true`
 
-The `_setSites()`, `_setTasks()`, and `_setPreviews()` methods set refs without touching the DB — used only during hydration to avoid a redundant clear+write cycle.
+The `_setSites()`, `_setTasks()`, `_setPreviews()`, `_setContent()`, and `_setRevisions()` methods set refs without touching the DB — used only during hydration to avoid a redundant clear+write cycle.
 
 ## Persona system (`src/data/usePersona.ts`)
 
 Personas provide seed data for different user scenarios. `activatePersona()`:
 
-1. Clears all 4 DB tables in a transaction
+1. Clears all 6 DB tables (sites, tasks, messages, previews, siteContent, revisions) in a transaction
 2. Seeds from persona's `sites`, `tasks`, `messages`, `previews` arrays
-3. Resets all in-memory composable state
+3. Resets all in-memory composable state (including site content and revisions)
 4. Stores persona ID in localStorage
 
 On refresh, the router reads the persona ID from localStorage and calls `hydrate()` — which loads from DB rather than re-seeding.
@@ -104,7 +111,7 @@ If IndexedDB is unavailable (e.g., some private browsing modes), `isDbAvailable(
 To add IndexedDB persistence to an existing in-memory composable:
 
 1. **Add a table** to `db.ts` — increment version, define indexes
-2. **Add persist helper** — `async function persistFoo(foo: Foo)` using the `toRaw` + `JSON.parse` pattern
+2. **Add persist helper** — `async function persistFoo(foo: Foo)` using the `toSerializable()` utility from `utils.ts`
 3. **Write-through** — every mutation calls the persist helper after updating the ref
 4. **Hydration** — add a `_setFoo()` setter, call it from `useHydration.hydrate()`
 5. **Persona reset** — update `activatePersona()` to clear + re-seed the new table
@@ -116,7 +123,7 @@ To add IndexedDB persistence to an existing in-memory composable:
 - **Sites** — `useSites.ts` → `db.sites` (includes embedded pipeline stages, skill overrides)
 - **Tasks** — `useTasks.ts` → `db.tasks` (includes worktree, changed files/entities)
 - **Messages** — `useTasks.ts` → `db.messages`
-- **Previews** — `usePreviews.ts` → `db.previews` (includes invites, view counts)
+- **Previews** — `useSharing.ts` → `db.previews` (includes invites, view counts)
 - **Site content** — `useSiteDocument.ts` → `db.siteContent` (pages, sections, theme)
 - **Revisions** — `useRevisions.ts` → `db.revisions` (full SiteContent snapshots per AI turn)
 
@@ -128,16 +135,17 @@ To add IndexedDB persistence to an existing in-memory composable:
 - Active persona ID (`usePersona`)
 - Agent install state (`agents.ts`)
 - Skill install state + custom skills (`skills.ts`)
-- API key (`ai-service.ts`)
 
 ### Intentionally in-memory only
 - **Auth** — restored from persona on hydration
 - **Onboarding** — restored from persona on hydration
-- **Settings modal** — transient UI state
-- **Add-site wizard** — transient wizard state
-- **Site transitions** — transient animation state
-- **Site content selections** — transient wizard state
-- **Import/export progress** — simulated progress, ephemeral by design
-- **Pipeline setup phase** — wizard state for sync setup flow
-- **Sync modal/progress** — transient operation UI
-- **Canvas pan/zoom** — viewport state, resets on mount
+- **Settings modal** — transient UI state (`useSettings`)
+- **Add-site wizard** — transient wizard state (`useAddSite`)
+- **Site transitions** — transient animation state (`useSiteTransition`)
+- **Site content selections** — transient wizard state (`useSiteContent`)
+- **Site settings working copies** — dirty-tracking refs, persisted to site on save (`useSiteSettings`)
+- **Confirm dialog** — transient UI state (`useConfirm`)
+- **Import/export progress** — simulated progress, ephemeral by design (`useImportExport`)
+- **Pipeline setup phase** — wizard state for sync setup flow (`usePipeline`)
+- **Sync modal/progress** — transient operation UI (`usePipeline`)
+- **Canvas pan/zoom** — viewport state, resets on mount (`usePreviewSync`)
