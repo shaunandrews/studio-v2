@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { seen as seenIcon, unseen as unseenIcon } from '@wordpress/icons'
+import { columns as columnsIcon } from '@wordpress/icons'
 import { useTasks } from '@/data/useTasks'
 import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
@@ -47,9 +47,9 @@ const browserUrl = computed(() =>
       <TaskRevisions :task-id="taskId" @preview-revision="(id) => emit('preview-revision', id)" />
       <Button
         v-if="browserUrl"
-        :icon="browserVisible ? unseenIcon : seenIcon"
+        :label="browserVisible ? 'Hide browser' : 'Show browser'"
         :tooltip="browserVisible ? 'Hide browser' : 'Show browser'"
-        variant="tertiary"
+        variant="secondary"
         @click.stop="emit('toggle-browser')"
       />
     </div>
@@ -62,7 +62,7 @@ const browserUrl = computed(() =>
   align-items: center;
   gap: var(--space-xs);
   border-block-end: 1px solid var(--color-frame-border);
-  padding: var(--space-xs) var(--space-s);
+  padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-s);
 }
 
 .brief-title {
@@ -87,7 +87,7 @@ const browserUrl = computed(() =>
 .brief-end {
   display: flex;
   align-items: center;
-  gap: var(--space-xxxs);
+  gap: var(--space-xs);
   flex-shrink: 0;
 }
 </style>

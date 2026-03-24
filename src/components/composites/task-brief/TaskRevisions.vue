@@ -49,7 +49,6 @@ function onPreview(revisionId: string, close: () => void) {
         variant="tertiary"
         :icon="backup"
         :tooltip="`${revisionCount} revision${revisionCount === 1 ? '' : 's'}`"
-        size="small"
         @click.stop="toggle"
       />
     </template>
