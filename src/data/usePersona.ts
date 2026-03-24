@@ -12,6 +12,8 @@ import { useSiteDocument } from './useSiteDocument'
 import { useRevisions } from './useRevisions'
 import { useBranches } from './useBranches'
 import { db, isDbAvailable } from './db'
+import { generateSeedRevisions } from './seed-revisions'
+import type { SiteContent } from './site-types'
 import type { Router } from 'vue-router'
 
 const STORAGE_KEY = 'studio-persona'
@@ -67,14 +69,41 @@ export function usePersona() {
       })
     }
 
-    const { _setContent } = useSiteDocument()
+    const { _setContent, initFromTemplate } = useSiteDocument()
     _setContent([])
-    const { resetRevisions } = useRevisions()
+    const { resetRevisions, _setRevisions } = useRevisions()
     await resetRevisions()
     const { resetBranches } = useBranches()
     await resetBranches()
     await resetSites(persona.sites)
+    // Initialize site content from templates so views (e.g. Site Map) have data immediately
+    const { getContent } = useSiteDocument()
+    for (const site of persona.sites) {
+      if (site.mockLayout) {
+        await initFromTemplate(site.id, site.mockLayout)
+      }
+    }
+    // Generate seed revisions so Site Timeline has data immediately
+    if (persona.messages.length > 0) {
+      const contentMap: Record<string, SiteContent> = {}
+      for (const site of persona.sites) {
+        const c = getContent(site.id).value
+        if (c) contentMap[site.id] = c
+      }
+      const seedRevs = generateSeedRevisions(persona.messages, persona.tasks, contentMap)
+      if (seedRevs.length) {
+        if (await isDbAvailable()) {
+          await db.revisions.bulkPut(seedRevs)
+        }
+        _setRevisions(seedRevs)
+      }
+    }
     await resetTasks(persona.tasks, persona.messages)
+    // Fork site content for each seeded task so task previews render immediately
+    const { forkForTask } = useBranches()
+    for (const task of persona.tasks) {
+      await forkForTask(task.siteId, task.id)
+    }
     await resetPreviews(persona.previews)
     resetAddSite()
     resetSettings()

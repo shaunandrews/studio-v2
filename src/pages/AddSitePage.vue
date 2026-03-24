@@ -13,6 +13,7 @@ import type { RemoteSite } from '@/components/features/add-site/PullSitePicker.v
 import WindowsTitlebar from '@/components/composites/WindowsTitlebar.vue'
 import TrafficLights from '@/components/primitives/TrafficLights.vue'
 import { useSites } from '@/data/useSites'
+import { useSiteDocument } from '@/data/useSiteDocument'
 import { useSiteTransition } from '@/data/useSiteTransition'
 import { useAddSite } from '@/data/useAddSite'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
@@ -174,6 +175,10 @@ const buildSteps: { progress: number; status: string; duration: number }[] = [
 async function onSubmit(data: { name: string }) {
   const site = await createUntitledSite()
   await updateSite(site.id, { name: data.name })
+  const { initFromTemplate } = useSiteDocument()
+  if (site.mockLayout) {
+    await initFromTemplate(site.id, site.mockLayout)
+  }
 
   buildingSiteName.value = data.name
   buildingProgress.value = 0

@@ -83,8 +83,15 @@ export function useHydration() {
       }
 
       // Hydrate task branches
-      const { _setBranches } = useBranches()
+      const { _setBranches, forkForTask, hasBranch } = useBranches()
       _setBranches(dbBranches)
+
+      // Fork any tasks that don't have branches yet (e.g. first load after seeding)
+      for (const task of dbTasks) {
+        if (!hasBranch(task.id)) {
+          await forkForTask(task.siteId, task.id)
+        }
+      }
 
       // Hydrate revisions — generate seed data if table is empty
       const { _setRevisions } = useRevisions()
@@ -122,6 +129,12 @@ export function useHydration() {
         if (site.mockLayout) {
           await initFromTemplate(site.id, site.mockLayout ?? 'default')
         }
+      }
+
+      // Fork site content for each seeded task
+      const { forkForTask: forkInMem } = useBranches()
+      for (const task of persona.tasks) {
+        await forkInMem(task.siteId, task.id)
       }
 
       // Generate seed revisions in memory
