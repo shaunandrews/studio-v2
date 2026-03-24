@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
-import { plus, fullscreen, arrowUp } from '@wordpress/icons'
+import { plus, fullscreen } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
+import InputChatMini from '@/components/composites/InputChatMini.vue'
 import { useSites } from '@/data/useSites'
 import { useTasks } from '@/data/useTasks'
 import { sites as siteRegistry } from '@/data/sites/index'
@@ -92,8 +93,7 @@ const selectedNode = computed<SiteMapNode | null>(() => {
 })
 
 const taskMessage = ref('')
-const taskInputRef = ref<HTMLTextAreaElement | null>(null)
-const canSendTask = computed(() => taskMessage.value.trim().length > 0)
+const taskInputRef = ref<InstanceType<typeof InputChatMini> | null>(null)
 
 /** Screen-space position of the task input, anchored below the selected node */
 const taskInputPos = ref<{ x: number; y: number } | null>(null)
@@ -115,8 +115,7 @@ function updateTaskInputPos() {
   }
 }
 
-async function sendTask() {
-  const text = taskMessage.value.trim()
+async function sendTask(text: string) {
   if (!text || !selectedNode.value) return
 
   const pageName = selectedNode.value.label
@@ -133,16 +132,6 @@ async function sendTask() {
 
   taskMessage.value = ''
   selectedNodeId.value = null
-}
-
-function onTaskKeydown(e: KeyboardEvent) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault()
-    sendTask()
-  }
-  if (e.key === 'Escape') {
-    deselectAll()
-  }
 }
 
 watch(selectedNodeId, (id) => {
@@ -658,19 +647,13 @@ watch(tree, () => nextTick(() => {
     <!-- Floating task input anchored to selected node -->
     <Transition name="task-input">
       <div v-if="selectedNode && taskInputPos" class="task-input-float" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
-        <div class="task-input-wrap">
-          <textarea
-            ref="taskInputRef"
-            v-model="taskMessage"
-            class="task-input-textarea"
-            :placeholder="`What would you like to do with ${selectedNode.label}?`"
-            rows="1"
-            @keydown="onTaskKeydown"
-          />
-          <button class="task-input-send" :class="{ 'is-active': canSendTask }" :disabled="!canSendTask" aria-label="Send" @click="sendTask">
-            <WPIcon :icon="arrowUp" :size="20" />
-          </button>
-        </div>
+        <InputChatMini
+          ref="taskInputRef"
+          v-model="taskMessage"
+          placeholder="Start a new task..."
+          elevated
+          @send="sendTask"
+        />
       </div>
     </Transition>
 
@@ -949,71 +932,7 @@ watch(tree, () => nextTick(() => {
   position: absolute;
   z-index: 10;
   transform: translateX(-50%);
-  width: 360px;
-}
-
-.task-input-wrap {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-xxs);
-  padding: var(--space-xxs) var(--space-xxs) var(--space-xxs) var(--space-s);
-  background: var(--color-frame-bg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-l);
-  box-shadow: var(--shadow-m);
-}
-
-.task-input-wrap:focus-within {
-  border-color: var(--color-frame-theme);
-  box-shadow: 0 0 0 1px var(--color-frame-theme), var(--shadow-m);
-}
-
-.task-input-textarea {
-  flex: 1;
-  display: block;
-  width: 100%;
-  background: none;
-  border: none;
-  outline: none;
-  font-family: inherit;
-  font-size: var(--font-size-m);
-  color: var(--color-frame-fg);
-  resize: none;
-  line-height: 1.5;
-  field-sizing: content;
-  min-height: 0;
-  max-height: 100px;
-  padding: var(--space-xxxs) 0;
-}
-
-.task-input-textarea::placeholder {
-  color: var(--color-frame-fg-muted);
-}
-
-.task-input-send {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 50%;
-  background: var(--color-frame-border);
-  color: var(--color-frame-fg-muted);
-  cursor: default;
-  transition: background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
-}
-
-.task-input-send.is-active {
-  background: var(--color-frame-theme);
-  color: #fff;
-  cursor: pointer;
-}
-
-.task-input-send.is-active:hover {
-  opacity: 0.85;
+  width: 240px;
 }
 
 /* ── Task input transition ── */
