@@ -218,32 +218,26 @@ function onSync() {
         </div>
       </template>
 
-      <!-- Sync visual -->
-      <!-- In sync mode: Local always first in DOM, remote always second.
-           CSS transforms swap positions on pull so remote visually appears on top.
-           In push mode: source/dest from props, no swap needed. -->
-      <div
-        class="sync-visual vstack align-center justify-center gap-xxxs"
-        :class="{ 'is-pull': mode === 'sync' && direction === 'pull' }"
-      >
+      <!-- Sync visual: remote on top, local on bottom. Arrow rotates to show direction. -->
+      <div class="sync-visual vstack align-center justify-center gap-xxxs">
         <div
-          class="sync-visual__card sync-visual__top hstack align-center justify-center gap-xxxs"
+          class="sync-visual__card hstack align-center justify-center gap-xxxs"
           :style="{ background: envColor(visualTopLabel) }"
         >
           <span class="sync-visual__label">{{ visualTopLabel }}</span>
-          <span class="sync-visual__url">{{ (visualTopUrl ?? 'localhost:3920').replace(/^https?:\/\//, '') }}</span>
+          <span class="sync-visual__url">{{ (visualTopUrl ?? '').replace(/^https?:\/\//, '') }}</span>
         </div>
-        <div class="sync-visual__arrow hstack align-center justify-center">
-          <svg class="sync-visual__arrow-svg" width="21" height="11" viewBox="0 0 20.75 11.047" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14.6963 0.21967C14.9892 -0.0732234 15.4649 -0.0732234 15.7578 0.21967L20.5303 4.99311C20.8232 5.286 20.8232 5.76076 20.5303 6.05365L15.7578 10.8271C15.4649 11.12 14.9892 11.12 14.6963 10.8271C14.4034 10.5342 14.4034 10.0585 14.6963 9.76557L18.1895 6.27338H0V4.77338H18.1895L14.6963 1.28119C14.4034 0.9883 14.4034 0.512563 14.6963 0.21967Z" fill="currentColor" />
+        <div class="sync-visual__arrow hstack align-center justify-center" :class="{ 'is-pull': resolvedVerb === 'pull' }">
+          <svg width="12" height="17" viewBox="0 0 12 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.8271 10.6963C11.12 10.9892 11.12 11.4649 10.8271 11.7578L6.05364 16.5303C5.76075 16.8232 5.28599 16.8232 4.9931 16.5303L0.21966 11.7578C-0.0732332 11.4649 -0.0732331 10.9892 0.21966 10.6963C0.512554 10.4034 0.98829 10.4034 1.28118 10.6963L4.77337 14.1895L4.77337 0L6.27337 0L6.27337 14.1895L9.76556 10.6963C10.0585 10.4034 10.5342 10.4034 10.8271 10.6963Z" fill="currentColor" />
           </svg>
         </div>
         <div
-          class="sync-visual__card sync-visual__bottom hstack align-center justify-center gap-xxxs"
+          class="sync-visual__card hstack align-center justify-center gap-xxxs"
           :style="{ background: envColor(visualBottomLabel) }"
         >
           <span class="sync-visual__label">{{ visualBottomLabel }}</span>
-          <span class="sync-visual__url">{{ (visualBottomUrl ?? '').replace(/^https?:\/\//, '') }}</span>
+          <span class="sync-visual__url">{{ (visualBottomUrl ?? 'localhost:3920').replace(/^https?:\/\//, '') }}</span>
         </div>
       </div>
 
@@ -418,31 +412,23 @@ function onSync() {
 }
 
 .sync-visual__card {
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: var(--space-xxs) var(--space-xs);
+  border-radius: var(--radius-m);
   font-size: var(--font-size-s);
   line-height: 16px;
   white-space: nowrap;
-  transition: transform 200ms var(--ease-default);
 }
 
 .sync-visual__arrow {
-  height: 21px;
   color: var(--color-frame-fg-muted);
+  /* Default: arrow points up (push — local to remote) */
+  rotate: 180deg;
+  transition: rotate var(--duration-moderate) var(--ease-default);
 }
 
-.sync-visual__arrow-svg {
-  transform: rotate(-90deg);
-}
-
-/* Pull animation: swap card positions so Studio slides to top, remote slides to bottom.
-   Offset = card(~34px) + gap + arrow(21px) + gap ≈ 63px */
-.sync-visual.is-pull .sync-visual__top {
-  transform: translateY(63px);
-}
-
-.sync-visual.is-pull .sync-visual__bottom {
-  transform: translateY(-63px);
+/* Pull: arrow points down (remote to local) */
+.sync-visual__arrow.is-pull {
+  rotate: 0deg;
 }
 
 .sync-visual__label {
