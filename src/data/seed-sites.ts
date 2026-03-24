@@ -1,5 +1,17 @@
 import type { Site } from './types'
 
+/** A freshly-created empty site — vanilla WP install, no customization yet. */
+export const emptySite: Site = {
+  id: 'my-site',
+  name: 'My Site',
+  status: 'running',
+  url: 'localhost:3918',
+  createdAt: '2026-03-24T09:00:00Z',
+  description: 'A fresh WordPress site.',
+  mockLayout: 'default',
+  themeType: 'block',
+}
+
 export const seedProjects: Site[] = [
   {
     id: 'downstreet-cafe',

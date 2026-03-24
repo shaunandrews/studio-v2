@@ -1,5 +1,5 @@
 import type { Persona } from './types'
-import { seedProjects } from './seed-sites'
+import { seedProjects, emptySite } from './seed-sites'
 import { seedTasks } from './seed-tasks'
 import { seedMessages } from './seed-messages'
 import { seedPreviews } from './seed-sharing'
@@ -20,15 +20,15 @@ export const personas: Persona[] = [
   {
     id: 'single-site',
     name: 'Jamie',
-    description: '1 site, signed in, just getting started.',
-    icon: '☕',
+    description: '1 empty site, signed in, just finished onboarding.',
+    icon: '👋',
     auth: {
       name: 'Jamie Rivera',
       email: 'jamie@example.com',
       avatar: 'https://gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=64',
     },
     onboardingCompleted: true,
-    sites: [seedProjects[0]],
+    sites: [emptySite],
     tasks: [],
     messages: [],
     previews: [],
