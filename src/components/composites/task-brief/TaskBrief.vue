@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { seen as seenIcon, unseen as unseenIcon } from '@wordpress/icons'
 import { useTasks } from '@/data/useTasks'
 import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
@@ -46,7 +47,8 @@ const browserUrl = computed(() =>
       <TaskRevisions :task-id="taskId" @preview-revision="(id) => emit('preview-revision', id)" />
       <Button
         v-if="browserUrl"
-        :label="browserVisible ? 'Hide browser' : 'Show browser'"
+        :icon="browserVisible ? unseenIcon : seenIcon"
+        :tooltip="browserVisible ? 'Hide browser' : 'Show browser'"
         variant="tertiary"
         @click.stop="emit('toggle-browser')"
       />
@@ -56,22 +58,20 @@ const browserUrl = computed(() =>
 
 <style scoped>
 .task-brief {
-  position: relative;
   display: flex;
   align-items: center;
+  gap: var(--space-xs);
   border-block-end: 1px solid var(--color-frame-border);
   padding: var(--space-xs) var(--space-s);
 }
 
 .brief-title {
-  position: absolute;
-  inset-inline: 0;
+  flex: 1;
+  min-inline-size: 0;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  pointer-events: none;
-  padding-inline: var(--space-xxxl);
 }
 
 .brief-branch {
@@ -81,13 +81,13 @@ const browserUrl = computed(() =>
   overflow: hidden;
   text-overflow: ellipsis;
   min-inline-size: 0;
-  position: relative;
-  z-index: 1;
+  flex-shrink: 1;
 }
 
 .brief-end {
-  margin-inline-start: auto;
-  position: relative;
-  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxxs);
+  flex-shrink: 0;
 }
 </style>

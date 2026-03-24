@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { backup } from '@wordpress/icons'
 import Popover from '@/components/primitives/Popover.vue'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
@@ -46,7 +47,9 @@ function onPreview(revisionId: string, close: () => void) {
     <template #trigger="{ toggle }">
       <Button
         variant="tertiary"
-        :label="`${revisionCount} revision${revisionCount === 1 ? '' : 's'}`"
+        :icon="backup"
+        :tooltip="`${revisionCount} revision${revisionCount === 1 ? '' : 's'}`"
+        size="small"
         @click.stop="toggle"
       />
     </template>
