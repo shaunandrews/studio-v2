@@ -20,10 +20,13 @@ const emit = defineEmits<{
 
 const inputRef = ref<HTMLDivElement | null>(null)
 
-const menuWidth = computed(() => {
-	if (!inputRef.value) return undefined
-	return `${inputRef.value.offsetWidth}px`
-})
+const menuRef = ref<InstanceType<typeof FlyoutMenu> | null>(null)
+const menuWidth = ref<string | undefined>(undefined)
+
+function onToggle() {
+	menuWidth.value = inputRef.value ? `${inputRef.value.offsetWidth}px` : undefined
+	menuRef.value?.toggle()
+}
 
 const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 	if (!props.pages?.length) return []
@@ -39,14 +42,15 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 <template>
 	<FlyoutMenu
+		ref="menuRef"
 		:groups="menuGroups"
 		placement="below"
 		align="start"
 		:width="menuWidth"
 		class="url-input-anchor"
 	>
-		<template #trigger="{ toggle }">
-			<div ref="inputRef" class="url-input" @click="toggle">
+		<template #trigger>
+			<div ref="inputRef" class="url-input" @click="onToggle">
 				<input
 					:value="modelValue"
 					type="text"
