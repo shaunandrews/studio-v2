@@ -9,6 +9,7 @@ import { useAuth } from './useAuth'
 import { useOnboarding } from './useOnboarding'
 import { useHydration } from './useHydration'
 import { useSiteDocument } from './useSiteDocument'
+import { useRevisions } from './useRevisions'
 import { db, isDbAvailable } from './db'
 import type { Router } from 'vue-router'
 
@@ -50,12 +51,13 @@ export function usePersona() {
 
     // Clear DB and re-seed from persona
     if (await isDbAvailable()) {
-      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, async () => {
+      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, db.revisions, async () => {
         await db.sites.clear()
         await db.tasks.clear()
         await db.messages.clear()
         await db.previews.clear()
         await db.siteContent.clear()
+        await db.revisions.clear()
         if (persona.sites.length) await db.sites.bulkPut(persona.sites)
         if (persona.tasks.length) await db.tasks.bulkPut(persona.tasks)
         if (persona.messages.length) await db.messages.bulkPut(persona.messages)
@@ -65,6 +67,8 @@ export function usePersona() {
 
     const { _setContent } = useSiteDocument()
     _setContent([])
+    const { resetRevisions } = useRevisions()
+    await resetRevisions()
     await resetSites(persona.sites)
     await resetTasks(persona.tasks, persona.messages)
     await resetPreviews(persona.previews)
@@ -96,17 +100,20 @@ export function usePersona() {
 
     // Clear DB
     if (await isDbAvailable()) {
-      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, async () => {
+      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, db.revisions, async () => {
         await db.sites.clear()
         await db.tasks.clear()
         await db.messages.clear()
         await db.previews.clear()
         await db.siteContent.clear()
+        await db.revisions.clear()
       })
     }
 
     const { _setContent } = useSiteDocument()
     _setContent([])
+    const { resetRevisions } = useRevisions()
+    await resetRevisions()
 
     const { ready } = useHydration()
     ready.value = false

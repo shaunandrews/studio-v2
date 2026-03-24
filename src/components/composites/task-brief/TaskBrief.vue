@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useTasks } from '@/data/useTasks'
 import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
+import TaskRevisions from './TaskRevisions.vue'
 
 const props = defineProps<{
   taskId: string
@@ -11,6 +12,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'toggle-browser': []
+  'preview-revision': [revisionId: string]
 }>()
 
 const { tasks } = useTasks()
@@ -40,8 +42,10 @@ const browserUrl = computed(() =>
       :title="title"
     >{{ title }}</Text>
 
-    <div v-if="browserUrl" class="brief-end">
+    <div class="brief-end">
+      <TaskRevisions :task-id="taskId" @preview-revision="(id) => emit('preview-revision', id)" />
       <Button
+        v-if="browserUrl"
         :label="browserVisible ? 'Hide browser' : 'Show browser'"
         variant="tertiary"
         @click.stop="emit('toggle-browser')"

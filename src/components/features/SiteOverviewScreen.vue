@@ -5,6 +5,7 @@ import Button from '@/components/primitives/Button.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
+import SiteTimeline from '@/components/features/SiteTimeline.vue'
 import { useSites } from '@/data/useSites'
 import { useWPAdmin } from '@/data/useWPAdmin'
 import type { SiteStatus } from '@/data/types'
@@ -140,6 +141,9 @@ const openInLinks = [
           </button>
         </div>
       </section>
+
+      <!-- Site revision timeline -->
+      <SiteTimeline :site-id="siteId" />
 
     </div>
   </div>

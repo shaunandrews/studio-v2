@@ -42,3 +42,20 @@ export interface Change {
   timestamp: string
   undo: () => void
 }
+
+export interface RevisionChange {
+  toolCallId: string
+  toolName: string
+  label: string
+}
+
+export interface Revision {
+  id: string
+  siteId: string
+  taskId: string
+  messageId: string
+  changes: RevisionChange[]
+  label: string
+  snapshot: SiteContent
+  timestamp: string
+}

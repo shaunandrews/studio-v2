@@ -7,6 +7,7 @@ import { useAuth } from './useAuth'
 import { useOnboarding } from './useOnboarding'
 import { getPersona } from './personas'
 import { useSiteDocument } from './useSiteDocument'
+import { useRevisions } from './useRevisions'
 
 const ready = ref(false)
 
@@ -40,11 +41,12 @@ export function useHydration() {
       }
 
       // Load from DB into refs
-      const [dbSites, dbTasks, dbMessages, dbPreviews] = await Promise.all([
+      const [dbSites, dbTasks, dbMessages, dbPreviews, dbRevisions] = await Promise.all([
         db.sites.toArray(),
         db.tasks.toArray(),
         db.messages.toArray(),
         db.previews.toArray(),
+        db.revisions.toArray(),
       ])
 
       const { _setSites } = useSites()
@@ -62,6 +64,9 @@ export function useHydration() {
 
       const { _setPreviews } = usePreviews()
       _setPreviews(dbPreviews)
+
+      const { _setRevisions } = useRevisions()
+      _setRevisions(dbRevisions)
 
       // Hydrate site content
       const { initFromTemplate, _setContent } = useSiteDocument()

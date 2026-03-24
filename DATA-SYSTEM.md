@@ -28,10 +28,12 @@ Studio v2 uses a site-first data model with IndexedDB persistence. The Site is t
 Single Dexie database `studio-v2` with indexed tables:
 
 ```typescript
-sites:    'id'
-tasks:    'id, siteId, status, updatedAt, [siteId+archived]'
-messages: 'id, taskId, timestamp'
-previews: 'id, siteId, status'
+sites:       'id'
+tasks:       'id, siteId, status, updatedAt, [siteId+archived]'
+messages:    'id, taskId, timestamp'
+previews:    'id, siteId, status'
+siteContent: 'siteId'
+revisions:   'id, siteId, taskId, timestamp'
 ```
 
 Schema changes require incrementing `this.version(N)` and adding an upgrade function.
@@ -115,6 +117,8 @@ To add IndexedDB persistence to an existing in-memory composable:
 - **Tasks** — `useTasks.ts` → `db.tasks` (includes worktree, changed files/entities)
 - **Messages** — `useTasks.ts` → `db.messages`
 - **Previews** — `usePreviews.ts` → `db.previews` (includes invites, view counts)
+- **Site content** — `useSiteDocument.ts` → `db.siteContent` (pages, sections, theme)
+- **Revisions** — `useRevisions.ts` → `db.revisions` (full SiteContent snapshots per AI turn)
 
 ### Persisted in localStorage
 - Sidebar collapse state (`useSidebarCollapse`)

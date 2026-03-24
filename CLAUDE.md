@@ -28,8 +28,8 @@ src/
   styles/            # CSS tokens (colors, space, radius, typography, layout, motion) + overrides
   components/
     primitives/      # Badge, Button, ButtonSplit, ContextMenu, ContextRing, Dropdown, FlyoutMenu, Modal, StatusIndicator, Text, TextInput, Toggle, Tooltip, WPIcon
-    composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, Pane, PaneGroup, PanelToolbar, ScreenHeader, SettingsPage, ShortcutsModal, SiteItem, SiteToolbar, chat-cards/, renderers/
-    features/        # SiteNavigation, SiteList, SiteSettingsScreen, SyncScreen, PreviewsScreen, ImportExportScreen, add-site/, sync/
+    composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, Pane, PaneGroup, PanelToolbar, ScreenHeader, SettingsPage, ShortcutsModal, SiteItem, SiteToolbar, chat-cards/, renderers/, task-brief/
+    features/        # SiteNavigation, SiteList, SiteSettingsScreen, SyncScreen, PreviewsScreen, ImportExportScreen, SiteTimeline, add-site/, sync/
   layouts/           # MainLayout (app shell), BareLayout (standalone pages)
   pages/             # SitePage, AddSitePage, DesignSystem, Components, Settings, Architecture
   data/              # State composables, AI service, seed data, types, site-types, site-renderer, useSiteTransition
@@ -69,6 +69,16 @@ Navigation between home and site uses the View Transitions API via `useSiteTrans
 ## AI site editing
 
 Kit (AI assistant) proposes changes via cards, user confirms via input actions, changes apply to site preview live.
+
+## Revision system
+
+Every AI turn that produces site changes creates a **revision snapshot** — a full `SiteContent` copy persisted to IndexedDB (`db.revisions`). Revisions are grouped by AI response (one turn with 5 tool calls = one revision, not 5).
+
+- **`useRevisions.ts`** — singleton composable. `createRevision()` snapshots current state, `getRevisionsForSite/Task()` returns computed lists sorted newest-first, `getRevisionSnapshot()` returns a past `SiteContent` for rendering.
+- **Hook point:** `useTasks.ts` → `sendToAI()` collects `turnChangeRecords` during streaming, creates a revision after message persistence (and on abort).
+- **Per-task UI:** `TaskRevisions.vue` in `task-brief/` — popover dropdown in TaskBrief showing revisions for the current task with "Preview" action.
+- **Per-site UI:** `SiteTimeline.vue` in `features/` — vertical timeline on the Overview screen showing all revisions across tasks.
+- **Revision preview:** SitePage supports `previewingRevisionId` — swaps `browserHtml` to render a snapshot with a "Return to live" banner.
 
 ## Deployment (Vercel)
 

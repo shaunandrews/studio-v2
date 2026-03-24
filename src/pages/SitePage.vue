@@ -24,6 +24,7 @@ import { useResizablePane } from '@/data/useResizablePane'
 import { useTasks } from '@/data/useTasks'
 import { useSiteDocument } from '@/data/useSiteDocument'
 import { usePreviewSync } from '@/data/usePreviewSync'
+import { useRevisions } from '@/data/useRevisions'
 import { renderSite } from '@/data/site-renderer'
 
 defineProps<{
@@ -147,6 +148,7 @@ function onSelectChat(taskId: string) {
   const id = activeSiteId.value
   if (!id) return
   draft.value = ''
+  previewingRevisionId.value = null
   markRead(taskId)
   router.push({ name: 'site-task', params: { id, taskId } })
   nextTick(() => inputChatRef.value?.focus())
@@ -201,7 +203,19 @@ const { width: browserWidth, isDragging: isBrowserResizing, onPointerDown: onBro
 // ── Browser iframe & navigation ──
 
 const { getContent } = useSiteDocument()
+const { getRevisionSnapshot } = useRevisions()
 const { registerIframe, unregisterIframe } = usePreviewSync()
+
+const previewingRevisionId = ref<string | null>(null)
+
+function onPreviewRevision(revisionId: string) {
+  previewingRevisionId.value = revisionId
+  if (!browserVisible.value) browserVisible.value = true
+}
+
+function exitRevisionPreview() {
+  previewingRevisionId.value = null
+}
 
 const browserIframeRef = ref<HTMLIFrameElement | null>(null)
 const currentPageSlug = ref('/')
@@ -252,6 +266,10 @@ const browserPages = computed(() => {
 })
 
 const browserHtml = computed(() => {
+  if (previewingRevisionId.value) {
+    const snapshot = getRevisionSnapshot(previewingRevisionId.value)
+    if (snapshot) return renderSite(snapshot, currentPageSlug.value)
+  }
   if (!activeSiteId.value) return ''
   const content = getContent(activeSiteId.value).value
   if (!content) return ''
@@ -328,6 +346,7 @@ onBeforeUnmount(() => {
               :task-id="selectedTaskId"
               :browser-visible="browserVisible"
               @toggle-browser="toggleBrowser"
+              @preview-revision="onPreviewRevision"
             />
           </Pane>
           <Pane v-if="!isNewTask" class="chat-pane">
@@ -392,6 +411,12 @@ onBeforeUnmount(() => {
               <UrlInput :model-value="browserDisplayUrl" :pages="browserPages" placeholder="URL" @navigate="navigateToPage" />
             </div>
           </Pane>
+          <Pane v-if="previewingRevisionId" fit>
+            <div class="revision-banner">
+              <Text variant="body-small" color="muted">Viewing past revision</Text>
+              <Button variant="tertiary" label="Return to live" @click="exitRevisionPreview" />
+            </div>
+          </Pane>
           <Pane>
             <iframe
               ref="browserIframeRef"
@@ -421,6 +446,15 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: var(--space-xxs);
   padding: var(--space-xxs) var(--space-s) var(--space-xxs) var(--space-xxs);
+  border-block-end: 1px solid var(--color-frame-border);
+}
+
+.revision-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xxs) var(--space-s);
+  background: var(--color-frame-fill);
   border-block-end: 1px solid var(--color-frame-border);
 }
 

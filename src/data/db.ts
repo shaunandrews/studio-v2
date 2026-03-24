@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import type { Site, Task, Message, PreviewSite } from './types'
-import type { SiteContent } from './site-types'
+import type { SiteContent, Revision } from './site-types'
 
 class StudioDatabase extends Dexie {
   sites!: Table<Site, string>
@@ -8,6 +8,7 @@ class StudioDatabase extends Dexie {
   messages!: Table<Message, string>
   previews!: Table<PreviewSite, string>
   siteContent!: Table<SiteContent, string>
+  revisions!: Table<Revision, string>
 
   constructor() {
     super('studio-v2')
@@ -28,6 +29,14 @@ class StudioDatabase extends Dexie {
       messages: 'id, taskId, timestamp',
       previews: 'id, siteId, status',
       siteContent: 'siteId',
+    })
+    this.version(4).stores({
+      sites: 'id',
+      tasks: 'id, siteId, status, updatedAt, [siteId+archived]',
+      messages: 'id, taskId, timestamp',
+      previews: 'id, siteId, status',
+      siteContent: 'siteId',
+      revisions: 'id, siteId, taskId, timestamp',
     })
   }
 }

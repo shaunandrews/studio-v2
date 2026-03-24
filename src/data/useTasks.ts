@@ -4,9 +4,11 @@ import { siteTools, buildSystemPrompt } from './ai-tools'
 import { executeToolCall } from './ai-tool-executor'
 import { useSiteDocument } from './useSiteDocument'
 import { usePreviewSync } from './usePreviewSync'
+import { useRevisions } from './useRevisions'
 import { db, isDbAvailable } from './db'
 import { toSerializable } from './utils'
 import type { Task, Message, AgentId, ToolCall } from './types'
+import type { RevisionChange } from './site-types'
 
 // Module-level state (singleton)
 const tasks = ref<Task[]>([])
@@ -217,6 +219,7 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
     messages.value.push(streamingMsg)
 
     const pendingToolCalls: ToolCall[] = []
+    const turnChangeRecords: RevisionChange[] = []
 
     let result
     try {
@@ -266,6 +269,15 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
             }
           }
 
+          // Track for revision snapshot
+          if (execResult.change && !execResult.isError) {
+            turnChangeRecords.push({
+              toolCallId: toolUse.id,
+              toolName: toolUse.name,
+              label: execResult.change.label,
+            })
+          }
+
           // Update tool call in message
           const tc = pendingToolCalls.find(t => t.id === toolUse.id)
           if (tc) {
@@ -290,6 +302,15 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
         }
         const idx = messages.value.findIndex(m => m.id === streamingId)
         if (idx !== -1) messages.value[idx]!.toolCalls = [...pendingToolCalls]
+        // Snapshot revision for partial turn
+        if (turnChangeRecords.length > 0) {
+          const abortMsg = messages.value.find(m => m.id === streamingId)
+          if (abortMsg) {
+            persistMessage(abortMsg)
+            const { createRevision } = useRevisions()
+            await createRevision(task.siteId, taskId, abortMsg.id, turnChangeRecords)
+          }
+        }
         break
       }
       throw e
@@ -297,6 +318,12 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
 
     const finalMsg = messages.value.find(m => m.id === streamingId)
     if (finalMsg) persistMessage(finalMsg)
+
+    // Snapshot revision if this turn made changes
+    if (turnChangeRecords.length > 0 && finalMsg) {
+      const { createRevision } = useRevisions()
+      await createRevision(task.siteId, taskId, finalMsg.id, turnChangeRecords)
+    }
 
     if (result.stopReason === 'tool_use') {
       continue
