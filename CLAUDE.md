@@ -56,7 +56,7 @@ Read `DATA-SYSTEM.md` before touching composables. Key rules:
 - **IndexedDB via Dexie** for domain data (sites, tasks, messages). localStorage for UI prefs only.
 - **Write-through:** Mutate the Vue ref first, then persist to DB. Use `toRaw()` + `JSON.parse(JSON.stringify())` before writing to Dexie.
 - **Hydration:** `useHydration.hydrate()` runs on app load. Seeds DB on first visit, reads from DB on return visits.
-- **Persona reset:** `activatePersona()` clears all DB tables and re-seeds. Only called from persona chooser, never on refresh.
+- **Persona reset:** `activatePersona()` clears all DB tables and re-seeds. Only called from persona chooser, never on refresh. Read `PERSONAS.md` for the full persona system documentation.
 
 ## View transitions (home <> site)
 
