@@ -501,10 +501,6 @@ export function useSiteDocument() {
     return contentMap.value[siteId] ?? null
   }
 
-  function getChanges(siteId: string) {
-    return computed(() => changeStacks.value[siteId] ?? [])
-  }
-
   async function initFromTemplate(siteId: string, mockLayout: string) {
     if (await isDbAvailable()) {
       const existing = await db.siteContent.get(siteId)
@@ -538,7 +534,6 @@ export function useSiteDocument() {
   return {
     getContent,
     readContent,
-    getChanges,
     updateSection,
     createSection,
     removeSection,

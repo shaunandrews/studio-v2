@@ -58,7 +58,6 @@ export function useAddSite() {
     selectedFile,
     openAddSite,
     closeAddSite,
-    resetState,
     resetAddSite: resetState,
     choosePath,
     goToDetails,

@@ -306,7 +306,7 @@ export function sendThemeUpdate(
  * Get the section data for a page, suitable for postMessage page-update.
  * Returns null if the page isn't found.
  */
-export function getPageData(site: Site, pageSlug: string): {
+function getPageData(site: Site, pageSlug: string): {
   title: string
   sections: { id: string; html: string; css: string; role?: string; order: number }[]
 } | null {

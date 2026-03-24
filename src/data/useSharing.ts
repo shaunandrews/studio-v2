@@ -254,34 +254,6 @@ export function useSharing() {
     return opId
   }
 
-  function updatePreview(previewId: string) {
-    const preview = previews.value.find(p => p.id === previewId)
-    if (!preview) return null
-
-    const opId = `op-${randomId()}`
-    const op: PreviewOperation = {
-      id: opId,
-      type: 'update',
-      previewId,
-      siteId: preview.siteId,
-      progress: 0,
-      detail: UPDATE_STAGES[0].label,
-      status: 'pending',
-    }
-
-    operations.value.push(op)
-
-    simulateProgress(op, () => {
-      const p = previews.value.find(p => p.id === previewId)
-      if (p) {
-        p.updatedAt = new Date().toISOString()
-        persistPreview(p)
-      }
-    })
-
-    return opId
-  }
-
   function deletePreview(previewId: string) {
     const preview = previews.value.find(p => p.id === previewId)
     if (!preview) return null
@@ -308,14 +280,6 @@ export function useSharing() {
     })
 
     return opId
-  }
-
-  function renamePreview(previewId: string, name: string) {
-    const preview = previews.value.find(p => p.id === previewId)
-    if (preview) {
-      preview.name = name
-      persistPreview(preview)
-    }
   }
 
   function extendPreview(previewId: string, days = 30) {
@@ -390,9 +354,7 @@ export function useSharing() {
     activeOperation,
     operationForPreview,
     createPreview,
-    updatePreview,
     deletePreview,
-    renamePreview,
     clearPreview,
     extendPreview,
     updateNote,

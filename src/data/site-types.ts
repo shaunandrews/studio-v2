@@ -20,7 +20,7 @@ export interface SiteContentSection {
 
 // The content-rich site type (pages, sections, theme).
 // Re-exported as `Site` for backward compat with site-renderer.ts import.
-export interface SiteDocument {
+interface SiteDocument {
   name: string
   theme: SiteContentTheme
   pages: SiteContentPage[]

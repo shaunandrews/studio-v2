@@ -106,20 +106,6 @@ export function useSiteSettings(siteId: Ref<string>) {
     return keys
   })
 
-  /** Human-readable labels for dirty settings (deduplicated for domain pair) */
-  const dirtyLabels = computed(() => {
-    const seen = new Set<string>()
-    const labels: string[] = []
-    for (const key of dirtyKeys.value) {
-      const label = LABELS[key]
-      if (!seen.has(label)) {
-        seen.add(label)
-        labels.push(label)
-      }
-    }
-    return labels
-  })
-
   /** Rich change descriptions with before → after values */
   const changeDescriptions = computed(() => {
     const changes: Array<{ label: string; description: string; needsRestart: boolean }> = []
@@ -212,7 +198,6 @@ export function useSiteSettings(siteId: Ref<string>) {
     // State
     isDirty,
     needsRestart,
-    dirtyLabels,
     changeDescriptions,
     // Actions
     save,

@@ -10,10 +10,6 @@ export function useAuth() {
     user.value = { ...authUser }
   }
 
-  function logout() {
-    user.value = null
-  }
-
   function reset(authUser: AuthUser | null) {
     user.value = authUser ? { ...authUser } : null
   }
@@ -22,7 +18,6 @@ export function useAuth() {
     user,
     isAuthenticated,
     login,
-    logout,
     reset,
   }
 }

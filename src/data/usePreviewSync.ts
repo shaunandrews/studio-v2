@@ -29,7 +29,6 @@ export function usePreviewSync() {
   }
 
   return {
-    iframeRef,
     registerIframe,
     unregisterIframe,
     pushSectionUpdate,

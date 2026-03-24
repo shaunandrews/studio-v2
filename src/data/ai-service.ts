@@ -78,19 +78,19 @@ export async function streamAI(
 
 // ---- Tool-aware streaming ----
 
-export interface ToolUseResult {
+interface ToolUseResult {
   id: string
   name: string
   input: Record<string, any>
 }
 
-export interface StreamCallbacks {
+interface StreamCallbacks {
   onText: (accumulated: string) => void
   onToolUseStart: (id: string, name: string) => void
   onToolUseComplete: (toolUse: ToolUseResult) => void
 }
 
-export interface StreamResult {
+interface StreamResult {
   stopReason: string
   text: string
   toolUses: ToolUseResult[]

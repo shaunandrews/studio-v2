@@ -318,7 +318,7 @@ function onBarLeave(el: Element, done: () => void) {
   border-block-start-color: var(--color-status-running-border);
 }
 
-/* ── Progress bar (matches ProgressCard) ── */
+/* ── Progress bar ── */
 
 .save-bar__progress-state {
   padding: var(--space-xs) 0;

@@ -276,7 +276,7 @@ const shortcutsOpen = ref(false)
   <!-- Pane -->
   <section id="screen-layout">
     <h2>Pane</h2>
-    <p class="section-desc">Flex column layout with optional fixed header/footer and scrollable body. Replaces ScreenLayout.</p>
+    <p class="section-desc">Flex column layout with optional fixed header/footer and scrollable body.</p>
 
     <div class="props-table">
       <h3>Props</h3>
