@@ -8,9 +8,9 @@ defineEmits<{
 
 <template>
   <EmptyState
-    heading="Share a preview of your site"
-    subtext="Get feedback from anyone, anywhere with a free hosted preview powered by WordPress.com."
-    action-label="Create preview site"
+    heading="Share your site"
+    subtext="Get feedback from anyone, anywhere with a free hosted link powered by WordPress.com."
+    action-label="Create share link"
     @action="$emit('create')"
   >
     <template #illustration>

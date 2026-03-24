@@ -9,7 +9,7 @@ import Modal from '@/components/primitives/Modal.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import type { PreviewSite } from '@/data/types'
-import { usePreviews } from '@/data/usePreviews'
+import { useSharing } from '@/data/useSharing'
 
 const props = defineProps<{
   preview: PreviewSite
@@ -22,7 +22,7 @@ const emit = defineEmits<{
   created: [url: string]
 }>()
 
-const { getExpiration, relativeTime, operationForPreview, updateNote, addInvite, removeInvite, extendPreview } = usePreviews()
+const { getExpiration, relativeTime, operationForPreview, updateNote, addInvite, removeInvite, extendPreview } = useSharing()
 
 const operation = computed(() => operationForPreview(props.preview.id).value)
 
@@ -215,8 +215,8 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
         <!-- Actions (hidden during creation) -->
         <div v-if="!isCreating" class="preview-card__actions hstack gap-xxs shrink-0">
           <template v-if="!isInactive">
-            <Button variant="secondary" label="Copy" size="small" tooltip="Copy preview URL" @click="handleCopy" />
-            <Button variant="secondary" label="View" size="small" tooltip="Open preview in browser" @click="handleView" />
+            <Button variant="secondary" label="Copy" size="small" tooltip="Copy share link URL" @click="handleCopy" />
+            <Button variant="secondary" label="View" size="small" tooltip="Open share link in browser" @click="handleView" />
           </template>
           <FlyoutMenu :groups="menuGroups" align="end">
             <template #trigger="{ toggle }">
@@ -275,7 +275,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
     <!-- Footer -->
     <div class="preview-card__footer">
       <template v-if="isCreating">
-        <span>Your preview link will appear shortly</span>
+        <span>Your share link will appear shortly</span>
       </template>
       <template v-else>
         <div class="preview-card__stats">
@@ -332,7 +332,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
   <!-- Extend deadline modal -->
   <Modal :open="showExtendModal" title="Extend deadline" width="400px" @close="showExtendModal = false">
     <div class="vstack gap-m">
-      <p class="extend-modal__description">Choose how long to extend this preview.</p>
+      <p class="extend-modal__description">Choose how long to extend this share link.</p>
       <div class="vstack gap-xxs">
         <label
           v-for="days in [30, 60, 90]"

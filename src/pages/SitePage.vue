@@ -13,7 +13,7 @@ import Pane from '@/components/composites/Pane.vue'
 import PaneGroup from '@/components/composites/PaneGroup.vue'
 import TaskBrief from '@/components/composites/task-brief/TaskBrief.vue'
 import SyncScreen from '@/components/features/SyncScreen.vue'
-import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
+import SharingScreen from '@/components/features/SharingScreen.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
 import SiteMapScreen from '@/components/features/SiteMapScreen.vue'
@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
 
 // -- Screen state (derived from route) --
 
-type Screen = 'overview' | 'sitemap' | 'tasks' | 'sync' | 'previews' | 'settings'
+type Screen = 'overview' | 'sitemap' | 'tasks' | 'sync' | 'sharing' | 'settings'
 
 const ROUTE_TO_SCREEN: Record<string, Screen> = {
   'site-overview': 'overview',
@@ -81,7 +81,7 @@ const ROUTE_TO_SCREEN: Record<string, Screen> = {
   'site-tasks': 'tasks',
   'site-task': 'tasks',
   'site-sync': 'sync',
-  'site-previews': 'previews',
+  'site-sharing': 'sharing',
   'site-settings': 'settings',
 }
 
@@ -393,7 +393,7 @@ onBeforeUnmount(() => {
           </Pane>
         </template>
         <SyncScreen v-else-if="!isAllSites && currentScreen === 'sync'" :site-id="activeSiteId!" />
-        <PreviewsScreen v-else-if="!isAllSites && currentScreen === 'previews'" :site-id="activeSiteId!" />
+        <SharingScreen v-else-if="!isAllSites && currentScreen === 'sharing'" :site-id="activeSiteId!" />
         <SiteSettingsScreen v-else-if="!isAllSites && currentScreen === 'settings'" :site-id="activeSiteId!" @manage-global-skills="openSettings('skills')" />
         <div v-else class="detail-empty">
           <span class="detail-empty__text">Select a task or start a new one</span>

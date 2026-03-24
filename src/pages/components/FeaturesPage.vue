@@ -4,7 +4,7 @@ import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import SiteSettingsImport from '@/components/features/site-settings/SiteSettingsImport.vue'
 import SiteSettingsExport from '@/components/features/site-settings/SiteSettingsExport.vue'
-import PreviewsScreen from '@/components/features/PreviewsScreen.vue'
+import SharingScreen from '@/components/features/SharingScreen.vue'
 import Text from '@/components/primitives/Text.vue'
 import '@/pages/dev-docs.css'
 </script>
@@ -106,9 +106,9 @@ import '@/pages/dev-docs.css'
     </div>
   </section>
 
-  <section id="previews">
-    <h2>Previews</h2>
-    <p class="section-desc">Screen for managing hosted preview instances — create, delete, extend, and share preview links.</p>
+  <section id="sharing">
+    <h2>Sharing</h2>
+    <p class="section-desc">Screen for managing hosted share links — create, delete, extend, and share site links.</p>
 
     <div class="props-table">
       <h3>Props</h3>
@@ -122,7 +122,7 @@ import '@/pages/dev-docs.css'
 
     <h3>Preview</h3>
     <div class="example-section" style="height: 400px; border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <PreviewsScreen site-id="1" />
+      <SharingScreen site-id="1" />
     </div>
   </section>
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { usePreviews } from '../data/usePreviews'
+import { useSharing } from '../data/useSharing'
 import type { PreviewSite } from '../data/types'
 
 function makePreview(overrides: Partial<PreviewSite> = {}): PreviewSite {
@@ -18,12 +18,12 @@ function makePreview(overrides: Partial<PreviewSite> = {}): PreviewSite {
   }
 }
 
-describe('usePreviews', () => {
-  let api: ReturnType<typeof usePreviews>
+describe('useSharing', () => {
+  let api: ReturnType<typeof useSharing>
 
   beforeEach(() => {
     vi.useFakeTimers()
-    api = usePreviews()
+    api = useSharing()
     api._setPreviews([])
   })
 

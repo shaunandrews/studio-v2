@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { personas, getPersona } from './personas'
 import { useSites } from './useSites'
 import { useTasks } from './useTasks'
-import { usePreviews } from './usePreviews'
+import { useSharing } from './useSharing'
 import { useAddSite } from './useAddSite'
 import { useSettings } from './useSettings'
 import { useAuth } from './useAuth'
@@ -43,7 +43,7 @@ export function usePersona() {
     // Reset all state
     const { resetSites } = useSites()
     const { resetTasks } = useTasks()
-    const { resetPreviews } = usePreviews()
+    const { resetPreviews } = useSharing()
     const { resetAddSite } = useAddSite()
     const { resetSettings } = useSettings()
     const { reset: resetAuth } = useAuth()

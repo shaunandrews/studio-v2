@@ -227,9 +227,9 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         <WPIcon :icon="update" :size="20" class="site-sections__icon" />
         Sync
       </button>
-      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'previews' }" @click="$emit('navigate', 'previews')">
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'sharing' }" @click="$emit('navigate', 'sharing')">
         <WPIcon :icon="customLink" :size="20" class="site-sections__icon" />
-        Previews
+        Sharing
       </button>
       <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'settings' }" @click="$emit('navigate', 'settings')">
         <WPIcon :icon="tool" :size="20" class="site-sections__icon" />

@@ -83,7 +83,7 @@ const router = createRouter({
         { name: 'site-tasks', path: 'tasks', component: { render: () => null } },
         { name: 'site-task', path: 'tasks/:taskId', component: { render: () => null } },
         { name: 'site-sync', path: 'sync', component: { render: () => null } },
-        { name: 'site-previews', path: 'previews', component: { render: () => null } },
+        { name: 'site-sharing', path: 'sharing', component: { render: () => null } },
         { name: 'site-settings', path: 'settings', component: { render: () => null } },
       ],
     },

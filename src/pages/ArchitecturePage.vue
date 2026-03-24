@@ -121,8 +121,8 @@ const platform = ref<'mac' | 'windows'>('mac')
         <h3>Sync <code>/sites/:id/sync</code></h3>
         <p class="arch-body">Detail pane switches to <code>SyncScreen</code>. A horizontal pipeline of stage cards connected by arrows. Each stage can link to a remote environment. Push/pull actions open <code>SyncModal</code>.</p>
 
-        <h3>Previews <code>/sites/:id/previews</code></h3>
-        <p class="arch-body">Detail pane shows <code>PreviewsScreen</code>. Shareable preview link cards with invite management, view counts, and expiry. Progress card shown during create/delete operations.</p>
+        <h3>Sharing <code>/sites/:id/sharing</code></h3>
+        <p class="arch-body">Detail pane shows <code>SharingScreen</code>. Shareable link cards with invite management, view counts, and expiry. Progress card shown during create/delete operations.</p>
 
         <h3>Import / Export <code>/sites/:id/import-export</code></h3>
         <p class="arch-body">Detail pane shows <code>ImportExportScreen</code>. Drag-and-drop import zone accepting Jetpack backups and full-site exports. Export download button. Both show progress states.</p>

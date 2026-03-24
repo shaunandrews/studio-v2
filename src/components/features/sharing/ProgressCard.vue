@@ -18,7 +18,7 @@ defineProps<{
       </div>
     </div>
     <div class="progress-card__footer">
-      Your preview link will appear shortly
+      Your share link will appear shortly
     </div>
   </div>
 </template>

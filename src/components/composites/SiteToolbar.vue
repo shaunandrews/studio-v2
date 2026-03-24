@@ -122,7 +122,7 @@ const openMenuGroups = computed<FlyoutMenuGroup[]>(() => [
 const moreMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   const groups: FlyoutMenuGroup[] = [{
     items: [
-      { label: 'Share preview link', icon: share, action: () => alert('Generating share link…') },
+      { label: 'Share link', icon: share, action: () => alert('Generating share link…') },
       { label: 'Preview site', icon: seen, action: () => alert('Opening site preview…') },
     ],
   }, {

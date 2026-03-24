@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import type { PreviewSite, PreviewOperation, PreviewOperationType } from './types'
-import { seedPreviews } from './seed-previews'
+import { seedPreviews } from './seed-sharing'
 import { db, isDbAvailable } from './db'
 import { toSerializable } from './utils'
 
@@ -76,18 +76,18 @@ interface StageConfig {
 const CREATE_STAGES: StageConfig[] = [
   { label: 'Packing your site...', start: 0, end: 20 },
   { label: 'Uploading to the cloud...', start: 20, end: 50 },
-  { label: 'Setting up your preview...', start: 50, end: 80 },
+  { label: 'Setting up your share link...', start: 50, end: 80 },
   { label: 'Almost there...', start: 80, end: 100 },
 ]
 
 const UPDATE_STAGES: StageConfig[] = [
   { label: 'Creating archive...', start: 0, end: 30 },
   { label: 'Uploading archive...', start: 30, end: 70 },
-  { label: 'Updating preview site...', start: 70, end: 100 },
+  { label: 'Updating share link...', start: 70, end: 100 },
 ]
 
 const DELETE_STAGES: StageConfig[] = [
-  { label: 'Removing preview site...', start: 0, end: 60 },
+  { label: 'Removing share link...', start: 0, end: 60 },
   { label: 'Cleaning up...', start: 60, end: 100 },
 ]
 
@@ -191,7 +191,7 @@ function relativeTime(iso: string): string {
 
 // --- Composable ---
 
-export function usePreviews() {
+export function useSharing() {
   function getPreviews(siteId: string) {
     return computed(() =>
       previews.value.filter(p => p.siteId === siteId)

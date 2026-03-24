@@ -2,7 +2,7 @@ import type { Persona } from './types'
 import { seedProjects } from './seed-sites'
 import { seedTasks } from './seed-tasks'
 import { seedMessages } from './seed-messages'
-import { seedPreviews } from './seed-previews'
+import { seedPreviews } from './seed-sharing'
 
 export const personas: Persona[] = [
   {

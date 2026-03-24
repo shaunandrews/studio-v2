@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { db, isDbAvailable } from './db'
 import { useSites } from './useSites'
 import { useTasks } from './useTasks'
-import { usePreviews } from './usePreviews'
+import { useSharing } from './useSharing'
 import { useAuth } from './useAuth'
 import { useOnboarding } from './useOnboarding'
 import { getPersona } from './personas'
@@ -64,7 +64,7 @@ export function useHydration() {
       const { _setTasks } = useTasks()
       _setTasks(dbTasks, dbMessages)
 
-      const { _setPreviews } = usePreviews()
+      const { _setPreviews } = useSharing()
       _setPreviews(dbPreviews)
 
       // Hydrate site content
@@ -107,7 +107,7 @@ export function useHydration() {
         persona.messages.map(m => ({ ...m })),
       )
 
-      const { _setPreviews } = usePreviews()
+      const { _setPreviews } = useSharing()
       _setPreviews(persona.previews.map(p => ({ ...p })))
 
       // Hydrate site content from templates in memory

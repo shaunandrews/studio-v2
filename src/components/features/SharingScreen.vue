@@ -2,13 +2,13 @@
 import { computed, ref } from 'vue'
 import { moreVertical } from '@wordpress/icons'
 import { useSites } from '@/data/useSites'
-import { usePreviews } from '@/data/usePreviews'
+import { useSharing } from '@/data/useSharing'
 import Button from '@/components/primitives/Button.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 import Pane from '@/components/composites/Pane.vue'
-import PreviewsEmptyState from './previews/PreviewsEmptyState.vue'
-import PreviewCard from './previews/PreviewCard.vue'
+import SharingEmptyState from './sharing/SharingEmptyState.vue'
+import ShareLinkCard from './sharing/ShareLinkCard.vue'
 
 const props = defineProps<{
   siteId: string
@@ -22,7 +22,7 @@ const {
   createPreview,
   deletePreview,
   clearPreview,
-} = usePreviews()
+} = useSharing()
 
 const previews = getPreviews(props.siteId)
 const createOp = computed(() => activeOperation(props.siteId).value)
@@ -128,7 +128,7 @@ function handleClear(previewId: string) {
 </script>
 
 <template>
-  <PreviewsEmptyState v-if="!hasPreviews" @create="handleCreate" />
+  <SharingEmptyState v-if="!hasPreviews" @create="handleCreate" />
 
   <Pane v-else :scrollable="false" centered>
     <div class="previews-list__header ps-xl pe-s mb-xl">
@@ -136,7 +136,7 @@ function handleClear(previewId: string) {
       <div class="hstack gap-xxs">
         <Button
           variant="primary"
-          label="New preview"
+          label="New share link"
           size="small"
           :disabled="!!createOp"
           @click="handleCreate"
@@ -157,7 +157,7 @@ function handleClear(previewId: string) {
     </div>
 
     <div class="previews-list vstack gap-xxl">
-      <PreviewCard
+      <ShareLinkCard
         v-for="preview in filteredPreviews"
         :key="preview.id"
         :preview="preview"
