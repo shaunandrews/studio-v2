@@ -10,6 +10,7 @@ import { useOnboarding } from './useOnboarding'
 import { useHydration } from './useHydration'
 import { useSiteDocument } from './useSiteDocument'
 import { useRevisions } from './useRevisions'
+import { useBranches } from './useBranches'
 import { db, isDbAvailable } from './db'
 import type { Router } from 'vue-router'
 
@@ -51,13 +52,14 @@ export function usePersona() {
 
     // Clear DB and re-seed from persona
     if (await isDbAvailable()) {
-      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, db.revisions, async () => {
+      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, db.revisions, db.taskBranches, async () => {
         await db.sites.clear()
         await db.tasks.clear()
         await db.messages.clear()
         await db.previews.clear()
         await db.siteContent.clear()
         await db.revisions.clear()
+        await db.taskBranches.clear()
         if (persona.sites.length) await db.sites.bulkPut(persona.sites)
         if (persona.tasks.length) await db.tasks.bulkPut(persona.tasks)
         if (persona.messages.length) await db.messages.bulkPut(persona.messages)
@@ -69,6 +71,8 @@ export function usePersona() {
     _setContent([])
     const { resetRevisions } = useRevisions()
     await resetRevisions()
+    const { resetBranches } = useBranches()
+    await resetBranches()
     await resetSites(persona.sites)
     await resetTasks(persona.tasks, persona.messages)
     await resetPreviews(persona.previews)
@@ -100,13 +104,14 @@ export function usePersona() {
 
     // Clear DB
     if (await isDbAvailable()) {
-      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, db.revisions, async () => {
+      await db.transaction('rw', db.sites, db.tasks, db.messages, db.previews, db.siteContent, db.revisions, db.taskBranches, async () => {
         await db.sites.clear()
         await db.tasks.clear()
         await db.messages.clear()
         await db.previews.clear()
         await db.siteContent.clear()
         await db.revisions.clear()
+        await db.taskBranches.clear()
       })
     }
 
@@ -114,6 +119,8 @@ export function usePersona() {
     _setContent([])
     const { resetRevisions } = useRevisions()
     await resetRevisions()
+    const { resetBranches: resetBranches2 } = useBranches()
+    await resetBranches2()
 
     const { ready } = useHydration()
     ready.value = false

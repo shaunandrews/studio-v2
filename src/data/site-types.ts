@@ -60,3 +60,38 @@ export interface Revision {
   snapshot: SiteContent
   timestamp: string
 }
+
+// ---- Branching & Merge ----
+
+export interface TaskBranch {
+  taskId: string
+  siteId: string
+  base: SiteContent
+  createdAt: string
+}
+
+export type ConflictKind =
+  | 'section-html'
+  | 'section-css'
+  | 'section-deleted'
+  | 'theme-variable'
+  | 'page-added'
+  | 'page-removed'
+  | 'section-order'
+
+export interface MergeConflict {
+  id: string
+  kind: ConflictKind
+  path: string
+  baseValue: any
+  mainValue: any
+  taskValue: any
+  resolution?: 'main' | 'task'
+  resolvedValue?: any
+}
+
+export interface MergeResult {
+  merged: SiteContent
+  conflicts: MergeConflict[]
+  autoMergedCount: number
+}

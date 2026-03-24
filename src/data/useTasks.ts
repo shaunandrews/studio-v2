@@ -5,6 +5,7 @@ import { executeToolCall } from './ai-tool-executor'
 import { useSiteDocument } from './useSiteDocument'
 import { usePreviewSync } from './usePreviewSync'
 import { useRevisions } from './useRevisions'
+import { useBranches, contentKey } from './useBranches'
 import { db, isDbAvailable } from './db'
 import { toSerializable } from './utils'
 import type { Task, Message, AgentId, ToolCall } from './types'
@@ -139,9 +140,10 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
 
   const { getContent } = useSiteDocument()
   const { pushSectionUpdate, pushThemeUpdate, pushPageUpdate } = usePreviewSync()
+  const branchKey = contentKey(task.siteId, task.id)
 
   // Fall back to simple streaming if no site content
-  if (!getContent(task.siteId).value) {
+  if (!getContent(branchKey).value) {
     return sendToAISimple(taskId, agentId)
   }
 
@@ -153,7 +155,7 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
   while (looping) {
     if (controller.signal.aborted) break
 
-    const currentContent = getContent(task.siteId).value!
+    const currentContent = getContent(branchKey).value!
     const system = buildSystemPrompt(currentContent)
 
     // Build API message history from task messages
@@ -242,11 +244,11 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
           }
         },
         onToolUseComplete: (toolUse) => {
-          const execResult = executeToolCall(task.siteId, toolUse.name, toolUse.input, toolUse.id)
+          const execResult = executeToolCall(branchKey, toolUse.name, toolUse.input, toolUse.id)
 
           // Push to preview
           if (execResult.change && !execResult.isError) {
-            const updatedContent = getContent(task.siteId).value
+            const updatedContent = getContent(branchKey).value
             if (updatedContent) {
               switch (toolUse.name) {
                 case 'update_section':
@@ -398,6 +400,11 @@ export function useTasks() {
     assignWorktree(task, opts.title ?? 'new-task')
     tasks.value.push(task)
     await persistTask(task)
+
+    // Fork site content for this task's isolated branch
+    const { forkForTask } = useBranches()
+    await forkForTask(opts.siteId, task.id)
+
     return task
   }
 
