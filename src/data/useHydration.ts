@@ -80,11 +80,11 @@ export function useHydration() {
         }
       }
 
-      // Hydrate revisions — generate seed data on first load
+      // Hydrate revisions — generate seed data if table is empty
       const { _setRevisions } = useRevisions()
       if (dbRevisions.length > 0) {
         _setRevisions(dbRevisions)
-      } else if (count === 0 && persona.messages.length > 0) {
+      } else if (persona.messages.length > 0) {
         const contentMap: Record<string, SiteContent> = {}
         for (const site of dbSites) {
           const c = getContent(site.id).value
