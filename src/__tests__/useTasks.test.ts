@@ -76,48 +76,6 @@ describe('useTasks', () => {
     })
   })
 
-  describe('getTask', () => {
-    it('returns a task by id', async () => {
-      const task = await api.createTask({ siteId: 's1', title: 'Test' })
-      const found = api.getTask(task.id)
-      expect(found.value).toBeTruthy()
-      expect(found.value!.title).toBe('Test')
-    })
-
-    it('returns null for unknown id', () => {
-      const found = api.getTask('nonexistent')
-      expect(found.value).toBeNull()
-    })
-
-    it('returns null for null id', () => {
-      const found = api.getTask(null)
-      expect(found.value).toBeNull()
-    })
-  })
-
-  describe('updateTask', () => {
-    it('updates task properties', async () => {
-      const task = await api.createTask({ siteId: 's1' })
-      await api.updateTask(task.id, { title: 'Updated' })
-      expect(api.tasks.value[0].title).toBe('Updated')
-    })
-
-    it('updates the updatedAt timestamp', async () => {
-      const task = await api.createTask({ siteId: 's1' })
-      const before = task.updatedAt
-      // Small delay to ensure timestamp differs
-      await new Promise(r => setTimeout(r, 10))
-      await api.updateTask(task.id, { title: 'Changed' })
-      expect(api.tasks.value[0].updatedAt).not.toBe(before)
-    })
-
-    it('does nothing for unknown task id', async () => {
-      await api.createTask({ siteId: 's1', title: 'Original' })
-      await api.updateTask('nonexistent', { title: 'Nope' })
-      expect(api.tasks.value[0].title).toBe('Original')
-    })
-  })
-
   describe('postMessage', () => {
     it('adds a message to the messages array', async () => {
       const task = await api.createTask({ siteId: 's1' })
@@ -168,23 +126,6 @@ describe('useTasks', () => {
     })
   })
 
-  describe('removeMessage', () => {
-    it('removes a message by id', async () => {
-      const task = await api.createTask({ siteId: 's1' })
-      api.postMessage(task.id, 'user', 'hello')
-      const msgId = api.messages.value[0].id
-      api.removeMessage(msgId)
-      expect(api.messages.value).toHaveLength(0)
-    })
-
-    it('does nothing for unknown message id', async () => {
-      const task = await api.createTask({ siteId: 's1' })
-      api.postMessage(task.id, 'user', 'hello')
-      api.removeMessage('nonexistent')
-      expect(api.messages.value).toHaveLength(1)
-    })
-  })
-
   describe('archiveTask / unarchiveTask', () => {
     it('archives and unarchives a task', async () => {
       const task = await api.createTask({ siteId: 's1' })
@@ -201,7 +142,8 @@ describe('useTasks', () => {
   describe('markRead', () => {
     it('sets unread to false', async () => {
       const task = await api.createTask({ siteId: 's1' })
-      await api.updateTask(task.id, { unread: true })
+      // Directly set unread to true on the task object
+      api.tasks.value[0].unread = true
       expect(api.tasks.value[0].unread).toBe(true)
 
       await api.markRead(task.id)

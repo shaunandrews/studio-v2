@@ -37,9 +37,6 @@ export function useOnboarding() {
   return {
     completed,
     needsOnboarding,
-    visitedWelcome,
-    visitedAuth,
-    visitedPermissions,
     markVisited,
     canAccess,
     complete,

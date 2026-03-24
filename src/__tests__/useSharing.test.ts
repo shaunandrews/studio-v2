@@ -88,16 +88,6 @@ describe('useSharing', () => {
     })
   })
 
-  describe('renamePreview', () => {
-    it('changes the preview name', () => {
-      const preview = makePreview()
-      api._setPreviews([preview])
-
-      api.renamePreview(preview.id, 'New Name')
-      expect(api.previews.value[0].name).toBe('New Name')
-    })
-  })
-
   describe('clearPreview', () => {
     it('removes the preview from the array', () => {
       const preview = makePreview()

@@ -365,14 +365,6 @@ export function useTasks() {
     )
   }
 
-  function getTask(taskId: Ref<string | null> | string | null) {
-    return computed(() => {
-      const id = unref(taskId)
-      if (!id) return null
-      return tasks.value.find(t => t.id === id) ?? null
-    })
-  }
-
   function getMessages(taskId: Ref<string | null> | string | null) {
     return computed(() => {
       const id = unref(taskId)
@@ -406,13 +398,6 @@ export function useTasks() {
     await forkForTask(opts.siteId, task.id)
 
     return task
-  }
-
-  async function updateTask(taskId: string, updates: Partial<Pick<Task, 'title' | 'archived' | 'unread'>>) {
-    const task = tasks.value.find(t => t.id === taskId)
-    if (!task) return
-    Object.assign(task, updates, { updatedAt: new Date().toISOString() })
-    await persistTask(task)
   }
 
   function sendMessage(taskId: string, content: string) {
@@ -478,11 +463,6 @@ export function useTasks() {
     agentId?: AgentId,
   ) {
     appendMessage(taskId, role, content, agentId)
-  }
-
-  function removeMessage(messageId: string) {
-    const idx = messages.value.findIndex(m => m.id === messageId)
-    if (idx !== -1) messages.value.splice(idx, 1)
   }
 
   async function markRead(id: string) {
@@ -551,15 +531,12 @@ export function useTasks() {
     messages,
     busyTaskIds,
     getTasksForSite,
-    getTask,
     getMessages,
     isBusy,
     stopTask,
     createTask,
-    updateTask,
     sendMessage,
     postMessage,
-    removeMessage,
     streamAgentMessage,
     markRead,
     archiveTask,

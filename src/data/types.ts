@@ -34,7 +34,7 @@ export interface Site {
 
 export type EnvironmentType = 'staging' | 'qa' | 'review' | 'production' | 'custom'
 
-export interface ConnectedSite {
+interface ConnectedSite {
   id: string
   name: string
   url: string
@@ -43,7 +43,7 @@ export interface ConnectedSite {
   lastPushAt?: string
 }
 
-export interface DeployedCommit {
+interface DeployedCommit {
   sha: string
   message: string
   author: string
@@ -63,7 +63,7 @@ export interface PipelineStage {
 
 export type AgentId = 'wpcom' | 'claude-code' | 'codex' | 'cursor' | 'opencode'
 
-export interface AgentModel {
+interface AgentModel {
   id: string
   label: string
 }
@@ -94,7 +94,7 @@ export interface ToolCall {
   changeId?: string        // Links to undoable Change in useSiteContent
 }
 
-export interface TaskWorktree {
+interface TaskWorktree {
   branch: string
   port: number
 }
@@ -123,9 +123,9 @@ export interface Message {
 
 // --- Previews ---
 
-export type PreviewStatus = 'creating' | 'active' | 'expired' | 'deleted'
+type PreviewStatus = 'creating' | 'active' | 'expired' | 'deleted'
 
-export interface PreviewInvite {
+interface PreviewInvite {
   email: string
   sentAt: string
   visitedAt?: string
