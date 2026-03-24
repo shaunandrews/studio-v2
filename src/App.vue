@@ -1,17 +1,25 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
 import ConfirmDialog from '@/components/primitives/ConfirmDialog.vue'
 import { usePersona } from '@/data/usePersona'
+import { useSites } from '@/data/useSites'
 
+const { activeProject } = useSites()
 const route = useRoute()
 const router = useRouter()
 const layoutName = computed(() => (route.meta.layout as string) || 'bare')
 
 const showShortcuts = ref(false)
 const { clearPersona } = usePersona()
+
+watchEffect(() => {
+  document.title = activeProject.value
+    ? `WordPress Studio · ${activeProject.value.name}`
+    : 'WordPress Studio'
+})
 
 function onGlobalKeydown(e: KeyboardEvent) {
   // Cmd+/ — Toggle shortcuts modal (global)
