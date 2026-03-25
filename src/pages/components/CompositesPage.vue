@@ -6,15 +6,12 @@ import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
 import InputChat from '@/components/composites/InputChat.vue'
 import SettingsPage from '@/components/composites/SettingsPage.vue'
-import PanelToolbar from '@/components/composites/PanelToolbar.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
 import Pane from '@/components/composites/Pane.vue'
 import ShortcutsModal from '@/components/composites/ShortcutsModal.vue'
-import SiteToolbar from '@/components/composites/SiteToolbar.vue'
 import ContentSelector from '@/components/composites/ContentSelector.vue'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
-import { cog, chevronDown } from '@wordpress/icons'
 import type { Site } from '@/data/types'
 import '@/pages/dev-docs.css'
 
@@ -169,41 +166,6 @@ const shortcutsOpen = ref(false)
     </div>
   </section>
 
-  <!-- PanelToolbar -->
-  <section id="panel-toolbar">
-    <h2>PanelToolbar</h2>
-    <p class="section-desc">Horizontal toolbar with start/center/end slots, used at the top of panels. Has a bottom border separator.</p>
-
-    <div class="props-table">
-      <h3>Slots</h3>
-      <table>
-        <thead><tr><th>Slot</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>start</code></td><td>Left-aligned content (flex-1 when no center slot)</td></tr>
-          <tr><td><code>center</code></td><td>Center content (takes flex-1)</td></tr>
-          <tr><td><code>end</code></td><td>Right-aligned content</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>With start and end</h3>
-    <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <PanelToolbar>
-        <template #start><Text variant="body-small" color="secondary">Left content</Text></template>
-        <template #end><Button variant="tertiary" :icon="cog" size="small" /></template>
-      </PanelToolbar>
-    </div>
-
-    <h3>With all three slots</h3>
-    <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <PanelToolbar>
-        <template #start><Button variant="tertiary" :icon="chevronDown" size="small" /></template>
-        <template #center><Text variant="body-small" color="muted">https://example.local</Text></template>
-        <template #end><Button variant="tertiary" :icon="cog" size="small" /></template>
-      </PanelToolbar>
-    </div>
-  </section>
-
   <!-- SettingsPage -->
   <section id="preferences-modal">
     <h2>SettingsPage</h2>
@@ -335,48 +297,6 @@ const shortcutsOpen = ref(false)
     <div class="example-section">
       <Button variant="secondary" label="Open Shortcuts" @click="shortcutsOpen = true" />
       <ShortcutsModal v-if="shortcutsOpen" :open="shortcutsOpen" @close="shortcutsOpen = false" />
-    </div>
-  </section>
-
-  <!-- SiteToolbar -->
-  <section id="site-toolbar">
-    <h2>SiteToolbar</h2>
-    <p class="section-desc">Top toolbar showing site name, status indicator, WordPress/open buttons, and action menu with duplicate/delete options.</p>
-
-    <div class="props-table">
-      <h3>Props</h3>
-      <table>
-        <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Site name</td></tr>
-          <tr><td><code>siteId</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Site ID</td></tr>
-          <tr><td><code>favicon</code></td><td><code>string</code></td><td><code>undefined</code></td><td>Site favicon URL</td></tr>
-          <tr><td><code>status</code></td><td><code>'running' | 'stopped' | 'loading'</code></td><td><code>undefined</code></td><td>Site run status</td></tr>
-          <tr><td><code>loadingTarget</code></td><td><code>'running' | 'stopped'</code></td><td><code>undefined</code></td><td>Target state when loading</td></tr>
-          <tr><td><code>sidebarHidden</code></td><td><code>boolean</code></td><td><code>undefined</code></td><td>Shows site picker pill when sidebar is hidden</td></tr>
-          <tr><td><code>isAllSites</code></td><td><code>boolean</code></td><td><code>undefined</code></td><td>Shows category icon instead of favicon</td></tr>
-        </tbody>
-      </table>
-      <h3>Events</h3>
-      <table>
-        <thead><tr><th>Event</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td><code>toggle-status</code></td><td>Start/stop button clicked</td></tr>
-          <tr><td><code>switch-site</code></td><td>Site selected from picker (id: string)</td></tr>
-          <tr><td><code>duplicate</code></td><td>Duplicate site requested</td></tr>
-          <tr><td><code>delete</code></td><td>Delete site requested</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Running site</h3>
-    <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <SiteToolbar title="Downstreet Cafe" status="running" />
-    </div>
-
-    <h3>Stopped site</h3>
-    <div class="example-section" style="border: 1px solid var(--color-frame-border); border-radius: var(--radius-m); overflow: hidden;">
-      <SiteToolbar title="UI Portfolio" status="stopped" />
     </div>
   </section>
 

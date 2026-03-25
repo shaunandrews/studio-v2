@@ -84,9 +84,6 @@ const platform = ref<'mac' | 'windows'>('mac')
           <dt>Frame</dt>
           <dd>Inset panel with rounded corners. Holds the active screen. Contains three zones:</dd>
 
-          <dt class="arch-sub">Toolbar</dt>
-          <dd><code>SiteToolbar</code> — site name, status, action buttons. Top of the frame.</dd>
-
           <dt class="arch-sub">Nav</dt>
           <dd><code>SiteNavigation</code> — left column within the frame. Site overview, task list, and section links.</dd>
 
@@ -145,9 +142,6 @@ const platform = ref<'mac' | 'windows'>('mac')
         <dl class="arch-defs">
           <dt>SiteList</dt>
           <dd>Sidebar. "All Sites" at top, then individual sites. Click to focus a site. "+" at bottom for site creation.</dd>
-
-          <dt>SiteToolbar</dt>
-          <dd>Top of the frame. Site name, start/stop status pill, and three flyout menus: <strong>WordPress</strong> (admin links via split button), <strong>Open In</strong> (Browser, VS Code, Cursor, Claude, Codex, Terminal, Finder), and <strong>More</strong> (copy URLs, share, duplicate, delete). When sidebar is collapsed, a site-picker pill appears here too.</dd>
 
           <dt>SiteNavigation</dt>
           <dd>Nav pane within the frame. Section links at the bottom switch the detail pane between Tasks, Sync, Previews, Import/Export, and Settings.</dd>
