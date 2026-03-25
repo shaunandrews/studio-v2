@@ -22,6 +22,7 @@ const props = withDefaults(defineProps<{
   syncLabel?: string
   syncDoneAt?: number
   syncDoneVerb?: string
+  syncButtonLabel?: string
 }>(), {
   syncPhase: 'idle',
   syncPercent: 0,
@@ -125,7 +126,7 @@ const timeSince = computed(() => {
     <div v-if="connected && syncPhase !== 'syncing'" class="hstack gap-xxs shrink-0">
       <Button
         variant="tertiary"
-        label="Sync"
+        :label="syncButtonLabel || 'Sync'"
         :disabled="syncDisabled"
         @click="$emit('sync')"
       />

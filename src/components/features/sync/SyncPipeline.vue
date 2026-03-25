@@ -228,6 +228,7 @@ function envColor(environment?: string): string {
               :sync-label="getProgress(stage.id).label"
               :sync-done-at="getProgress(stage.id).doneAt"
               :sync-done-verb="getProgress(stage.id).doneVerb"
+              sync-button-label="Pull"
               @sync="onSync(stage.id)"
               @connect="openConnectModal(stage.id)"
               @replace="openConnectModal(stage.id)"
