@@ -14,6 +14,7 @@ import { useBranches } from './useBranches'
 import { db, isDbAvailable } from './db'
 import { generateSeedRevisions } from './seed-revisions'
 import type { SiteContent } from './site-types'
+import { discardUnsavedSiteSettings } from './useSiteSettings'
 import type { Router } from 'vue-router'
 
 const STORAGE_KEY = 'studio-persona'
@@ -130,8 +131,24 @@ export function usePersona() {
   }
 
   async function clearPersona(router?: Router) {
+    // Navigate to chooser FIRST so current-page components unmount
+    // before we clear state (avoids render errors from empty refs)
     activePersonaId.value = null
     localStorage.removeItem(STORAGE_KEY)
+    discardUnsavedSiteSettings()
+
+    if (router) {
+      await router.replace('/choose')
+    }
+
+    // Now safe to clear all state — PersonaChooser uses static data only
+    const { resetSites } = useSites()
+    const { resetTasks } = useTasks()
+    const { resetPreviews } = useSharing()
+    const { resetAddSite } = useAddSite()
+    const { resetSettings } = useSettings()
+    const { reset: resetAuth } = useAuth()
+    const { reset: resetOnboarding } = useOnboarding()
 
     // Clear DB
     if (await isDbAvailable()) {
@@ -152,13 +169,16 @@ export function usePersona() {
     await resetRevisions()
     const { resetBranches: resetBranches2 } = useBranches()
     await resetBranches2()
+    await resetSites([])
+    await resetTasks([], [])
+    await resetPreviews([])
+    resetAddSite()
+    resetSettings()
+    resetAuth(null)
+    resetOnboarding(false)
 
     const { ready } = useHydration()
     ready.value = false
-
-    if (router) {
-      router.push('/choose')
-    }
   }
 
   return {

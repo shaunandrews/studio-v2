@@ -21,7 +21,7 @@ watchEffect(() => {
     : 'WordPress Studio'
 })
 
-function onGlobalKeydown(e: KeyboardEvent) {
+async function onGlobalKeydown(e: KeyboardEvent) {
   // Cmd+/ — Toggle shortcuts modal (global)
   if ((e.metaKey || e.ctrlKey) && e.key === '/') {
     e.preventDefault()
@@ -31,7 +31,7 @@ function onGlobalKeydown(e: KeyboardEvent) {
   if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'p' || e.key === 'P')) {
     e.preventDefault()
     showShortcuts.value = false
-    clearPersona(router)
+    await clearPersona(router)
   }
 }
 
