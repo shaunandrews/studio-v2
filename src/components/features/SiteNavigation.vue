@@ -119,6 +119,41 @@ const archivedTasks = computed(() =>
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 )
 
+/* ── Empty state carousel ── */
+const carouselStep = ref(0)
+const carouselSteps = [
+  { label: 'Create a task', desc: 'Describe what you want built or changed.' },
+  { label: 'Review changes', desc: 'See exactly what the AI did before you accept.' },
+  { label: 'Merge to local', desc: 'Apply approved changes to your local site.' },
+  { label: 'Push to staging', desc: 'Deploy when you\'re ready to go live.' },
+]
+let carouselTimer: ReturnType<typeof setInterval> | null = null
+
+function startCarousel() {
+  stopCarousel()
+  carouselTimer = setInterval(() => {
+    carouselStep.value = (carouselStep.value + 1) % carouselSteps.length
+  }, 4000)
+}
+
+function stopCarousel() {
+  if (carouselTimer) {
+    clearInterval(carouselTimer)
+    carouselTimer = null
+  }
+}
+
+function goToStep(index: number) {
+  carouselStep.value = index
+  startCarousel() // reset timer on manual navigation
+}
+
+onMounted(() => {
+  if (sortedTasks.value.length === 0) startCarousel()
+})
+
+onBeforeUnmount(() => stopCarousel())
+
 const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   if (archivedTasks.value.length === 0) {
     return [{ items: [{ label: 'No archived tasks' }] }]
@@ -279,20 +314,62 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         </span>
       </div>
       <div v-if="sortedTasks.length === 0" class="site-tasks__empty">
-        <div class="empty__illustration">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-            <!-- Chat bubble -->
-            <rect x="6" y="8" width="36" height="24" rx="4" stroke="currentColor" stroke-width="1.5" opacity="0.25" />
-            <path d="M14 36l4-4h0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.25" />
-            <!-- Lines representing a message -->
-            <rect x="12" y="15" width="20" height="2" rx="1" fill="currentColor" opacity="0.15" />
-            <rect x="12" y="20" width="14" height="2" rx="1" fill="currentColor" opacity="0.15" />
-            <rect x="12" y="25" width="18" height="2" rx="1" fill="currentColor" opacity="0.15" />
-          </svg>
+        <!-- Carousel fills the space -->
+        <div class="empty__carousel">
+          <!-- Large illustration -->
+          <div class="empty__illo-area">
+            <!-- Step 1: Create — todo list -->
+            <svg v-if="carouselStep === 0" class="empty__illo" viewBox="0 0 48 48" fill="none">
+              <rect x="0" y="4" width="12" height="12" rx="3" fill="currentColor" opacity="0.12" />
+              <path d="M3.5 10 L5.5 12.5 L9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.25" />
+              <rect x="17" y="8" width="28" height="3" rx="1.5" fill="currentColor" opacity="0.12" />
+              <rect x="0" y="20" width="12" height="12" rx="3" fill="currentColor" opacity="0.12" />
+              <path d="M3.5 26 L5.5 28.5 L9 23.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.25" />
+              <rect x="17" y="24" width="20" height="3" rx="1.5" fill="currentColor" opacity="0.12" />
+              <rect x="0" y="36" width="12" height="12" rx="3" stroke="currentColor" stroke-width="2" opacity="0.12" />
+              <rect x="17" y="40" width="24" height="3" rx="1.5" fill="currentColor" opacity="0.08" />
+            </svg>
+            <!-- Step 2: Review — browser window -->
+            <svg v-if="carouselStep === 1" class="empty__illo" viewBox="0 0 48 48" fill="none">
+              <rect x="2" y="2" width="44" height="44" rx="4" stroke="currentColor" stroke-width="2" opacity="0.12" />
+              <line x1="2" y1="12" x2="46" y2="12" stroke="currentColor" stroke-width="2" opacity="0.08" />
+              <rect x="8" y="20" width="24" height="3" rx="1.5" fill="currentColor" opacity="0.1" />
+              <rect x="8" y="28" width="32" height="3" rx="1.5" fill="currentColor" opacity="0.08" />
+              <rect x="8" y="36" width="18" height="3" rx="1.5" fill="currentColor" opacity="0.08" />
+            </svg>
+            <!-- Step 3: Merge — bullseye -->
+            <svg v-if="carouselStep === 2" class="empty__illo" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2" opacity="0.1" />
+              <circle cx="24" cy="24" r="13" stroke="currentColor" stroke-width="2" opacity="0.13" />
+              <circle cx="24" cy="24" r="6" stroke="currentColor" stroke-width="2" opacity="0.16" />
+              <circle cx="24" cy="24" r="2" fill="currentColor" opacity="0.25" />
+            </svg>
+            <!-- Step 4: Push — cloud with arrow -->
+            <svg v-if="carouselStep === 3" class="empty__illo" viewBox="0 0 48 48" fill="none">
+              <path d="M12 36 Q4 36 4 28 Q4 22 10 20 Q10 12 20 12 Q24 6 32 8 Q38 10 38 16 Q46 16 46 24 Q46 32 38 32" stroke="currentColor" stroke-width="2" opacity="0.15" fill="none" stroke-linecap="round" />
+              <path d="M24 38 L24 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.2" />
+              <path d="M18 27 L24 20 L30 27" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.2" />
+            </svg>
+          </div>
+          <!-- Step text -->
+          <div class="empty__slide-text" :key="carouselStep">
+            <p class="empty__slide-label">{{ carouselSteps[carouselStep].label }}</p>
+            <p class="empty__slide-desc">{{ carouselSteps[carouselStep].desc }}</p>
+          </div>
         </div>
-        <p class="empty__heading">AI agents that work for you</p>
-        <p class="empty__description">Tasks are conversations with AI agents that can edit your site, install plugins, write content, and more.</p>
-        <Button label="Create your first task" variant="secondary" size="small" @click="$emit('new-task')" />
+        <!-- Bottom: dots + button -->
+        <div class="empty__bottom">
+          <div class="empty__dots">
+            <div
+              v-for="(_, i) in carouselSteps"
+              :key="i"
+              class="empty__dot"
+              :class="{ 'empty__dot--active': i === carouselStep }"
+              @click="goToStep(i)"
+            />
+          </div>
+          <Button label="Create your first task" variant="secondary" size="small" @click="$emit('new-task')" />
+        </div>
       </div>
     </div>
 
@@ -699,32 +776,135 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-xl) var(--space-l);
-  text-align: center;
+  justify-content: center;
+  flex: 1;
+  padding: var(--space-l) var(--space-s);
+  gap: var(--space-xl);
 }
 
-/* ── Empty illustration ── */
+/* ── Carousel ── */
 
-.empty__illustration {
-  margin-block-end: var(--space-m);
+.empty__carousel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-m);
+}
+
+.empty__illo-area {
+  width: 96px;
+  height: 96px;
   color: var(--color-frame-fg);
 }
 
-.empty__heading {
-  margin: 0 0 var(--space-xxs);
+.empty__illo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: empty-illo-in var(--duration-moderate) var(--ease-out);
+}
+
+.empty__slide-text {
+  text-align: center;
+  animation: empty-text-in var(--duration-moderate) var(--ease-out);
+}
+
+.empty__slide-label {
+  margin: 0 0 var(--space-xxxs);
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-semibold);
   color: var(--color-frame-fg);
-  line-height: 1.3;
+  line-height: var(--line-height-tight);
 }
 
-.empty__description {
-  margin: 0 0 var(--space-m);
+.empty__slide-desc {
+  margin: 0;
   font-size: var(--font-size-s);
   color: var(--color-frame-fg-muted);
-  line-height: 1.5;
-  max-width: 240px;
+  line-height: 1.4;
 }
+
+/* ── Bottom area ── */
+
+.empty__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-m);
+}
+
+/* ── Dot indicators ── */
+
+.empty__dots {
+  display: flex;
+  gap: var(--space-xxs);
+  align-items: center;
+}
+
+.empty__dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  border: none;
+  padding: 0;
+  background: color-mix(in srgb, var(--color-frame-fg) 12%, transparent);
+  cursor: pointer;
+  overflow: hidden;
+  transition: width var(--duration-moderate) var(--ease-out), background var(--transition-hover);
+}
+
+.empty__dot:hover {
+  background: color-mix(in srgb, var(--color-frame-fg) 20%, transparent);
+}
+
+.empty__dot--active {
+  width: 24px;
+}
+
+.empty__dot--active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-frame-fg) 35%, transparent);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: dot-progress 4s linear forwards;
+}
+
+@keyframes dot-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes empty-illo-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes empty-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty__illo,
+  .empty__slide-text {
+    animation: none;
+  }
+  .empty__dot--active::after {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
 
 /* ── All Sites summary ── */
 
