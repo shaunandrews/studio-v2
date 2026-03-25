@@ -67,7 +67,7 @@ Auth and onboarding state are **not** persisted to IndexedDB — they are restor
 | ID | Name | Auth | Onboarding | Sites | Tasks | Description |
 |----|------|------|------------|-------|-------|-------------|
 | `new-user` | New User | `null` | `false` | 0 | 0 | First launch. No sites, no account. Routes to `/welcome` onboarding. |
-| `single-site` | Jamie | Jamie Rivera | `true` | 1 | 0 | Signed in with one site (Downstreet Café). Just getting started. |
+| `single-site` | Jamie | Jamie Rivera | `true` | 1 | 0 | Signed in with one empty site. Just finished onboarding. |
 | `existing-user` | Shaun | Shaun Andrews | `true` | 7 | 16 | Full setup with all seed sites, active tasks, chat history, and previews. |
 
 Seed data is imported from:
@@ -125,7 +125,9 @@ When a user selects a persona, `activatePersona(id, router)` in `usePersona.ts` 
    └── useHydration().ready = true
 
 7. Navigate to starting point
-   └── onboardingCompleted ? '/all-sites' : '/welcome'
+   └── !onboardingCompleted → '/welcome'
+       has sites → '/sites/:firstSiteId'
+       no sites → '/add-site'
 ```
 
 Steps 2–3 happen inside a single Dexie transaction for atomicity. If IndexedDB is unavailable (e.g. private browsing), DB writes are silently skipped and the app runs in-memory from persona data.
