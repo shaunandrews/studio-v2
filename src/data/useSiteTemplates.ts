@@ -45,39 +45,39 @@ export interface SiteFiles {
   templates: Record<string, string>
 }
 
-export interface SiteMapNode {
+export interface CanvasNode {
   label: string
   slug: string
   template: string
   isCollection?: boolean
   collectionCount?: number
-  children?: SiteMapNode[]
+  children?: CanvasNode[]
 }
 
-export interface SiteMapPart {
+export interface CanvasPart {
   id: string
   label: string
 }
 
-export function deriveSiteMapParts(config: SiteConfig): SiteMapPart[] {
+export function deriveCanvasParts(config: SiteConfig): CanvasPart[] {
   return config.parts.map(part => ({
     id: `shared-${part}`,
     label: part.charAt(0).toUpperCase() + part.slice(1),
   }))
 }
 
-export function deriveSiteMapTree(config: SiteConfig): SiteMapNode {
+export function deriveCanvasTree(config: SiteConfig): CanvasNode {
   const homePage = config.pages.find(p => p.slug === '/')
-  const root: SiteMapNode = {
+  const root: CanvasNode = {
     label: homePage?.title ?? 'Home',
     slug: '/',
     template: homePage?.template ?? 'home',
   }
 
-  const children: SiteMapNode[] = []
+  const children: CanvasNode[] = []
   for (const page of config.pages) {
     if (page.slug === '/') continue
-    const node: SiteMapNode = {
+    const node: CanvasNode = {
       label: page.title,
       slug: page.slug,
       template: page.template,

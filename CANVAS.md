@@ -1,43 +1,43 @@
-# Site Map
+# Canvas
 
-The site map is an interactive canvas that visualizes a site's page hierarchy. It lives in `SiteMapScreen.vue` and appears as one of the site navigation screens.
+An interactive canvas that visualizes a site's page hierarchy. It lives in `CanvasScreen.vue` and appears as one of the site navigation screens.
 
 ## Data flow
 
-The site map has two data sources:
+The canvas has two data sources:
 
-- **Tree structure** — derived from the static `site.json` config via `deriveSiteMapTree()` in `useSiteTemplates.ts`. This provides the page hierarchy, labels, slugs, and collection metadata (e.g., blog posts with a count badge). The tree is a `SiteMapNode` with nested children.
+- **Tree structure** — derived from the static `site.json` config via `deriveCanvasTree()` in `useSiteTemplates.ts`. This provides the page hierarchy, labels, slugs, and collection metadata (e.g., blog posts with a count badge). The tree is a `CanvasNode` with nested children.
 
 - **Page thumbnails** — rendered from the live `SiteContent` in IndexedDB via `renderSite()` from `site-renderer.ts`. This is the same rendering path the browser preview uses, so thumbnails reflect AI edits and all other changes.
 
 ```
 site.json (static)              IndexedDB (live)
       │                               │
-deriveSiteMapTree()              getContent(siteId)
+deriveCanvasTree()              getContent(siteId)
       │                               │
-  SiteMapNode tree              SiteContent
+  CanvasNode tree              SiteContent
   (labels, slugs,                     │
    collections)              renderSite(content, slug)
       │                               │
       └──────────┬────────────────────┘
                  │
-          SiteMapScreen.vue
+          CanvasScreen.vue
           ├── tree layout + connectors
           └── SitePageThumb iframes
 ```
 
 ## Tree structure
 
-`SiteMapNode` represents one node in the hierarchy:
+`CanvasNode` represents one node in the hierarchy:
 
 ```typescript
-interface SiteMapNode {
+interface CanvasNode {
   label: string           // Display name ("Home", "Blog")
   slug: string            // Page slug ("/", "/blog")
   template: string        // Template name ("home", "blog")
   isCollection?: boolean  // True for paginated content (blog posts, products)
   collectionCount?: number // Number of items in the collection
-  children?: SiteMapNode[]
+  children?: CanvasNode[]
 }
 ```
 
@@ -50,7 +50,7 @@ Collection slugs contain route params (e.g., `/blog/:slug`). Since these don't c
 
 ## Canvas
 
-The site map uses an infinite-pan/zoom canvas:
+The canvas uses an infinite-pan/zoom canvas:
 
 - **Pan** — pointer drag (any button except right-click)
 - **Zoom** — Ctrl+wheel or pinch; clamped to 0.15×–6×
@@ -74,7 +74,7 @@ Connectors are recomputed on mount, resize, zoom settle, and tree changes.
 Clicking a page node selects it. A floating `InputChatMini` appears below the selected node. Typing and sending creates a new task scoped to that page:
 
 - Task title: `"{page name}: {message preview}"`
-- Message prefixed with: `[Site Map → {page name} page]`
+- Message prefixed with: `[Canvas → {page name} page]`
 - Agent: `claude-code`
 
 ## Thumbnail rendering
@@ -85,17 +85,17 @@ Each node contains a `SitePageThumb` component — a scaled-down iframe (`160px`
 
 | File | Role |
 |------|------|
-| `src/components/features/SiteMapScreen.vue` | Canvas, tree layout, connectors, selection, task input |
+| `src/components/features/CanvasScreen.vue` | Canvas, tree layout, connectors, selection, task input |
 | `src/components/composites/SitePageThumb.vue` | Scaled iframe wrapper for a single page |
-| `src/data/useSiteTemplates.ts` | `deriveSiteMapTree()` — builds tree from `site.json` config |
+| `src/data/useSiteTemplates.ts` | `deriveCanvasTree()` — builds tree from `site.json` config |
 | `src/data/site-renderer.ts` | `renderSite()` — produces HTML from live `SiteContent` |
 | `src/data/useSiteDocument.ts` | `getContent()` — provides DB-backed `SiteContent` |
 | `src/data/sites/*/site.json` | Static page hierarchy, collections, theme config |
 
 ## Known limitations
 
-- **Tree structure is static.** `deriveSiteMapTree` reads from `site.json`, not from `SiteContent.pages`. If the AI adds or removes a page, the tree won't update — only the thumbnails reflect changes. The tree should eventually be derived from `SiteContent.pages` directly.
+- **Tree structure is static.** `deriveCanvasTree` reads from `site.json`, not from `SiteContent.pages`. If the AI adds or removes a page, the tree won't update — only the thumbnails reflect changes. The tree should eventually be derived from `SiteContent.pages` directly.
 
-- **No shared elements.** Shared sections (header, footer) don't appear on the site map. They should eventually show as a separate "site elements" group.
+- **No shared elements.** Shared sections (header, footer) don't appear on the canvas. They should eventually show as a separate "site elements" group.
 
 - **Collection thumbnails are approximate.** Collection nodes (e.g., blog posts) show the parent page's thumbnail since the collection slug pattern doesn't correspond to a real page.

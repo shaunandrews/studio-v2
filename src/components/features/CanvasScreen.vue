@@ -3,18 +3,18 @@ import { computed, ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { plus, fullscreen } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
+import Toolbar from '@/components/composites/Toolbar.vue'
 import InputChatMini from '@/components/composites/InputChatMini.vue'
 import { useSites } from '@/data/useSites'
 import { useTasks } from '@/data/useTasks'
 import { useSiteDocument } from '@/data/useSiteDocument'
-import { renderSite, renderSection } from '@/data/site-renderer'
+import { renderSite } from '@/data/site-renderer'
 import { sites as siteRegistry } from '@/data/sites/index'
-import { deriveSiteMapTree, deriveSiteMapParts } from '@/data/useSiteTemplates'
-import type { SiteMapNode, SiteMapPart } from '@/data/useSiteTemplates'
+import { deriveCanvasTree } from '@/data/useSiteTemplates'
+import type { CanvasNode } from '@/data/useSiteTemplates'
 import SitePageThumb from '@/components/composites/SitePageThumb.vue'
-import SiteSectionThumb from '@/components/composites/SiteSectionThumb.vue'
-import SiteMapThemeView from '@/components/features/SiteMapThemeView.vue'
-import SiteMapSectionView from '@/components/features/SiteMapSectionView.vue'
+import CanvasThemeView from '@/components/features/CanvasThemeView.vue'
+import CanvasSectionView from '@/components/features/CanvasSectionView.vue'
 import type { MockLayout } from '@/data/types'
 
 const props = defineProps<{
@@ -28,19 +28,26 @@ const site = computed(() => sites.value.find(s => s.id === props.siteId))
 const layout = computed<MockLayout>(() => site.value?.mockLayout ?? 'default')
 const siteFiles = computed(() => siteRegistry[layout.value] ?? null)
 const siteContent = computed(() => getContent(props.siteId).value)
-const tree = computed<SiteMapNode | null>(() => {
-  if (siteFiles.value) return deriveSiteMapTree(siteFiles.value.config)
+const tree = computed<CanvasNode | null>(() => {
+  if (siteFiles.value) return deriveCanvasTree(siteFiles.value.config)
   return null
 })
 
-const parts = computed<SiteMapPart[]>(() => {
-  if (siteFiles.value) return deriveSiteMapParts(siteFiles.value.config)
-  return []
-})
-
 /* ── View toggle (Map / Theme) ── */
-type SiteMapView = 'map' | 'theme'
-const activeView = ref<SiteMapView>('map')
+type CanvasView = 'map' | 'theme'
+const activeView = ref<CanvasView>('map')
+const viewTabsRef = ref<HTMLElement | null>(null)
+const mapTabRef = ref<HTMLElement | null>(null)
+const themeTabRef = ref<HTMLElement | null>(null)
+
+const tabIndicatorStyle = computed(() => {
+  const tab = activeView.value === 'map' ? mapTabRef.value : themeTabRef.value
+  if (!tab || !viewTabsRef.value) return { width: '0px', insetInlineStart: '0px' }
+  return {
+    width: `${tab.offsetWidth}px`,
+    insetInlineStart: `${tab.offsetLeft}px`,
+  }
+})
 
 /* ── Section zoom view ── */
 const sectionViewPage = ref<{ slug: string; title: string } | null>(null)
@@ -51,11 +58,6 @@ function getPageHtml(slug: string): string {
   // Fall back to the parent path so the thumbnail shows something useful.
   const resolvedSlug = slug.includes(':') ? slug.replace(/\/:[^/]+$/, '') || '/' : slug
   return renderSite(siteContent.value, resolvedSlug)
-}
-
-function getSectionHtml(sectionId: string): string {
-  if (!siteContent.value) return ''
-  return renderSection(siteContent.value, sectionId)
 }
 
 /* ── Infinite canvas (pan & zoom) ── */
@@ -108,11 +110,9 @@ function deselectAll() {
   selectedNodeId.value = null
 }
 
-/** Resolve selected node ID → SiteMapNode (or SiteMapPart for template parts) */
-const selectedNode = computed<SiteMapNode | null>(() => {
+/** Resolve selected node ID → CanvasNode (or CanvasPart for template parts) */
+const selectedNode = computed<CanvasNode | null>(() => {
   if (!selectedNodeId.value || !tree.value) return null
-  // Part-type IDs handled by selectedPart
-  if (selectedNodeId.value.startsWith('part-') || selectedNodeId.value.startsWith('tpart-')) return null
   // Theme view template nodes — resolve via wpTemplates
   if (selectedNodeId.value.startsWith('tpl-')) {
     const idx = parseInt(selectedNodeId.value.slice(4), 10)
@@ -130,19 +130,6 @@ const selectedNode = computed<SiteMapNode | null>(() => {
   if (!l1) return null
   if (indices.length === 1) return l1
   return l1.children?.[indices[1]] ?? null
-})
-
-const selectedPart = computed<SiteMapPart | null>(() => {
-  if (!selectedNodeId.value) return null
-  if (selectedNodeId.value.startsWith('part-')) {
-    const partIndex = parseInt(selectedNodeId.value.slice(5), 10)
-    return parts.value[partIndex] ?? null
-  }
-  if (selectedNodeId.value.startsWith('tpart-')) {
-    const partIndex = parseInt(selectedNodeId.value.slice(6), 10)
-    return parts.value[partIndex] ?? null
-  }
-  return null
 })
 
 const taskMessage = ref('')
@@ -169,17 +156,12 @@ function updateTaskInputPos() {
 }
 
 async function sendTask(text: string) {
-  if (!text || (!selectedNode.value && !selectedPart.value)) return
+  if (!text || !selectedNode.value) return
 
   let title: string
   let contextMessage: string
 
-  if (selectedPart.value) {
-    // Template part context
-    const part = selectedPart.value
-    title = `${part.label}: ${text.slice(0, 40)}`
-    contextMessage = `[Context: Shared template part "${part.id}" (appears on all pages)]\nRole: ${part.label.toLowerCase()}\n\n${text}`
-  } else {
+  {
     // Page context
     const node = selectedNode.value!
     const page = siteContent.value?.pages.find(p => p.slug === node.slug || (node.slug === '/' && p.slug === '/'))
@@ -234,8 +216,6 @@ const PAN_THRESHOLD = 4 // px before a click becomes a drag
 
 function onPointerDown(e: PointerEvent) {
   if (e.button === 2) return
-  const target = e.target as HTMLElement
-  if (target.closest('.sitemap-toolbar')) return
 
   isPointerDown = true
   isPanning = false
@@ -275,16 +255,16 @@ function onPointerUp(e: PointerEvent) {
 
   // It was a click, not a drag — handle selection
   const target = e.target as HTMLElement
-  const nodeEl = target.closest('.sitemap-node') as HTMLElement | null
-  const labelEl = target.closest('.sitemap-label') as HTMLElement | null
+  const nodeEl = target.closest('.canvas-node') as HTMLElement | null
+  const labelEl = target.closest('.canvas-label') as HTMLElement | null
 
   if (nodeEl) {
     const id = nodeEl.dataset.nodeId
     if (id != null) selectNode(id)
   } else if (labelEl) {
     // Labels have the same click logic — find the sibling node's ID
-    const branch = labelEl.closest('.sitemap-branch') ?? labelEl.parentElement
-    const siblingNode = branch?.querySelector('.sitemap-node') as HTMLElement | null
+    const branch = labelEl.closest('.canvas-branch') ?? labelEl.parentElement
+    const siblingNode = branch?.querySelector('.canvas-node') as HTMLElement | null
     const id = siblingNode?.dataset.nodeId
     if (id != null) selectNode(id)
   } else {
@@ -295,7 +275,7 @@ function onPointerUp(e: PointerEvent) {
 // Double-click: enter section view for the clicked page node
 function onDoubleClick(e: MouseEvent) {
   const target = e.target as HTMLElement
-  const nodeEl = target.closest('.sitemap-node') as HTMLElement | null
+  const nodeEl = target.closest('.canvas-node') as HTMLElement | null
   if (!nodeEl) return
 
   // Resolve the node to a page
@@ -305,8 +285,8 @@ function onDoubleClick(e: MouseEvent) {
   // Don't enter section view for part nodes
   if (nodeId.startsWith('part-') || nodeId.startsWith('tpart-')) return
 
-  // Find the corresponding SiteMapNode
-  let node: SiteMapNode | null = null
+  // Find the corresponding CanvasNode
+  let node: CanvasNode | null = null
   if (nodeId === 'root') {
     node = tree.value
   } else if (nodeId.startsWith('tpl-')) {
@@ -412,7 +392,7 @@ function centerCanvas() {
   const prevTransform = canvas.style.transform
   canvas.style.transform = 'none'
 
-  const root = canvas.querySelector('.sitemap-canvas-content') as HTMLElement | null
+  const root = canvas.querySelector('.canvas-canvas-content') as HTMLElement | null
   if (!root) { canvas.style.transform = prevTransform; return }
 
   const cw = root.offsetWidth
@@ -491,8 +471,9 @@ function buildTreePaths(
   // Single child — just a straight vertical line
   if (childrenCoords.length === 1) {
     const c = childrenCoords[0]
-    if (Math.abs(c.x - parentX) < 1) {
-      paths.push(`M ${parentX} ${parentY} L ${c.x} ${c.y}`)
+    if (Math.abs(c.x - parentX) < 3) {
+      // Snap to parent X to avoid sub-pixel crooks
+      paths.push(`M ${parentX} ${parentY} L ${parentX} ${c.y}`)
     } else {
       const dir = c.x > parentX ? 1 : -1
       const cr = Math.min(r, Math.abs(c.x - parentX) / 2, railY - parentY, c.y - railY)
@@ -544,9 +525,9 @@ function buildTreePaths(
     const c = sorted[i]
     const cr = Math.min(r, c.y - railY)
 
-    if (Math.abs(c.x - parentX) < 1) {
-      // Center child — straight drop from trunk through rail
-      paths.push(`M ${c.x} ${railY} L ${c.x} ${c.y}`)
+    if (Math.abs(c.x - parentX) < 3) {
+      // Center child — straight drop from trunk through rail (snap to parent X)
+      paths.push(`M ${parentX} ${railY} L ${parentX} ${c.y}`)
     } else if (c.x < parentX) {
       // Left of parent
       const arcR = Math.min(cr, parentX - c.x)
@@ -572,22 +553,22 @@ function buildTreePaths(
 }
 
 function computeConnectors() {
+  const viewport = viewportRef.value
   const canvas = canvasRef.value
-  if (!canvas) return
+  if (!viewport || !canvas) return
 
-  const origin = canvas.getBoundingClientRect()
-  const s = zoom.value // account for scale
+  const vpRect = viewport.getBoundingClientRect()
   const paths: string[] = []
 
   function getNodeRect(id: string) {
     const el = canvas!.querySelector(`[data-node-id="${id}"] .page-thumb`) as HTMLElement | null
     if (!el) return null
     const r = el.getBoundingClientRect()
-    // Convert screen coords back to canvas-local coords
+    // Viewport-relative coords (no zoom division — SVG lives in viewport space)
     return {
-      cx: (r.left + r.width / 2 - origin.left) / s,
-      top: (r.top - origin.top) / s,
-      bottom: (r.bottom - origin.top) / s,
+      cx: Math.round(r.left + r.width / 2 - vpRect.left),
+      top: Math.round(r.top - vpRect.top),
+      bottom: Math.round(r.bottom - vpRect.top),
     }
   }
 
@@ -692,7 +673,7 @@ watch(tree, () => nextTick(() => {
 
 <template>
   <!-- Section zoom view (full-pane, replaces canvas) -->
-  <SiteMapSectionView
+  <CanvasSectionView
     v-if="sectionViewPage"
     :site-id="props.siteId"
     :page-slug="sectionViewPage.slug"
@@ -702,37 +683,67 @@ watch(tree, () => nextTick(() => {
   />
 
   <!-- Canvas view (map or theme) -->
+  <template v-if="!sectionViewPage">
+  <Toolbar title="Canvas" size="mini">
+    <template #center>
+      <nav ref="viewTabsRef" class="view-tabs">
+        <button ref="mapTabRef" class="view-tab" :class="{ 'is-active': activeView === 'map' }" @click="activeView = 'map'; deselectAll(); nextTick(() => { centerCanvas(); nextTick(() => computeConnectors()) })">Map</button>
+        <button ref="themeTabRef" class="view-tab" :class="{ 'is-active': activeView === 'theme' }" @click="activeView = 'theme'; deselectAll(); nextTick(() => centerCanvas())">Theme</button>
+        <span class="view-tabs__indicator" aria-hidden="true" :style="tabIndicatorStyle" />
+      </nav>
+    </template>
+    <template #end>
+      <div class="zoom-controls hstack align-center gap-xxxs">
+        <Tooltip text="Zoom out" placement="bottom" :delay="300">
+          <button class="zoom-btn" @click="zoomOut">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor" /></svg>
+          </button>
+        </Tooltip>
+        <span class="zoom-level">{{ zoomPercent }}%</span>
+        <Tooltip text="Zoom in" placement="bottom" :delay="300">
+          <button class="zoom-btn" @click="zoomIn">
+            <WPIcon :icon="plus" :size="16" />
+          </button>
+        </Tooltip>
+        <div class="zoom-divider" />
+        <Tooltip text="Fit to screen" placement="bottom" :delay="300">
+          <button class="zoom-btn" @click="zoomFit">
+            <WPIcon :icon="fullscreen" :size="16" />
+          </button>
+        </Tooltip>
+      </div>
+    </template>
+  </Toolbar>
   <div
-    v-else
     ref="viewportRef"
-    class="sitemap-viewport"
+    class="canvas-viewport"
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"
     @pointerup="onPointerUp"
     @dblclick="onDoubleClick"
   >
-    <div ref="canvasRef" class="sitemap-canvas" :class="{ 'is-moving': isMoving }" :style="canvasStyle">
-      <!-- SVG connector layer (map view only) -->
-      <svg v-if="activeView === 'map'" class="sitemap-connectors" aria-hidden="true">
-        <path :d="connectorPath" />
-      </svg>
+    <!-- SVG connector layer (viewport-space, not scaled) -->
+    <svg v-if="activeView === 'map'" class="canvas-connectors" aria-hidden="true">
+      <path :d="connectorPath" />
+    </svg>
 
+    <div ref="canvasRef" class="canvas-canvas" :class="{ 'is-moving': isMoving }" :style="canvasStyle">
       <!-- Map view -->
-      <div v-if="activeView === 'map' && tree" class="sitemap-canvas-content">
+      <div v-if="activeView === 'map' && tree" class="canvas-canvas-content">
         <!-- Page hierarchy tree -->
-        <div class="sitemap-root">
-          <div class="sitemap-node" :class="{ 'is-selected': selectedNodeId === 'root' }" data-node-id="root">
-            <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === 'root' }" :style="{ transform: labelScale }">{{ tree.label }}</span>
+        <div class="canvas-root">
+          <div class="canvas-node" :class="{ 'is-selected': selectedNodeId === 'root' }" data-node-id="root">
+            <span class="canvas-label" :class="{ 'is-selected': selectedNodeId === 'root' }" :style="{ transform: labelScale }">{{ tree.label }}</span>
             <div class="page-thumb">
               <SitePageThumb v-if="siteContent" :html="getPageHtml(tree.slug)" />
             </div>
           </div>
 
           <!-- Level 1 -->
-          <div v-if="tree.children?.length" class="sitemap-level">
-            <div class="sitemap-level__nodes">
-              <div v-for="(child, ci) in tree.children" :key="child.label" class="sitemap-branch">
-                <div class="sitemap-node" :data-node-id="String(ci)" :class="{ 'sitemap-node--stack': child.isCollection, 'is-selected': selectedNodeId === String(ci) }">
+          <div v-if="tree.children?.length" class="canvas-level">
+            <div class="canvas-level__nodes">
+              <div v-for="(child, ci) in tree.children" :key="child.label" class="canvas-branch">
+                <div class="canvas-node" :data-node-id="String(ci)" :class="{ 'canvas-node--stack': child.isCollection, 'is-selected': selectedNodeId === String(ci) }">
                   <div v-if="child.isCollection" class="stack-cards">
                     <div class="stack-card" />
                     <div class="stack-card" />
@@ -740,16 +751,16 @@ watch(tree, () => nextTick(() => {
                   <div class="page-thumb">
                     <SitePageThumb v-if="siteContent" :html="getPageHtml(child.slug)" />
                   </div>
-                  <span v-if="child.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ child.collectionCount }}</span>
-                  <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === String(ci) }" :style="{ transform: labelScale }">{{ child.label }}</span>
+                  <span v-if="child.isCollection" class="canvas-badge" :style="{ transform: badgeTransform }">{{ child.collectionCount }}</span>
+                  <span class="canvas-label" :class="{ 'is-selected': selectedNodeId === String(ci) }" :style="{ transform: labelScale }">{{ child.label }}</span>
                 </div>
 
                 <!-- Level 2 children -->
                 <template v-if="child.children?.length">
-                  <div class="sitemap-level sitemap-level--sub">
-                    <div class="sitemap-level__nodes">
-                      <div v-for="(gc, gci) in child.children" :key="gc.label" class="sitemap-branch">
-                        <div class="sitemap-node" :data-node-id="`${ci}-${gci}`" :class="{ 'sitemap-node--stack': gc.isCollection, 'is-selected': selectedNodeId === `${ci}-${gci}` }">
+                  <div class="canvas-level canvas-level--sub">
+                    <div class="canvas-level__nodes">
+                      <div v-for="(gc, gci) in child.children" :key="gc.label" class="canvas-branch">
+                        <div class="canvas-node" :data-node-id="`${ci}-${gci}`" :class="{ 'canvas-node--stack': gc.isCollection, 'is-selected': selectedNodeId === `${ci}-${gci}` }">
                           <div v-if="gc.isCollection" class="stack-cards">
                             <div class="stack-card" />
                             <div class="stack-card" />
@@ -757,8 +768,8 @@ watch(tree, () => nextTick(() => {
                           <div class="page-thumb">
                             <SitePageThumb v-if="siteContent" :html="getPageHtml(gc.slug)" />
                           </div>
-                          <span v-if="gc.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ gc.collectionCount }}</span>
-                          <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `${ci}-${gci}` }" :style="{ transform: labelScale }">{{ gc.label }}</span>
+                          <span v-if="gc.isCollection" class="canvas-badge" :style="{ transform: badgeTransform }">{{ gc.collectionCount }}</span>
+                          <span class="canvas-label" :class="{ 'is-selected': selectedNodeId === `${ci}-${gci}` }" :style="{ transform: labelScale }">{{ gc.label }}</span>
                         </div>
                       </div>
                     </div>
@@ -769,20 +780,11 @@ watch(tree, () => nextTick(() => {
           </div>
         </div>
 
-        <!-- Template Parts floating group -->
-        <div v-if="parts.length" class="sitemap-parts-group">
-          <span class="sitemap-group-label" :style="{ transform: labelScale }">Template Parts</span>
-          <div class="sitemap-parts-nodes">
-            <div v-for="(part, pi) in parts" :key="part.id" class="sitemap-node" :data-node-id="`part-${pi}`" :class="{ 'is-selected': selectedNodeId === `part-${pi}` }">
-              <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `part-${pi}` }" :style="{ transform: labelScale }">{{ part.label }}</span>
-              <SiteSectionThumb v-if="siteContent" :html="getSectionHtml(part.id)" />
-            </div>
-          </div>
-        </div>
+
       </div>
 
       <!-- Theme view -->
-      <SiteMapThemeView
+      <CanvasThemeView
         v-if="activeView === 'theme'"
         :site-id="props.siteId"
         :mock-layout="layout"
@@ -795,7 +797,7 @@ watch(tree, () => nextTick(() => {
 
     <!-- Floating task input anchored to selected node -->
     <Transition name="task-input">
-      <div v-if="(selectedNode || selectedPart) && taskInputPos" class="task-input-float" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
+      <div v-if="selectedNode && taskInputPos" class="task-input-float" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
         <InputChatMini
           ref="taskInputRef"
           v-model="taskMessage"
@@ -806,39 +808,14 @@ watch(tree, () => nextTick(() => {
       </div>
     </Transition>
 
-    <!-- View toggle -->
-    <div class="view-toggle">
-      <button class="view-toggle-btn" :class="{ 'is-active': activeView === 'map' }" @click="activeView = 'map'; deselectAll(); nextTick(() => { centerCanvas(); nextTick(() => computeConnectors()) })">Map</button>
-      <button class="view-toggle-btn" :class="{ 'is-active': activeView === 'theme' }" @click="activeView = 'theme'; deselectAll(); nextTick(() => centerCanvas())">Theme</button>
-    </div>
-
-    <!-- Floating toolbar -->
-    <div class="sitemap-toolbar">
-      <Tooltip text="Zoom out" placement="top" :delay="300">
-        <button class="toolbar-btn" @click="zoomOut">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor" /></svg>
-        </button>
-      </Tooltip>
-      <span class="toolbar-zoom">{{ zoomPercent }}%</span>
-      <Tooltip text="Zoom in" placement="top" :delay="300">
-        <button class="toolbar-btn" @click="zoomIn">
-          <WPIcon :icon="plus" :size="18" />
-        </button>
-      </Tooltip>
-      <div class="toolbar-divider" />
-      <Tooltip text="Fit to screen" placement="top" :delay="300">
-        <button class="toolbar-btn" @click="zoomFit">
-          <WPIcon :icon="fullscreen" :size="18" />
-        </button>
-      </Tooltip>
-    </div>
   </div>
+  </template>
 </template>
 
 <style scoped>
 /* ── Infinite canvas viewport ── */
 
-.sitemap-viewport {
+.canvas-viewport {
   flex: 1;
   overflow: hidden;
   position: relative;
@@ -847,66 +824,53 @@ watch(tree, () => nextTick(() => {
   /* background-color: var(--color-frame-fill); */
 }
 
-.sitemap-viewport:active {
+.canvas-viewport:active {
   cursor: grabbing;
 }
 
-/* ── View toggle ── */
+/* ── View tabs ── */
 
-.view-toggle {
-  position: absolute;
-  inset-block-start: var(--space-m);
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+.view-tabs {
+  position: relative;
   display: flex;
-  padding: var(--space-xxxs);
-  background: var(--color-frame-bg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  box-shadow: 0 2px 8px var(--color-shadow);
+  height: 100%;
 }
 
-.view-toggle-btn {
-  padding: var(--space-xxxs) var(--space-s);
+.view-tab {
+  position: relative;
+  padding: 0 var(--space-s);
+  height: 100%;
   border: none;
-  border-radius: var(--radius-s);
   background: none;
   color: var(--color-frame-fg-muted);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-m);
   font-weight: var(--font-weight-medium);
+  font-family: inherit;
   cursor: pointer;
-  transition: background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
+  transition: color var(--duration-fast) var(--ease-default);
 }
 
-.view-toggle-btn:hover {
+.view-tab:hover {
   color: var(--color-frame-fg);
 }
 
-.view-toggle-btn.is-active {
-  background: var(--color-frame-hover);
+.view-tab.is-active {
   color: var(--color-frame-fg);
 }
 
-/* ── Floating toolbar ── */
-
-.sitemap-toolbar {
+.view-tabs__indicator {
   position: absolute;
-  inset-block-end: var(--space-m);
-  inset-inline-end: var(--space-m);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: var(--space-xxxs);
-  padding: var(--space-xxxs);
-  background: var(--color-frame-bg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  box-shadow: 0 2px 8px var(--color-shadow);
+  inset-block-end: 0;
+  height: 2px;
+  background: var(--color-frame-fg);
+  border-radius: 1px;
+  transition: inset-inline-start var(--duration-moderate) var(--ease-out),
+    width var(--duration-moderate) var(--ease-out);
 }
 
-.toolbar-btn {
+/* ── Zoom controls ── */
+
+.zoom-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -921,13 +885,13 @@ watch(tree, () => nextTick(() => {
     color var(--duration-instant) var(--ease-default);
 }
 
-.toolbar-btn:hover {
+.zoom-btn:hover {
   background: var(--color-frame-hover);
   color: var(--color-frame-fg);
 }
 
-.toolbar-zoom {
-  min-width: 40px;
+.zoom-level {
+  min-width: 36px;
   text-align: center;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
@@ -935,25 +899,25 @@ watch(tree, () => nextTick(() => {
   font-variant-numeric: tabular-nums;
 }
 
-.toolbar-divider {
+.zoom-divider {
   width: 1px;
   height: 16px;
   background: var(--color-frame-border);
 }
 
-.sitemap-canvas {
+.canvas-canvas {
   position: absolute;
   inset-block-start: 0;
   inset-inline-start: 0;
   transform-origin: 0 0;
 }
 
-.sitemap-canvas.is-moving {
+.canvas-canvas.is-moving {
   will-change: transform;
 }
 
 /* Grid pattern lives on canvas so it pans/zooms with content */
-.sitemap-canvas::before {
+.canvas-canvas::before {
   content: '';
   position: absolute;
   /* Extend far beyond content so grid is visible when panning */
@@ -965,14 +929,14 @@ watch(tree, () => nextTick(() => {
 }
 
 @media (prefers-color-scheme: dark) {
-  .sitemap-canvas::before {
+  .canvas-canvas::before {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cline x1='13' y1='16' x2='19' y2='16' stroke='%23fff' stroke-opacity='0.07' stroke-width='0.75'/%3E%3Cline x1='16' y1='13' x2='16' y2='19' stroke='%23fff' stroke-opacity='0.07' stroke-width='0.75'/%3E%3Cline x1='19' y1='16' x2='32' y2='16' stroke='%23fff' stroke-opacity='0.03' stroke-width='0.75' stroke-dasharray='1 3'/%3E%3Cline x1='0' y1='16' x2='13' y2='16' stroke='%23fff' stroke-opacity='0.03' stroke-width='0.75' stroke-dasharray='1 3'/%3E%3Cline x1='16' y1='19' x2='16' y2='32' stroke='%23fff' stroke-opacity='0.03' stroke-width='0.75' stroke-dasharray='1 3'/%3E%3Cline x1='16' y1='0' x2='16' y2='13' stroke='%23fff' stroke-opacity='0.03' stroke-width='0.75' stroke-dasharray='1 3'/%3E%3C/svg%3E");
   }
 }
 
 /* ── Canvas content layout ── */
 
-.sitemap-canvas-content {
+.canvas-canvas-content {
   display: flex;
   align-items: flex-start;
   gap: 120px;
@@ -980,52 +944,27 @@ watch(tree, () => nextTick(() => {
 
 /* ── Tree structure ── */
 
-.sitemap-root {
+.canvas-root {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* ── Template Parts group ── */
 
-.sitemap-parts-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-block-start: 40px;
-}
-
-.sitemap-group-label {
-  transform-origin: bottom center;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-block-end: var(--space-m);
-  white-space: nowrap;
-}
-
-.sitemap-parts-nodes {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-l);
-}
-
-.sitemap-level {
+.canvas-level {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-block-start: 60px;
 }
 
-.sitemap-level__nodes {
+.canvas-level__nodes {
   display: flex;
   gap: var(--space-l);
   align-items: flex-start;
 }
 
-.sitemap-branch {
+.canvas-branch {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1033,41 +972,42 @@ watch(tree, () => nextTick(() => {
 
 /* ── SVG connectors ── */
 
-.sitemap-connectors {
+.canvas-connectors {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
   overflow: visible;
 }
 
-.sitemap-connectors path {
+.canvas-connectors path {
   fill: none;
   stroke: var(--color-frame-border);
-  stroke-width: calc(1.5 / var(--zoom, 1));
+  stroke-width: 1.5px;
   stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ── Node ── */
 
-.sitemap-node {
+.canvas-node {
   position: relative;
   cursor: pointer;
 }
 
-.sitemap-node .page-thumb {
+.canvas-node .page-thumb {
   transition: outline-color var(--duration-fast) var(--ease-default);
   outline: calc(1.5px / var(--zoom, 1)) solid transparent;
   outline-offset: calc(2px / var(--zoom, 1));
 }
 
-.sitemap-node.is-selected .page-thumb {
+.canvas-node.is-selected .page-thumb {
   outline-color: var(--color-frame-selected);
 }
 
-.sitemap-label {
+.canvas-label {
   position: absolute;
   inset-block-end: 100%;
   inset-inline-start: 0;
@@ -1083,13 +1023,13 @@ watch(tree, () => nextTick(() => {
   line-height: 1;
 }
 
-.sitemap-label.is-selected {
+.canvas-label.is-selected {
   color: var(--color-frame-selected);
 }
 
 /* ── Collection stack ── */
 
-.sitemap-node--stack {
+.canvas-node--stack {
   padding-block-start: 8px;
   padding-inline-start: 8px;
 }
@@ -1120,7 +1060,7 @@ watch(tree, () => nextTick(() => {
   inset-block-end: 4px;
 }
 
-.sitemap-badge {
+.canvas-badge {
   position: absolute;
   inset-block-start: 0;
   inset-inline-end: 0;

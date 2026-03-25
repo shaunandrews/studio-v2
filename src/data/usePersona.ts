@@ -77,7 +77,7 @@ export function usePersona() {
     const { resetBranches } = useBranches()
     await resetBranches()
     await resetSites(persona.sites)
-    // Initialize site content from templates so views (e.g. Site Map) have data immediately
+    // Initialize site content from templates so views (e.g. Canvas) have data immediately
     const { getContent } = useSiteDocument()
     for (const site of persona.sites) {
       if (site.mockLayout) {

@@ -1,6 +1,6 @@
 # Site Template System
 
-WordPress-inspired file system for rendering realistic miniature page previews in the Site Map.
+WordPress-inspired file system for rendering realistic miniature page previews in the Canvas.
 
 ## How It Works
 
@@ -105,8 +105,8 @@ export const sites: Record<string, SiteFiles> = {
 `useSiteTemplates.ts` provides:
 
 - **`assemblePage(site, templateName)`** — Takes a SiteFiles object and template name, returns a complete HTML document string ready for iframe `srcdoc`. Injects theme CSS variables, Google Fonts links, base reset styles, and resolves `{{part}}` placeholders.
-- **`deriveSiteMapTree(config)`** — Converts the flat pages array from site.json into a hierarchical tree for the sitemap. Collections become child nodes with stack treatment.
+- **`deriveCanvasTree(config)`** — Converts the flat pages array from site.json into a hierarchical tree for the Canvas. Collections become child nodes with stack treatment.
 
 ## Rendering
 
-`SitePageThumb.vue` renders an assembled HTML string in a sandboxed iframe scaled from 800px to 160px. The parent `SiteMapScreen.vue` wraps each thumb in a `.page-thumb` div that handles borders, shadows, selection outlines, and zoom compensation.
+`SitePageThumb.vue` renders an assembled HTML string in a sandboxed iframe scaled from 800px to 160px. The parent `CanvasScreen.vue` wraps each thumb in a `.page-thumb` div that handles borders, shadows, selection outlines, and zoom compensation.

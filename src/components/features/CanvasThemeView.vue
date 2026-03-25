@@ -5,8 +5,8 @@ import SiteSectionThumb from '@/components/composites/SiteSectionThumb.vue'
 import { useSiteDocument } from '@/data/useSiteDocument'
 import { renderSite, renderSection } from '@/data/site-renderer'
 import { sites as siteRegistry } from '@/data/sites/index'
-import { deriveSiteMapParts } from '@/data/useSiteTemplates'
-import type { SiteMapPart } from '@/data/useSiteTemplates'
+import { deriveCanvasParts } from '@/data/useSiteTemplates'
+import type { CanvasPart } from '@/data/useSiteTemplates'
 import type { MockLayout } from '@/data/types'
 import type { SiteContentTemplate } from '@/data/site-types'
 import type { SiteTheme } from '@/data/useSiteTemplates'
@@ -31,8 +31,8 @@ const theme = computed<SiteTheme | null>(() => {
   return siteFiles.value?.config.theme ?? null
 })
 
-const parts = computed<SiteMapPart[]>(() => {
-  if (siteFiles.value) return deriveSiteMapParts(siteFiles.value.config)
+const parts = computed<CanvasPart[]>(() => {
+  if (siteFiles.value) return deriveCanvasParts(siteFiles.value.config)
   return []
 })
 
@@ -260,8 +260,8 @@ function getSectionHtml(sectionId: string): string {
         <div
           v-for="(tpl, ti) in wpTemplates"
           :key="tpl.slug"
-          class="sitemap-node"
-          :class="{ 'sitemap-node--stack': tpl.renders.length > 1, 'is-selected': selectedNodeId === `tpl-${ti}` }"
+          class="canvas-node"
+          :class="{ 'canvas-node--stack': tpl.renders.length > 1, 'is-selected': selectedNodeId === `tpl-${ti}` }"
           :data-node-id="`tpl-${ti}`"
           @click.stop="emit('select', `tpl-${ti}`)"
         >
@@ -270,8 +270,8 @@ function getSectionHtml(sectionId: string): string {
             <div class="stack-card" />
           </div>
           <SiteSectionThumb v-if="siteContent" :html="getTemplateHtml(tpl)" />
-          <span v-if="tpl.renders.length > 1" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ tpl.renders.length }}</span>
-          <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `tpl-${ti}` }" :style="{ transform: labelScale }">{{ tpl.label }}</span>
+          <span v-if="tpl.renders.length > 1" class="canvas-badge" :style="{ transform: badgeTransform }">{{ tpl.renders.length }}</span>
+          <span class="canvas-label" :class="{ 'is-selected': selectedNodeId === `tpl-${ti}` }" :style="{ transform: labelScale }">{{ tpl.label }}</span>
         </div>
       </div>
     </div>
@@ -283,12 +283,12 @@ function getSectionHtml(sectionId: string): string {
         <div
           v-for="(part, pi) in parts"
           :key="part.id"
-          class="sitemap-node"
+          class="canvas-node"
           :class="{ 'is-selected': selectedNodeId === `tpart-${pi}` }"
           :data-node-id="`tpart-${pi}`"
           @click.stop="emit('select', `tpart-${pi}`)"
         >
-          <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `tpart-${pi}` }" :style="{ transform: labelScale }">{{ part.label }}</span>
+          <span class="canvas-label" :class="{ 'is-selected': selectedNodeId === `tpart-${pi}` }" :style="{ transform: labelScale }">{{ part.label }}</span>
           <SiteSectionThumb v-if="siteContent" :html="getSectionHtml(part.id)" />
         </div>
       </div>
@@ -464,24 +464,24 @@ function getSectionHtml(sectionId: string): string {
   justify-content: center;
 }
 
-/* ── Node (duplicated from SiteMapScreen — scoped styles don't inherit) ── */
+/* ── Node (duplicated from CanvasScreen — scoped styles don't inherit) ── */
 
-.sitemap-node {
+.canvas-node {
   position: relative;
   cursor: pointer;
 }
 
-.sitemap-node .page-thumb {
+.canvas-node .page-thumb {
   transition: outline-color var(--duration-fast) var(--ease-default);
   outline: calc(1.5px / var(--zoom, 1)) solid transparent;
   outline-offset: calc(2px / var(--zoom, 1));
 }
 
-.sitemap-node.is-selected .page-thumb {
+.canvas-node.is-selected .page-thumb {
   outline-color: var(--color-frame-selected);
 }
 
-.sitemap-label {
+.canvas-label {
   position: absolute;
   inset-block-end: 100%;
   inset-inline-start: 0;
@@ -497,11 +497,11 @@ function getSectionHtml(sectionId: string): string {
   line-height: 1;
 }
 
-.sitemap-label.is-selected {
+.canvas-label.is-selected {
   color: var(--color-frame-selected);
 }
 
-.sitemap-node--stack {
+.canvas-node--stack {
   padding-block-start: 8px;
   padding-inline-start: 8px;
 }
@@ -531,7 +531,7 @@ function getSectionHtml(sectionId: string): string {
   inset-block-end: 4px;
 }
 
-.sitemap-badge {
+.canvas-badge {
   position: absolute;
   inset-block-start: 0;
   inset-inline-end: 0;

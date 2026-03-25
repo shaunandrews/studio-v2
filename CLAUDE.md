@@ -28,8 +28,8 @@ src/
   styles/            # CSS tokens (colors, space, radius, typography, layout, motion) + overrides
   components/
     primitives/      # Badge, Button, ButtonSplit, ContextMenu, ContextRing, Dropdown, FlyoutMenu, Modal, StatusIndicator, Text, TextInput, Toggle, Tooltip, WPIcon
-    composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, Pane, PaneGroup, PanelToolbar, ScreenHeader, SettingsPage, ShortcutsModal, SiteItem, SiteToolbar, chat-cards/, renderers/, task-brief/
-    features/        # SiteNavigation, SiteList, SiteSettingsScreen, SyncScreen, PreviewsScreen, ImportExportScreen, SiteTimeline, add-site/, sync/
+    composites/      # ChatMessage, ChatMessageList, GlobalMenu, InputChat, Pane, PaneGroup, ScreenHeader, SettingsPage, ShortcutsModal, SiteItem, Toolbar, chat-cards/, renderers/, task-brief/
+    features/        # CanvasScreen, SiteNavigation, SiteList, SiteSettingsScreen, SyncScreen, PreviewsScreen, ImportExportScreen, SiteTimeline, add-site/, sync/
   layouts/           # MainLayout (app shell), BareLayout (standalone pages)
   pages/             # SitePage, AddSitePage, DesignSystem, Components, Settings, Architecture
   data/              # State composables, AI service, seed data, types, site-types, site-renderer, useSiteTransition

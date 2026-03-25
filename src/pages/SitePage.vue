@@ -16,7 +16,7 @@ import SyncScreen from '@/components/features/SyncScreen.vue'
 import SharingScreen from '@/components/features/SharingScreen.vue'
 import SiteSettingsScreen from '@/components/features/SiteSettingsScreen.vue'
 import SiteOverviewScreen from '@/components/features/SiteOverviewScreen.vue'
-import SiteMapScreen from '@/components/features/SiteMapScreen.vue'
+import CanvasScreen from '@/components/features/CanvasScreen.vue'
 import MergeConflictModal from '@/components/features/MergeConflictModal.vue'
 import { chevronLeft, chevronRight } from '@wordpress/icons'
 import { useSettings } from '@/data/useSettings'
@@ -75,11 +75,11 @@ onBeforeUnmount(() => {
 
 // -- Screen state (derived from route) --
 
-type Screen = 'overview' | 'sitemap' | 'tasks' | 'sync' | 'sharing' | 'settings'
+type Screen = 'overview' | 'canvas' | 'tasks' | 'sync' | 'sharing' | 'settings'
 
 const ROUTE_TO_SCREEN: Record<string, Screen> = {
   'site-overview': 'overview',
-  'site-sitemap': 'sitemap',
+  'site-canvas': 'canvas',
   'site-tasks': 'tasks',
   'site-task': 'tasks',
   'site-sync': 'sync',
@@ -386,7 +386,7 @@ onBeforeUnmount(() => {
       <!-- Detail area -->
       <PaneGroup>
         <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" :status="currentSite?.status" :loading-target="loadingTarget" @toggle-status="toggleStatus" />
-        <SiteMapScreen v-else-if="!isAllSites && currentScreen === 'sitemap'" :site-id="activeSiteId!" />
+        <CanvasScreen v-else-if="!isAllSites && currentScreen === 'canvas'" :site-id="activeSiteId!" />
         <template v-else-if="currentScreen === 'tasks' && selectedTaskId">
           <Pane v-if="!isNewTask" fit>
             <TaskBrief

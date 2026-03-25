@@ -5,6 +5,7 @@ import Button from '@/components/primitives/Button.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Pane from '@/components/composites/Pane.vue'
+import Toolbar from '@/components/composites/Toolbar.vue'
 import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
 import SiteTimeline from '@/components/features/SiteTimeline.vue'
 import { useSites } from '@/data/useSites'
@@ -76,36 +77,35 @@ const openInLinks = [
 </script>
 
 <template>
-  <Pane fit>
-    <header class="overview__header hstack justify-between align-center">
-        <h1 class="overview__title">Site Overview</h1>
-        <div class="overview__status">
-          <span class="status-label" :class="status ?? 'stopped'">{{ statusLabel }}</span>
-          <Tooltip :text="statusTooltip" placement="bottom">
-            <button
-              class="status-btn"
-              :class="status ?? 'stopped'"
-              :disabled="status === 'loading'"
-              @click="emit('toggle-status')"
-            >
-              <svg v-if="status === 'loading'" class="status-spinner" viewBox="0 0 16 16">
-                <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="20 12" />
-              </svg>
-              <svg v-else class="status-shape" viewBox="0 0 10 10">
-                <template v-if="(status ?? 'stopped') === 'stopped'">
-                  <rect class="status-rect" x="1" y="1" width="8" height="8" rx="1.5" />
-                  <path class="status-play" d="M3.5 1.8 L8.5 5 L3.5 8.2Z" />
-                </template>
-                <template v-else>
-                  <circle class="status-circle" cx="5" cy="5" r="4.5" />
-                  <rect class="status-stop" x="1" y="1" width="8" height="8" rx="1.5" />
-                </template>
-              </svg>
-            </button>
-          </Tooltip>
-        </div>
-    </header>
-  </Pane>
+  <Toolbar title="Site Overview">
+    <template #end>
+      <div class="overview__status">
+        <span class="status-label" :class="status ?? 'stopped'">{{ statusLabel }}</span>
+        <Tooltip :text="statusTooltip" placement="bottom">
+          <button
+            class="status-btn"
+            :class="status ?? 'stopped'"
+            :disabled="status === 'loading'"
+            @click="emit('toggle-status')"
+          >
+            <svg v-if="status === 'loading'" class="status-spinner" viewBox="0 0 16 16">
+              <circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="20 12" />
+            </svg>
+            <svg v-else class="status-shape" viewBox="0 0 10 10">
+              <template v-if="(status ?? 'stopped') === 'stopped'">
+                <rect class="status-rect" x="1" y="1" width="8" height="8" rx="1.5" />
+                <path class="status-play" d="M3.5 1.8 L8.5 5 L3.5 8.2Z" />
+              </template>
+              <template v-else>
+                <circle class="status-circle" cx="5" cy="5" r="4.5" />
+                <rect class="status-stop" x="1" y="1" width="8" height="8" rx="1.5" />
+              </template>
+            </svg>
+          </button>
+        </Tooltip>
+      </div>
+    </template>
+  </Toolbar>
 
   <Pane scrollable>
     <div class="overview__content">
@@ -153,17 +153,6 @@ const openInLinks = [
 </template>
 
 <style scoped>
-.overview__header {
-  padding: var(--space-s) var(--space-m);
-  border-block-end: 1px solid var(--color-frame-border);
-}
-
-.overview__title {
-  font-size: var(--font-size-m);
-  font-weight: 600;
-  color: var(--color-frame-fg);
-}
-
 .overview__content {
   display: flex;
   flex-direction: column;

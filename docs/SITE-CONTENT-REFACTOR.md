@@ -10,7 +10,7 @@ The site content system had degraded from its intended architecture. Pages were 
 - Headers and footers were string-replaced into every page via `{{header}}`/`{{footer}}` — no true sharing, editing one didn't affect others
 - All styling was inline (`style="..."`) — the section `css` field was always empty
 - Section roles were never assigned from templates
-- The sitemap had no concept of shared site elements
+- The canvas had no concept of shared site elements
 
 ### Changes
 
@@ -81,9 +81,9 @@ Each section's CSS lives in its own `<style id="section-X">` tag in the rendered
 
 ## What still needs work
 
-### Sitemap shared elements UI
+### Canvas shared elements UI
 
-The sitemap (`SiteMapScreen.vue`) currently only shows pages. Shared sections (header, footer) should appear as "site elements" — a separate visual group connected to all pages. The data model supports this (shared sections have `shared: true` and `role`), but the UI hasn't been built.
+The canvas (`CanvasScreen.vue`) currently only shows pages. Shared sections (header, footer) should appear as "site elements" — a separate visual group connected to all pages. The data model supports this (shared sections have `shared: true` and `role`), but the UI hasn't been built.
 
 ### Dark mode variables
 

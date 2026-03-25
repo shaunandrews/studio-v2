@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRef, onMounted, onBeforeUnmount } from 'vue'
-import { plus, archive, update, customLink, tool, home, chevronDown, category, listView } from '@wordpress/icons'
+import { plus, archive, update, customLink, tool, home, chevronDown, category, navigation } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
@@ -254,9 +254,9 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         <WPIcon :icon="home" :size="20" class="site-sections__icon" />
         Overview
       </button>
-      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'sitemap' }" @click="$emit('navigate', 'sitemap')">
-        <WPIcon :icon="listView" :size="20" class="site-sections__icon" />
-        Site Map
+      <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'canvas' }" @click="$emit('navigate', 'canvas')">
+        <WPIcon :icon="navigation" :size="20" class="site-sections__icon" />
+        Canvas
       </button>
       <button class="site-sections__item" :class="{ 'is-active': activeScreen === 'sync' }" @click="$emit('navigate', 'sync')">
         <WPIcon :icon="update" :size="20" class="site-sections__icon" />
