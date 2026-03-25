@@ -15,7 +15,38 @@
       "heading": "'Inter', sans-serif",
       "body": "'Inter', sans-serif"
     },
+    "fontSizes": {
+      "small": "0.875rem",
+      "medium": "1rem",
+      "large": "1.125rem",
+      "x-large": "1.5rem",
+      "xx-large": "2.25rem"
+    },
+    "fontWeights": {
+      "regular": 400,
+      "medium": 500,
+      "bold": 700
+    },
+    "lineHeights": {
+      "tight": 1.2,
+      "normal": 1.5,
+      "relaxed": 1.75
+    },
     "spacing": {
+      "xs": "0.5rem",
+      "s": "0.75rem",
+      "m": "1rem",
+      "l": "1.5rem",
+      "xl": "2rem",
+      "xxl": "3rem"
+    },
+    "radii": {
+      "small": "4px",
+      "medium": "8px",
+      "large": "16px",
+      "full": "9999px"
+    },
+    "layout": {
       "content": "640px",
       "wide": "800px"
     }
@@ -35,7 +66,8 @@
     { "slug": "page", "label": "Page", "renders": ["/about", "/contact"] },
     { "slug": "archive", "label": "Archive", "renders": ["/blog"] },
     { "slug": "single", "label": "Single Post" },
-    { "slug": "404", "label": "Not Found" },
+    { "slug": "index", "label": "Index" },
+    { "slug": "404", "label": "404" },
     { "slug": "search", "label": "Search Results" }
   ]
 }

@@ -15,7 +15,38 @@
       "heading": "'Inter', sans-serif",
       "body": "'Inter', sans-serif"
     },
+    "fontSizes": {
+      "small": "0.875rem",
+      "medium": "1rem",
+      "large": "1.25rem",
+      "x-large": "2rem",
+      "xx-large": "3rem"
+    },
+    "fontWeights": {
+      "regular": 400,
+      "medium": 500,
+      "bold": 700
+    },
+    "lineHeights": {
+      "tight": 1.15,
+      "normal": 1.5,
+      "relaxed": 1.7
+    },
     "spacing": {
+      "xs": "0.5rem",
+      "s": "0.75rem",
+      "m": "1.25rem",
+      "l": "2rem",
+      "xl": "3rem",
+      "xxl": "5rem"
+    },
+    "radii": {
+      "small": "6px",
+      "medium": "10px",
+      "large": "16px",
+      "full": "9999px"
+    },
+    "layout": {
       "content": "680px",
       "wide": "1000px"
     }
@@ -33,7 +64,8 @@
     { "slug": "page", "label": "Page", "renders": ["/about", "/contact"] },
     { "slug": "page-features", "label": "Features Page", "renders": ["/features"] },
     { "slug": "page-pricing", "label": "Pricing Page", "renders": ["/pricing"] },
-    { "slug": "404", "label": "Not Found" },
+    { "slug": "index", "label": "Index" },
+    { "slug": "404", "label": "404" },
     { "slug": "search", "label": "Search Results" }
   ]
 }

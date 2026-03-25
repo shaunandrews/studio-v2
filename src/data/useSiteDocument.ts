@@ -112,8 +112,34 @@ function transformSiteFiles(siteId: string, files: SiteFiles): SiteContent {
       fonts.push(family)
     }
   }
+  if (config.theme.fontSizes) {
+    for (const [key, value] of Object.entries(config.theme.fontSizes)) {
+      variables[`--font-size-${key}`] = value
+    }
+  }
+  if (config.theme.fontWeights) {
+    for (const [key, value] of Object.entries(config.theme.fontWeights)) {
+      variables[`--font-weight-${key}`] = String(value)
+    }
+  }
+  if (config.theme.lineHeights) {
+    for (const [key, value] of Object.entries(config.theme.lineHeights)) {
+      variables[`--line-height-${key}`] = String(value)
+    }
+  }
+  if (config.theme.radii) {
+    for (const [key, value] of Object.entries(config.theme.radii)) {
+      variables[`--radius-${key}`] = value
+    }
+  }
+  // Layout widths (formerly "spacing" — content/wide)
+  if (config.theme.layout) {
+    for (const [key, value] of Object.entries(config.theme.layout)) {
+      variables[`--${key}`] = value
+    }
+  }
   for (const [key, value] of Object.entries(config.theme.spacing)) {
-    variables[`--${key}`] = value
+    variables[`--spacing-${key}`] = value
   }
 
   const sections: Record<string, SiteContentSection> = {}
@@ -217,9 +243,14 @@ function transformSiteFiles(siteId: string, files: SiteFiles): SiteContent {
         }
       }
 
-      // For templates with no rendered pages (404, search), build a skeleton from parts only
+      // For templates with no rendered pages (404, search, index), build skeleton: header + content + footer
       if (templateSections.length === 0) {
+        const contentId = `tpl-content-${tplDef.slug}`
+        if (!sections[contentId]) {
+          sections[contentId] = { id: contentId, html: '', css: '', role: 'content' }
+        }
         if (sharedSectionIds['header']) templateSections.push(sharedSectionIds['header'])
+        templateSections.push(contentId)
         if (sharedSectionIds['footer']) templateSections.push(sharedSectionIds['footer'])
       }
 

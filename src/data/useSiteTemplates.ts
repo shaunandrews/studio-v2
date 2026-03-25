@@ -1,7 +1,12 @@
 export interface SiteTheme {
   colors: Record<string, string>
   fonts: Record<string, string>
+  fontSizes: Record<string, string>
+  fontWeights: Record<string, number>
+  lineHeights: Record<string, number>
   spacing: Record<string, string>
+  radii: Record<string, string>
+  layout: Record<string, string>
 }
 
 export interface SitePageDef {

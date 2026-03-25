@@ -15,7 +15,38 @@
       "heading": "'Inter', sans-serif",
       "body": "'Inter', sans-serif"
     },
+    "fontSizes": {
+      "small": "0.875rem",
+      "medium": "1rem",
+      "large": "1.25rem",
+      "x-large": "2rem",
+      "xx-large": "3.5rem"
+    },
+    "fontWeights": {
+      "regular": 400,
+      "medium": 500,
+      "bold": 600
+    },
+    "lineHeights": {
+      "tight": 1.1,
+      "normal": 1.5,
+      "relaxed": 1.7
+    },
     "spacing": {
+      "xs": "0.5rem",
+      "s": "1rem",
+      "m": "1.5rem",
+      "l": "2.5rem",
+      "xl": "4rem",
+      "xxl": "6rem"
+    },
+    "radii": {
+      "small": "2px",
+      "medium": "4px",
+      "large": "8px",
+      "full": "9999px"
+    },
+    "layout": {
       "content": "680px",
       "wide": "1000px"
     }
@@ -36,7 +67,8 @@
     { "slug": "page", "label": "Page", "renders": ["/services", "/about", "/contact"] },
     { "slug": "archive", "label": "Archive", "renders": ["/work"] },
     { "slug": "single", "label": "Single Project" },
-    { "slug": "404", "label": "Not Found" },
+    { "slug": "index", "label": "Index" },
+    { "slug": "404", "label": "404" },
     { "slug": "search", "label": "Search Results" }
   ]
 }

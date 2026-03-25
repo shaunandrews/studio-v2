@@ -15,7 +15,38 @@
       "heading": "'Playfair Display', Georgia, serif",
       "body": "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
     },
+    "fontSizes": {
+      "small": "0.875rem",
+      "medium": "1rem",
+      "large": "1.125rem",
+      "x-large": "1.75rem",
+      "xx-large": "2.75rem"
+    },
+    "fontWeights": {
+      "regular": 400,
+      "medium": 500,
+      "bold": 700
+    },
+    "lineHeights": {
+      "tight": 1.2,
+      "normal": 1.6,
+      "relaxed": 1.8
+    },
     "spacing": {
+      "xs": "0.5rem",
+      "s": "0.75rem",
+      "m": "1.25rem",
+      "l": "2rem",
+      "xl": "3rem",
+      "xxl": "4rem"
+    },
+    "radii": {
+      "small": "4px",
+      "medium": "8px",
+      "large": "16px",
+      "full": "9999px"
+    },
+    "layout": {
       "content": "640px",
       "wide": "800px"
     }
@@ -38,7 +69,8 @@
     { "slug": "page-menu", "label": "Menu Page", "renders": ["/menu"] },
     { "slug": "archive", "label": "Archive", "renders": ["/blog"] },
     { "slug": "single", "label": "Single Post" },
-    { "slug": "404", "label": "Not Found" },
+    { "slug": "index", "label": "Index" },
+    { "slug": "404", "label": "404" },
     { "slug": "search", "label": "Search Results" }
   ]
 }

@@ -15,7 +15,38 @@
       "heading": "'Inter', sans-serif",
       "body": "'Inter', sans-serif"
     },
+    "fontSizes": {
+      "small": "0.8125rem",
+      "medium": "0.9375rem",
+      "large": "1.125rem",
+      "x-large": "1.5rem",
+      "xx-large": "2.5rem"
+    },
+    "fontWeights": {
+      "regular": 400,
+      "medium": 500,
+      "bold": 600
+    },
+    "lineHeights": {
+      "tight": 1.2,
+      "normal": 1.5,
+      "relaxed": 1.7
+    },
     "spacing": {
+      "xs": "0.5rem",
+      "s": "0.75rem",
+      "m": "1rem",
+      "l": "1.5rem",
+      "xl": "2.5rem",
+      "xxl": "4rem"
+    },
+    "radii": {
+      "small": "4px",
+      "medium": "8px",
+      "large": "12px",
+      "full": "9999px"
+    },
+    "layout": {
       "content": "680px",
       "wide": "1000px"
     }
@@ -38,7 +69,8 @@
     { "slug": "page-cart", "label": "Cart Page", "renders": ["/cart"] },
     { "slug": "archive-product", "label": "Product Archive", "renders": ["/shop", "/products"] },
     { "slug": "single-product", "label": "Single Product" },
-    { "slug": "404", "label": "Not Found" },
+    { "slug": "index", "label": "Index" },
+    { "slug": "404", "label": "404" },
     { "slug": "search", "label": "Search Results" }
   ]
 }
