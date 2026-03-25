@@ -824,7 +824,7 @@ watch(tree, () => nextTick(() => {
   position: relative;
   cursor: grab;
   user-select: none;
-  background-color: var(--color-frame-fill);
+  /* background-color: var(--color-frame-fill); */
 }
 
 .sitemap-viewport:active {
