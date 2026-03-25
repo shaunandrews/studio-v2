@@ -22,14 +22,23 @@
   },
   "parts": ["header", "footer"],
   "pages": [
-    { "slug": "/", "title": "Home", "template": "home" },
-    { "slug": "/shop", "title": "Shop", "template": "shop" },
+    { "slug": "/", "title": "Home", "template": "home", "wpTemplate": "front-page" },
+    { "slug": "/shop", "title": "Shop", "template": "shop", "wpTemplate": "archive-product" },
     {
-      "slug": "/products", "title": "Products", "template": "product",
-      "collection": { "slug": "/products/:slug", "title": "Product", "template": "product", "count": 24 }
+      "slug": "/products", "title": "Products", "template": "product", "wpTemplate": "archive-product",
+      "collection": { "slug": "/products/:slug", "title": "Product", "template": "product", "wpTemplate": "single-product", "count": 24 }
     },
-    { "slug": "/cart", "title": "Cart", "template": "cart" },
-    { "slug": "/about", "title": "About", "template": "about" },
-    { "slug": "/contact", "title": "Contact", "template": "contact" }
+    { "slug": "/cart", "title": "Cart", "template": "cart", "wpTemplate": "page-cart" },
+    { "slug": "/about", "title": "About", "template": "about", "wpTemplate": "page" },
+    { "slug": "/contact", "title": "Contact", "template": "contact", "wpTemplate": "page" }
+  ],
+  "wpTemplates": [
+    { "slug": "front-page", "label": "Front Page", "renders": ["/"] },
+    { "slug": "page", "label": "Page", "renders": ["/about", "/contact"] },
+    { "slug": "page-cart", "label": "Cart Page", "renders": ["/cart"] },
+    { "slug": "archive-product", "label": "Product Archive", "renders": ["/shop", "/products"] },
+    { "slug": "single-product", "label": "Single Product" },
+    { "slug": "404", "label": "Not Found" },
+    { "slug": "search", "label": "Search Results" }
   ]
 }

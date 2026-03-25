@@ -22,13 +22,21 @@
   },
   "parts": ["header", "footer"],
   "pages": [
-    { "slug": "/", "title": "Home", "template": "home" },
+    { "slug": "/", "title": "Home", "template": "home", "wpTemplate": "front-page" },
     {
-      "slug": "/work", "title": "Work", "template": "work",
-      "collection": { "slug": "/work/:slug", "title": "Project", "template": "project", "count": 8 }
+      "slug": "/work", "title": "Work", "template": "work", "wpTemplate": "archive",
+      "collection": { "slug": "/work/:slug", "title": "Project", "template": "project", "wpTemplate": "single", "count": 8 }
     },
-    { "slug": "/services", "title": "Services", "template": "services" },
-    { "slug": "/about", "title": "About", "template": "about" },
-    { "slug": "/contact", "title": "Contact", "template": "contact" }
+    { "slug": "/services", "title": "Services", "template": "services", "wpTemplate": "page" },
+    { "slug": "/about", "title": "About", "template": "about", "wpTemplate": "page" },
+    { "slug": "/contact", "title": "Contact", "template": "contact", "wpTemplate": "page" }
+  ],
+  "wpTemplates": [
+    { "slug": "front-page", "label": "Front Page", "renders": ["/"] },
+    { "slug": "page", "label": "Page", "renders": ["/services", "/about", "/contact"] },
+    { "slug": "archive", "label": "Archive", "renders": ["/work"] },
+    { "slug": "single", "label": "Single Project" },
+    { "slug": "404", "label": "Not Found" },
+    { "slug": "search", "label": "Search Results" }
   ]
 }

@@ -271,6 +271,51 @@ export function renderSite(site: Site, pageSlug: string, colorMode?: 'light' | '
   return parts.join('\n')
 }
 
+/**
+ * Render a single section as a standalone HTML document (for template part thumbnails).
+ */
+export function renderSection(site: Site, sectionId: string): string {
+  const section = site.sections[sectionId]
+  if (!section) return createErrorDocument(`Section "${sectionId}" not found`)
+
+  const parts: string[] = []
+  parts.push('<!DOCTYPE html>')
+  parts.push('<html lang="en">')
+  parts.push('<head>')
+  parts.push('<meta charset="utf-8">')
+  parts.push('<meta name="viewport" content="width=device-width, initial-scale=1">')
+
+  if (site.theme.fonts.length > 0) {
+    const fontParams = site.theme.fonts
+      .map(font => `family=${encodeURIComponent(font)}`)
+      .join('&')
+    parts.push(`<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fontParams}&display=swap">`)
+  }
+
+  const themeVars = site.theme.variables
+  if (Object.keys(themeVars).length > 0) {
+    const rootVariables = Object.entries(themeVars)
+      .map(([key, value]) => `  ${key}: ${value};`)
+      .join('\n')
+    parts.push(`<style id="theme">:root {\n${rootVariables}\n}</style>`)
+  }
+
+  if (section.css.trim()) {
+    parts.push(`<style>${section.css}</style>`)
+  }
+
+  parts.push('<style>body { margin: 0; background: var(--bg, #fff); color-scheme: light; }</style>')
+  parts.push('</head>')
+  parts.push('<body>')
+  parts.push(`<div data-section="${escapeAttr(sectionId)}" style="display:contents">`)
+  parts.push(section.html)
+  parts.push('</div>')
+  parts.push('</body>')
+  parts.push('</html>')
+
+  return parts.join('\n')
+}
+
 // ---- PostMessage Helper Functions ----
 
 /**

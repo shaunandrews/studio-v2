@@ -22,15 +22,25 @@
   },
   "parts": ["header", "footer"],
   "pages": [
-    { "slug": "/", "title": "Home", "template": "home" },
+    { "slug": "/", "title": "Home", "template": "home", "wpTemplate": "front-page" },
     {
-      "slug": "/docs", "title": "Docs", "template": "docs",
-      "collection": { "slug": "/docs/:slug", "title": "Article", "template": "docs", "count": 42 }
+      "slug": "/docs", "title": "Docs", "template": "docs", "wpTemplate": "archive-docs",
+      "collection": { "slug": "/docs/:slug", "title": "Article", "template": "docs", "wpTemplate": "single-docs", "count": 42 }
     },
     {
-      "slug": "/blog", "title": "Blog", "template": "blog",
-      "collection": { "slug": "/blog/:slug", "title": "Post", "template": "post", "count": 10 }
+      "slug": "/blog", "title": "Blog", "template": "blog", "wpTemplate": "archive",
+      "collection": { "slug": "/blog/:slug", "title": "Post", "template": "post", "wpTemplate": "single", "count": 10 }
     },
-    { "slug": "/about", "title": "About", "template": "about" }
+    { "slug": "/about", "title": "About", "template": "about", "wpTemplate": "page" }
+  ],
+  "wpTemplates": [
+    { "slug": "front-page", "label": "Front Page", "renders": ["/"] },
+    { "slug": "page", "label": "Page", "renders": ["/about"] },
+    { "slug": "archive-docs", "label": "Docs Archive", "renders": ["/docs"] },
+    { "slug": "single-docs", "label": "Single Doc" },
+    { "slug": "archive", "label": "Archive", "renders": ["/blog"] },
+    { "slug": "single", "label": "Single Post" },
+    { "slug": "404", "label": "Not Found" },
+    { "slug": "search", "label": "Search Results" }
   ]
 }

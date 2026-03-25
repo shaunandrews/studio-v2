@@ -22,10 +22,18 @@
   },
   "parts": ["header", "footer"],
   "pages": [
-    { "slug": "/", "title": "Home", "template": "home" },
-    { "slug": "/features", "title": "Features", "template": "features" },
-    { "slug": "/pricing", "title": "Pricing", "template": "pricing" },
-    { "slug": "/about", "title": "About", "template": "about" },
-    { "slug": "/contact", "title": "Contact", "template": "contact" }
+    { "slug": "/", "title": "Home", "template": "home", "wpTemplate": "front-page" },
+    { "slug": "/features", "title": "Features", "template": "features", "wpTemplate": "page-features" },
+    { "slug": "/pricing", "title": "Pricing", "template": "pricing", "wpTemplate": "page-pricing" },
+    { "slug": "/about", "title": "About", "template": "about", "wpTemplate": "page" },
+    { "slug": "/contact", "title": "Contact", "template": "contact", "wpTemplate": "page" }
+  ],
+  "wpTemplates": [
+    { "slug": "front-page", "label": "Front Page", "renders": ["/"] },
+    { "slug": "page", "label": "Page", "renders": ["/about", "/contact"] },
+    { "slug": "page-features", "label": "Features Page", "renders": ["/features"] },
+    { "slug": "page-pricing", "label": "Pricing Page", "renders": ["/pricing"] },
+    { "slug": "404", "label": "Not Found" },
+    { "slug": "search", "label": "Search Results" }
   ]
 }

@@ -61,6 +61,18 @@ class StudioDatabase extends Dexie {
       revisions: 'id, siteId, taskId, timestamp',
       taskBranches: 'taskId, siteId',
     })
+    // v7: WP templates — clear siteContent to re-transform with wpTemplates data.
+    this.version(7).stores({
+      sites: 'id',
+      tasks: 'id, siteId, status, updatedAt, [siteId+archived]',
+      messages: 'id, taskId, timestamp',
+      previews: 'id, siteId, status',
+      siteContent: 'siteId',
+      revisions: 'id, siteId, taskId, timestamp',
+      taskBranches: 'taskId, siteId',
+    }).upgrade(tx => {
+      return tx.table('siteContent').clear()
+    })
   }
 }
 

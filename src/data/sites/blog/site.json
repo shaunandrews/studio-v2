@@ -22,12 +22,20 @@
   },
   "parts": ["header", "footer"],
   "pages": [
-    { "slug": "/", "title": "Home", "template": "home" },
+    { "slug": "/", "title": "Home", "template": "home", "wpTemplate": "front-page" },
     {
-      "slug": "/blog", "title": "Articles", "template": "blog",
-      "collection": { "slug": "/blog/:slug", "title": "Post", "template": "post", "count": 36 }
+      "slug": "/blog", "title": "Articles", "template": "blog", "wpTemplate": "archive",
+      "collection": { "slug": "/blog/:slug", "title": "Post", "template": "post", "wpTemplate": "single", "count": 36 }
     },
-    { "slug": "/about", "title": "About", "template": "about" },
-    { "slug": "/contact", "title": "Contact", "template": "contact" }
+    { "slug": "/about", "title": "About", "template": "about", "wpTemplate": "page" },
+    { "slug": "/contact", "title": "Contact", "template": "contact", "wpTemplate": "page" }
+  ],
+  "wpTemplates": [
+    { "slug": "front-page", "label": "Front Page", "renders": ["/"] },
+    { "slug": "page", "label": "Page", "renders": ["/about", "/contact"] },
+    { "slug": "archive", "label": "Archive", "renders": ["/blog"] },
+    { "slug": "single", "label": "Single Post" },
+    { "slug": "404", "label": "Not Found" },
+    { "slug": "search", "label": "Search Results" }
   ]
 }
