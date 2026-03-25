@@ -379,30 +379,24 @@ function animateZoomTo(targetX: number, targetY: number, targetZoom: number) {
   animFrame = requestAnimationFrame(step)
 }
 
-// Zoom via wheel (Ctrl+wheel = zoom, plain wheel = pan)
+// Scroll always zooms toward pointer; drag to pan
 function onWheel(e: WheelEvent) {
   e.preventDefault()
 
-  if (e.ctrlKey || e.metaKey) {
-    // Pinch-to-zoom or Ctrl+wheel → zoom
-    const viewport = viewportRef.value!
-    const rect = viewport.getBoundingClientRect()
-    const pointerX = e.clientX - rect.left
-    const pointerY = e.clientY - rect.top
+  const viewport = viewportRef.value!
+  const rect = viewport.getBoundingClientRect()
+  const pointerX = e.clientX - rect.left
+  const pointerY = e.clientY - rect.top
 
-    const delta = -e.deltaY * 0.005
-    const newZoom = Math.min(6, Math.max(0.15, zoom.value * (1 + delta)))
-    const scale = newZoom / zoom.value
+  // Pinch-to-zoom (ctrlKey) uses finer deltaY; regular scroll is coarser
+  const sensitivity = e.ctrlKey ? 0.005 : 0.005
+  const delta = -e.deltaY * sensitivity
+  const newZoom = Math.min(6, Math.max(0.15, zoom.value * (1 + delta)))
+  const scale = newZoom / zoom.value
 
-    // Zoom toward pointer position
-    panX.value = pointerX - scale * (pointerX - panX.value)
-    panY.value = pointerY - scale * (pointerY - panY.value)
-    zoom.value = newZoom
-  } else {
-    // Plain scroll → pan
-    panX.value -= e.deltaX
-    panY.value -= e.deltaY
-  }
+  panX.value = pointerX - scale * (pointerX - panX.value)
+  panY.value = pointerY - scale * (pointerY - panY.value)
+  zoom.value = newZoom
   startMoving()
   scheduleSettle()
   updateTaskInputPos()
@@ -641,6 +635,38 @@ function requestConnectorUpdate() {
 }
 
 let ro: ResizeObserver | null = null
+let prevViewport: HTMLElement | null = null
+
+function attachViewport(el: HTMLElement) {
+  el.addEventListener('wheel', onWheel, { passive: false })
+  ro = new ResizeObserver(() => {
+    centerCanvas()
+    requestConnectorUpdate()
+  })
+  ro.observe(el)
+  prevViewport = el
+}
+
+function detachViewport() {
+  if (prevViewport) {
+    prevViewport.removeEventListener('wheel', onWheel)
+    prevViewport = null
+  }
+  ro?.disconnect()
+  ro = null
+}
+
+// Re-attach listeners when viewportRef is recreated (e.g. after exiting section view)
+watch(viewportRef, (el, oldEl) => {
+  if (oldEl && oldEl !== el) detachViewport()
+  if (el) {
+    attachViewport(el)
+    nextTick(() => {
+      centerCanvas()
+      nextTick(() => computeConnectors())
+    })
+  }
+})
 
 onMounted(() => {
   nextTick(() => {
@@ -648,18 +674,12 @@ onMounted(() => {
     nextTick(() => computeConnectors())
   })
   if (viewportRef.value) {
-    viewportRef.value.addEventListener('wheel', onWheel, { passive: false })
-    ro = new ResizeObserver(() => {
-      centerCanvas()
-      requestConnectorUpdate()
-    })
-    ro.observe(viewportRef.value)
+    attachViewport(viewportRef.value)
   }
 })
 
 onUnmounted(() => {
-  ro?.disconnect()
-  viewportRef.value?.removeEventListener('wheel', onWheel)
+  detachViewport()
   if (settleTimer) clearTimeout(settleTimer)
   if (animFrame) cancelAnimationFrame(animFrame)
 })
