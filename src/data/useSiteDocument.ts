@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import type { SiteContent, SiteContentSection, SiteContentPage, Change } from './site-types'
+import type { SiteContent, SiteContentSection, SiteContentPage, SiteContentTemplate, Change } from './site-types'
 import type { SiteFiles } from './useSiteTemplates'
 import { db, isDbAvailable } from './db'
 import { toSerializable } from './utils'
@@ -175,9 +175,62 @@ function transformSiteFiles(siteId: string, files: SiteFiles): SiteContent {
     return {
       slug: page.slug,
       title: page.title,
+      template: page.wpTemplate,
       sections: pageSectionIds,
     }
   })
+
+  // Build wpTemplates — each template gets the section skeleton from its first rendered page
+  const wpTemplates: SiteContentTemplate[] = []
+  if (config.wpTemplates) {
+    for (const tplDef of config.wpTemplates) {
+      // Find the first page that uses this template to get its section skeleton
+      const firstPageSlug = tplDef.renders?.[0]
+      const firstPage = firstPageSlug
+        ? pages.find(p => p.slug === firstPageSlug)
+        : undefined
+
+      // For collection templates (single, single-product, etc.) find via wpTemplate on collections
+      let templateSections: string[] = []
+      if (firstPage) {
+        templateSections = [...firstPage.sections]
+      } else {
+        // Check collections for this template
+        for (const pageDef of config.pages) {
+          if (pageDef.collection?.wpTemplate === tplDef.slug) {
+            // Use the collection's template HTML to build sections
+            const collTemplateHtml = templates[pageDef.collection.template] ?? ''
+            const stripped = collTemplateHtml.replace(/^\s*\{\{(\w+)\}\}\s*$/gm, '').trim()
+            const extracted = extractSections(stripped)
+            if (sharedSectionIds['header']) templateSections.push(sharedSectionIds['header'])
+            for (const chunk of extracted) {
+              // These sections may already exist from page processing — reuse them
+              if (!sections[chunk.name]) {
+                const { html, css } = extractStyles(chunk.html)
+                sections[chunk.name] = { id: chunk.name, html, css, role: chunk.role || slugify(chunk.name) }
+              }
+              templateSections.push(chunk.name)
+            }
+            if (sharedSectionIds['footer']) templateSections.push(sharedSectionIds['footer'])
+            break
+          }
+        }
+      }
+
+      // For templates with no rendered pages (404, search), build a skeleton from parts only
+      if (templateSections.length === 0) {
+        if (sharedSectionIds['header']) templateSections.push(sharedSectionIds['header'])
+        if (sharedSectionIds['footer']) templateSections.push(sharedSectionIds['footer'])
+      }
+
+      wpTemplates.push({
+        slug: tplDef.slug,
+        label: tplDef.label,
+        sections: templateSections,
+        renders: tplDef.renders ?? [],
+      })
+    }
+  }
 
   return {
     siteId,
@@ -185,6 +238,7 @@ function transformSiteFiles(siteId: string, files: SiteFiles): SiteContent {
     theme: { fonts, variables },
     pages,
     sections,
+    wpTemplates,
   }
 }
 

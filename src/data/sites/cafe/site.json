@@ -22,14 +22,23 @@
   },
   "parts": ["header", "footer"],
   "pages": [
-    { "slug": "/", "title": "Home", "template": "home" },
-    { "slug": "/menu", "title": "Menu", "template": "menu" },
-    { "slug": "/about", "title": "About", "template": "about" },
+    { "slug": "/", "title": "Home", "template": "home", "wpTemplate": "front-page" },
+    { "slug": "/menu", "title": "Menu", "template": "menu", "wpTemplate": "page-menu" },
+    { "slug": "/about", "title": "About", "template": "about", "wpTemplate": "page" },
     {
-      "slug": "/blog", "title": "Blog", "template": "blog",
-      "collection": { "slug": "/blog/:slug", "title": "Post", "template": "post", "count": 12 }
+      "slug": "/blog", "title": "Blog", "template": "blog", "wpTemplate": "archive",
+      "collection": { "slug": "/blog/:slug", "title": "Post", "template": "post", "wpTemplate": "single", "count": 12 }
     },
-    { "slug": "/reservations", "title": "Reservations", "template": "reservations" },
-    { "slug": "/contact", "title": "Contact", "template": "contact" }
+    { "slug": "/reservations", "title": "Reservations", "template": "reservations", "wpTemplate": "page" },
+    { "slug": "/contact", "title": "Contact", "template": "contact", "wpTemplate": "page" }
+  ],
+  "wpTemplates": [
+    { "slug": "front-page", "label": "Front Page", "renders": ["/"] },
+    { "slug": "page", "label": "Page", "renders": ["/about", "/reservations", "/contact"] },
+    { "slug": "page-menu", "label": "Menu Page", "renders": ["/menu"] },
+    { "slug": "archive", "label": "Archive", "renders": ["/blog"] },
+    { "slug": "single", "label": "Single Post" },
+    { "slug": "404", "label": "Not Found" },
+    { "slug": "search", "label": "Search Results" }
   ]
 }

@@ -22,12 +22,20 @@
   },
   "parts": ["header", "footer"],
   "pages": [
-    { "slug": "/", "title": "Home", "template": "home" },
+    { "slug": "/", "title": "Home", "template": "home", "wpTemplate": "front-page" },
     {
-      "slug": "/portfolio", "title": "Portfolio", "template": "gallery",
-      "collection": { "slug": "/portfolio/:slug", "title": "Album", "template": "album", "count": 15 }
+      "slug": "/portfolio", "title": "Portfolio", "template": "gallery", "wpTemplate": "archive",
+      "collection": { "slug": "/portfolio/:slug", "title": "Album", "template": "album", "wpTemplate": "single", "count": 15 }
     },
-    { "slug": "/about", "title": "About", "template": "about" },
-    { "slug": "/contact", "title": "Contact", "template": "contact" }
+    { "slug": "/about", "title": "About", "template": "about", "wpTemplate": "page" },
+    { "slug": "/contact", "title": "Contact", "template": "contact", "wpTemplate": "page" }
+  ],
+  "wpTemplates": [
+    { "slug": "front-page", "label": "Front Page", "renders": ["/"] },
+    { "slug": "page", "label": "Page", "renders": ["/about", "/contact"] },
+    { "slug": "archive", "label": "Archive", "renders": ["/portfolio"] },
+    { "slug": "single", "label": "Single Album" },
+    { "slug": "404", "label": "Not Found" },
+    { "slug": "search", "label": "Search Results" }
   ]
 }

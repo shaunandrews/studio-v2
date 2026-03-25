@@ -8,12 +8,20 @@ export interface SitePageDef {
   slug: string
   title: string
   template: string
+  wpTemplate?: string
   collection?: {
     slug: string
     title: string
     template: string
+    wpTemplate?: string
     count: number
   }
+}
+
+export interface WPTemplateDef {
+  slug: string
+  label: string
+  renders?: string[]
 }
 
 export interface SiteConfig {
@@ -23,6 +31,7 @@ export interface SiteConfig {
   theme: SiteTheme
   parts: string[]
   pages: SitePageDef[]
+  wpTemplates?: WPTemplateDef[]
 }
 
 export interface SiteFiles {
@@ -38,6 +47,18 @@ export interface SiteMapNode {
   isCollection?: boolean
   collectionCount?: number
   children?: SiteMapNode[]
+}
+
+export interface SiteMapPart {
+  id: string
+  label: string
+}
+
+export function deriveSiteMapParts(config: SiteConfig): SiteMapPart[] {
+  return config.parts.map(part => ({
+    id: `shared-${part}`,
+    label: part.charAt(0).toUpperCase() + part.slice(1),
+  }))
 }
 
 export function deriveSiteMapTree(config: SiteConfig): SiteMapNode {

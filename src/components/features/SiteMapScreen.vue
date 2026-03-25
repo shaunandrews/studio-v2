@@ -7,11 +7,14 @@ import InputChatMini from '@/components/composites/InputChatMini.vue'
 import { useSites } from '@/data/useSites'
 import { useTasks } from '@/data/useTasks'
 import { useSiteDocument } from '@/data/useSiteDocument'
-import { renderSite } from '@/data/site-renderer'
+import { renderSite, renderSection } from '@/data/site-renderer'
 import { sites as siteRegistry } from '@/data/sites/index'
-import { deriveSiteMapTree } from '@/data/useSiteTemplates'
-import type { SiteMapNode } from '@/data/useSiteTemplates'
+import { deriveSiteMapTree, deriveSiteMapParts } from '@/data/useSiteTemplates'
+import type { SiteMapNode, SiteMapPart } from '@/data/useSiteTemplates'
 import SitePageThumb from '@/components/composites/SitePageThumb.vue'
+import SiteSectionThumb from '@/components/composites/SiteSectionThumb.vue'
+import SiteMapThemeView from '@/components/features/SiteMapThemeView.vue'
+import SiteMapSectionView from '@/components/features/SiteMapSectionView.vue'
 import type { MockLayout } from '@/data/types'
 
 const props = defineProps<{
@@ -30,12 +33,29 @@ const tree = computed<SiteMapNode | null>(() => {
   return null
 })
 
+const parts = computed<SiteMapPart[]>(() => {
+  if (siteFiles.value) return deriveSiteMapParts(siteFiles.value.config)
+  return []
+})
+
+/* ── View toggle (Map / Theme) ── */
+type SiteMapView = 'map' | 'theme'
+const activeView = ref<SiteMapView>('map')
+
+/* ── Section zoom view ── */
+const sectionViewPage = ref<{ slug: string; title: string } | null>(null)
+
 function getPageHtml(slug: string): string {
   if (!siteContent.value) return ''
   // Collection slugs with params (e.g. "/blog/:slug") won't match a real page.
   // Fall back to the parent path so the thumbnail shows something useful.
   const resolvedSlug = slug.includes(':') ? slug.replace(/\/:[^/]+$/, '') || '/' : slug
   return renderSite(siteContent.value, resolvedSlug)
+}
+
+function getSectionHtml(sectionId: string): string {
+  if (!siteContent.value) return ''
+  return renderSection(siteContent.value, sectionId)
 }
 
 /* ── Infinite canvas (pan & zoom) ── */
@@ -88,15 +108,41 @@ function deselectAll() {
   selectedNodeId.value = null
 }
 
-/** Resolve selected node ID → SiteMapNode */
+/** Resolve selected node ID → SiteMapNode (or SiteMapPart for template parts) */
 const selectedNode = computed<SiteMapNode | null>(() => {
   if (!selectedNodeId.value || !tree.value) return null
+  // Part-type IDs handled by selectedPart
+  if (selectedNodeId.value.startsWith('part-') || selectedNodeId.value.startsWith('tpart-')) return null
+  // Theme view template nodes — resolve via wpTemplates
+  if (selectedNodeId.value.startsWith('tpl-')) {
+    const idx = parseInt(selectedNodeId.value.slice(4), 10)
+    const wpTpls = siteContent.value?.wpTemplates
+    if (!wpTpls) return null
+    const tpl = wpTpls[idx]
+    if (!tpl) return null
+    // Use the first rendered page slug, or the template slug as fallback
+    const slug = tpl.renders[0] ?? `/${tpl.slug}`
+    return { label: tpl.label, slug, template: tpl.slug }
+  }
   if (selectedNodeId.value === 'root') return tree.value
-  const parts = selectedNodeId.value.split('-').map(Number)
-  const l1 = tree.value.children?.[parts[0]]
+  const indices = selectedNodeId.value.split('-').map(Number)
+  const l1 = tree.value.children?.[indices[0]]
   if (!l1) return null
-  if (parts.length === 1) return l1
-  return l1.children?.[parts[1]] ?? null
+  if (indices.length === 1) return l1
+  return l1.children?.[indices[1]] ?? null
+})
+
+const selectedPart = computed<SiteMapPart | null>(() => {
+  if (!selectedNodeId.value) return null
+  if (selectedNodeId.value.startsWith('part-')) {
+    const partIndex = parseInt(selectedNodeId.value.slice(5), 10)
+    return parts.value[partIndex] ?? null
+  }
+  if (selectedNodeId.value.startsWith('tpart-')) {
+    const partIndex = parseInt(selectedNodeId.value.slice(6), 10)
+    return parts.value[partIndex] ?? null
+  }
+  return null
 })
 
 const taskMessage = ref('')
@@ -123,17 +169,38 @@ function updateTaskInputPos() {
 }
 
 async function sendTask(text: string) {
-  if (!text || !selectedNode.value) return
+  if (!text || (!selectedNode.value && !selectedPart.value)) return
 
-  const pageName = selectedNode.value.label
+  let title: string
+  let contextMessage: string
+
+  if (selectedPart.value) {
+    // Template part context
+    const part = selectedPart.value
+    title = `${part.label}: ${text.slice(0, 40)}`
+    contextMessage = `[Context: Shared template part "${part.id}" (appears on all pages)]\nRole: ${part.label.toLowerCase()}\n\n${text}`
+  } else {
+    // Page context
+    const node = selectedNode.value!
+    const page = siteContent.value?.pages.find(p => p.slug === node.slug || (node.slug === '/' && p.slug === '/'))
+    const sectionList = page?.sections
+      .map(id => {
+        const s = siteContent.value?.sections[id]
+        return s ? `${id}${s.role ? ` [${s.role}]` : ''}` : id
+      })
+      .join(', ') ?? ''
+
+    title = `${node.label}: ${text.slice(0, 40)}`
+    contextMessage = `[Context: Page "${node.label}" (${node.slug})]\nSections on this page: ${sectionList}\n\n${text}`
+  }
+
   const task = await createTask({
     siteId: props.siteId,
     agentId: 'claude-code',
-    title: `${pageName}: ${text.slice(0, 40)}`,
+    title,
   })
   task.unread = true
 
-  const contextMessage = `[Site Map → ${pageName} page]\n\n${text}`
   sendMessage(task.id, contextMessage)
   generateTaskTitle(task.id, text)
 
@@ -225,40 +292,57 @@ function onPointerUp(e: PointerEvent) {
   }
 }
 
-// Double-click: zoom to fit the clicked page node
+// Double-click: enter section view for the clicked page node
 function onDoubleClick(e: MouseEvent) {
   const target = e.target as HTMLElement
   const nodeEl = target.closest('.sitemap-node') as HTMLElement | null
   if (!nodeEl) return
 
-  const thumbEl = nodeEl.querySelector('.page-thumb') as HTMLElement | null
-  if (!thumbEl) return
+  // Resolve the node to a page
+  const nodeId = nodeEl.dataset.nodeId
+  if (!nodeId) return
 
-  const viewport = viewportRef.value!
-  const vw = viewport.clientWidth
-  const vh = viewport.clientHeight
+  // Don't enter section view for part nodes
+  if (nodeId.startsWith('part-') || nodeId.startsWith('tpart-')) return
 
-  // Get the thumb's position in canvas-local coords
-  const canvasRect = canvasRef.value!.getBoundingClientRect()
-  const thumbRect = thumbEl.getBoundingClientRect()
-  const s = zoom.value
+  // Find the corresponding SiteMapNode
+  let node: SiteMapNode | null = null
+  if (nodeId === 'root') {
+    node = tree.value
+  } else if (nodeId.startsWith('tpl-')) {
+    // Theme view template — resolve via selectedNode logic
+    selectNode(nodeId)
+    node = selectedNode.value
+  } else {
+    const indices = nodeId.split('-').map(Number)
+    const l1 = tree.value?.children?.[indices[0]]
+    if (l1 && indices.length === 1) node = l1
+    else if (l1) node = l1.children?.[indices[1]] ?? null
+  }
 
-  const thumbLocalX = (thumbRect.left - canvasRect.left) / s
-  const thumbLocalY = (thumbRect.top - canvasRect.top) / s
-  const thumbLocalW = thumbRect.width / s
-  const thumbLocalH = thumbRect.height / s
+  if (node) {
+    sectionViewPage.value = { slug: node.slug, title: node.label }
+    deselectAll()
+  }
+}
 
-  // Fit the thumb in the viewport with padding
-  const pad = 80
-  const scaleX = (vw - pad * 2) / thumbLocalW
-  const scaleY = (vh - pad * 2) / thumbLocalH
-  const targetZoom = Math.min(6, Math.max(0.15, Math.min(scaleX, scaleY)))
+function exitSectionView() {
+  sectionViewPage.value = null
+}
 
-  // Center the thumb in the viewport
-  const targetPanX = (vw - thumbLocalW * targetZoom) / 2 - thumbLocalX * targetZoom
-  const targetPanY = (vh - thumbLocalH * targetZoom) / 2 - thumbLocalY * targetZoom
+async function onSectionTask(ctx: { sectionId: string; role: string; htmlPreview: string; message: string }) {
+  if (!sectionViewPage.value) return
 
-  animateZoomTo(targetPanX, targetPanY, targetZoom)
+  const task = await createTask({
+    siteId: props.siteId,
+    agentId: 'claude-code',
+    title: `${ctx.sectionId}: ${ctx.message.slice(0, 40)}`,
+  })
+  task.unread = true
+
+  const contextMessage = `[Context: Section "${ctx.sectionId}" on page "${sectionViewPage.value.title}" (${sectionViewPage.value.slug})]\nRole: ${ctx.role || 'content'}\nCurrent content preview: ${ctx.htmlPreview.slice(0, 200)}\n\n${ctx.message}`
+  sendMessage(task.id, contextMessage)
+  generateTaskTitle(task.id, ctx.message)
 }
 
 // Smooth animated zoom transition
@@ -334,7 +418,7 @@ function centerCanvas() {
   const prevTransform = canvas.style.transform
   canvas.style.transform = 'none'
 
-  const root = canvas.querySelector('.sitemap-root') as HTMLElement | null
+  const root = canvas.querySelector('.sitemap-canvas-content') as HTMLElement | null
   if (!root) { canvas.style.transform = prevTransform; return }
 
   const cw = root.offsetWidth
@@ -587,7 +671,19 @@ watch(tree, () => nextTick(() => {
 </script>
 
 <template>
+  <!-- Section zoom view (full-pane, replaces canvas) -->
+  <SiteMapSectionView
+    v-if="sectionViewPage"
+    :site-id="props.siteId"
+    :page-slug="sectionViewPage.slug"
+    :page-title="sectionViewPage.title"
+    @back="exitSectionView"
+    @create-task="onSectionTask"
+  />
+
+  <!-- Canvas view (map or theme) -->
   <div
+    v-else
     ref="viewportRef"
     class="sitemap-viewport"
     @pointerdown="onPointerDown"
@@ -596,64 +692,90 @@ watch(tree, () => nextTick(() => {
     @dblclick="onDoubleClick"
   >
     <div ref="canvasRef" class="sitemap-canvas" :class="{ 'is-moving': isMoving }" :style="canvasStyle">
-      <!-- SVG connector layer -->
-      <svg class="sitemap-connectors" aria-hidden="true">
+      <!-- SVG connector layer (map view only) -->
+      <svg v-if="activeView === 'map'" class="sitemap-connectors" aria-hidden="true">
         <path :d="connectorPath" />
       </svg>
-      <!-- Root / Home -->
-      <div v-if="tree" class="sitemap-root">
-        <div class="sitemap-node" :class="{ 'is-selected': selectedNodeId === 'root' }" data-node-id="root">
-          <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === 'root' }" :style="{ transform: labelScale }">{{ tree.label }}</span>
-          <div class="page-thumb">
-            <SitePageThumb v-if="siteContent" :html="getPageHtml(tree.slug)" />
+
+      <!-- Map view -->
+      <div v-if="activeView === 'map' && tree" class="sitemap-canvas-content">
+        <!-- Page hierarchy tree -->
+        <div class="sitemap-root">
+          <div class="sitemap-node" :class="{ 'is-selected': selectedNodeId === 'root' }" data-node-id="root">
+            <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === 'root' }" :style="{ transform: labelScale }">{{ tree.label }}</span>
+            <div class="page-thumb">
+              <SitePageThumb v-if="siteContent" :html="getPageHtml(tree.slug)" />
+            </div>
           </div>
-        </div>
 
-        <!-- Level 1 -->
-        <div v-if="tree.children?.length" class="sitemap-level">
-          <div class="sitemap-level__nodes">
-            <div v-for="(child, ci) in tree.children" :key="child.label" class="sitemap-branch">
-              <div class="sitemap-node" :data-node-id="String(ci)" :class="{ 'sitemap-node--stack': child.isCollection, 'is-selected': selectedNodeId === String(ci) }">
-                <div v-if="child.isCollection" class="stack-cards">
-                  <div class="stack-card" />
-                  <div class="stack-card" />
+          <!-- Level 1 -->
+          <div v-if="tree.children?.length" class="sitemap-level">
+            <div class="sitemap-level__nodes">
+              <div v-for="(child, ci) in tree.children" :key="child.label" class="sitemap-branch">
+                <div class="sitemap-node" :data-node-id="String(ci)" :class="{ 'sitemap-node--stack': child.isCollection, 'is-selected': selectedNodeId === String(ci) }">
+                  <div v-if="child.isCollection" class="stack-cards">
+                    <div class="stack-card" />
+                    <div class="stack-card" />
+                  </div>
+                  <div class="page-thumb">
+                    <SitePageThumb v-if="siteContent" :html="getPageHtml(child.slug)" />
+                  </div>
+                  <span v-if="child.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ child.collectionCount }}</span>
+                  <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === String(ci) }" :style="{ transform: labelScale }">{{ child.label }}</span>
                 </div>
-                <div class="page-thumb">
-                  <SitePageThumb v-if="siteContent" :html="getPageHtml(child.slug)" />
-                </div>
-                <span v-if="child.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ child.collectionCount }}</span>
-                <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === String(ci) }" :style="{ transform: labelScale }">{{ child.label }}</span>
-              </div>
 
-              <!-- Level 2 children -->
-              <template v-if="child.children?.length">
-                <div class="sitemap-level sitemap-level--sub">
-                  <div class="sitemap-level__nodes">
-                    <div v-for="(gc, gci) in child.children" :key="gc.label" class="sitemap-branch">
-                      <div class="sitemap-node" :data-node-id="`${ci}-${gci}`" :class="{ 'sitemap-node--stack': gc.isCollection, 'is-selected': selectedNodeId === `${ci}-${gci}` }">
-                        <div v-if="gc.isCollection" class="stack-cards">
-                          <div class="stack-card" />
-                          <div class="stack-card" />
+                <!-- Level 2 children -->
+                <template v-if="child.children?.length">
+                  <div class="sitemap-level sitemap-level--sub">
+                    <div class="sitemap-level__nodes">
+                      <div v-for="(gc, gci) in child.children" :key="gc.label" class="sitemap-branch">
+                        <div class="sitemap-node" :data-node-id="`${ci}-${gci}`" :class="{ 'sitemap-node--stack': gc.isCollection, 'is-selected': selectedNodeId === `${ci}-${gci}` }">
+                          <div v-if="gc.isCollection" class="stack-cards">
+                            <div class="stack-card" />
+                            <div class="stack-card" />
+                          </div>
+                          <div class="page-thumb">
+                            <SitePageThumb v-if="siteContent" :html="getPageHtml(gc.slug)" />
+                          </div>
+                          <span v-if="gc.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ gc.collectionCount }}</span>
+                          <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `${ci}-${gci}` }" :style="{ transform: labelScale }">{{ gc.label }}</span>
                         </div>
-                        <div class="page-thumb">
-                          <SitePageThumb v-if="siteContent" :html="getPageHtml(gc.slug)" />
-                        </div>
-                        <span v-if="gc.isCollection" class="sitemap-badge" :style="{ transform: badgeTransform }">{{ gc.collectionCount }}</span>
-                        <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `${ci}-${gci}` }" :style="{ transform: labelScale }">{{ gc.label }}</span>
                       </div>
                     </div>
                   </div>
-                </div>
-              </template>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template Parts floating group -->
+        <div v-if="parts.length" class="sitemap-parts-group">
+          <span class="sitemap-group-label" :style="{ transform: labelScale }">Template Parts</span>
+          <div class="sitemap-parts-nodes">
+            <div v-for="(part, pi) in parts" :key="part.id" class="sitemap-node" :data-node-id="`part-${pi}`" :class="{ 'is-selected': selectedNodeId === `part-${pi}` }">
+              <span class="sitemap-label" :class="{ 'is-selected': selectedNodeId === `part-${pi}` }" :style="{ transform: labelScale }">{{ part.label }}</span>
+              <SiteSectionThumb v-if="siteContent" :html="getSectionHtml(part.id)" />
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Theme view -->
+      <SiteMapThemeView
+        v-if="activeView === 'theme'"
+        :site-id="props.siteId"
+        :mock-layout="layout"
+        :selected-node-id="selectedNodeId"
+        :label-scale="labelScale"
+        :badge-transform="badgeTransform"
+        @select="selectNode"
+      />
     </div>
 
     <!-- Floating task input anchored to selected node -->
     <Transition name="task-input">
-      <div v-if="selectedNode && taskInputPos" class="task-input-float" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
+      <div v-if="(selectedNode || selectedPart) && taskInputPos" class="task-input-float" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
         <InputChatMini
           ref="taskInputRef"
           v-model="taskMessage"
@@ -663,6 +785,12 @@ watch(tree, () => nextTick(() => {
         />
       </div>
     </Transition>
+
+    <!-- View toggle -->
+    <div class="view-toggle">
+      <button class="view-toggle-btn" :class="{ 'is-active': activeView === 'map' }" @click="activeView = 'map'; deselectAll(); nextTick(() => { centerCanvas(); nextTick(() => computeConnectors()) })">Map</button>
+      <button class="view-toggle-btn" :class="{ 'is-active': activeView === 'theme' }" @click="activeView = 'theme'; deselectAll(); nextTick(() => centerCanvas())">Theme</button>
+    </div>
 
     <!-- Floating toolbar -->
     <div class="sitemap-toolbar">
@@ -701,6 +829,44 @@ watch(tree, () => nextTick(() => {
 
 .sitemap-viewport:active {
   cursor: grabbing;
+}
+
+/* ── View toggle ── */
+
+.view-toggle {
+  position: absolute;
+  inset-block-start: var(--space-m);
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  padding: var(--space-xxxs);
+  background: var(--color-frame-bg);
+  border: 1px solid var(--color-frame-border);
+  border-radius: var(--radius-m);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.view-toggle-btn {
+  padding: var(--space-xxxs) var(--space-s);
+  border: none;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--color-frame-fg-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--duration-instant) var(--ease-default),
+    color var(--duration-instant) var(--ease-default);
+}
+
+.view-toggle-btn:hover {
+  color: var(--color-frame-fg);
+}
+
+.view-toggle-btn.is-active {
+  background: var(--color-frame-hover);
+  color: var(--color-frame-fg);
 }
 
 /* ── Floating toolbar ── */
@@ -784,12 +950,46 @@ watch(tree, () => nextTick(() => {
   }
 }
 
+/* ── Canvas content layout ── */
+
+.sitemap-canvas-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 120px;
+}
+
 /* ── Tree structure ── */
 
 .sitemap-root {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* ── Template Parts group ── */
+
+.sitemap-parts-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block-start: 40px;
+}
+
+.sitemap-group-label {
+  transform-origin: bottom center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-block-end: var(--space-m);
+  white-space: nowrap;
+}
+
+.sitemap-parts-nodes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-l);
 }
 
 .sitemap-level {

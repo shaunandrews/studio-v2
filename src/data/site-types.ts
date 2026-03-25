@@ -7,7 +7,15 @@ export interface SiteContentTheme {
 export interface SiteContentPage {
   slug: string
   title: string
+  template?: string
   sections: string[]
+}
+
+export interface SiteContentTemplate {
+  slug: string
+  label: string
+  sections: string[]
+  renders: string[]
 }
 
 export interface SiteContentSection {
@@ -25,6 +33,7 @@ interface SiteDocument {
   theme: SiteContentTheme
   pages: SiteContentPage[]
   sections: Record<string, SiteContentSection>
+  wpTemplates?: SiteContentTemplate[]
 }
 
 // Backward-compat alias — site-renderer.ts does `import type { Site } from './site-types'`
