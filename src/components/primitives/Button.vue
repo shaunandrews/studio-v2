@@ -70,7 +70,7 @@ onUnmounted(() => {
         `btn--${size || 'default'}`,
         `btn--on-${surface || 'light'}`,
         `btn--${width || 'hug'}`,
-        { 'btn--icon-only': icon && !label, 'btn--active': active, 'btn--active-rotate': active && activeRotate, 'btn--destructive': destructive }
+        { 'btn--icon-only': iconOnly || (icon && !label), 'btn--active': active, 'btn--active-rotate': active && activeRotate, 'btn--destructive': destructive }
       ]"
       :disabled="disabled"
       :aria-label="!label && tooltip ? tooltip : undefined"
