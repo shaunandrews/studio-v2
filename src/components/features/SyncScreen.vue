@@ -150,6 +150,6 @@ function handleSyncFromCard(payload: { verb: 'push' | 'pull'; envId: string }) {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
 }
 </style>

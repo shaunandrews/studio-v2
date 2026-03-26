@@ -7,6 +7,7 @@ import Text from '@/components/primitives/Text.vue'
 import Button from '@/components/primitives/Button.vue'
 import StageCard from './StageCard.vue'
 import PipelineConnector from './PipelineConnector.vue'
+import SiteTimeline from '@/components/features/SiteTimeline.vue'
 
 const props = defineProps<{
   siteId: string
@@ -159,6 +160,8 @@ function envColor(environment?: string): string {
   <Pane :scrollable="false" centered>
     <div class="sync-pipeline__layout" :class="{ 'is-setup': showSetupLayout, 'is-ending': setupEnding, 'is-intro': isIntroStep }">
       <div ref="envContainerRef" class="sync-pipeline__environments">
+        <SiteTimeline v-if="!isSetup" :site-id="siteId" class="sync-pipeline__timeline" />
+
         <StageCard
           data-setup-index="-1"
           label="Local"
