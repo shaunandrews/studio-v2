@@ -4,6 +4,7 @@ import { plus, fullscreen } from '@wordpress/icons'
 import Button from '@/components/primitives/Button.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import InputChatMini from '@/components/composites/InputChatMini.vue'
 import { useSites } from '@/data/useSites'
 import { useTasks } from '@/data/useTasks'
@@ -516,7 +517,10 @@ watch(tree, () => nextTick(() => centerCanvas()))
 
   <!-- Canvas view (map or theme) -->
   <template v-if="!sectionViewPage">
-  <Toolbar title="Canvas" size="mini">
+  <Toolbar size="mini">
+    <template #start>
+      <ScreenSwitcher title="Canvas" />
+    </template>
     <template #center>
       <nav ref="viewTabsRef" class="view-tabs">
         <button ref="mapTabRef" class="view-tab" :class="{ 'is-active': activeView === 'map' }" @click="activeView = 'map'; deselectAll(); nextTick(() => centerCanvas())">Map</button>

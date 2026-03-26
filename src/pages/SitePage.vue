@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import ChatMessageList from '@/components/composites/ChatMessageList.vue'
 import InputChat from '@/components/composites/InputChat.vue'
 import Text from '@/components/primitives/Text.vue'
@@ -30,9 +29,6 @@ import { useRevisions } from '@/data/useRevisions'
 import { contentKey, useBranches } from '@/data/useBranches'
 import { renderSite } from '@/data/site-renderer'
 
-defineProps<{
-  sidebarHidden?: boolean
-}>()
 
 const route = useRoute()
 const router = useRouter()
@@ -150,31 +146,14 @@ watch(inputWrapRef, (el, _, onCleanup) => {
 const draft = ref('')
 const isScrolledUp = ref(false)
 
-function onNavigate(screen: string) {
-  const id = activeSiteId.value
-  if (!id) return
-  const routeName = screen === 'tasks' ? 'site-tasks' : `site-${screen}`
-  router.push({ name: routeName, params: { id } })
-}
-
-function onSelectChat(taskId: string) {
-  const id = activeSiteId.value
-  if (!id) return
-  draft.value = ''
-  previewingRevisionId.value = null
-  markRead(taskId)
-  router.push({ name: 'site-task', params: { id, taskId } })
-  nextTick(() => inputChatRef.value?.focus())
-}
-
-async function onNewChat() {
-  const siteId = activeSiteId.value
-  if (!siteId) return
-  const task = await createTask({ siteId })
-  draft.value = ''
-  router.push({ name: 'site-task', params: { id: siteId, taskId: task.id } })
-  nextTick(() => inputChatRef.value?.focus())
-}
+// React to task selection changes from sidebar navigation
+watch(selectedTaskId, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    draft.value = ''
+    previewingRevisionId.value = null
+    nextTick(() => inputChatRef.value?.focus())
+  }
+})
 
 function onSend(text: string, context?: import('@/data/types').TaskContextItem[]) {
   if (!selectedTaskId.value) return
@@ -194,13 +173,6 @@ function onSend(text: string, context?: import('@/data/types').TaskContextItem[]
     generateTaskTitle(selectedTaskId.value, text)
   }
 }
-
-const { width: navWidth, isDragging: isResizing, onPointerDown: onResizeStart, resetWidth: resetNavWidth } = useResizablePane({
-  defaultWidth: 275,
-  minWidth: 180,
-  maxWidth: 480,
-  storageKey: 'studio-nav-width',
-})
 
 const { openSettings } = useSettings()
 
@@ -406,28 +378,7 @@ onBeforeUnmount(() => {
   <div class="site-page vstack">
     <!-- Nested route outlet (children render null — SitePage owns the layout) -->
     <router-view />
-    <PaneGroup direction="horizontal" :class="{ 'is-resizing': isResizing || isBrowserResizing }">
-      <Pane fit :style="{ width: navWidth + 'px' }">
-        <SiteNavigation
-          v-if="activeSiteId"
-          :site-id="activeSiteId"
-          :selected-id="currentScreen === 'tasks' ? selectedTaskId : null"
-          :active-screen="currentScreen"
-          :site-favicon="isAllSites ? undefined : currentSite?.favicon"
-          :is-all-sites="isAllSites"
-          :sidebar-hidden="sidebarHidden"
-          @select="onSelectChat"
-          @new-task="onNewChat"
-          @navigate="onNavigate"
-          @switch-site="(id) => {
-            const screen = currentScreen === 'tasks' ? 'site-tasks' : `site-${currentScreen}`
-            router.push({ name: screen, params: { id } })
-          }"
-          @navigate-all-sites="router.push({ name: 'all-sites' })"
-        />
-      </Pane>
-      <ResizeHandle :is-dragging="isResizing" @pointerdown="onResizeStart" @dblclick="resetNavWidth" />
-
+    <PaneGroup direction="horizontal" :class="{ 'is-resizing': isBrowserResizing }">
       <!-- Detail area -->
       <PaneGroup>
         <SiteOverviewScreen v-if="!isAllSites && currentScreen === 'overview'" :site-id="activeSiteId!" :status="currentSite?.status" :loading-target="loadingTarget" @toggle-status="toggleStatus" />

@@ -7,7 +7,6 @@ import SiteItem from '@/components/composites/SiteItem.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Button from '@/components/primitives/Button.vue'
 
-import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 
@@ -23,7 +22,7 @@ const props = defineProps<{
   activeScreen?: string
   siteFavicon?: string
   isAllSites?: boolean
-  sidebarHidden?: boolean
+  surface?: 'chrome' | 'frame'
 }>()
 
 const emit = defineEmits<{
@@ -209,7 +208,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 </script>
 
 <template>
-  <div class="site-navigation">
+  <div class="site-navigation" :class="{ 'surface-chrome': surface === 'chrome' }">
     <!-- All Sites summary -->
     <div v-if="isAllSites" class="site-overview--all">
       <div class="summary__sites">
@@ -237,9 +236,8 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
     </div>
 
-    <!-- Site picker (when sidebar hidden) -->
-    <Transition name="site-header">
-      <div v-if="!isAllSites && sidebarHidden" ref="sitePickerEl" class="site-picker-anchor" :class="{ 'has-lights': isMac }">
+    <!-- Site picker -->
+    <div v-if="!isAllSites" ref="sitePickerEl" class="site-picker-anchor">
         <button class="site-picker pill pill-with-icon" @click="toggleSitePicker">
           <span class="pill-icon-start">
             <SiteIcon :favicon="siteFavicon" :site-name="siteId" :size="14" />
@@ -279,8 +277,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
             </button>
           </div>
         </Transition>
-      </div>
-    </Transition>
+    </div>
 
     <!-- Site nav -->
     <nav v-if="!isAllSites" class="site-sections">
@@ -418,7 +415,6 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
       </div>
     </div>
 
-    <ProgressiveBlur v-if="sidebarHidden" class="nav-blur" height="80px" />
   </div>
 </template>
 
@@ -430,8 +426,14 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   height: 100%;
 }
 
-.nav-blur {
-  z-index: 1;
+/* Chrome surface: remap frame tokens to chrome equivalents */
+.site-navigation.surface-chrome {
+  --color-frame-fg: var(--color-chrome-fg);
+  --color-frame-fg-muted: var(--color-chrome-fg-muted);
+  --color-frame-hover: var(--color-chrome-hover);
+  --color-frame-border: var(--color-chrome-border);
+  --color-frame-fill: var(--color-chrome-fill);
+  --color-frame-theme: var(--color-chrome-theme);
 }
 
 /* ── Site picker ── */
@@ -440,31 +442,6 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   position: relative;
   padding: 0 var(--space-xs);
   flex-shrink: 0;
-}
-
-.site-picker-anchor.has-lights {
-  padding-block-start: 48px; /* Clear macOS traffic lights within the frame */
-}
-
-/* Site header animate in/out */
-.site-header-enter-active {
-  transition: opacity 300ms var(--ease-default),
-    max-height 300ms var(--ease-default);
-}
-.site-header-leave-active {
-  transition: opacity 200ms var(--ease-default),
-    max-height 200ms var(--ease-default);
-}
-.site-header-enter-from,
-.site-header-leave-to {
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-}
-.site-header-enter-to,
-.site-header-leave-from {
-  max-height: 80px;
-  overflow: hidden;
 }
 
 /* ── Pill button ── */
@@ -497,6 +474,11 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
 
 .pill:hover {
   background: var(--color-frame-hover);
+}
+
+/* Chrome surface: pill blends with sidebar */
+.surface-chrome .pill {
+  background: transparent;
 }
 
 .pill-icon-start,

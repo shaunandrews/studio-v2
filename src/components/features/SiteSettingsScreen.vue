@@ -9,6 +9,8 @@ import SiteSettingsDebugging from '@/components/features/site-settings/SiteSetti
 import SiteSettingsImport from '@/components/features/site-settings/SiteSettingsImport.vue'
 import SiteSettingsExport from '@/components/features/site-settings/SiteSettingsExport.vue'
 import SiteSettingsActions from '@/components/features/site-settings/SiteSettingsActions.vue'
+import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import Button from '@/components/primitives/Button.vue'
 import { useSiteSettings, provideSiteSettings } from '@/data/useSiteSettings'
 
@@ -146,6 +148,11 @@ function onBarLeave(el: Element, done: () => void) {
 
 <template>
   <PaneGroup>
+    <Toolbar size="mini">
+      <template #start>
+        <ScreenSwitcher title="Settings" />
+      </template>
+    </Toolbar>
     <Pane scrollable centered>
       <div class="settings-sections">
         <SiteSettingsGeneral :site-id="siteId" />
