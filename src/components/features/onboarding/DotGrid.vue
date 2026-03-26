@@ -1,12 +1,23 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-const canvas = ref<HTMLCanvasElement | null>(null)
+const props = withDefaults(defineProps<{
+  opacity?: number
+  repulsion?: number
+  rippleStrength?: number
+  spacing?: number
+  crossSize?: number
+  crossThickness?: number
+}>(), {
+  opacity: 1,
+  repulsion: 6,
+  rippleStrength: 6,
+  spacing: 32,
+  crossSize: 5,
+  crossThickness: 0.75,
+})
 
-const SPACING = 32
-const CROSS_HALF = 5
-const CROSS_THICKNESS = .75
-const REPULSION = 6
+const canvas = ref<HTMLCanvasElement | null>(null)
 const SPRING_K = 0.07
 const DAMPING = 0.8
 const SLEEP_EPS = 0.08
@@ -18,7 +29,6 @@ const RADIUS_CONTRACT_SPEED = 0.10
 
 const RIPPLE_SPEED = 9
 const RIPPLE_HALF_WIDTH = 32
-const RIPPLE_STRENGTH = 6
 
 const INTRO_SPEED = 18
 const INTRO_FADE_WIDTH = 80
@@ -60,8 +70,8 @@ function readColor() {
 
 function initDots() {
   if (!canvas.value) return
-  cols = Math.ceil(canvas.value.offsetWidth / SPACING) + 1
-  rows = Math.ceil(canvas.value.offsetHeight / SPACING) + 1
+  cols = Math.ceil(canvas.value.offsetWidth / props.spacing) + 1
+  rows = Math.ceil(canvas.value.offsetHeight / props.spacing) + 1
   const n = cols * rows
   ox = new Float32Array(n)
   oy = new Float32Array(n)
@@ -102,8 +112,8 @@ function tick(timestamp: number): boolean {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const i = r * cols + c
-      const rx = c * SPACING
-      const ry = r * SPACING
+      const rx = c * props.spacing
+      const ry = r * props.spacing
 
       let dvx = vx[i]
       let dvy = vy[i]
@@ -118,7 +128,7 @@ function tick(timestamp: number): boolean {
         const ddy = cy - mouseY
         const dist = Math.sqrt(ddx * ddx + ddy * ddy)
         if (dist < currentRadius && dist > 0.5) {
-          const force = REPULSION * (1 - dist / currentRadius) / dist
+          const force = props.repulsion * (1 - dist / currentRadius) / dist
           dvx += force * ddx * dt
           dvy += force * ddy * dt
         }
@@ -134,7 +144,7 @@ function tick(timestamp: number): boolean {
         if (dist > 0.5) {
           const delta = dist - ripple.radius
           const falloff = Math.exp(-0.5 * (delta / RIPPLE_HALF_WIDTH) ** 2)
-          const force = RIPPLE_STRENGTH * falloff / dist
+          const force = props.rippleStrength * falloff / dist
           dvx += force * ddx * dt
           dvy += force * ddy * dt
         }
@@ -170,37 +180,37 @@ function tick(timestamp: number): boolean {
 
   // Draw dotted connecting lines between adjacent crosses
   ctx.strokeStyle = color
-  ctx.lineWidth = CROSS_THICKNESS
+  ctx.lineWidth = props.crossThickness
   ctx.setLineDash([1, 4])
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const i = r * cols + c
-      const x = c * SPACING + ox[i]
-      const y = r * SPACING + oy[i]
+      const x = c * props.spacing + ox[i]
+      const y = r * props.spacing + oy[i]
 
       if (!introComplete) {
-        const distFromCorner = Math.sqrt((c * SPACING) ** 2 + (r * SPACING) ** 2)
+        const distFromCorner = Math.sqrt((c * props.spacing) ** 2 + (r * props.spacing) ** 2)
         ctx.globalAlpha = Math.max(0, Math.min(1, (introRadius - distFromCorner) / INTRO_FADE_WIDTH))
       }
 
       // Horizontal line to right neighbor
       if (c < cols - 1) {
         const ni = r * cols + (c + 1)
-        const nx = (c + 1) * SPACING + ox[ni]
-        const ny = r * SPACING + oy[ni]
+        const nx = (c + 1) * props.spacing + ox[ni]
+        const ny = r * props.spacing + oy[ni]
         ctx.beginPath()
-        ctx.moveTo(x + CROSS_HALF, y)
-        ctx.lineTo(nx - CROSS_HALF, ny)
+        ctx.moveTo(x + props.crossSize, y)
+        ctx.lineTo(nx - props.crossSize, ny)
         ctx.stroke()
       }
       // Vertical line to bottom neighbor
       if (r < rows - 1) {
         const ni = (r + 1) * cols + c
-        const nx = c * SPACING + ox[ni]
-        const ny = (r + 1) * SPACING + oy[ni]
+        const nx = c * props.spacing + ox[ni]
+        const ny = (r + 1) * props.spacing + oy[ni]
         ctx.beginPath()
-        ctx.moveTo(x, y + CROSS_HALF)
-        ctx.lineTo(nx, ny - CROSS_HALF)
+        ctx.moveTo(x, y + props.crossSize)
+        ctx.lineTo(nx, ny - props.crossSize)
         ctx.stroke()
       }
     }
@@ -212,16 +222,16 @@ function tick(timestamp: number): boolean {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const i = r * cols + c
-      const x = c * SPACING + ox[i]
-      const y = r * SPACING + oy[i]
+      const x = c * props.spacing + ox[i]
+      const y = r * props.spacing + oy[i]
 
       if (!introComplete) {
-        const distFromCorner = Math.sqrt((c * SPACING) ** 2 + (r * SPACING) ** 2)
+        const distFromCorner = Math.sqrt((c * props.spacing) ** 2 + (r * props.spacing) ** 2)
         ctx.globalAlpha = Math.max(0, Math.min(1, (introRadius - distFromCorner) / INTRO_FADE_WIDTH))
       }
 
-      ctx.fillRect(x - CROSS_HALF, y - CROSS_THICKNESS / 2, CROSS_HALF * 2, CROSS_THICKNESS)
-      ctx.fillRect(x - CROSS_THICKNESS / 2, y - CROSS_HALF, CROSS_THICKNESS, CROSS_HALF * 2)
+      ctx.fillRect(x - props.crossSize, y - props.crossThickness / 2, props.crossSize * 2, props.crossThickness)
+      ctx.fillRect(x - props.crossThickness / 2, y - props.crossSize, props.crossThickness, props.crossSize * 2)
     }
   }
 
@@ -335,7 +345,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <canvas ref="canvas" class="dot-grid" />
+  <canvas ref="canvas" class="dot-grid" :style="{ opacity: props.opacity }" />
 </template>
 
 <style scoped>

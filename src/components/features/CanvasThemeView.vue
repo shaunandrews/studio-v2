@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import SitePageThumb from '@/components/composites/SitePageThumb.vue'
 import SiteSectionThumb from '@/components/composites/SiteSectionThumb.vue'
+import CanvasCard from '@/components/composites/CanvasCard.vue'
 import { useSiteDocument } from '@/data/useSiteDocument'
 import { renderSite, renderSection } from '@/data/site-renderer'
 import { sites as siteRegistry } from '@/data/sites/index'
@@ -261,17 +262,13 @@ function getSectionHtml(sectionId: string): string {
           v-for="(tpl, ti) in wpTemplates"
           :key="tpl.slug"
           class="canvas-node"
-          :class="{ 'canvas-node--stack': tpl.renders.length > 1, 'is-selected': selectedNodeId === `tpl-${ti}` }"
           :data-node-id="`tpl-${ti}`"
           @click.stop="emit('select', `tpl-${ti}`)"
         >
-          <div v-if="tpl.renders.length > 1" class="stack-cards">
-            <div class="stack-card" />
-            <div class="stack-card" />
-          </div>
-          <SiteSectionThumb v-if="siteContent" :html="getTemplateHtml(tpl)" />
-          <span v-if="tpl.renders.length > 1" class="canvas-badge" :style="{ transform: badgeTransform }">{{ tpl.renders.length }}</span>
           <span class="canvas-label" :class="{ 'is-selected': selectedNodeId === `tpl-${ti}` }" :style="{ transform: labelScale }">{{ tpl.label }}</span>
+          <CanvasCard :selected="selectedNodeId === `tpl-${ti}`" :stack="tpl.renders.length > 1" :count="tpl.renders.length">
+            <SiteSectionThumb v-if="siteContent" :html="getTemplateHtml(tpl)" />
+          </CanvasCard>
         </div>
       </div>
     </div>
@@ -284,12 +281,13 @@ function getSectionHtml(sectionId: string): string {
           v-for="(part, pi) in parts"
           :key="part.id"
           class="canvas-node"
-          :class="{ 'is-selected': selectedNodeId === `tpart-${pi}` }"
           :data-node-id="`tpart-${pi}`"
           @click.stop="emit('select', `tpart-${pi}`)"
         >
           <span class="canvas-label" :class="{ 'is-selected': selectedNodeId === `tpart-${pi}` }" :style="{ transform: labelScale }">{{ part.label }}</span>
-          <SiteSectionThumb v-if="siteContent" :html="getSectionHtml(part.id)" />
+          <CanvasCard :selected="selectedNodeId === `tpart-${pi}`">
+            <SiteSectionThumb v-if="siteContent" :html="getSectionHtml(part.id)" />
+          </CanvasCard>
         </div>
       </div>
     </div>
@@ -297,6 +295,7 @@ function getSectionHtml(sectionId: string): string {
     <!-- Styles (theme.json) group -->
     <div v-if="theme" class="theme-group">
       <span class="theme-group-label" :style="{ transform: labelScale }">Styles</span>
+      <CanvasCard>
       <div class="styles-card">
         <!-- Colors -->
         <div class="styles-section">
@@ -428,6 +427,7 @@ function getSectionHtml(sectionId: string): string {
           </div>
         </div>
       </div>
+      </CanvasCard>
     </div>
   </div>
 </template>
@@ -464,21 +464,11 @@ function getSectionHtml(sectionId: string): string {
   justify-content: center;
 }
 
-/* ── Node (duplicated from CanvasScreen — scoped styles don't inherit) ── */
+/* ── Node ── */
 
 .canvas-node {
   position: relative;
   cursor: pointer;
-}
-
-.canvas-node .page-thumb {
-  transition: outline-color var(--duration-fast) var(--ease-default);
-  outline: calc(1.5px / var(--zoom, 1)) solid transparent;
-  outline-offset: calc(2px / var(--zoom, 1));
-}
-
-.canvas-node.is-selected .page-thumb {
-  outline-color: var(--color-frame-selected);
 }
 
 .canvas-label {
@@ -501,65 +491,6 @@ function getSectionHtml(sectionId: string): string {
   color: var(--color-frame-selected);
 }
 
-.canvas-node--stack {
-  padding-block-start: 8px;
-  padding-inline-start: 8px;
-}
-
-.stack-cards {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.stack-card {
-  position: absolute;
-  inset-inline-start: 0;
-  inset-block-start: 0;
-  inset-inline-end: 8px;
-  inset-block-end: 8px;
-  background: var(--color-frame-bg);
-  border: calc(1px / var(--zoom, 1)) solid var(--color-frame-border);
-  box-shadow: 0 calc(1px / var(--zoom, 1)) calc(3px / var(--zoom, 1)) var(--color-shadow);
-}
-
-.stack-card:first-child {
-  inset-inline-start: 4px;
-  inset-block-start: 4px;
-  inset-inline-end: 4px;
-  inset-block-end: 4px;
-}
-
-.canvas-badge {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-end: 0;
-  transform-origin: top right;
-  z-index: 3;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 var(--space-xxs);
-  border-radius: 10px;
-  background: var(--color-theme-bg);
-  color: var(--color-theme-fg);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  line-height: 20px;
-  text-align: center;
-}
-
-.page-thumb {
-  width: 160px;
-  aspect-ratio: 3 / 4;
-  border-radius: calc(0.5px / var(--zoom, 1));
-  overflow: hidden;
-  background: white;
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 calc(1px / var(--zoom, 1)) calc(3px / var(--zoom, 1)) var(--color-shadow);
-}
-
 /* ── Styles card ── */
 
 .styles-card {
@@ -567,9 +498,6 @@ function getSectionHtml(sectionId: string): string {
   flex-direction: column;
   gap: var(--space-xl);
   padding: var(--space-l);
-  background: var(--color-frame-bg);
-  border: calc(1px / var(--zoom, 1)) solid var(--color-frame-border);
-  box-shadow: 0 calc(1px / var(--zoom, 1)) calc(3px / var(--zoom, 1)) var(--color-shadow);
   width: 320px;
 }
 

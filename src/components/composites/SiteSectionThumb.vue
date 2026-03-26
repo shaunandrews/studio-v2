@@ -52,16 +52,7 @@ watch(() => props.html, () => {
 .site-section-thumb {
   width: 160px;
   overflow: hidden;
-  background: white;
   position: relative;
-  z-index: 1;
-  box-shadow: 0 1px 3px var(--color-shadow);
-}
-
-@media (prefers-color-scheme: dark) {
-  .site-section-thumb {
-    background: #2c2c2c;
-  }
 }
 
 .site-section-thumb__iframe {
