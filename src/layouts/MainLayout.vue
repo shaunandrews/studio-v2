@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { drawerLeft } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
-import SiteList from '@/components/features/SiteList.vue'
+import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import SettingsPage from '@/components/composites/SettingsPage.vue'
 import { useSettings } from '@/data/useSettings'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
@@ -15,12 +16,14 @@ import { useAddSite } from '@/data/useAddSite'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useResizablePane } from '@/data/useResizablePane'
 import { useAuth } from '@/data/useAuth'
+import { useSites } from '@/data/useSites'
+import { useTasks } from '@/data/useTasks'
 
 const { hidden, toggle: toggleSidebar } = useSidebarCollapse()
 
 const { width: sidebarWidth, isDragging: isSidebarResizing, onPointerDown: onSidebarResizeStart, resetWidth: resetSidebarWidth } = useResizablePane({
-  defaultWidth: 210,
-  minWidth: 160,
+  defaultWidth: 260,
+  minWidth: 220,
   maxWidth: 360,
   storageKey: 'studio-sidebar-width',
 })
@@ -58,6 +61,53 @@ onBeforeUnmount(() => {
 
 function handleNewSite() {
   openAddSite()
+}
+
+// ── Sidebar navigation state ──
+const route = useRoute()
+const router = useRouter()
+const { sites, activeSiteId } = useSites()
+const { createTask, markRead } = useTasks()
+
+const isAllSites = computed(() => route.name === 'all-sites')
+const currentSite = computed(() => sites.value.find(p => p.id === activeSiteId.value))
+
+type Screen = 'overview' | 'canvas' | 'tasks' | 'sync' | 'sharing' | 'settings'
+const ROUTE_TO_SCREEN: Record<string, Screen> = {
+  'site-overview': 'overview',
+  'site-canvas': 'canvas',
+  'site-tasks': 'tasks',
+  'site-task': 'tasks',
+  'site-sync': 'sync',
+  'site-sharing': 'sharing',
+  'site-settings': 'settings',
+}
+const currentScreen = computed<Screen>(() => ROUTE_TO_SCREEN[route.name as string] ?? 'overview')
+const selectedTaskId = computed<string | null>(() => (route.params.taskId as string) ?? null)
+
+function onNavigate(screen: string) {
+  const id = activeSiteId.value
+  if (!id) return
+  router.push({ name: screen === 'tasks' ? 'site-tasks' : `site-${screen}`, params: { id } })
+}
+
+function onSelectTask(taskId: string) {
+  const id = activeSiteId.value
+  if (!id) return
+  markRead(taskId)
+  router.push({ name: 'site-task', params: { id, taskId } })
+}
+
+async function onNewTask() {
+  const siteId = activeSiteId.value
+  if (!siteId) return
+  const task = await createTask({ siteId })
+  router.push({ name: 'site-task', params: { id: siteId, taskId: task.id } })
+}
+
+function onSwitchSite(id: string) {
+  const screen = currentScreen.value === 'tasks' ? 'site-tasks' : `site-${currentScreen.value}`
+  router.push({ name: screen, params: { id } })
 }
 </script>
 
@@ -108,7 +158,21 @@ function handleNewSite() {
         :class="{ 'is-hidden': hidden, 'is-offscreen': isBackdropActive, 'is-resizing': isSidebarResizing }"
         :style="{ viewTransitionName: 'sidebar', width: hidden ? undefined : sidebarWidth + 'px' }"
       >
-        <SiteList class="flex-1 min-h-0" @new-site="handleNewSite" />
+        <SiteNavigation
+          v-if="activeSiteId"
+          class="flex-1 min-h-0"
+          surface="chrome"
+          :site-id="activeSiteId"
+          :selected-id="currentScreen === 'tasks' ? selectedTaskId : null"
+          :active-screen="currentScreen"
+          :site-favicon="isAllSites ? undefined : currentSite?.favicon"
+          :is-all-sites="isAllSites"
+          @select="onSelectTask"
+          @new-task="onNewTask"
+          @navigate="onNavigate"
+          @switch-site="onSwitchSite"
+          @navigate-all-sites="router.push({ name: 'all-sites' })"
+        />
       </div>
 
       <ResizeHandle
@@ -158,6 +222,7 @@ function handleNewSite() {
   height: 100%;
   overflow: hidden;
   padding: 8px; /* Figma: grid-unit-10 */
+  padding-inline-start: 0; /* Sidebar flush with viewport edge */
 }
 
 /* ── Sidebar ── */
@@ -197,7 +262,7 @@ function handleNewSite() {
 }
 
 .sidebar.is-offscreen {
-  transform: translateX(calc(-100% - 16px)); /* Clear body padding */
+  transform: translateX(calc(-100% - 8px));
   transition:
     width 300ms cubic-bezier(0.4, 0, 0.2, 1),
     transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -231,7 +296,7 @@ function handleNewSite() {
   position: absolute;
   inset-block-start: 8px;
   inset-block-end: 8px;
-  inset-inline-start: calc(var(--sidebar-width, 210px) + 16px); /* sidebar + body padding + gap */
+  inset-inline-start: calc(var(--sidebar-width, 260px) + 8px); /* sidebar + gap */
   inset-inline-end: 8px;
   border-radius: var(--radius-l);
   background: var(--color-frame-bg);
@@ -354,7 +419,7 @@ function handleNewSite() {
 .sidebar-resize-handle {
   position: absolute;
   inset-block: 0;
-  inset-inline-start: calc(var(--sidebar-width, 210px) + 15px); /* body padding (8px) + gap (8px) - 1px to sit on frame edge */
+  inset-inline-start: calc(var(--sidebar-width, 260px) + 7px); /* gap (8px) - 1px to sit on frame edge */
   z-index: 3;
   height: auto;
   background: transparent;
@@ -364,7 +429,7 @@ function handleNewSite() {
 
 .sidebar-toggle {
   bottom: 8px; /* Physical: body padding from window edge */
-  left: calc(var(--sidebar-width, 210px) + 8px - 32px); /* Physical: body padding + sidebar width - button width */
+  left: calc(var(--sidebar-width, 260px) - 32px); /* Physical: sidebar width - button width */
   /* Show: slide right with sidebar expansion (300ms, delayed 200ms) */
   transition:
     left 300ms cubic-bezier(0.4, 0, 0.2, 1) 200ms,

@@ -2,6 +2,8 @@
 import { computed, toRef } from 'vue'
 import { useSites } from '@/data/useSites'
 import { usePipeline } from '@/data/usePipeline'
+import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import SyncEmptyState from './sync/SyncEmptyState.vue'
 import SyncPipeline from './sync/SyncPipeline.vue'
 import SyncModal from './sync/SyncModal.vue'
@@ -109,6 +111,11 @@ function handleSyncFromCard(payload: { verb: 'push' | 'pull'; envId: string }) {
 
 <template>
   <div class="sync-screen">
+    <Toolbar size="mini">
+      <template #start>
+        <ScreenSwitcher title="Sync" />
+      </template>
+    </Toolbar>
     <SyncEmptyState v-if="!hasPipeline" @setup="setupDefaultPipeline" />
     <SyncPipeline
       v-else

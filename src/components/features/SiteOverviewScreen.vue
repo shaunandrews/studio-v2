@@ -6,6 +6,7 @@ import Tooltip from '@/components/primitives/Tooltip.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Pane from '@/components/composites/Pane.vue'
 import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
 import { useSites } from '@/data/useSites'
 import { useWPAdmin } from '@/data/useWPAdmin'
@@ -76,7 +77,10 @@ const openInLinks = [
 </script>
 
 <template>
-  <Toolbar title="Site Overview" size="mini">
+  <Toolbar size="mini">
+    <template #start>
+      <ScreenSwitcher title="Overview" />
+    </template>
     <template #end>
       <div class="overview__status">
         <span class="status-label" :class="status ?? 'stopped'">{{ statusLabel }}</span>

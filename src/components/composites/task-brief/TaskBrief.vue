@@ -4,6 +4,7 @@ import { useTasks } from '@/data/useTasks'
 import { useBranches } from '@/data/useBranches'
 import Button from '@/components/primitives/Button.vue'
 import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import TaskRevisions from './TaskRevisions.vue'
 
 const props = defineProps<{
@@ -34,7 +35,10 @@ const canMerge = computed(() => hasDiverged(props.taskId))
 </script>
 
 <template>
-  <Toolbar :title="title" size="mini">
+  <Toolbar size="mini">
+    <template #start>
+      <ScreenSwitcher :title="title" />
+    </template>
     <template #end>
       <TaskRevisions :task-id="taskId" @preview-revision="(id) => emit('preview-revision', id)" />
       <Button
@@ -54,3 +58,11 @@ const canMerge = computed(() => hasDiverged(props.taskId))
     </template>
   </Toolbar>
 </template>
+
+<style scoped>
+.toolbar-title {
+  font-size: var(--font-size-m);
+  font-weight: 600;
+  color: var(--color-frame-fg);
+}
+</style>
