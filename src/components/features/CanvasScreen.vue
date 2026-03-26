@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { plus, fullscreen } from '@wordpress/icons'
-import WPIcon from '@/components/primitives/WPIcon.vue'
+import Button from '@/components/primitives/Button.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Toolbar from '@/components/composites/Toolbar.vue'
 import InputChatMini from '@/components/composites/InputChatMini.vue'
@@ -526,23 +526,13 @@ watch(tree, () => nextTick(() => centerCanvas()))
     </template>
     <template #end>
       <div class="zoom-controls hstack align-center gap-xxxs">
-        <Tooltip text="Zoom out" placement="bottom" :delay="300">
-          <button class="zoom-btn" @click="zoomOut">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor" /></svg>
-          </button>
-        </Tooltip>
+        <Button variant="tertiary" icon-only tooltip="Zoom out" tooltip-placement="bottom" @click="zoomOut">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor" /></svg>
+        </Button>
         <span class="zoom-level">{{ zoomPercent }}%</span>
-        <Tooltip text="Zoom in" placement="bottom" :delay="300">
-          <button class="zoom-btn" @click="zoomIn">
-            <WPIcon :icon="plus" :size="16" />
-          </button>
-        </Tooltip>
+        <Button variant="tertiary" :icon="plus" icon-only tooltip="Zoom in" tooltip-placement="bottom" @click="zoomIn" />
         <div class="zoom-divider" />
-        <Tooltip text="Fit to screen" placement="bottom" :delay="300">
-          <button class="zoom-btn" @click="zoomFit">
-            <WPIcon :icon="fullscreen" :size="16" />
-          </button>
-        </Tooltip>
+        <Button variant="tertiary" :icon="fullscreen" icon-only tooltip="Fit to screen" tooltip-placement="bottom" @click="zoomFit" />
       </div>
     </template>
   </Toolbar>
@@ -662,26 +652,6 @@ watch(tree, () => nextTick(() => centerCanvas()))
 }
 
 /* ── Zoom controls ── */
-
-.zoom-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: var(--radius-s);
-  background: none;
-  color: var(--color-frame-fg-muted);
-  cursor: pointer;
-  transition: background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
-}
-
-.zoom-btn:hover {
-  background: var(--color-frame-hover);
-  color: var(--color-frame-fg);
-}
 
 .zoom-level {
   min-width: 36px;
