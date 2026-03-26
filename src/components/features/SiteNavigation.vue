@@ -37,7 +37,7 @@ const emit = defineEmits<{
 const { isMac } = useOperatingSystem()
 const { openAddSite } = useAddSite()
 const { showAllSitesView } = useAllSitesView()
-const { tasks, getTasksForSite, messages, archiveTask, unarchiveTask, isBusy, busyTaskIds } = useTasks()
+const { tasks, getTasksForSite, messages, renameTask, archiveTask, unarchiveTask, isBusy, busyTaskIds } = useTasks()
 const siteTasks = getTasksForSite(toRef(props, 'siteId'))
 
 const { sites: allSites } = useSites()
@@ -110,6 +110,40 @@ function onArchive(e: Event, taskId: string) {
   e.stopPropagation()
   archiveTask(taskId)
 }
+
+// ── Inline rename ──
+
+const editingTaskId = ref<string | null>(null)
+const editingTitle = ref('')
+
+function startEditing(taskId: string, currentTitle: string) {
+  editingTaskId.value = taskId
+  editingTitle.value = currentTitle || ''
+}
+
+function commitEdit() {
+  if (editingTaskId.value && editingTitle.value.trim()) {
+    renameTask(editingTaskId.value, editingTitle.value.trim())
+  }
+  editingTaskId.value = null
+  editingTitle.value = ''
+}
+
+function cancelEdit() {
+  editingTaskId.value = null
+  editingTitle.value = ''
+}
+
+function onEditKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    commitEdit()
+  } else if (e.key === 'Escape') {
+    cancelEdit()
+  }
+}
+
+const vFocus = { mounted: (el: HTMLElement) => el.focus() }
 
 const archiveMenuRef = ref<InstanceType<typeof FlyoutMenu> | null>(null)
 
@@ -296,9 +330,20 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
         class="site-tasks__item"
         :class="{ 'is-selected': task.id === selectedId }"
         @click="$emit('select', task.id)"
+        @dblclick.stop="startEditing(task.id, task.title || '')"
       >
         <span v-if="task.unread" class="site-tasks__unread-dot" />
-        <span class="site-tasks__item-title">{{ task.title || 'New task' }}</span>
+        <input
+          v-if="editingTaskId === task.id"
+          v-model="editingTitle"
+          class="site-tasks__item-edit"
+          @blur="commitEdit"
+          @keydown="onEditKeydown"
+          @click.stop
+          @dblclick.stop
+          v-focus
+        />
+        <span v-else class="site-tasks__item-title">{{ task.title || 'New task' }}</span>
         <span class="site-tasks__item-end">
           <template v-if="busyTaskIds.has(task.id)">
             <svg class="site-tasks__spinner" width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -713,6 +758,21 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.site-tasks__item-edit {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-m);
+  font-family: inherit;
+  line-height: 20px;
+  color: var(--color-frame-fg);
+  background: var(--color-frame-bg);
+  border: 1px solid var(--color-frame-theme);
+  border-radius: var(--radius-s);
+  outline: none;
+  padding: 0 var(--space-xxxs);
+  margin: -1px 0;
 }
 
 .site-tasks__item-end {
