@@ -8,8 +8,8 @@ defineEmits<{
 
 <template>
   <EmptyState
-    heading="Build locally, publish confidently"
-    subtext="Develop on your local site, push to staging to preview and test, then promote to production when it's ready for visitors."
+    heading="Keep every environment in sync"
+    subtext="Know exactly what's changed locally, what's been tested on staging, and what's live in production — all in one place."
     action-label="Setup Sync"
     @action="$emit('setup')"
   >
