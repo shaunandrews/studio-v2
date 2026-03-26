@@ -544,7 +544,7 @@ watch(tree, () => nextTick(() => centerCanvas()))
     @pointerup="onPointerUp"
     @dblclick="onDoubleClick"
   >
-    <DotGrid :opacity="0.05" :repulsion="0.5" :ripple-strength="0.75" :spacing="28" :cross-size="4" :cross-thickness="1" />
+    <DotGrid :opacity="0.06" :repulsion="0.5" :ripple-strength="0.75" :spacing="14" :cross-size="4" :cross-thickness=".5" />
     <div ref="canvasRef" class="canvas-canvas" :class="{ 'is-moving': isMoving }" :style="canvasStyle">
       <!-- Connectors (SVG inside transform group — real-time zoom/pan for free) -->
       <svg v-if="activeView === 'map' && canvasLayout.connectors.length" class="canvas-connectors" aria-hidden="true">

@@ -266,7 +266,7 @@ function getSectionHtml(sectionId: string): string {
           @click.stop="emit('select', `tpl-${ti}`)"
         >
           <span class="canvas-label" :class="{ 'is-selected': selectedNodeId === `tpl-${ti}` }" :style="{ transform: labelScale }">{{ tpl.label }}</span>
-          <CanvasCard :selected="selectedNodeId === `tpl-${ti}`" :stack="tpl.renders.length > 1" :count="tpl.renders.length">
+          <CanvasCard :selected="selectedNodeId === `tpl-${ti}`">
             <SiteSectionThumb v-if="siteContent" :html="getTemplateHtml(tpl)" />
           </CanvasCard>
         </div>
@@ -295,7 +295,6 @@ function getSectionHtml(sectionId: string): string {
     <!-- Styles (theme.json) group -->
     <div v-if="theme" class="theme-group">
       <span class="theme-group-label" :style="{ transform: labelScale }">Styles</span>
-      <CanvasCard>
       <div class="styles-card">
         <!-- Colors -->
         <div class="styles-section">
@@ -427,7 +426,6 @@ function getSectionHtml(sectionId: string): string {
           </div>
         </div>
       </div>
-      </CanvasCard>
     </div>
   </div>
 </template>
@@ -442,26 +440,23 @@ function getSectionHtml(sectionId: string): string {
 .theme-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .theme-group-label {
-  transform-origin: bottom center;
-  font-size: var(--font-size-xs);
+  transform-origin: bottom left; /* physical: anchored to group start */
+  font-size: var(--font-size-m);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-block-end: var(--space-m);
+  color: var(--color-frame-fg);
+  margin-block-end: calc(48px / var(--zoom, 1));
   white-space: nowrap;
 }
 
 .theme-group-nodes {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-l);
   align-items: flex-start;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
 /* ── Node ── */
@@ -497,7 +492,6 @@ function getSectionHtml(sectionId: string): string {
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
-  padding: var(--space-l);
   width: 320px;
 }
 

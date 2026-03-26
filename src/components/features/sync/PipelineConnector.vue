@@ -35,7 +35,7 @@ defineEmits<{
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-xxs);
 }
 
 .connector__line {

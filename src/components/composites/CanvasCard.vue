@@ -48,9 +48,10 @@ withDefaults(defineProps<{
   inset-block-start: 8px;
   inset-inline-end: 0;
   inset-block-end: 0;
-  background: var(--color-frame-bg);
-  border: calc(1px / var(--zoom, 1)) solid var(--color-frame-border);
-  box-shadow: 0 calc(1px / var(--zoom, 1)) calc(3px / var(--zoom, 1)) var(--color-shadow);
+  background: var(--color-frame-fg);
+  opacity: 0.03;
+  /* border: calc(1px / var(--zoom, 1)) solid var(--color-frame-border); */
+  /* box-shadow: 0 calc(1px / var(--zoom, 1)) calc(3px / var(--zoom, 1)) var(--color-shadow); */
 }
 
 /* Middle layer — half offset (renders second, sits in front of back) */
@@ -60,9 +61,10 @@ withDefaults(defineProps<{
   inset-block-start: 4px;
   inset-inline-end: 4px;
   inset-block-end: 4px;
-  background: var(--color-frame-bg);
-  border: calc(1px / var(--zoom, 1)) solid var(--color-frame-border);
-  box-shadow: 0 calc(1px / var(--zoom, 1)) calc(3px / var(--zoom, 1)) var(--color-shadow);
+  background: var(--color-frame-fg);
+  opacity: 0.03;
+  /* border: calc(1px / var(--zoom, 1)) solid var(--color-frame-border); */
+  /* box-shadow: 0 calc(1px / var(--zoom, 1)) calc(3px / var(--zoom, 1)) var(--color-shadow); */
 }
 
 /* ── Content area ── */
@@ -72,11 +74,11 @@ withDefaults(defineProps<{
   z-index: 1;
   overflow: hidden;
   background: white;
-  /* border-radius: calc(var(--radius-s) / var(--zoom, 1)); */
-  box-shadow: 0 calc(1px / var(--zoom, 1)) calc(3px / var(--zoom, 1)) var(--color-shadow);
+  border-radius: calc(var(--radius-s) / var(--zoom, 1));
+  box-shadow: 0 calc(1px / var(--zoom, 1)) calc(2px / var(--zoom, 1)) var(--color-shadow);
   transition: outline-color var(--duration-fast) var(--ease-default);
   outline: calc(1.5px / var(--zoom, 1)) solid transparent;
-  outline-offset: calc(2px / var(--zoom, 1));
+  /* outline-offset: calc(2px / var(--zoom, 1)); */
 }
 
 .is-selected .canvas-card__content {
