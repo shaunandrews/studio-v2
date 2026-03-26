@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { plus, arrowUp, chevronDown } from '@wordpress/icons'
+import { plus, arrowUp, chevronDown, close } from '@wordpress/icons'
+import { page as pageIcon, layout as templateIcon } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup, FlyoutMenuItem } from '@/components/primitives/FlyoutMenu.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import ContextRing from '@/components/primitives/ContextRing.vue'
 import { codingAgents } from '@/data/agents'
-import type { AgentId, Agent } from '@/data/types'
+import type { AgentId, Agent, TaskContextItem } from '@/data/types'
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const selectedAgentId = ref<AgentId>('wpcom')
@@ -80,6 +81,9 @@ const props = withDefaults(defineProps<{
   placeholder?: string
   elevated?: boolean
   streaming?: boolean
+  pages?: { slug: string; title: string }[]
+  templates?: { slug: string; label: string }[]
+  currentPageSlug?: string
 }>(), {
   surface: 'light',
   modelValue: '',
@@ -87,7 +91,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  send: [message: string]
+  send: [message: string, context?: TaskContextItem[]]
   stop: []
   'update:modelValue': [value: string]
   'manage-agents': []
@@ -100,11 +104,116 @@ const message = computed({
 
 const canSend = computed(() => message.value.trim().length > 0)
 
+// ── Attached context ──
+
+const attachedContext = ref<TaskContextItem[]>([])
+
+function isPageAttached(slug: string): boolean {
+  return attachedContext.value.some(c => c.type === 'page' && c.pageSlug === slug)
+}
+
+function isTemplateAttached(slug: string): boolean {
+  return attachedContext.value.some(c => c.type === 'template' && c.templateSlug === slug)
+}
+
+function attachPage(slug: string, title: string) {
+  if (isPageAttached(slug)) return
+  attachedContext.value.push({ type: 'page', pageSlug: slug, pageTitle: title })
+}
+
+function attachTemplate(slug: string, label: string) {
+  if (isTemplateAttached(slug)) return
+  attachedContext.value.push({ type: 'template', templateSlug: slug, templateLabel: label })
+}
+
+function removeContext(index: number) {
+  attachedContext.value.splice(index, 1)
+}
+
+// File upload
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
+function triggerFileUpload() {
+  fileInputRef.value?.click()
+}
+
+function onFileSelected(e: Event) {
+  const input = e.target as HTMLInputElement
+  if (!input.files?.length) return
+  // Prototype: just log the file name. Real implementation would upload and attach.
+  for (const file of input.files) {
+    console.log('[InputChat] File selected:', file.name, file.type, file.size)
+  }
+  input.value = ''
+}
+
+const currentPageTitle = computed(() => {
+  if (!props.currentPageSlug || !props.pages) return null
+  const p = props.pages.find(pg => pg.slug === props.currentPageSlug)
+  return p?.title ?? null
+})
+
+const attachMenuGroups = computed<FlyoutMenuGroup[]>(() => {
+  const items: FlyoutMenuItem[] = []
+
+  // Current page shortcut
+  if (props.currentPageSlug && currentPageTitle.value) {
+    const slug = props.currentPageSlug
+    const title = currentPageTitle.value
+    items.push({
+      label: `Current page: ${title}`,
+      detail: slug,
+      icon: pageIcon,
+      checked: isPageAttached(slug),
+      action: () => attachPage(slug, title),
+    })
+  }
+
+  // All pages
+  if (props.pages?.length) {
+    items.push({
+      label: 'Add page...',
+      icon: pageIcon,
+      children: props.pages.map(p => ({
+        label: p.title,
+        detail: p.slug,
+        checked: isPageAttached(p.slug),
+        action: () => attachPage(p.slug, p.title),
+      })),
+    })
+  }
+
+  // Templates
+  if (props.templates?.length) {
+    items.push({
+      label: 'Add template...',
+      icon: templateIcon,
+      children: props.templates.map(t => ({
+        label: t.label,
+        detail: t.slug,
+        checked: isTemplateAttached(t.slug),
+        action: () => attachTemplate(t.slug, t.label),
+      })),
+    })
+  }
+
+  // Upload file
+  items.push({
+    label: 'Upload file...',
+    icon: plus,
+    action: () => triggerFileUpload(),
+  })
+
+  return items.length ? [{ items }] : []
+})
+
 function send() {
   const text = message.value.trim()
   if (!text) return
-  emit('send', text)
+  const ctx = attachedContext.value.length ? [...attachedContext.value] : undefined
+  emit('send', text, ctx)
   message.value = ''
+  attachedContext.value = []
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -134,8 +243,22 @@ function focusInput(e: MouseEvent) {
 
 <template>
   <div class="input-chat" :class="[`surface-${props.surface}`, { 'has-content': canSend, 'is-elevated': props.elevated }]" @click="focusInput">
+    <input ref="fileInputRef" type="file" class="sr-only" multiple @change="onFileSelected" />
 
     <div class="input-body">
+      <!-- Attached context chips -->
+      <div v-if="attachedContext.length" class="attached-chips">
+        <span v-for="(item, i) in attachedContext" :key="i" class="attached-chip">
+          <WPIcon :icon="item.type === 'template' ? templateIcon : pageIcon" :size="14" />
+          <span class="attached-chip__label">
+            <template v-if="item.type === 'page'">{{ item.pageTitle }}</template>
+            <template v-else-if="item.type === 'template'">{{ item.templateLabel }}</template>
+          </span>
+          <button class="attached-chip__remove" aria-label="Remove" @click.stop="removeContext(i)">
+            <WPIcon :icon="close" :size="12" />
+          </button>
+        </span>
+      </div>
       <textarea
         ref="textareaRef"
         v-model="message"
@@ -146,8 +269,17 @@ function focusInput(e: MouseEvent) {
       />
       <div class="input-toolbar">
         <div class="input-toolbar__start">
-          <Tooltip text="Attach" placement="top">
-            <button class="input-icon-btn" aria-label="Attach">
+          <FlyoutMenu v-if="attachMenuGroups.length" :groups="attachMenuGroups" placement="above" align="start">
+            <template #trigger="{ toggle }">
+              <Tooltip text="Attach context" placement="top">
+                <button class="input-icon-btn" aria-label="Attach context" @click="toggle">
+                  <WPIcon :icon="plus" :size="24" />
+                </button>
+              </Tooltip>
+            </template>
+          </FlyoutMenu>
+          <Tooltip v-else text="Attach" placement="top">
+            <button class="input-icon-btn" aria-label="Attach" disabled>
               <WPIcon :icon="plus" :size="24" />
             </button>
           </Tooltip>
@@ -356,6 +488,62 @@ function focusInput(e: MouseEvent) {
   height: 10px;
   border-radius: 2px;
   background: currentColor;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* ── Attached context chips ── */
+
+.attached-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xxxs);
+  padding: 0;
+}
+
+.attached-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxxs);
+  padding: 2px var(--space-xxs) 2px var(--space-xxs);
+  border-radius: var(--radius-s);
+  background: var(--color-frame-hover);
+  font-size: var(--font-size-xs);
+  line-height: 1;
+  color: var(--color-frame-fg-muted);
+}
+
+.attached-chip__label {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-frame-fg);
+}
+
+.attached-chip__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--color-frame-fg-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--duration-instant) var(--ease-default);
+}
+
+.attached-chip__remove:hover {
+  color: var(--color-frame-fg);
 }
 
 /* ── Dark surface variant ── */

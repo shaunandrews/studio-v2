@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { page as pageIcon, layout as templateIcon, columns as sectionIcon } from '@wordpress/icons'
+import WPIcon from '@/components/primitives/WPIcon.vue'
 import MarkdownText from '@/components/composites/renderers/MarkdownText.vue'
 import ToolCallItem from '@/components/composites/ToolCallItem.vue'
 import { useSiteDocument } from '@/data/useSiteDocument'
-import type { AgentId, ToolCall } from '@/data/types'
+import type { AgentId, ToolCall, TaskContextItem } from '@/data/types'
 
 const VISIBLE_TAIL = 3
 
@@ -13,6 +15,7 @@ const props = defineProps<{
   toolCalls?: ToolCall[]
   agentId?: AgentId
   siteId?: string
+  context?: TaskContextItem[]
 }>()
 
 const { undoChange } = useSiteDocument()
@@ -44,6 +47,24 @@ function onToolUndo(changeId: string) {
     class="chat-message vstack gap-xxs"
     :class="`chat-message--${role}`"
   >
+    <!-- Context chips (user messages only) -->
+    <div v-if="role === 'user' && context?.length" class="context-chips">
+      <span v-for="(item, i) in context" :key="i" class="context-chip">
+        <WPIcon :icon="item.type === 'page' ? pageIcon : item.type === 'template' ? templateIcon : sectionIcon" :size="14" />
+        <template v-if="item.type === 'page'">
+          <span class="context-chip__label">{{ item.pageTitle }}</span>
+          <span class="context-chip__slug">{{ item.pageSlug }}</span>
+        </template>
+        <template v-else-if="item.type === 'section'">
+          <span class="context-chip__label">{{ item.sectionId }}</span>
+          <span class="context-chip__slug">on {{ item.pageTitle }}</span>
+          <span v-if="item.shared" class="context-chip__badge">shared</span>
+        </template>
+        <template v-else-if="item.type === 'template'">
+          <span class="context-chip__label">{{ item.templateLabel }}</span>
+        </template>
+      </span>
+    </div>
     <div class="chat-message-body vstack gap-xxs">
       <div v-if="content === '...'" class="thinking-dots">
         <span class="thinking-dot" />
@@ -166,5 +187,45 @@ function onToolUndo(changeId: string) {
 
 .tool-calls-expand:hover {
   color: var(--color-frame-theme);
+}
+
+/* ── Context chips ── */
+
+.context-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xxxs);
+  align-self: flex-end;
+}
+
+.context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxxs);
+  padding: 2px var(--space-xs) 2px var(--space-xxs);
+  border-radius: var(--radius-s);
+  background: var(--color-frame-bg);
+  border: 1px solid var(--color-frame-border);
+  font-size: var(--font-size-xs);
+  line-height: 1;
+  color: var(--color-frame-fg-muted);
+}
+
+.context-chip__label {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-frame-fg);
+}
+
+.context-chip__slug {
+  font-family: var(--font-mono);
+  opacity: 0.6;
+}
+
+.context-chip__badge {
+  padding: 0 var(--space-xxxs);
+  border-radius: var(--radius-s);
+  background: var(--color-frame-hover);
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-medium);
 }
 </style>

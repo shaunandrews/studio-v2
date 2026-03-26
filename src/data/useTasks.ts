@@ -8,7 +8,7 @@ import { useRevisions } from './useRevisions'
 import { useBranches, contentKey } from './useBranches'
 import { db, isDbAvailable } from './db'
 import { toSerializable } from './utils'
-import type { Task, Message, AgentId, ToolCall } from './types'
+import type { Task, Message, AgentId, ToolCall, TaskContextItem } from './types'
 import type { RevisionChange } from './site-types'
 
 // Module-level state (singleton)
@@ -56,6 +56,7 @@ function appendMessage(
   role: 'user' | 'agent',
   content: string,
   agentId?: AgentId,
+  context?: TaskContextItem[],
 ) {
   const msg: Message = {
     id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -63,6 +64,7 @@ function appendMessage(
     role,
     agentId,
     content,
+    context,
     timestamp: new Date().toISOString(),
   }
   messages.value.push(msg)
@@ -156,7 +158,7 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
     if (controller.signal.aborted) break
 
     const currentContent = getContent(branchKey).value!
-    const system = buildSystemPrompt(currentContent)
+    const system = buildSystemPrompt(currentContent, task?.context)
 
     // Build API message history from task messages
     const apiMessages: Array<{ role: string; content: any }> = []
@@ -168,7 +170,16 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
 
     for (const m of history) {
       if (m.role === 'user') {
-        apiMessages.push({ role: 'user', content: m.content })
+        let userContent = m.content
+        if (m.context?.length) {
+          const labels = m.context.map(item => {
+            if (item.type === 'page') return `Page "${item.pageTitle}" (${item.pageSlug})`
+            if (item.type === 'section') return `Section "${item.sectionId}" on "${item.pageTitle}" (${item.pageSlug})`
+            return `Template "${item.templateLabel}"`
+          })
+          userContent = `[Context: ${labels.join(', ')}]\n${m.content}`
+        }
+        apiMessages.push({ role: 'user', content: userContent })
       } else {
         // Only include tool calls that reference valid API tools with parseable args
         const apiToolCalls = (m.toolCalls ?? []).filter(tc => {
@@ -244,7 +255,7 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
           }
         },
         onToolUseComplete: (toolUse) => {
-          const execResult = executeToolCall(branchKey, toolUse.name, toolUse.input, toolUse.id)
+          const execResult = executeToolCall(branchKey, toolUse.name, toolUse.input, toolUse.id, taskId)
 
           // Push to preview
           if (execResult.change && !execResult.isError) {
@@ -266,6 +277,16 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
                   break
                 case 'update_theme':
                   pushThemeUpdate(toolUse.input.variables)
+                  break
+                case 'update_page':
+                  pushPageUpdate(updatedContent, toolUse.input.new_slug ?? toolUse.input.slug)
+                  break
+                case 'restore_revision':
+                  // Full rebuild — push all pages
+                  for (const page of updatedContent.pages) {
+                    pushPageUpdate(updatedContent, page.slug)
+                  }
+                  pushThemeUpdate(updatedContent.theme.variables)
                   break
               }
             }
@@ -379,6 +400,7 @@ export function useTasks() {
     siteId: string
     agentId?: AgentId
     title?: string
+    context?: TaskContextItem[]
   }): Promise<Task> {
     const now = new Date().toISOString()
     const task: Task = {
@@ -386,6 +408,7 @@ export function useTasks() {
       siteId: opts.siteId,
       agentId: opts.agentId ?? 'wpcom',
       title: opts.title,
+      context: opts.context,
       createdAt: now,
       updatedAt: now,
     }
@@ -400,8 +423,8 @@ export function useTasks() {
     return task
   }
 
-  function sendMessage(taskId: string, content: string) {
-    appendMessage(taskId, 'user', content)
+  function sendMessage(taskId: string, content: string, context?: TaskContextItem[]) {
+    appendMessage(taskId, 'user', content, undefined, context)
     queueAgentResponse(taskId)
   }
 
@@ -482,6 +505,15 @@ export function useTasks() {
     }
   }
 
+  async function renameTask(id: string, title: string) {
+    const task = tasks.value.find(t => t.id === id)
+    if (task) {
+      task.title = title
+      task.updatedAt = new Date().toISOString()
+      await persistTask(task)
+    }
+  }
+
   async function unarchiveTask(id: string) {
     const task = tasks.value.find(t => t.id === id)
     if (task) {
@@ -539,6 +571,7 @@ export function useTasks() {
     postMessage,
     streamAgentMessage,
     markRead,
+    renameTask,
     archiveTask,
     unarchiveTask,
     generateTaskTitle,

@@ -67,6 +67,7 @@ onBeforeUnmount(() => {
         :tool-calls="msg.toolCalls"
         :agent-id="msg.agentId"
         :site-id="siteId"
+        :context="msg.context"
       />
     </div>
   </div>

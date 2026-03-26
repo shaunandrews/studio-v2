@@ -565,6 +565,45 @@ function reorderSections(
   return change
 }
 
+function updatePage(
+  siteId: string,
+  slug: string,
+  updates: { title?: string; newSlug?: string },
+): Change | null {
+  const content = contentMap.value[siteId]
+  if (!content) return null
+  const page = content.pages.find(p => p.slug === slug)
+  if (!page) return null
+
+  const prevTitle = page.title
+  const prevSlug = page.slug
+
+  if (updates.title !== undefined) page.title = updates.title
+  if (updates.newSlug !== undefined) page.slug = updates.newSlug
+  persistContent(content)
+
+  const change: Change = {
+    id: makeChangeId(),
+    siteId,
+    toolName: 'update_page',
+    label: `Updated page "${prevTitle}"`,
+    timestamp: new Date().toISOString(),
+    undo: () => {
+      const c = contentMap.value[siteId]
+      if (!c) return
+      const p = c.pages.find(pg => pg.slug === (updates.newSlug ?? slug))
+      if (p) {
+        p.title = prevTitle
+        p.slug = prevSlug
+      }
+      persistContent(c)
+    },
+  }
+
+  pushChange(siteId, change)
+  return change
+}
+
 function undoChange(siteId: string, changeId: string) {
   const stack = changeStacks.value[siteId]
   if (!stack) return
@@ -626,6 +665,7 @@ export function useSiteDocument() {
     addPage,
     removePage,
     reorderSections,
+    updatePage,
     undoChange,
     initFromTemplate,
     _setContent,

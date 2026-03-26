@@ -11,6 +11,7 @@ import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 import ResizeHandle from '@/components/primitives/ResizeHandle.vue'
 import Pane from '@/components/composites/Pane.vue'
 import PaneGroup from '@/components/composites/PaneGroup.vue'
+import Toolbar from '@/components/composites/Toolbar.vue'
 import TaskBrief from '@/components/composites/task-brief/TaskBrief.vue'
 import SyncScreen from '@/components/features/SyncScreen.vue'
 import SharingScreen from '@/components/features/SharingScreen.vue'
@@ -52,7 +53,7 @@ function toggleStatus() {
     statusTimer = null
   }, 1200)
 }
-const { tasks, getTasksForSite, getMessages, sendMessage, streamAgentMessage, createTask, generateTaskTitle, markRead, isBusy, stopTask } = useTasks()
+const { tasks, messages, getTasksForSite, getMessages, sendMessage, postMessage, streamAgentMessage, createTask, generateTaskTitle, markRead, isBusy, stopTask } = useTasks()
 
 const isTaskStreaming = computed(() =>
   selectedTaskId.value ? isBusy(selectedTaskId.value).value : false
@@ -122,6 +123,16 @@ const selectedTask = computed(() =>
   tasks.value.find(t => t.id === selectedTaskId.value)
 )
 
+// Navigate browser preview to the task's context page when selecting a task
+watch(selectedTaskId, (id) => {
+  if (!id || currentScreen.value !== 'tasks') return
+  const task = tasks.value.find(t => t.id === id)
+  const pageCtx = task?.context?.find(c => c.type === 'page' || c.type === 'section')
+  if (pageCtx && 'pageSlug' in pageCtx) {
+    navigateToPage(pageCtx.pageSlug)
+  }
+})
+
 const inputChatRef = ref<InstanceType<typeof InputChat> | null>(null)
 const inputWrapRef = ref<HTMLDivElement | null>(null)
 const inputHeight = ref(0)
@@ -165,10 +176,19 @@ async function onNewChat() {
   nextTick(() => inputChatRef.value?.focus())
 }
 
-function onSend(text: string) {
+function onSend(text: string, context?: import('@/data/types').TaskContextItem[]) {
   if (!selectedTaskId.value) return
   const isFirst = isNewTask.value
-  sendMessage(selectedTaskId.value, text)
+
+  // Default to current page context on first message if none was attached
+  if (isFirst && !context?.length && currentPageSlug.value) {
+    const pageInfo = browserPages.value.find(p => p.slug === currentPageSlug.value)
+    if (pageInfo) {
+      context = [{ type: 'page', pageSlug: pageInfo.slug, pageTitle: pageInfo.title }]
+    }
+  }
+
+  sendMessage(selectedTaskId.value, text, context)
   draft.value = ''
   if (isFirst) {
     generateTaskTitle(selectedTaskId.value, text)
@@ -232,6 +252,22 @@ const mergePreviewTheme = computed(() => {
   return readContent(activeSiteId.value)?.theme
 })
 
+function postMergeMessage(taskId: string, result: import('@/data/site-types').MergeResult) {
+  const changeCount = result.autoMergedCount + result.conflicts.length
+  const label = changeCount === 1 ? '1 change' : `${changeCount} changes`
+  postMessage(taskId, 'agent', '', 'wpcom')
+  // Attach a tool call to the just-posted message to render as a status item
+  const msg = messages.value.filter(m => m.taskId === taskId).at(-1)
+  if (msg) {
+    msg.toolCalls = [{
+      id: `merge-${Date.now()}`,
+      label: `Merged ${label} to main site`,
+      status: 'done',
+      toolName: 'merge',
+    }]
+  }
+}
+
 async function onMergeTask() {
   if (!selectedTaskId.value) return
   const result = mergeTask(selectedTaskId.value)
@@ -239,6 +275,7 @@ async function onMergeTask() {
 
   if (result.conflicts.length === 0) {
     await applyMerge(selectedTaskId.value, result)
+    postMergeMessage(selectedTaskId.value, result)
   } else {
     pendingMergeResult.value = result
     mergeModalOpen.value = true
@@ -248,6 +285,7 @@ async function onMergeTask() {
 async function onMergeResolved(result: import('@/data/site-types').MergeResult) {
   if (!selectedTaskId.value) return
   await applyMerge(selectedTaskId.value, result)
+  postMergeMessage(selectedTaskId.value, result)
   mergeModalOpen.value = false
   pendingMergeResult.value = null
 }
@@ -310,6 +348,13 @@ const browserPages = computed(() => {
   const content = readContent(browserContentKey.value)
   if (!content) return []
   return content.pages.map(p => ({ slug: p.slug, title: p.title }))
+})
+
+const browserTemplates = computed(() => {
+  if (!browserContentKey.value) return []
+  const content = readContent(browserContentKey.value)
+  if (!content?.wpTemplates) return []
+  return content.wpTemplates.map(t => ({ slug: t.slug, label: t.label }))
 })
 
 const browserHtml = computed(() => {
@@ -407,6 +452,9 @@ onBeforeUnmount(() => {
                 :site-id="activeSiteId"
                 :elevated="isScrolledUp"
                 :streaming="isTaskStreaming"
+                :pages="browserPages"
+                :templates="browserTemplates"
+                :current-page-slug="currentPageSlug"
                 placeholder="Ask anything..."
                 @send="onSend"
                 @stop="selectedTaskId && stopTask(selectedTaskId)"
@@ -432,6 +480,9 @@ onBeforeUnmount(() => {
                 v-model="draft"
                 :site-id="activeSiteId"
                 :streaming="isTaskStreaming"
+                :pages="browserPages"
+                :templates="browserTemplates"
+                :current-page-slug="currentPageSlug"
                 placeholder="Describe what this task should do..."
                 @send="onSend"
                 @stop="selectedTaskId && stopTask(selectedTaskId)"
@@ -453,11 +504,13 @@ onBeforeUnmount(() => {
         <ResizeHandle :is-dragging="isBrowserResizing" @pointerdown="onBrowserResizeStart" @dblclick="resetBrowserWidth" />
         <PaneGroup fit :style="{ width: browserWidth + 'px' }">
           <Pane fit>
-            <div class="browser-toolbar">
-              <Button variant="tertiary" :icon="chevronLeft" icon-only :disabled="!canGoBack" tooltip="Back" @click="goBack" />
-              <Button variant="tertiary" :icon="chevronRight" icon-only :disabled="!canGoForward" tooltip="Forward" @click="goForward" />
-              <UrlInput :model-value="browserDisplayUrl" :pages="browserPages" placeholder="URL" @navigate="navigateToPage" />
-            </div>
+            <Toolbar size="mini">
+              <template #start>
+                <Button variant="tertiary" :icon="chevronLeft" icon-only size="small" :disabled="!canGoBack" tooltip="Back" @click="goBack" />
+                <Button variant="tertiary" :icon="chevronRight" icon-only size="small" :disabled="!canGoForward" tooltip="Forward" @click="goForward" />
+                <UrlInput class="browser-url" :model-value="browserDisplayUrl" :pages="browserPages" placeholder="URL" @navigate="navigateToPage" />
+              </template>
+            </Toolbar>
           </Pane>
           <Pane v-if="previewingRevisionId" fit>
             <div class="revision-banner">
@@ -496,12 +549,15 @@ onBeforeUnmount(() => {
   cursor: col-resize;
 }
 
-.browser-toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xxs);
-  padding: var(--space-xxs) var(--space-s) var(--space-xxs) var(--space-xxs);
-  border-block-end: 1px solid var(--color-frame-border);
+.browser-url {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The UrlInput's FlyoutMenu wraps in a Popover .popover-anchor div that needs to fill space */
+.browser-url :deep(.popover-anchor) {
+  flex: 1;
+  min-width: 0;
 }
 
 .revision-banner {

@@ -80,6 +80,13 @@ export interface Agent {
   models?: AgentModel[]
 }
 
+// --- Task Context ---
+
+export type TaskContextItem =
+  | { type: 'page'; pageSlug: string; pageTitle: string }
+  | { type: 'section'; pageSlug: string; pageTitle: string; sectionId: string; sectionRole?: string; shared?: boolean }
+  | { type: 'template'; templateSlug: string; templateLabel: string }
+
 export type ToolCallStatus = 'running' | 'done' | 'error' | 'reverted'
 
 export interface ToolCall {
@@ -109,6 +116,7 @@ export interface Task {
   archived?: boolean
   unread?: boolean
   worktree?: TaskWorktree
+  context?: TaskContextItem[]
 }
 
 export interface Message {
@@ -118,6 +126,7 @@ export interface Message {
   agentId?: AgentId
   content: string
   toolCalls?: ToolCall[]   // Rendered inline above text content
+  context?: TaskContextItem[]
   timestamp: string
 }
 
