@@ -83,7 +83,7 @@ const menuGroups = computed<FlyoutMenuGroup[]>(() => {
 	background: var(--color-frame-fill);
 	border: 1px solid transparent;
 	border-radius: var(--radius-s);
-	height: 28px;
+	height: 32px;
 	padding: 0 var(--space-xs);
 	outline: none;
 	cursor: pointer;

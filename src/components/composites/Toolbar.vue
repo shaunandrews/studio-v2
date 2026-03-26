@@ -9,7 +9,7 @@ withDefaults(defineProps<{
 
 <template>
   <div class="toolbar hstack align-center" :class="`toolbar--${size}`">
-    <div class="toolbar__start hstack align-center gap-xs">
+    <div class="toolbar__start hstack align-center gap-xxs">
       <slot name="start">
         <span v-if="title" class="toolbar__title">{{ title }}</span>
       </slot>
@@ -17,7 +17,7 @@ withDefaults(defineProps<{
     <div v-if="$slots.center" class="toolbar__center hstack align-center" :style="{ height: '100%' }">
       <slot name="center" />
     </div>
-    <div class="toolbar__end hstack align-center gap-xxs">
+    <div v-if="$slots.end" class="toolbar__end hstack align-center gap-xxs">
       <slot name="end" />
     </div>
   </div>
@@ -26,7 +26,7 @@ withDefaults(defineProps<{
 <style scoped>
 .toolbar {
   justify-content: space-between;
-  padding-inline: var(--space-m);
+  padding-inline: var(--space-xs);
   border-block-end: 1px solid var(--color-frame-border);
   flex-shrink: 0;
 }
@@ -46,7 +46,7 @@ withDefaults(defineProps<{
 }
 
 .toolbar--mini {
-  height: 40px;
+  height: 48px;
 }
 
 .toolbar__title {

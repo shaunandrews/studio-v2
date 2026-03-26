@@ -506,8 +506,8 @@ onBeforeUnmount(() => {
           <Pane fit>
             <Toolbar size="mini">
               <template #start>
-                <Button variant="tertiary" :icon="chevronLeft" icon-only size="small" :disabled="!canGoBack" tooltip="Back" @click="goBack" />
-                <Button variant="tertiary" :icon="chevronRight" icon-only size="small" :disabled="!canGoForward" tooltip="Forward" @click="goForward" />
+                <Button variant="tertiary" :icon="chevronLeft" icon-only :disabled="!canGoBack" tooltip="Back" @click="goBack" />
+                <Button variant="tertiary" :icon="chevronRight" icon-only :disabled="!canGoForward" tooltip="Forward" @click="goForward" />
                 <UrlInput class="browser-url" :model-value="browserDisplayUrl" :pages="browserPages" placeholder="URL" @navigate="navigateToPage" />
               </template>
             </Toolbar>

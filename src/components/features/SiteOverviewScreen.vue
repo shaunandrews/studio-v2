@@ -76,7 +76,7 @@ const openInLinks = [
 </script>
 
 <template>
-  <Toolbar title="Site Overview">
+  <Toolbar title="Site Overview" size="mini">
     <template #end>
       <div class="overview__status">
         <span class="status-label" :class="status ?? 'stopped'">{{ statusLabel }}</span>
