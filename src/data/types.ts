@@ -172,13 +172,7 @@ export interface PreviewOperation {
   error?: string
 }
 
-// --- Personas ---
-
-export interface AuthUser {
-  name: string
-  email: string
-  avatar: string
-}
+// --- Wpcom Sites ---
 
 export interface WpcomSite {
   id: string
@@ -187,6 +181,14 @@ export interface WpcomSite {
   provider: 'wpcom' | 'pressable'
   environmentType: 'production' | 'staging' | 'development'
   status: 'syncable' | 'already-connected' | 'needs-upgrade' | 'needs-transfer' | 'missing-permissions'
+}
+
+// --- Personas ---
+
+export interface AuthUser {
+  name: string
+  email: string
+  avatar: string
 }
 
 export interface Persona {

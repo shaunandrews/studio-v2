@@ -1,4 +1,4 @@
-import type { Site } from './types'
+import type { Site, EnvironmentType } from './types'
 
 /** A freshly-created empty site — vanilla WP install, no customization yet. */
 export const emptySite: Site = {
@@ -133,5 +133,53 @@ export const seedProjects: Site[] = [
     description: 'Nature photography portfolio.',
     mockLayout: 'gallery',
     themeType: 'block',
+  },
+]
+
+/** Sites for the no-match persona — names share no words with any wpcom site. */
+export const noMatchSites: Site[] = [
+  {
+    id: 'bright-pixel',
+    name: 'Bright Pixel Agency',
+    status: 'running',
+    url: 'localhost:3930',
+    createdAt: '2026-02-01T10:00:00Z',
+    description: 'A digital agency website.',
+    mockLayout: 'portfolio',
+    themeType: 'block',
+    pipeline: [
+      {
+        id: 'bp-staging',
+        label: 'Staging',
+        environment: 'staging' as EnvironmentType,
+        order: 1,
+      },
+      {
+        id: 'bp-production',
+        label: 'Production',
+        environment: 'production' as EnvironmentType,
+        order: 2,
+      },
+    ],
+  },
+  {
+    id: 'coastal-eats',
+    name: 'Coastal Eats',
+    status: 'running',
+    url: 'localhost:3931',
+    createdAt: '2026-02-15T14:00:00Z',
+    description: 'A seafood restaurant website.',
+    mockLayout: 'cafe',
+    themeType: 'block',
+  },
+  {
+    id: 'neon-notes',
+    name: 'Neon Notes',
+    status: 'stopped',
+    url: 'localhost:3932',
+    createdAt: '2026-03-01T09:00:00Z',
+    description: 'A music blog.',
+    mockLayout: 'blog',
+    themeType: 'classic',
   },
 ]

@@ -1,9 +1,9 @@
 import type { Persona } from './types'
-import { seedProjects, emptySite } from './seed-sites'
+import { seedProjects, emptySite, noMatchSites } from './seed-sites'
 import { seedTasks } from './seed-tasks'
 import { seedMessages } from './seed-messages'
 import { seedPreviews } from './seed-sharing'
-import { seedWpcomSites } from './seed-wpcom-sites'
+import { seedWpcomSites, noMatchWpcomSites } from './seed-wpcom-sites'
 
 export const personas: Persona[] = [
   {
@@ -52,6 +52,23 @@ export const personas: Persona[] = [
     messages: seedMessages,
     previews: seedPreviews,
     wpcomSites: seedWpcomSites,
+  },
+  {
+    id: 'no-match',
+    name: 'Taylor',
+    description: 'Has pipelines but no matching wpcom sites. Tests browse/search flow.',
+    icon: '🔍',
+    auth: {
+      name: 'Taylor Chen',
+      email: 'taylor@example.com',
+      avatar: 'https://gravatar.com/avatar/00000000000000000000000000000001?d=mp&s=64',
+    },
+    onboardingCompleted: true,
+    sites: noMatchSites,
+    tasks: [],
+    messages: [],
+    previews: [],
+    wpcomSites: noMatchWpcomSites,
   },
 ]
 

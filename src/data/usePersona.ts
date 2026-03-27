@@ -16,6 +16,7 @@ import { db, isDbAvailable } from './db'
 import { generateSeedRevisions } from './seed-revisions'
 import type { SiteContent } from './site-types'
 import { discardUnsavedSiteSettings } from './useSiteSettings'
+import { useWpcomSites } from './useWpcomSites'
 import type { Router } from 'vue-router'
 
 const STORAGE_KEY = 'studio-persona'
@@ -53,6 +54,7 @@ export function usePersona() {
     const { resetSettings } = useSettings()
     const { reset: resetAuth } = useAuth()
     const { reset: resetOnboarding } = useOnboarding()
+    const { resetWpcomSites } = useWpcomSites()
 
     // Clear DB and re-seed from persona
     if (await isDbAvailable()) {
@@ -113,6 +115,7 @@ export function usePersona() {
     resetSettings()
     resetAuth(persona.auth)
     resetOnboarding(persona.onboardingCompleted)
+    resetWpcomSites(persona.wpcomSites)
 
     activePersonaId.value = id
     localStorage.setItem(STORAGE_KEY, id)
@@ -179,6 +182,8 @@ export function usePersona() {
     resetSettings()
     resetAuth(null)
     resetOnboarding(false)
+    const { resetWpcomSites: resetWpcom } = useWpcomSites()
+    resetWpcom()
 
     const { ready } = useHydration()
     ready.value = false

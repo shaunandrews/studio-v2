@@ -10,3 +10,12 @@ export const seedWpcomSites: WpcomSite[] = [
   { id: 'wpcom-6', name: 'Starter Site', url: 'shaun2026.wordpress.com', provider: 'wpcom', environmentType: 'production', status: 'needs-upgrade' },
   { id: 'wpcom-7', name: 'Old Portfolio', url: 'shaundesign.wordpress.com', provider: 'wpcom', environmentType: 'production', status: 'needs-transfer' },
 ]
+
+/** Wpcom sites for the no-match persona — none share words with "Bright Pixel Agency", "Coastal Eats", or "Neon Notes". */
+export const noMatchWpcomSites: WpcomSite[] = [
+  { id: 'nm-wpcom-1', name: 'Summit Trail Outfitters', url: 'summittrail.com', provider: 'wpcom', environmentType: 'production', status: 'syncable' },
+  { id: 'nm-wpcom-2', name: 'Summit Trail Staging', url: 'staging.summittrail.com', provider: 'pressable', environmentType: 'staging', status: 'syncable' },
+  { id: 'nm-wpcom-3', name: 'Velvet Room Records', url: 'velvetroomrecords.com', provider: 'wpcom', environmentType: 'production', status: 'syncable' },
+  { id: 'nm-wpcom-4', name: 'Foxglove Floristry', url: 'foxglovefloristry.com', provider: 'wpcom', environmentType: 'production', status: 'needs-upgrade' },
+  { id: 'nm-wpcom-5', name: 'Redline Auto Blog', url: 'redlineauto.wordpress.com', provider: 'wpcom', environmentType: 'production', status: 'syncable' },
+]
