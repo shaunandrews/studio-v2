@@ -73,6 +73,28 @@ class StudioDatabase extends Dexie {
     }).upgrade(tx => {
       return tx.table('siteContent').clear()
     })
+    // v8: Backfill status field on existing tasks.
+    this.version(8).stores({
+      sites: 'id',
+      tasks: 'id, siteId, status, updatedAt, [siteId+archived]',
+      messages: 'id, taskId, timestamp',
+      previews: 'id, siteId, status',
+      siteContent: 'siteId',
+      revisions: 'id, siteId, taskId, timestamp',
+      taskBranches: 'taskId, siteId',
+    }).upgrade(async tx => {
+      const tasksTable = tx.table('tasks')
+      const messagesTable = tx.table('messages')
+      const allTasks = await tasksTable.toArray()
+      for (const task of allTasks) {
+        if (task.archived) {
+          await tasksTable.update(task.id, { status: 'merged' })
+        } else {
+          const msgCount = await messagesTable.where('taskId').equals(task.id).count()
+          await tasksTable.update(task.id, { status: msgCount > 0 ? 'in_progress' : 'backlog' })
+        }
+      }
+    })
   }
 }
 

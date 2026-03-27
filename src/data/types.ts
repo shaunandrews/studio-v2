@@ -106,6 +106,8 @@ interface TaskWorktree {
   port: number
 }
 
+export type TaskStatus = 'backlog' | 'in_progress' | 'review' | 'merged'
+
 export interface Task {
   id: string
   siteId: string
@@ -113,6 +115,8 @@ export interface Task {
   title?: string
   createdAt: string
   updatedAt: string
+  status: TaskStatus
+  skipReview?: boolean
   archived?: boolean
   unread?: boolean
   worktree?: TaskWorktree

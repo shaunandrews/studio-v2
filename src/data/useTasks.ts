@@ -8,7 +8,7 @@ import { useRevisions } from './useRevisions'
 import { useBranches, contentKey } from './useBranches'
 import { db, isDbAvailable } from './db'
 import { toSerializable } from './utils'
-import type { Task, Message, AgentId, ToolCall, TaskContextItem } from './types'
+import type { Task, TaskStatus, Message, AgentId, ToolCall, TaskContextItem } from './types'
 import type { RevisionChange } from './site-types'
 
 // Module-level state (singleton)
@@ -381,9 +381,29 @@ export function useTasks() {
   function getTasksForSite(siteId: Ref<string | null> | string | null) {
     return computed(() =>
       tasks.value
-        .filter(t => t.siteId === unref(siteId) && !t.archived)
+        .filter(t => t.siteId === unref(siteId) && t.status !== 'merged')
         .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     )
+  }
+
+  function getTasksByStatus(siteId: Ref<string | null> | string | null) {
+    return computed(() => {
+      const grouped: Record<TaskStatus, Task[]> = {
+        backlog: [],
+        in_progress: [],
+        review: [],
+        merged: [],
+      }
+      for (const t of tasks.value) {
+        if (t.siteId === unref(siteId)) {
+          grouped[t.status].push(t)
+        }
+      }
+      for (const key of Object.keys(grouped) as TaskStatus[]) {
+        grouped[key].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      }
+      return grouped
+    })
   }
 
   function getMessages(taskId: Ref<string | null> | string | null) {
@@ -409,6 +429,7 @@ export function useTasks() {
       agentId: opts.agentId ?? 'wpcom',
       title: opts.title,
       context: opts.context,
+      status: 'backlog',
       createdAt: now,
       updatedAt: now,
     }
@@ -424,6 +445,12 @@ export function useTasks() {
   }
 
   function sendMessage(taskId: string, content: string, context?: TaskContextItem[]) {
+    const task = tasks.value.find(t => t.id === taskId)
+    if (task && (task.status === 'backlog' || task.status === 'review')) {
+      task.status = 'in_progress'
+      task.updatedAt = new Date().toISOString()
+      persistTask(task)
+    }
     appendMessage(taskId, 'user', content, undefined, context)
     queueAgentResponse(taskId)
   }
@@ -500,6 +527,7 @@ export function useTasks() {
     const task = tasks.value.find(t => t.id === id)
     if (task) {
       task.archived = true
+      task.status = 'merged'
       task.updatedAt = new Date().toISOString()
       await persistTask(task)
     }
@@ -518,6 +546,43 @@ export function useTasks() {
     const task = tasks.value.find(t => t.id === id)
     if (task) {
       task.archived = false
+      task.status = 'in_progress'
+      task.updatedAt = new Date().toISOString()
+      await persistTask(task)
+    }
+  }
+
+  async function startTask(id: string) {
+    const task = tasks.value.find(t => t.id === id)
+    if (task) {
+      task.status = 'in_progress'
+      task.updatedAt = new Date().toISOString()
+      await persistTask(task)
+    }
+  }
+
+  async function moveToReview(id: string) {
+    const task = tasks.value.find(t => t.id === id)
+    if (task) {
+      task.status = 'review'
+      task.updatedAt = new Date().toISOString()
+      await persistTask(task)
+    }
+  }
+
+  async function mergeTask(id: string) {
+    const task = tasks.value.find(t => t.id === id)
+    if (task) {
+      task.status = 'merged'
+      task.updatedAt = new Date().toISOString()
+      await persistTask(task)
+    }
+  }
+
+  async function reopenTask(id: string) {
+    const task = tasks.value.find(t => t.id === id)
+    if (task) {
+      task.status = 'in_progress'
       task.updatedAt = new Date().toISOString()
       await persistTask(task)
     }
@@ -563,6 +628,7 @@ export function useTasks() {
     messages,
     busyTaskIds,
     getTasksForSite,
+    getTasksByStatus,
     getMessages,
     isBusy,
     stopTask,
@@ -574,6 +640,10 @@ export function useTasks() {
     renameTask,
     archiveTask,
     unarchiveTask,
+    startTask,
+    moveToReview,
+    mergeTask,
+    reopenTask,
     generateTaskTitle,
     resetTasks,
     _setTasks,
