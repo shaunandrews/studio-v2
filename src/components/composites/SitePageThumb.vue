@@ -19,13 +19,13 @@ defineProps<{
 <style scoped>
 .site-page-thumb {
   width: 160px;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
 }
 
 .site-page-thumb__iframe {
   width: 800px;
-  height: 1066px;
+  height: 534px;
   border: none;
   transform-origin: top left;
   transform: scale(0.2);
