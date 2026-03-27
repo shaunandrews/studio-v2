@@ -5,15 +5,8 @@ import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import { search as searchIcon, external } from '@wordpress/icons'
-
-export interface WpcomSite {
-  id: string
-  name: string
-  url: string
-  provider: 'wpcom' | 'pressable'
-  environmentType: 'production' | 'staging' | 'development'
-  status: 'syncable' | 'already-connected' | 'needs-upgrade' | 'needs-transfer' | 'missing-permissions'
-}
+import { useWpcomSites } from '@/data/useWpcomSites'
+import type { WpcomSite } from '@/data/types'
 
 const props = defineProps<{
   open: boolean
@@ -28,18 +21,9 @@ const emit = defineEmits<{
   select: [site: WpcomSite]
 }>()
 
-// ── Fake wpcom sites ──
+// ── Wpcom sites from persona ──
 
-const allSites: WpcomSite[] = [
-  { id: 'wpcom-1', name: 'Downstreet Café', url: 'downstreet.cafe', provider: 'wpcom', environmentType: 'production', status: 'syncable' },
-  { id: 'wpcom-2', name: 'Downstreet Café Staging', url: 'staging.downstreet.cafe', provider: 'pressable', environmentType: 'staging', status: 'syncable' },
-  { id: 'wpcom-3', name: 'Studio Meridian', url: 'studiomeridian.com', provider: 'wpcom', environmentType: 'production', status: 'syncable' },
-  { id: 'wpcom-8', name: 'Studio Meridian Staging', url: 'staging.studiomeridian.com', provider: 'pressable', environmentType: 'staging', status: 'syncable' },
-  { id: 'wpcom-4', name: 'Meridian Dev', url: 'dev.studiomeridian.com', provider: 'pressable', environmentType: 'development', status: 'syncable' },
-  { id: 'wpcom-5', name: 'My Travel Blog', url: 'wanderlustdiaries.com', provider: 'wpcom', environmentType: 'production', status: 'syncable' },
-  { id: 'wpcom-6', name: 'Starter Site', url: 'shaun2026.wordpress.com', provider: 'wpcom', environmentType: 'production', status: 'needs-upgrade' },
-  { id: 'wpcom-7', name: 'Old Portfolio', url: 'shaundesign.wordpress.com', provider: 'wpcom', environmentType: 'production', status: 'needs-transfer' },
-]
+const { wpcomSites: allSites } = useWpcomSites()
 
 // ── State ──
 
@@ -74,7 +58,7 @@ function nameScore(siteName: string, localName: string): number {
 const suggestedSite = computed(() => {
   if (!props.siteName) return null
   const connected = new Set(props.connectedSiteIds ?? [])
-  const candidates = allSites
+  const candidates = allSites.value
     .filter(s => s.status === 'syncable' && !connected.has(s.id))
     .map(s => ({
       ...s,
@@ -89,7 +73,7 @@ const suggestedSite = computed(() => {
 
 const sites = computed(() => {
   const connected = new Set(props.connectedSiteIds ?? [])
-  const enriched = allSites.map(s => ({
+  const enriched = allSites.value.map(s => ({
     ...s,
     status: connected.has(s.id) ? 'already-connected' as const : s.status,
   }))

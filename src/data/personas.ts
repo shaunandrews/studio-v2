@@ -3,6 +3,7 @@ import { seedProjects, emptySite } from './seed-sites'
 import { seedTasks } from './seed-tasks'
 import { seedMessages } from './seed-messages'
 import { seedPreviews } from './seed-sharing'
+import { seedWpcomSites } from './seed-wpcom-sites'
 
 export const personas: Persona[] = [
   {
@@ -16,6 +17,7 @@ export const personas: Persona[] = [
     tasks: [],
     messages: [],
     previews: [],
+    wpcomSites: [],
   },
   {
     id: 'single-site',
@@ -32,6 +34,7 @@ export const personas: Persona[] = [
     tasks: [],
     messages: [],
     previews: [],
+    wpcomSites: [],
   },
   {
     id: 'existing-user',
@@ -48,6 +51,7 @@ export const personas: Persona[] = [
     tasks: seedTasks,
     messages: seedMessages,
     previews: seedPreviews,
+    wpcomSites: seedWpcomSites,
   },
 ]
 

@@ -11,6 +11,7 @@ import { useHydration } from './useHydration'
 import { useSiteDocument } from './useSiteDocument'
 import { useRevisions } from './useRevisions'
 import { useBranches } from './useBranches'
+import { useWpcomSites } from './useWpcomSites'
 import { db, isDbAvailable } from './db'
 import { generateSeedRevisions } from './seed-revisions'
 import type { SiteContent } from './site-types'
@@ -106,6 +107,8 @@ export function usePersona() {
       await forkForTask(task.siteId, task.id)
     }
     await resetPreviews(persona.previews)
+    const { resetWpcomSites } = useWpcomSites()
+    resetWpcomSites(persona.wpcomSites)
     resetAddSite()
     resetSettings()
     resetAuth(persona.auth)

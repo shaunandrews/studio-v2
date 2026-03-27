@@ -6,7 +6,7 @@ import SyncEmptyState from './sync/SyncEmptyState.vue'
 import SyncPipeline from './sync/SyncPipeline.vue'
 import SyncModal from './sync/SyncModal.vue'
 import ConnectSiteModal from './sync/ConnectSiteModal.vue'
-import type { WpcomSite } from './sync/ConnectSiteModal.vue'
+import type { WpcomSite } from '@/data/types'
 
 const props = defineProps<{
   siteId: string

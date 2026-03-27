@@ -180,6 +180,15 @@ export interface AuthUser {
   avatar: string
 }
 
+export interface WpcomSite {
+  id: string
+  name: string
+  url: string
+  provider: 'wpcom' | 'pressable'
+  environmentType: 'production' | 'staging' | 'development'
+  status: 'syncable' | 'already-connected' | 'needs-upgrade' | 'needs-transfer' | 'missing-permissions'
+}
+
 export interface Persona {
   id: string
   name: string
@@ -191,4 +200,5 @@ export interface Persona {
   tasks: Task[]
   messages: Message[]
   previews: PreviewSite[]
+  wpcomSites: WpcomSite[]
 }

@@ -11,6 +11,7 @@ import { useSiteDocument } from './useSiteDocument'
 import { useRevisions } from './useRevisions'
 import { useBranches } from './useBranches'
 import { generateSeedRevisions } from './seed-revisions'
+import { useWpcomSites } from './useWpcomSites'
 
 const ready = ref(false)
 
@@ -22,11 +23,13 @@ export function useHydration() {
       return
     }
 
-    // Restore auth + onboarding from persona (not persisted in DB)
+    // Restore auth + onboarding + wpcom sites from persona (not persisted in DB)
     const { reset: resetAuth } = useAuth()
     const { reset: resetOnboarding } = useOnboarding()
+    const { _setWpcomSites } = useWpcomSites()
     resetAuth(persona.auth)
     resetOnboarding(persona.onboardingCompleted)
+    _setWpcomSites(structuredClone(persona.wpcomSites))
 
     const dbOk = await isDbAvailable()
 
