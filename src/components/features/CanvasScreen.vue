@@ -697,13 +697,12 @@ watch(tree, () => nextTick(() => centerCanvas()))
       </nav>
     </template>
     <template #end>
-      <div class="zoom-controls hstack align-center gap-xxxs">
+      <div class="zoom-controls hstack align-center gap-xs">
         <Button variant="tertiary" icon-only tooltip="Zoom out" tooltip-placement="bottom" @click="zoomOut">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor" /></svg>
         </Button>
         <span class="zoom-level">{{ zoomPercent }}%</span>
         <Button variant="tertiary" :icon="plus" icon-only tooltip="Zoom in" tooltip-placement="bottom" @click="zoomIn" />
-        <div class="zoom-divider" />
         <Button variant="tertiary" :icon="fullscreen" icon-only tooltip="Fit to screen" tooltip-placement="bottom" @click="zoomFit" />
       </div>
     </template>
@@ -866,12 +865,6 @@ watch(tree, () => nextTick(() => centerCanvas()))
   font-weight: var(--font-weight-medium);
   color: var(--color-frame-fg-muted);
   font-variant-numeric: tabular-nums;
-}
-
-.zoom-divider {
-  width: 1px;
-  height: 16px;
-  background: var(--color-frame-border);
 }
 
 .canvas-canvas {
