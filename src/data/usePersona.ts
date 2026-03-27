@@ -16,7 +16,6 @@ import { db, isDbAvailable } from './db'
 import { generateSeedRevisions } from './seed-revisions'
 import type { SiteContent } from './site-types'
 import { discardUnsavedSiteSettings } from './useSiteSettings'
-import { useWpcomSites } from './useWpcomSites'
 import type { Router } from 'vue-router'
 
 const STORAGE_KEY = 'studio-persona'
@@ -109,13 +108,11 @@ export function usePersona() {
       await forkForTask(task.siteId, task.id)
     }
     await resetPreviews(persona.previews)
-    const { resetWpcomSites } = useWpcomSites()
     resetWpcomSites(persona.wpcomSites)
     resetAddSite()
     resetSettings()
     resetAuth(persona.auth)
     resetOnboarding(persona.onboardingCompleted)
-    resetWpcomSites(persona.wpcomSites)
 
     activePersonaId.value = id
     localStorage.setItem(STORAGE_KEY, id)
