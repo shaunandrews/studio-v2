@@ -53,7 +53,7 @@ function toggleStatus() {
     statusTimer = null
   }, 1200)
 }
-const { tasks, messages, getTasksForSite, getMessages, sendMessage, postMessage, streamAgentMessage, createTask, generateTaskTitle, markRead, isBusy, stopTask } = useTasks()
+const { tasks, messages, getTasksForSite, getMessages, sendMessage, postMessage, streamAgentMessage, createTask, generateTaskTitle, markRead, isBusy, stopTask, startTask, mergeTask: mergeTaskStatus, setPreMergeSnapshot, undoMerge } = useTasks()
 
 const isTaskStreaming = computed(() =>
   selectedTaskId.value ? isBusy(selectedTaskId.value).value : false
@@ -122,6 +122,16 @@ const isNewTask = computed(() =>
 const selectedTask = computed(() =>
   tasks.value.find(t => t.id === selectedTaskId.value)
 )
+
+const taskStatus = computed(() => selectedTask.value?.status ?? 'backlog')
+
+const inputPlaceholder = computed(() => {
+  switch (taskStatus.value) {
+    case 'backlog': return 'Send a message to start this task...'
+    case 'review': return 'Send feedback to continue...'
+    default: return 'Ask anything...'
+  }
+})
 
 // Navigate browser preview to the task's context page when selecting a task
 watch(selectedTaskId, (id) => {
@@ -268,13 +278,23 @@ function postMergeMessage(taskId: string, result: import('@/data/site-types').Me
   }
 }
 
+function snapshotMainBeforeMerge(taskId: string) {
+  if (!activeSiteId.value) return
+  const mainContent = readContent(activeSiteId.value)
+  if (mainContent) {
+    setPreMergeSnapshot(taskId, activeSiteId.value, JSON.parse(JSON.stringify(mainContent)))
+  }
+}
+
 async function onMergeTask() {
   if (!selectedTaskId.value) return
   const result = mergeTask(selectedTaskId.value)
   if (!result) return
 
   if (result.conflicts.length === 0) {
+    snapshotMainBeforeMerge(selectedTaskId.value)
     await applyMerge(selectedTaskId.value, result)
+    await mergeTaskStatus(selectedTaskId.value)
     postMergeMessage(selectedTaskId.value, result)
   } else {
     pendingMergeResult.value = result
@@ -284,7 +304,9 @@ async function onMergeTask() {
 
 async function onMergeResolved(result: import('@/data/site-types').MergeResult) {
   if (!selectedTaskId.value) return
+  snapshotMainBeforeMerge(selectedTaskId.value)
   await applyMerge(selectedTaskId.value, result)
+  await mergeTaskStatus(selectedTaskId.value)
   postMergeMessage(selectedTaskId.value, result)
   mergeModalOpen.value = false
   pendingMergeResult.value = null
@@ -293,6 +315,30 @@ async function onMergeResolved(result: import('@/data/site-types').MergeResult) 
 function onMergeModalClose() {
   mergeModalOpen.value = false
   pendingMergeResult.value = null
+}
+
+async function onStartTask() {
+  if (!selectedTaskId.value) return
+  await startTask(selectedTaskId.value)
+}
+
+function onStopTask() {
+  if (selectedTaskId.value) stopTask(selectedTaskId.value)
+}
+
+async function onUndoMerge() {
+  if (!selectedTaskId.value) return
+  await undoMerge(selectedTaskId.value)
+  postMessage(selectedTaskId.value, 'agent', '', 'wpcom')
+  const msg = messages.value.filter(m => m.taskId === selectedTaskId.value).at(-1)
+  if (msg) {
+    msg.toolCalls = [{
+      id: `undo-merge-${Date.now()}`,
+      label: 'Merge undone — task returned to review',
+      status: 'done',
+      toolName: 'merge',
+    }]
+  }
 }
 
 const browserIframeRef = ref<HTMLIFrameElement | null>(null)
@@ -440,11 +486,14 @@ onBeforeUnmount(() => {
               @toggle-browser="toggleBrowser"
               @preview-revision="onPreviewRevision"
               @merge-task="onMergeTask"
+              @start-task="onStartTask"
+              @stop-task="onStopTask"
+              @undo-merge="onUndoMerge"
             />
           </Pane>
           <Pane v-if="!isNewTask" class="chat-pane">
             <ChatMessageList :messages="currentMessages" :site-id="activeSiteId ?? undefined" :style="{ paddingBlockEnd: inputHeight + 'px' }" @scroll-state="(atBottom) => isScrolledUp = !atBottom" />
-            <div ref="inputWrapRef" class="detail-input">
+            <div v-if="taskStatus !== 'merged'" ref="inputWrapRef" class="detail-input">
               <ProgressiveBlur class="input-blur" height="calc(100% + 6px)" />
               <InputChat
                 ref="inputChatRef"
@@ -455,7 +504,7 @@ onBeforeUnmount(() => {
                 :pages="browserPages"
                 :templates="browserTemplates"
                 :current-page-slug="currentPageSlug"
-                placeholder="Ask anything..."
+                :placeholder="inputPlaceholder"
                 @send="onSend"
                 @stop="selectedTaskId && stopTask(selectedTaskId)"
                 @manage-agents="openSettings('agents')"

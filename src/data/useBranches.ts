@@ -538,6 +538,7 @@ export function useBranches() {
     hasDiverged,
     mergeTask,
     applyMerge,
+    deleteBranch,
     threeWayMerge,
     _setBranches,
     resetBranches,

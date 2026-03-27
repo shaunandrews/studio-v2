@@ -9,13 +9,14 @@ import { useBranches, contentKey } from './useBranches'
 import { db, isDbAvailable } from './db'
 import { toSerializable } from './utils'
 import type { Task, TaskStatus, Message, AgentId, ToolCall, TaskContextItem } from './types'
-import type { RevisionChange } from './site-types'
+import type { RevisionChange, SiteContent } from './site-types'
 
 // Module-level state (singleton)
 const tasks = ref<Task[]>([])
 const messages = ref<Message[]>([])
 const busyTaskIds = ref<Set<string>>(new Set())
 const abortControllers = new Map<string, AbortController>()
+const preMergeSnapshots = new Map<string, { siteId: string; snapshot: SiteContent }>()
 
 let nextWorktreePort = 4001
 
@@ -668,6 +669,45 @@ export function useTasks() {
     if (controller) controller.abort()
   }
 
+  function setPreMergeSnapshot(taskId: string, siteId: string, snapshot: SiteContent) {
+    preMergeSnapshots.set(taskId, { siteId, snapshot: toSerializable(snapshot) })
+  }
+
+  function hasPreMergeSnapshot(taskId: string) {
+    return preMergeSnapshots.has(taskId)
+  }
+
+  async function undoMerge(taskId: string) {
+    const entry = preMergeSnapshots.get(taskId)
+    if (!entry) return
+
+    const { _setContentForKey, _removeContent } = useSiteDocument()
+    const { branches, deleteBranch, forkForTask } = useBranches()
+
+    // Restore main site content to pre-merge state
+    _setContentForKey(entry.siteId, entry.snapshot)
+    if (await isDbAvailable()) {
+      await db.siteContent.put(toSerializable(entry.snapshot))
+    }
+
+    // Remove old fork content and branch record
+    _removeContent(contentKey(entry.siteId, taskId))
+    if (await isDbAvailable()) {
+      await db.siteContent.delete(contentKey(entry.siteId, taskId))
+    }
+    const idx = branches.value.findIndex(b => b.taskId === taskId)
+    if (idx !== -1) branches.value.splice(idx, 1)
+    await deleteBranch(taskId)
+
+    // Re-fork from restored main
+    await forkForTask(entry.siteId, taskId)
+
+    // Move task back to review
+    await moveToReview(taskId)
+
+    preMergeSnapshots.delete(taskId)
+  }
+
   return {
     tasks,
     messages,
@@ -689,6 +729,9 @@ export function useTasks() {
     moveToReview,
     mergeTask,
     reopenTask,
+    setPreMergeSnapshot,
+    hasPreMergeSnapshot,
+    undoMerge,
     generateTaskTitle,
     resetTasks,
     _setTasks,
