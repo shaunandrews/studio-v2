@@ -6,6 +6,8 @@ import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Button from '@/components/primitives/Button.vue'
+import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
+import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 
 import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
 
@@ -94,6 +96,14 @@ const hasActiveTasks = computed(() => visibleSections.value.length > 0)
 
 const mergedExpanded = ref(false)
 const mergedTasks = computed(() => tasksByStatus.value.merged)
+
+const archivedMenuGroups = computed<FlyoutMenuGroup[]>(() => [{
+  items: mergedTasks.value.map(task => ({
+    label: task.title || 'New task',
+    detail: formatTime(getLastTimestamp(task.id) || task.createdAt),
+    action: () => emit('select', task.id),
+  })),
+}])
 
 function formatTime(iso: string): string {
   const date = new Date(iso)
@@ -298,6 +308,18 @@ onBeforeUnmount(() => stopCarousel())
     <div class="site-tasks__header">
       <span class="site-tasks__title">Tasks</span>
       <div class="site-tasks__actions">
+        <FlyoutMenu
+          v-if="mergedTasks.length > 0"
+          :groups="archivedMenuGroups"
+          placement="below"
+          align="end"
+          min-width="200px"
+          max-height="300px"
+        >
+          <template #trigger>
+            <Button :icon="archive" icon-only size="small" variant="tertiary" tooltip="Archived tasks" tooltip-placement="top" />
+          </template>
+        </FlyoutMenu>
         <Button :icon="plus" icon-only size="small" variant="tertiary" tooltip="New task" tooltip-placement="top" @click="$emit('new-task')" />
       </div>
     </div>
