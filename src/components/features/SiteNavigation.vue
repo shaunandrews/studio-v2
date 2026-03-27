@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRef, onMounted, onBeforeUnmount } from 'vue'
-import { plus, archive, update, customLink, tool, home, chevronDown, category, navigation } from '@wordpress/icons'
+import { plus, update, customLink, tool, home, chevronDown, chevronRight, check, category, navigation } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
@@ -8,8 +8,6 @@ import Tooltip from '@/components/primitives/Tooltip.vue'
 import Button from '@/components/primitives/Button.vue'
 
 import ProgressiveBlur from '@/components/primitives/ProgressiveBlur.vue'
-import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
-import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
 
 import { useTasks } from '@/data/useTasks'
 import { useSites } from '@/data/useSites'
@@ -37,8 +35,8 @@ const emit = defineEmits<{
 const { isMac } = useOperatingSystem()
 const { openAddSite } = useAddSite()
 const { showAllSitesView } = useAllSitesView()
-const { tasks, getTasksForSite, messages, renameTask, archiveTask, unarchiveTask, isBusy, busyTaskIds } = useTasks()
-const siteTasks = getTasksForSite(toRef(props, 'siteId'))
+const { tasks, getTasksByStatus, messages, renameTask, startTask, isBusy, busyTaskIds } = useTasks()
+const tasksByStatus = getTasksByStatus(toRef(props, 'siteId'))
 
 const { sites: allSites } = useSites()
 const currentSite = computed(() => allSites.value.find(s => s.id === props.siteId))
@@ -81,10 +79,20 @@ function addSite() {
 const runningCount = computed(() => allSites.value.filter(p => p.status === 'running').length)
 const stoppedCount = computed(() => allSites.value.filter(p => p.status === 'stopped').length)
 
-const sortedTasks = computed(() =>
-  [...siteTasks.value]
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+const statusSections = [
+  { key: 'in_progress' as const, label: 'In Progress' },
+  { key: 'review' as const, label: 'Review' },
+  { key: 'backlog' as const, label: 'Backlog' },
+] as const
+
+const visibleSections = computed(() =>
+  statusSections.filter(s => tasksByStatus.value[s.key].length > 0)
 )
+
+const hasActiveTasks = computed(() => visibleSections.value.length > 0)
+
+const mergedExpanded = ref(false)
+const mergedTasks = computed(() => tasksByStatus.value.merged)
 
 function formatTime(iso: string): string {
   const date = new Date(iso)
@@ -106,9 +114,9 @@ function getLastTimestamp(taskId: string): string {
   return taskMsgs[0]?.timestamp ?? ''
 }
 
-function onArchive(e: Event, taskId: string) {
+function onStart(e: Event, taskId: string) {
   e.stopPropagation()
-  archiveTask(taskId)
+  startTask(taskId)
 }
 
 // ── Inline rename ──
@@ -145,14 +153,6 @@ function onEditKeydown(e: KeyboardEvent) {
 
 const vFocus = { mounted: (el: HTMLElement) => el.focus() }
 
-const archiveMenuRef = ref<InstanceType<typeof FlyoutMenu> | null>(null)
-
-const archivedTasks = computed(() =>
-  tasks.value
-    .filter(t => t.siteId === props.siteId && t.archived)
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-)
-
 /* ── Empty state carousel ── */
 const carouselStep = ref(0)
 const carouselSteps = [
@@ -183,29 +183,12 @@ function goToStep(index: number) {
 }
 
 onMounted(() => {
-  if (sortedTasks.value.length === 0) startCarousel()
+  if (!hasActiveTasks.value) startCarousel()
 })
 
 onBeforeUnmount(() => stopCarousel())
 
-const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
-  if (archivedTasks.value.length === 0) {
-    return [{ items: [{ label: 'No archived tasks' }] }]
-  }
-  return [
-    {
-      label: 'Archived tasks',
-      items: archivedTasks.value.map(t => ({
-        label: t.title || 'New task',
-        detail: formatTime(t.createdAt),
-        action: () => unarchiveTask(t.id),
-      })),
-    },
-    {
-      items: [{ label: 'View archives' }],
-    },
-  ]
-})
+
 </script>
 
 <template>
@@ -309,56 +292,87 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     <div class="site-tasks__header">
       <span class="site-tasks__title">Tasks</span>
       <div class="site-tasks__actions">
-        <FlyoutMenu ref="archiveMenuRef" :groups="archiveMenuGroups" surface="dark" align="end" max-width="260px">
-          <template #trigger="{ toggle, open }">
-            <Tooltip text="Archived tasks" placement="top" :delay="300">
-              <button class="site-tasks__icon-btn" :class="{ 'is-active': open }" @click="toggle">
-                <WPIcon :icon="archive" :size="16" />
-              </button>
-            </Tooltip>
-          </template>
-        </FlyoutMenu>
         <Button :icon="plus" icon-only size="small" variant="tertiary" tooltip="New task" tooltip-placement="top" @click="$emit('new-task')" />
       </div>
     </div>
 
     <!-- Site tasks -->
     <div class="site-tasks__list">
-      <div
-        v-for="task in sortedTasks"
-        :key="task.id"
-        class="site-tasks__item"
-        :class="{ 'is-selected': task.id === selectedId }"
-        @click="$emit('select', task.id)"
-        @dblclick.stop="startEditing(task.id, task.title || '')"
-      >
-        <span v-if="task.unread" class="site-tasks__unread-dot" />
-        <input
-          v-if="editingTaskId === task.id"
-          v-model="editingTitle"
-          class="site-tasks__item-edit"
-          @blur="commitEdit"
-          @keydown="onEditKeydown"
-          @click.stop
-          @dblclick.stop
-          v-focus
-        />
-        <span v-else class="site-tasks__item-title">{{ task.title || 'New task' }}</span>
-        <span class="site-tasks__item-end">
-          <template v-if="busyTaskIds.has(task.id)">
-            <svg class="site-tasks__spinner" width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="24 12" fill="none" />
-            </svg>
-          </template>
-          <span v-else class="site-tasks__time">{{ formatTime(getLastTimestamp(task.id) || task.createdAt) }}</span>
-          <Tooltip text="Archive" placement="right" :delay="300" class="site-tasks__archive-wrap">
-            <button class="site-tasks__archive" @click.stop="onArchive($event, task.id)">
-              <WPIcon :icon="archive" :size="16" />
-            </button>
-          </Tooltip>
-        </span>
+      <!-- Active status groups -->
+      <template v-for="section in visibleSections" :key="section.key">
+        <div class="site-tasks__group">
+          <div class="site-tasks__group-label">{{ section.label }}</div>
+          <div
+            v-for="task in tasksByStatus[section.key]"
+            :key="task.id"
+            class="site-tasks__item"
+            :class="{
+              'is-selected': task.id === selectedId,
+              'is-review': section.key === 'review',
+            }"
+            @click="$emit('select', task.id)"
+            @dblclick.stop="startEditing(task.id, task.title || '')"
+          >
+            <span v-if="task.unread" class="site-tasks__unread-dot" />
+            <input
+              v-if="editingTaskId === task.id"
+              v-model="editingTitle"
+              class="site-tasks__item-edit"
+              @blur="commitEdit"
+              @keydown="onEditKeydown"
+              @click.stop
+              @dblclick.stop
+              v-focus
+            />
+            <span v-else class="site-tasks__item-title">{{ task.title || 'New task' }}</span>
+            <span class="site-tasks__item-end">
+              <template v-if="busyTaskIds.has(task.id)">
+                <svg class="site-tasks__spinner" width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="24 12" fill="none" />
+                </svg>
+              </template>
+              <span v-else class="site-tasks__time">{{ formatTime(getLastTimestamp(task.id) || task.createdAt) }}</span>
+              <!-- Backlog: Start action on hover -->
+              <Tooltip v-if="section.key === 'backlog'" text="Start" placement="right" :delay="300" class="site-tasks__action-wrap">
+                <button class="site-tasks__action-btn" @click.stop="onStart($event, task.id)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="7,4 20,12 7,20" /></svg>
+                </button>
+              </Tooltip>
+            </span>
+          </div>
+        </div>
+      </template>
+
+      <!-- Merged section (collapsed by default) -->
+      <div v-if="mergedTasks.length > 0" class="site-tasks__group">
+        <button class="site-tasks__group-toggle" @click="mergedExpanded = !mergedExpanded">
+          <WPIcon
+            :icon="chevronRight"
+            :size="14"
+            class="site-tasks__group-chevron"
+            :class="{ 'is-expanded': mergedExpanded }"
+          />
+          <span class="site-tasks__group-label">Merged</span>
+          <span class="site-tasks__group-count">{{ mergedTasks.length }}</span>
+        </button>
+        <template v-if="mergedExpanded">
+          <div
+            v-for="task in mergedTasks"
+            :key="task.id"
+            class="site-tasks__item is-merged"
+            :class="{ 'is-selected': task.id === selectedId }"
+            @click="$emit('select', task.id)"
+          >
+            <WPIcon :icon="check" :size="14" class="site-tasks__merged-icon" />
+            <span class="site-tasks__item-title">{{ task.title || 'New task' }}</span>
+            <span class="site-tasks__item-end">
+              <span class="site-tasks__time">{{ formatTime(getLastTimestamp(task.id) || task.createdAt) }}</span>
+            </span>
+          </div>
+        </template>
       </div>
-      <div v-if="sortedTasks.length === 0" class="site-tasks__empty">
+
+      <div v-if="!hasActiveTasks" class="site-tasks__empty">
         <!-- Carousel fills the space -->
         <div class="empty__carousel">
           <!-- Large illustration -->
@@ -685,25 +699,71 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   gap: 2px;
 }
 
-.site-tasks__icon-btn {
+
+/* ── Status groups ── */
+
+.site-tasks__group {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border: none;
-  border-radius: var(--radius-s);
-  background: none;
-  color: var(--color-frame-fg-muted);
-  cursor: pointer;
-  transition: background var(--duration-instant) var(--ease-default),
-    color var(--duration-instant) var(--ease-default);
+  flex-direction: column;
+  gap: var(--space-xxxs);
 }
 
-.site-tasks__icon-btn:hover,
-.site-tasks__icon-btn.is-active {
-  background: var(--color-frame-hover);
+.site-tasks__group + .site-tasks__group {
+  margin-block-start: var(--space-xs);
+}
+
+.site-tasks__group-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-frame-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 16px;
+  padding: var(--space-xxs) var(--space-s) 0;
+}
+
+.site-tasks__group-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxxs);
+  padding: var(--space-xxs) var(--space-s) 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-frame-fg-muted);
+  font-family: inherit;
+}
+
+.site-tasks__group-toggle:hover {
   color: var(--color-frame-fg);
+}
+
+.site-tasks__group-chevron {
+  flex-shrink: 0;
+  transition: transform var(--duration-fast) var(--ease-default);
+}
+
+.site-tasks__group-chevron.is-expanded {
+  transform: rotate(90deg);
+}
+
+.site-tasks__group-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-frame-fg-muted);
+  opacity: 0.6;
+  margin-inline-start: var(--space-xxxs);
+}
+
+/* ── Merged items ── */
+
+.site-tasks__item.is-merged .site-tasks__item-title {
+  opacity: 0.5;
+}
+
+.site-tasks__merged-icon {
+  flex-shrink: 0;
+  color: var(--color-frame-fg-muted);
+  opacity: 0.4;
 }
 
 /* ── Task list items ── */
@@ -788,7 +848,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   white-space: nowrap;
 }
 
-.site-tasks__archive {
+.site-tasks__action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -803,7 +863,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
     color var(--duration-instant) var(--ease-default);
 }
 
-.site-tasks__archive:hover {
+.site-tasks__action-btn:hover {
   background: var(--color-frame-border);
   color: var(--color-frame-fg);
 }
@@ -818,8 +878,8 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   to { transform: rotate(360deg); }
 }
 
-/* Hide archive by default, show on row hover */
-.site-tasks__archive-wrap {
+/* Hide action by default, show on row hover */
+.site-tasks__action-wrap {
   display: none;
 }
 
@@ -828,7 +888,7 @@ const archiveMenuGroups = computed<FlyoutMenuGroup[]>(() => {
   display: none;
 }
 
-.site-tasks__item:hover .site-tasks__archive-wrap {
+.site-tasks__item:hover .site-tasks__action-wrap {
   display: flex;
 }
 
