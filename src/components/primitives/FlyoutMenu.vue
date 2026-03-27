@@ -7,6 +7,8 @@ import Popover from '@/components/primitives/Popover.vue'
 export interface FlyoutMenuItem {
   label: string
   detail?: string
+  detailColor?: string
+  status?: 'running' | 'stopped'
   icon?: any
   iconUrl?: string
   shortcut?: string
@@ -229,7 +231,11 @@ defineExpose({ toggle, close, open })
           @mouseenter="onItemEnter(item, gi, ii)"
           @click="onItemClick(item)"
         >
-          <span v-if="item.detail" class="flyout-item-detail">{{ item.detail }}</span>
+          <span v-if="item.detail" class="flyout-item-detail" :style="item.detailColor ? { color: item.detailColor, opacity: 1 } : undefined">{{ item.detail }}</span>
+          <svg v-if="item.status" class="flyout-item-status" viewBox="0 0 10 10" width="10" height="10">
+            <circle v-if="item.status === 'running'" cx="5" cy="5" r="4.5" />
+            <rect v-else x="1" y="1" width="8" height="8" rx="1.5" />
+          </svg>
           <img v-if="item.iconUrl" :src="item.iconUrl" class="flyout-item-icon flyout-item-icon--img" />
           <WPIcon v-else-if="item.icon" :icon="item.icon" :size="18" class="flyout-item-icon" />
           <span class="flyout-item-label">{{ item.label }}</span>
@@ -272,6 +278,11 @@ defineExpose({ toggle, close, open })
                 :class="{ 'flyout-item--destructive': child.destructive }"
                 @click="onChildClick(child)"
               >
+                <span v-if="child.detail" class="flyout-item-detail" :style="child.detailColor ? { color: child.detailColor, opacity: 1 } : undefined">{{ child.detail }}</span>
+                <svg v-if="child.status" class="flyout-item-status" viewBox="0 0 10 10" width="10" height="10">
+                  <circle v-if="child.status === 'running'" cx="5" cy="5" r="4.5" />
+                  <rect v-else x="1" y="1" width="8" height="8" rx="1.5" />
+                </svg>
                 <img v-if="child.iconUrl" :src="child.iconUrl" class="flyout-item-icon flyout-item-icon--img" />
                 <WPIcon v-else-if="child.icon" :icon="child.icon" :size="18" class="flyout-item-icon" />
                 <span class="flyout-item-label">{{ child.label }}</span>
@@ -446,6 +457,20 @@ defineExpose({ toggle, close, open })
   font-size: var(--font-size-xs);
   opacity: 0.4;
   letter-spacing: 0.02em;
+}
+
+.flyout-item-status {
+  flex-shrink: 0;
+  order: 98;
+  margin-inline-start: auto;
+}
+
+.flyout-item-status circle {
+  fill: var(--color-status-running);
+}
+
+.flyout-item-status rect {
+  fill: var(--color-status-stopped);
 }
 
 .flyout-item-detail {
