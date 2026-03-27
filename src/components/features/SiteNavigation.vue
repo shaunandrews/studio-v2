@@ -229,9 +229,9 @@ onBeforeUnmount(() => stopCarousel())
     <!-- Site picker (when sidebar hidden or in chrome surface) -->
     <Transition name="site-header">
       <div v-if="!isAllSites && (sidebarHidden || surface === 'chrome')" ref="sitePickerEl" class="site-picker-anchor" :class="{ 'has-lights': isMac && !surface }">
-        <button class="site-picker pill pill-with-icon" @click="toggleSitePicker">
+        <button class="site-picker pill" @click="toggleSitePicker">
           <span class="pill-icon-start">
-            <SiteIcon :favicon="siteFavicon" :site-name="siteId" :size="20" />
+            <SiteIcon :favicon="siteFavicon" :site-name="siteId" :size="28" />
           </span>
           <span class="pill-label">{{ siteName }}</span>
           <span class="pill-icon-end">
@@ -445,6 +445,7 @@ onBeforeUnmount(() => stopCarousel())
     </div>
 
     <ProgressiveBlur v-if="sidebarHidden" class="nav-blur" height="80px" />
+
   </div>
 </template>
 
@@ -508,37 +509,25 @@ onBeforeUnmount(() => stopCarousel())
 .pill {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 32px;
+  gap: var(--space-xs);
+  height: 40px;
   width: 100%;
-  padding-inline-start: 12px;
-  padding-inline-end: 8px;
-  border: 1px solid var(--color-frame-border);
+  padding: var(--space-xxs);
+  border: none;
   border-radius: var(--radius-s);
-  background: var(--color-frame-bg);
+  background: none;
   color: var(--color-frame-fg);
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 550;
   line-height: 20px;
   cursor: pointer;
   white-space: nowrap;
   transition: background var(--duration-instant) var(--ease-default);
 }
 
-.pill-with-icon {
-  padding: 6px;
-  padding-inline-start: var(--space-xxs);
-  gap: 4px;
-}
-
 .pill:hover {
   background: var(--color-frame-hover);
-}
-
-/* Chrome surface: pill blends with sidebar */
-.surface-chrome .pill {
-  background: transparent;
 }
 
 /* Chrome surface: equalise insets so left and right spacing match */
@@ -550,13 +539,21 @@ onBeforeUnmount(() => stopCarousel())
   padding-inline-start: var(--space-xxs);
 }
 
-.pill-icon-start,
+.pill-icon-start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
 .pill-icon-end {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
   color: var(--color-frame-fg-muted);
 }
