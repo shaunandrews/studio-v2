@@ -26,7 +26,7 @@ withDefaults(defineProps<{
 <style scoped>
 .toolbar {
   justify-content: space-between;
-  padding-inline: var(--space-xs);
+  padding-inline: var(--space-l);
   border-block-end: 1px solid var(--color-frame-border);
   flex-shrink: 0;
 }
