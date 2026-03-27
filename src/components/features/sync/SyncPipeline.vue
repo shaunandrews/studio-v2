@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, nextTick, toRef } from 'vue'
+import { computed, toRef } from 'vue'
 import { useSites } from '@/data/useSites'
 import { usePipeline } from '@/data/usePipeline'
 import Pane from '@/components/composites/Pane.vue'
@@ -23,17 +23,6 @@ const site = computed(() => sites.value.find(p => p.id === props.siteId))
 const isSetup = computed(() => setupPhase.value !== null)
 const hasConnectedStage = computed(() => pipeline.value.some(s => s.site))
 
-// Keep layout in setup mode briefly while the guide fades out and envs expand
-const setupEnding = ref(false)
-const showSetupLayout = computed(() => isSetup.value || setupEnding.value)
-
-watch(isSetup, (val, oldVal) => {
-  if (!val && oldVal) {
-    setupEnding.value = true
-    setTimeout(() => { setupEnding.value = false }, 500)
-  }
-})
-
 // ── Setup step definitions ──
 // Phase -2 = intro, -1 = local, 0+ = pipeline stage indices
 
@@ -44,22 +33,22 @@ interface SetupStep {
 
 const STEP_INTRO: SetupStep = {
   title: 'Your sync pipeline',
-  subtitle: 'Build locally, push to staging to test, then deploy to production when ready. Connect each environment below to get started.',
+  subtitle: 'Connect your staging and production sites so you can track what\'s changed and move updates between environments.',
 }
 
 const STEP_LOCAL: SetupStep = {
   title: 'Your local site',
-  subtitle: 'This is your local WordPress site, running in Studio. It\'s the starting point for all your changes.',
+  subtitle: 'Where you make changes. Everything starts here.',
 }
 
 const STEP_DEFS: Record<string, SetupStep> = {
   staging: {
-    title: 'Connect a staging site',
-    subtitle: 'Test changes before they go live.',
+    title: 'Connect staging',
+    subtitle: 'A safe place to test changes before they go live.',
   },
   production: {
-    title: 'Connect a production site',
-    subtitle: 'Your live site that visitors see.',
+    title: 'Connect production',
+    subtitle: 'Your live site. Sync with care.',
   },
 }
 
@@ -74,33 +63,18 @@ const currentStep = computed((): SetupStep | null => {
 const isIntroStep = computed(() => setupPhase.value === -2)
 const isLocalStep = computed(() => setupPhase.value === -1)
 
-// ── Guide vertical alignment ──
-
-const envContainerRef = ref<HTMLElement | null>(null)
-const guideOffset = ref(0)
-
-function measureGuideOffset() {
-  const container = envContainerRef.value
-  if (!container || setupPhase.value === null) return
-
-  // phase -1 = local (index 0 card), phase 0 = staging (index 1 card), etc.
-  // Cards have data-setup-index: -1 for local, 0 for first pipeline stage, etc.
-  const selector = `[data-setup-index="${setupPhase.value}"]`
-  const card = container.querySelector(selector) as HTMLElement | null
-  if (card) {
-    guideOffset.value = card.offsetTop
-  }
+// During progressive reveal, stages beyond setupPhase are hidden entirely
+function isStageRevealed(index: number): boolean {
+  if (!isSetup.value || isIntroStep.value) return true
+  if (isLocalStep.value) return false
+  return index <= setupPhase.value!
 }
-
-watch(setupPhase, () => {
-  nextTick(measureGuideOffset)
-}, { immediate: true })
 
 // ── Sync progress ──
 
 const syncingCardId = computed(() => {
   if (!syncAction.value || syncProgress.value.phase === 'idle') return null
-  return syncAction.value.verb === 'pull' ? syncAction.value.toStage : syncAction.value.toStage
+  return syncAction.value.toStage
 })
 
 function getProgress(cardId: string) {
@@ -118,13 +92,10 @@ function hasLaterConnectedStage(index: number): boolean {
 }
 
 // Walk back from a connector's natural source to find the nearest connected stage.
-// If the previous pipeline stage isn't connected, fall back to Local so users can
-// push directly (e.g. Local → Production when Staging is skipped).
 function effectiveSource(index: number): { id: string; label: string; connected: boolean } {
   if (index === 0) return { id: 'local', label: 'Local', connected: true }
   const prev = pipeline.value[index - 1]
   if (prev.site) return { id: prev.id, label: prev.label, connected: true }
-  // Previous stage not connected — walk back
   for (let i = index - 2; i >= 0; i--) {
     const s = pipeline.value[i]
     if (s.site) return { id: s.id, label: s.label, connected: true }
@@ -138,13 +109,11 @@ function onConnectorPush(fromStageId: string, toStageId: string) {
 
 function onSync(stageId: string) {
   if (stageId === 'local') {
-    // Local Sync button: default to first connected stage
     const firstConnected = pipeline.value.find(s => s.site)
     if (firstConnected) {
       openSyncModal('pull', firstConnected.id, 'local', 'sync')
     }
   } else {
-    // Stage Sync button: use that specific stage
     openSyncModal('pull', stageId, 'local', 'sync')
   }
 }
@@ -157,10 +126,20 @@ function envColor(environment?: string): string {
 </script>
 
 <template>
-  <Pane :scrollable="false" centered>
-    <div class="sync-pipeline__layout" :class="{ 'is-setup': showSetupLayout, 'is-ending': setupEnding, 'is-intro': isIntroStep }">
-      <div ref="envContainerRef" class="sync-pipeline__environments">
-        <SiteTimeline v-if="!isSetup" :site-id="siteId" class="sync-pipeline__timeline" />
+  <Pane scrollable>
+    <div class="sync-pipeline__layout" :class="{ 'is-intro': isIntroStep, 'is-setup': isSetup }">
+      <div class="sync-pipeline__environments">
+        <!-- Changes list (active mode only) -->
+        <SiteTimeline v-if="!isSetup" :site-id="siteId" />
+
+        <!-- Setup guide: below Local card (before in DOM = below in column-reverse) -->
+        <Transition name="step-fade">
+          <div v-if="isLocalStep && currentStep" class="setup-guide-inline" key="local-guide">
+            <Text variant="body" weight="semibold" tag="p">{{ currentStep.title }}</Text>
+            <Text variant="body-small" color="muted" tag="p">{{ currentStep.subtitle }}</Text>
+            <Button label="Continue" variant="secondary" size="small" class="setup-guide-inline__action" @click="skipSetupStep" />
+          </div>
+        </Transition>
 
         <StageCard
           data-setup-index="-1"
@@ -180,76 +159,81 @@ function envColor(environment?: string): string {
         />
 
         <template v-for="(stage, index) in pipeline" :key="stage.id">
-          <!-- Compact skipped stage: sits beside the skip-connector in a horizontal row -->
-          <template v-if="!stage.site && hasLaterConnectedStage(index)">
-            <div class="sync-pipeline__skip-zone">
+          <template v-if="isStageRevealed(index)">
+            <!-- Compact skipped stage -->
+            <template v-if="!stage.site && hasLaterConnectedStage(index)">
+              <div class="sync-pipeline__skip-zone">
+                <PipelineConnector
+                  :from-label="effectiveSource(index + 1).label"
+                  :to-label="pipeline[index + 1]?.label ?? stage.label"
+                  :from-connected="effectiveSource(index + 1).connected"
+                  :to-connected="!!pipeline[index + 1]?.site"
+                  @push="onConnectorPush(effectiveSource(index + 1).id, pipeline[index + 1]?.id ?? stage.id)"
+                />
+                <StageCard
+                  class="sync-pipeline__skip-card"
+                  :data-setup-index="index"
+                  :label="stage.label"
+                  :connected="false"
+                  compact
+                  :env-color="envColor(stage.environment)"
+                  @connect="openConnectModal(stage.id)"
+                />
+              </div>
+            </template>
+
+            <!-- Normal flow -->
+            <template v-else>
+              <!-- Setup guide: before card in DOM = below card visually -->
+              <Transition name="step-fade">
+                <div v-if="setupPhase === index && currentStep" :key="`guide-${stage.id}`" class="setup-guide-inline">
+                  <Text variant="body" weight="semibold" tag="p">{{ currentStep.title }}</Text>
+                  <Text variant="body-small" color="muted" tag="p">{{ currentStep.subtitle }}</Text>
+                  <Button label="Skip this step" variant="tertiary" size="small" class="setup-guide-inline__action" @click="skipSetupStep" />
+                </div>
+              </Transition>
+
+              <!-- Connector: hide during setup for the active step -->
               <PipelineConnector
-                :from-label="effectiveSource(index + 1).label"
-                :to-label="pipeline[index + 1]?.label ?? stage.label"
-                :from-connected="effectiveSource(index + 1).connected"
-                :to-connected="!!pipeline[index + 1]?.site"
-                :dimmed="isSetup && !isIntroStep && (index + 1) > setupPhase!"
-                @push="onConnectorPush(effectiveSource(index + 1).id, pipeline[index + 1]?.id ?? stage.id)"
+                v-if="setupPhase !== index && !(index > 0 && !pipeline[index - 1].site && hasLaterConnectedStage(index - 1))"
+                :from-label="effectiveSource(index).label"
+                :to-label="stage.label"
+                :from-connected="effectiveSource(index).connected"
+                :to-connected="!!stage.site"
+                @push="onConnectorPush(effectiveSource(index).id, stage.id)"
               />
               <StageCard
-                class="sync-pipeline__skip-card"
                 :data-setup-index="index"
                 :label="stage.label"
-                :connected="false"
-                compact
+                :url="stage.site?.url"
+                :favicon="site?.favicon"
+                :site-name="site?.name"
+                :connected="!!stage.site"
+                :show-menu="!isSetup && !!stage.site"
                 :env-color="envColor(stage.environment)"
-                :dimmed="isSetup && !isIntroStep && index > setupPhase!"
+                :sync-phase="getProgress(stage.id).phase"
+                :sync-percent="getProgress(stage.id).percent"
+                :sync-label="getProgress(stage.id).label"
+                :sync-done-at="getProgress(stage.id).doneAt"
+                :sync-done-verb="getProgress(stage.id).doneVerb"
+                sync-button-label="Pull"
+                @sync="onSync(stage.id)"
                 @connect="openConnectModal(stage.id)"
+                @replace="openConnectModal(stage.id)"
+                @disconnect="disconnectSite(stage.id)"
               />
-            </div>
-          </template>
-
-          <!-- Normal flow: connector then card -->
-          <template v-else>
-            <!-- Hide connector if next stage already rendered it in the skip-row -->
-            <PipelineConnector
-              v-if="!(index > 0 && !pipeline[index - 1].site && hasLaterConnectedStage(index - 1))"
-              :from-label="effectiveSource(index).label"
-              :to-label="stage.label"
-              :from-connected="effectiveSource(index).connected"
-              :to-connected="!!stage.site"
-              :dimmed="isSetup && !isIntroStep && index > setupPhase!"
-              @push="onConnectorPush(effectiveSource(index).id, stage.id)"
-            />
-            <StageCard
-              :data-setup-index="index"
-              :label="stage.label"
-              :url="stage.site?.url"
-              :favicon="site?.favicon"
-              :site-name="site?.name"
-              :connected="!!stage.site"
-              :show-menu="!!stage.site"
-              :env-color="envColor(stage.environment)"
-              :dimmed="isSetup && !isIntroStep && index > setupPhase!"
-              :sync-phase="getProgress(stage.id).phase"
-              :sync-percent="getProgress(stage.id).percent"
-              :sync-label="getProgress(stage.id).label"
-              :sync-done-at="getProgress(stage.id).doneAt"
-              :sync-done-verb="getProgress(stage.id).doneVerb"
-              sync-button-label="Pull"
-              @sync="onSync(stage.id)"
-              @connect="openConnectModal(stage.id)"
-              @replace="openConnectModal(stage.id)"
-              @disconnect="disconnectSite(stage.id)"
-            />
+            </template>
           </template>
         </template>
       </div>
 
-      <!-- Setup guide panel on the right -->
-      <Transition name="guide-fade">
-      <div v-if="currentStep" class="setup-guide" :style="{ paddingBlockStart: guideOffset + 'px' }">
-        <Text variant="body" weight="semibold" tag="p">{{ currentStep.title }}</Text>
-        <Text variant="body" color="muted" tag="p">{{ currentStep.subtitle }}</Text>
-        <Button v-if="isIntroStep" label="Get started" variant="primary" size="small" class="setup-guide__cta" @click="skipSetupStep" />
-        <Button v-else-if="isLocalStep" label="Continue" variant="secondary" size="small" class="setup-guide__cta" @click="skipSetupStep" />
-        <Button v-else variant="tertiary" size="small" label="Skip this step" class="setup-guide__skip" @click="skipSetupStep" />
-      </div>
+      <!-- Intro guide (below scaled rack preview) -->
+      <Transition name="step-fade">
+        <div v-if="isIntroStep && currentStep" key="intro-guide" class="setup-guide">
+          <Text variant="body" weight="semibold" tag="p">{{ currentStep.title }}</Text>
+          <Text variant="body" color="muted" tag="p">{{ currentStep.subtitle }}</Text>
+          <Button label="Continue" variant="secondary" size="small" class="setup-guide__cta" @click="skipSetupStep" />
+        </div>
       </Transition>
     </div>
   </Pane>
@@ -258,14 +242,13 @@ function envColor(environment?: string): string {
 <style scoped>
 .sync-pipeline__layout {
   display: flex;
-  gap: var(--space-xxl);
+  flex-direction: column;
   margin-inline: auto;
+  margin-block: auto;
   width: 100%;
   max-width: 680px;
-}
-
-.sync-pipeline__layout.is-setup {
-  max-width: none;
+  padding: var(--space-m) var(--space-l) var(--space-l);
+  transition: gap var(--duration-slow) var(--ease-default);
 }
 
 .sync-pipeline__environments {
@@ -273,24 +256,13 @@ function envColor(environment?: string): string {
   display: flex;
   flex-direction: column-reverse;
   align-items: stretch;
-  gap: 4px;
+  gap: var(--space-xxs);
   width: 100%;
-  max-width: 680px;
-  transition: max-width 400ms var(--ease-default), transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* Smooth scale and layout changes between setup steps */
+  transition: transform var(--duration-slow) var(--ease-out);
 }
 
-.is-setup .sync-pipeline__environments {
-  max-width: 360px;
-  flex-shrink: 0;
-  transform: scale(1);
-}
-
-.is-ending .sync-pipeline__environments {
-  max-width: 680px;
-  transform: scale(1);
-}
-
-/* ── Skip-zone: connector centered, compact card positioned to the end ── */
+/* ── Skip-zone ── */
 
 .sync-pipeline__skip-zone {
   position: relative;
@@ -304,77 +276,92 @@ function envColor(environment?: string): string {
   translate: 0 -50%;
 }
 
-/* ── Intro layout: centered column, stack scaled down ── */
+/* ── Intro layout: scaled rack preview ── */
 
 .sync-pipeline__layout.is-intro {
-  flex-direction: column;
   align-items: center;
+  gap: var(--space-l);
 }
 
 .is-intro .sync-pipeline__environments {
   transform: scale(0.8);
   transform-origin: top center;
-}
-
-.is-intro .setup-guide {
-  order: -1;
-  align-items: center;
-  text-align: center;
+  pointer-events: none;
 }
 
 .is-intro :deep(.connector__push-btn) {
-  display: none;
+  opacity: 0;
 }
 
 .is-intro :deep(.connector__line) {
   height: 8px;
 }
 
-.is-intro .sync-pipeline__environments {
-  pointer-events: none;
-}
-
 .is-intro :deep(.sync-env__action),
 .is-intro :deep(.sync-env .btn) {
-  display: none;
+  opacity: 0;
 }
 
-/* ── Setup guide panel ── */
+/* ── Setup guide: intro (centered below rack) ── */
 
 .setup-guide {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: var(--space-xxs);
-  min-width: 280px;
-  max-width: 480px;
-  /* No transition on padding — layout property triggers reflow */
+  max-width: 420px;
+  align-self: center;
 }
 
 .setup-guide__cta {
-  margin-block-start: var(--space-m);
+  margin-block-start: var(--space-s);
 }
 
 .setup-guide p {
   margin: 0;
 }
 
-/* ── Guide fade transition ── */
+/* ── Setup guide: inline (below active card during progressive reveal) ── */
 
-.guide-fade-enter-active {
-  transition: opacity 200ms var(--ease-default);
+.setup-guide-inline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  padding: var(--space-s) var(--space-m);
+  max-width: 320px;
 }
 
-.guide-fade-leave-active {
-  transition: opacity 300ms var(--ease-default);
+.setup-guide-inline p {
+  margin: 0;
 }
 
-.guide-fade-enter-from,
-.guide-fade-leave-to {
-  opacity: 0;
-}
-
-.setup-guide__skip {
+.setup-guide-inline__action {
   align-self: flex-start;
-  margin-block-start: var(--space-xs);
+  margin-block-start: var(--space-xxs);
+}
+
+/* ── Step transitions ── */
+
+.step-fade-enter-active {
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+.step-fade-leave-active {
+  transition:
+    opacity var(--duration-fast) var(--ease-in),
+    transform var(--duration-fast) var(--ease-in);
+  position: absolute;
+}
+
+.step-fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.step-fade-leave-to {
+  opacity: 0;
 }
 </style>
