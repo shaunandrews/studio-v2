@@ -35,6 +35,14 @@ const groups = computed<ShortcutGroup[]>(() => [
     ],
   },
   {
+    title: 'Canvas',
+    shortcuts: [
+      { label: 'Zoom in', keys: [mod.value, '+'] },
+      { label: 'Zoom out', keys: [mod.value, '–'] },
+      { label: 'Zoom to fit', keys: [mod.value, '0'] },
+    ],
+  },
+  {
     title: 'Navigation',
     shortcuts: [
       { label: 'Toggle sidebar', keys: [mod.value, 'B'] },

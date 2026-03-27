@@ -624,15 +624,31 @@ watch(viewportRef, (el, oldEl) => {
   }
 })
 
+function onKeydown(e: KeyboardEvent) {
+  if (!(e.metaKey || e.ctrlKey)) return
+  if (e.key === '=' || e.key === '+') {
+    e.preventDefault()
+    zoomIn()
+  } else if (e.key === '-') {
+    e.preventDefault()
+    zoomOut()
+  } else if (e.key === '0') {
+    e.preventDefault()
+    zoomFit()
+  }
+}
+
 onMounted(() => {
   nextTick(() => centerCanvas())
   if (viewportRef.value) {
     attachViewport(viewportRef.value)
   }
+  document.addEventListener('keydown', onKeydown)
 })
 
 onUnmounted(() => {
   detachViewport()
+  document.removeEventListener('keydown', onKeydown)
   if (settleTimer) clearTimeout(settleTimer)
   if (animFrame) cancelAnimationFrame(animFrame)
 })
