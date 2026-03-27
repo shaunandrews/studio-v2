@@ -231,7 +231,7 @@ onBeforeUnmount(() => stopCarousel())
       <div v-if="!isAllSites && (sidebarHidden || surface === 'chrome')" ref="sitePickerEl" class="site-picker-anchor" :class="{ 'has-lights': isMac && !surface }">
         <button class="site-picker pill pill-with-icon" @click="toggleSitePicker">
           <span class="pill-icon-start">
-            <SiteIcon :favicon="siteFavicon" :site-name="siteId" :size="14" />
+            <SiteIcon :favicon="siteFavicon" :site-name="siteId" :size="20" />
           </span>
           <span class="pill-label">{{ siteName }}</span>
           <span class="pill-icon-end">
@@ -528,6 +528,7 @@ onBeforeUnmount(() => stopCarousel())
 
 .pill-with-icon {
   padding: 6px;
+  padding-inline-start: var(--space-xxs);
   gap: 4px;
 }
 
