@@ -3,6 +3,9 @@ import { computed, ref } from 'vue'
 import { moreVertical } from '@wordpress/icons'
 import { useSites } from '@/data/useSites'
 import { useSharing } from '@/data/useSharing'
+import { useUnifiedSidebar } from '@/data/useUnifiedSidebar'
+import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import Button from '@/components/primitives/Button.vue'
 import FlyoutMenu from '@/components/primitives/FlyoutMenu.vue'
 import type { FlyoutMenuGroup } from '@/components/primitives/FlyoutMenu.vue'
@@ -15,6 +18,7 @@ const props = defineProps<{
 }>()
 
 const { sites } = useSites()
+const { unifiedSidebar } = useUnifiedSidebar()
 const {
   getPreviews,
   getExpiration,
@@ -128,6 +132,12 @@ function handleClear(previewId: string) {
 </script>
 
 <template>
+  <Toolbar v-if="unifiedSidebar" size="mini">
+    <template #start>
+      <ScreenSwitcher title="Sharing" />
+    </template>
+  </Toolbar>
+
   <SharingEmptyState v-if="!hasPreviews" @create="handleCreate" />
 
   <Pane v-else :scrollable="false" centered>

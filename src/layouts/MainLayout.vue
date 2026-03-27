@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { drawerLeft } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import SiteList from '@/components/features/SiteList.vue'
+import SiteNavigation from '@/components/features/SiteNavigation.vue'
 import SettingsPage from '@/components/composites/SettingsPage.vue'
 import { useSettings } from '@/data/useSettings'
 import GlobalMenu from '@/components/composites/GlobalMenu.vue'
@@ -15,15 +17,23 @@ import { useAddSite } from '@/data/useAddSite'
 import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useResizablePane } from '@/data/useResizablePane'
 import { useAuth } from '@/data/useAuth'
+import { useUnifiedSidebar } from '@/data/useUnifiedSidebar'
+import { useSites } from '@/data/useSites'
+import { useTasks } from '@/data/useTasks'
+import { ROUTE_TO_SCREEN } from '@/data/screenMapping'
+import type { Screen } from '@/data/screenMapping'
 
 const { hidden, toggle: toggleSidebar } = useSidebarCollapse()
 
-const { width: sidebarWidth, isDragging: isSidebarResizing, onPointerDown: onSidebarResizeStart, resetWidth: resetSidebarWidth } = useResizablePane({
-  defaultWidth: 210,
-  minWidth: 160,
-  maxWidth: 360,
-  storageKey: 'studio-sidebar-width',
-})
+const { unifiedSidebar } = useUnifiedSidebar()
+
+const defaultSidebar = useResizablePane({ defaultWidth: 210, minWidth: 160, maxWidth: 360, storageKey: 'studio-sidebar-width' })
+const unifiedSidebarPane = useResizablePane({ defaultWidth: 268, minWidth: 228, maxWidth: 368, storageKey: 'studio-sidebar-width-unified' })
+
+const sidebarWidth = computed(() => unifiedSidebar.value ? unifiedSidebarPane.width.value : defaultSidebar.width.value)
+const isSidebarResizing = computed(() => unifiedSidebar.value ? unifiedSidebarPane.isDragging.value : defaultSidebar.isDragging.value)
+function onSidebarResizeStart(e: PointerEvent) { (unifiedSidebar.value ? unifiedSidebarPane : defaultSidebar).onPointerDown(e) }
+function resetSidebarWidth() { (unifiedSidebar.value ? unifiedSidebarPane : defaultSidebar).resetWidth() }
 const { isWindows } = useOperatingSystem()
 const { openAddSite } = useAddSite()
 const { user } = useAuth()
@@ -59,10 +69,47 @@ onBeforeUnmount(() => {
 function handleNewSite() {
   openAddSite()
 }
+
+// ── Unified sidebar mode ──
+const route = useRoute()
+const router = useRouter()
+const { sites, activeSiteId } = useSites()
+const { createTask, markRead } = useTasks()
+
+const isAllSites = computed(() => route.name === 'all-sites')
+const currentSite = computed(() => sites.value.find(p => p.id === activeSiteId.value))
+
+const currentScreen = computed<Screen>(() => ROUTE_TO_SCREEN[route.name as string] ?? 'overview')
+const selectedTaskId = computed<string | null>(() => (route.params.taskId as string) ?? null)
+
+function onNavigate(screen: string) {
+  const id = activeSiteId.value
+  if (!id) return
+  router.push({ name: screen === 'tasks' ? 'site-tasks' : `site-${screen}`, params: { id } })
+}
+
+function onSelectTask(taskId: string) {
+  const id = activeSiteId.value
+  if (!id) return
+  markRead(taskId)
+  router.push({ name: 'site-task', params: { id, taskId } })
+}
+
+async function onNewTask() {
+  const siteId = activeSiteId.value
+  if (!siteId) return
+  const task = await createTask({ siteId })
+  router.push({ name: 'site-task', params: { id: siteId, taskId: task.id } })
+}
+
+function onSwitchSite(id: string) {
+  const screen = currentScreen.value === 'tasks' ? 'site-tasks' : `site-${currentScreen.value}`
+  router.push({ name: screen, params: { id } })
+}
 </script>
 
 <template>
-  <div class="main-layout" :class="{ 'is-windows': isWindows }" :style="{ '--sidebar-width': sidebarWidth + 'px' }">
+  <div class="main-layout" :class="{ 'is-windows': isWindows, 'is-unified-sidebar': unifiedSidebar }" :style="{ '--sidebar-width': sidebarWidth + 'px' }">
     <!-- Windows titlebar -->
     <WindowsTitlebar v-if="isWindows" />
 
@@ -108,7 +155,22 @@ function handleNewSite() {
         :class="{ 'is-hidden': hidden, 'is-offscreen': isBackdropActive, 'is-resizing': isSidebarResizing }"
         :style="{ viewTransitionName: 'sidebar', width: hidden ? undefined : sidebarWidth + 'px' }"
       >
-        <SiteList class="flex-1 min-h-0" @new-site="handleNewSite" />
+        <SiteNavigation
+          v-if="unifiedSidebar && activeSiteId"
+          class="flex-1 min-h-0"
+          surface="chrome"
+          :site-id="activeSiteId"
+          :selected-id="currentScreen === 'tasks' ? selectedTaskId : null"
+          :active-screen="currentScreen"
+          :site-favicon="isAllSites ? undefined : currentSite?.favicon"
+          :is-all-sites="isAllSites"
+          @select="onSelectTask"
+          @new-task="onNewTask"
+          @navigate="onNavigate"
+          @switch-site="onSwitchSite"
+          @navigate-all-sites="router.push({ name: 'all-sites' })"
+        />
+        <SiteList v-else class="flex-1 min-h-0" @new-site="handleNewSite" />
       </div>
 
       <ResizeHandle
@@ -125,7 +187,7 @@ function handleNewSite() {
         :style="{ viewTransitionName: 'site-frame' }"
       >
         <router-view name="main" v-slot="{ Component }">
-          <component :is="Component" :sidebar-hidden="hidden" />
+          <component :is="Component" :sidebar-hidden="!unifiedSidebar ? hidden : undefined" :unified-sidebar="unifiedSidebar" />
         </router-view>
       </main>
     </div>
@@ -426,4 +488,27 @@ function handleNewSite() {
 .main-layout.is-windows .sidebar {
   padding-block-start: 0;
 }
+
+/* ── Unified sidebar: flush left, reposition frame/handle/toggle ── */
+
+.is-unified-sidebar .app-body {
+  padding-inline-start: 0;
+}
+
+.is-unified-sidebar .frame:not(.is-full) {
+  inset-inline-start: var(--sidebar-width, 260px);
+}
+
+.is-unified-sidebar .sidebar.is-offscreen {
+  transform: translateX(calc(-100% - 8px));
+}
+
+.is-unified-sidebar .sidebar-resize-handle {
+  inset-inline-start: var(--sidebar-width, 260px);
+}
+
+.is-unified-sidebar .sidebar-toggle:not(.is-sidebar-hidden) {
+  left: calc(var(--sidebar-width, 268px) - 40px); /* 32px button + 8px inset from frame edge */
+}
+
 </style>

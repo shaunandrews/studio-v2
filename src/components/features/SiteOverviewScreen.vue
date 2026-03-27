@@ -6,8 +6,10 @@ import Tooltip from '@/components/primitives/Tooltip.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import Pane from '@/components/composites/Pane.vue'
 import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import SiteThumbnail from '@/components/composites/SiteThumbnail.vue'
 import { useSites } from '@/data/useSites'
+import { useUnifiedSidebar } from '@/data/useUnifiedSidebar'
 import { useWPAdmin } from '@/data/useWPAdmin'
 import type { SiteStatus } from '@/data/types'
 
@@ -22,6 +24,7 @@ const emit = defineEmits<{
 }>()
 
 const { sites } = useSites()
+const { unifiedSidebar } = useUnifiedSidebar()
 const site = computed(() => sites.value.find(s => s.id === props.siteId))
 
 const siteLayout = computed(() => site.value?.mockLayout ?? 'cafe')
@@ -76,7 +79,10 @@ const openInLinks = [
 </script>
 
 <template>
-  <Toolbar title="Site Overview" size="mini">
+  <Toolbar :title="unifiedSidebar ? undefined : 'Site Overview'" size="mini">
+    <template v-if="unifiedSidebar" #start>
+      <ScreenSwitcher title="Overview" />
+    </template>
     <template #end>
       <div class="overview__status">
         <span class="status-label" :class="status ?? 'stopped'">{{ statusLabel }}</span>

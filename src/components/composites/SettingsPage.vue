@@ -20,6 +20,7 @@ import { useOperatingSystem } from '@/data/useOperatingSystem'
 import { useRouter } from 'vue-router'
 import { usePersona } from '@/data/usePersona'
 import { useAllSitesView } from '@/data/useAllSitesView'
+import { useUnifiedSidebar } from '@/data/useUnifiedSidebar'
 
 const props = withDefaults(defineProps<{
   open: boolean
@@ -117,6 +118,7 @@ function setPersona(id: string) {
 // -- All Sites toggle --
 
 const { showAllSitesView, setShowAllSites } = useAllSitesView()
+const { unifiedSidebar } = useUnifiedSidebar()
 
 watch(() => props.open, (val) => {
   if (val) {
@@ -867,6 +869,12 @@ function skillInstallLabel(id: string): string {
           <div class="settings-section">
             <Toggle v-model="isWindows" label="Windows mode" :surface="surfaceMode" size="small" @update:model-value="(v: boolean) => setOS(v ? 'windows' : 'macos')">
               <template #hint>Switch the app chrome between macOS and Windows styles.</template>
+            </Toggle>
+          </div>
+
+          <div class="settings-section">
+            <Toggle v-model="unifiedSidebar" label="Unified sidebar" :surface="surfaceMode" size="small">
+              <template #hint>Move site navigation into the sidebar instead of a separate pane.</template>
             </Toggle>
           </div>
 

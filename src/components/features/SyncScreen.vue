@@ -2,6 +2,9 @@
 import { computed, toRef } from 'vue'
 import { useSites } from '@/data/useSites'
 import { usePipeline } from '@/data/usePipeline'
+import { useUnifiedSidebar } from '@/data/useUnifiedSidebar'
+import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import SyncEmptyState from './sync/SyncEmptyState.vue'
 import SyncPipeline from './sync/SyncPipeline.vue'
 import SyncModal from './sync/SyncModal.vue'
@@ -14,6 +17,7 @@ const props = defineProps<{
 
 const siteIdRef = toRef(props, 'siteId')
 const { sites } = useSites()
+const { unifiedSidebar } = useUnifiedSidebar()
 const {
   hasPipeline,
   syncModalOpen,
@@ -109,6 +113,11 @@ function handleSyncFromCard(payload: { verb: 'push' | 'pull'; envId: string }) {
 
 <template>
   <div class="sync-screen">
+    <Toolbar v-if="unifiedSidebar" size="mini">
+      <template #start>
+        <ScreenSwitcher title="Sync" />
+      </template>
+    </Toolbar>
     <SyncEmptyState v-if="!hasPipeline" @setup="setupDefaultPipeline" />
     <SyncPipeline
       v-else

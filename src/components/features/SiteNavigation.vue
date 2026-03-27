@@ -22,6 +22,7 @@ const props = defineProps<{
   siteFavicon?: string
   isAllSites?: boolean
   sidebarHidden?: boolean
+  surface?: 'chrome' | 'frame'
 }>()
 
 const emit = defineEmits<{
@@ -197,7 +198,7 @@ onBeforeUnmount(() => stopCarousel())
 </script>
 
 <template>
-  <div class="site-navigation">
+  <div class="site-navigation" :class="{ 'surface-chrome': surface === 'chrome' }">
     <!-- All Sites summary -->
     <div v-if="isAllSites" class="site-overview--all">
       <div class="summary__sites">
@@ -225,9 +226,9 @@ onBeforeUnmount(() => stopCarousel())
       </div>
     </div>
 
-    <!-- Site picker (when sidebar hidden) -->
+    <!-- Site picker (when sidebar hidden or in chrome surface) -->
     <Transition name="site-header">
-      <div v-if="!isAllSites && sidebarHidden" ref="sitePickerEl" class="site-picker-anchor" :class="{ 'has-lights': isMac }">
+      <div v-if="!isAllSites && (sidebarHidden || surface === 'chrome')" ref="sitePickerEl" class="site-picker-anchor" :class="{ 'has-lights': isMac && !surface }">
         <button class="site-picker pill pill-with-icon" @click="toggleSitePicker">
           <span class="pill-icon-start">
             <SiteIcon :favicon="siteFavicon" :site-name="siteId" :size="14" />
@@ -455,6 +456,16 @@ onBeforeUnmount(() => stopCarousel())
   height: 100%;
 }
 
+/* Chrome surface: remap frame tokens to chrome equivalents */
+.site-navigation.surface-chrome {
+  --color-frame-fg: var(--color-chrome-fg);
+  --color-frame-fg-muted: var(--color-chrome-fg-muted);
+  --color-frame-hover: var(--color-chrome-hover);
+  --color-frame-border: var(--color-chrome-border);
+  --color-frame-fill: var(--color-chrome-fill);
+  --color-frame-theme: var(--color-chrome-theme);
+}
+
 .nav-blur {
   z-index: 1;
 }
@@ -522,6 +533,20 @@ onBeforeUnmount(() => stopCarousel())
 
 .pill:hover {
   background: var(--color-frame-hover);
+}
+
+/* Chrome surface: pill blends with sidebar */
+.surface-chrome .pill {
+  background: transparent;
+}
+
+/* Chrome surface: equalise insets so left and right spacing match */
+.surface-chrome .site-tasks__header {
+  padding-inline-start: var(--space-xs);
+}
+
+.surface-chrome .site-tasks__item {
+  padding-inline-start: var(--space-xxs);
 }
 
 .pill-icon-start,
@@ -650,6 +675,7 @@ onBeforeUnmount(() => stopCarousel())
   display: flex;
   align-items: center;
   gap: 4px;
+  width: 100%;
   height: 32px;
   padding: 0 var(--space-xxs);
   border: none;

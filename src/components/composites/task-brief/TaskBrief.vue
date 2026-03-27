@@ -2,8 +2,10 @@
 import { computed } from 'vue'
 import { useTasks } from '@/data/useTasks'
 import { useBranches } from '@/data/useBranches'
+import { useUnifiedSidebar } from '@/data/useUnifiedSidebar'
 import Button from '@/components/primitives/Button.vue'
 import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import TaskRevisions from './TaskRevisions.vue'
 
 const props = defineProps<{
@@ -36,11 +38,15 @@ const browserUrl = computed(() =>
 
 const { hasDiverged } = useBranches()
 const canMerge = computed(() => hasDiverged(props.taskId))
+const { unifiedSidebar } = useUnifiedSidebar()
 const canUndoMerge = computed(() => hasPreMergeSnapshot(props.taskId))
 </script>
 
 <template>
-  <Toolbar :title="title" size="mini">
+  <Toolbar :title="unifiedSidebar ? undefined : title" size="mini">
+    <template v-if="unifiedSidebar" #start>
+      <ScreenSwitcher :title="title" />
+    </template>
     <template #end>
       <TaskRevisions :task-id="taskId" @preview-revision="(id) => emit('preview-revision', id)" />
       <!-- Backlog: Start button -->

@@ -5,8 +5,10 @@ import Button from '@/components/primitives/Button.vue'
 import Badge from '@/components/primitives/Badge.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import InputChatMini from '@/components/composites/InputChatMini.vue'
 import { useSites } from '@/data/useSites'
+import { useUnifiedSidebar } from '@/data/useUnifiedSidebar'
 import { useTasks } from '@/data/useTasks'
 import { useSiteDocument } from '@/data/useSiteDocument'
 import { renderSite } from '@/data/site-renderer'
@@ -27,6 +29,7 @@ const props = defineProps<{
 }>()
 
 const { sites } = useSites()
+const { unifiedSidebar } = useUnifiedSidebar()
 const { tasks, sendMessage, generateTaskTitle, createTask } = useTasks()
 const { getContent } = useSiteDocument()
 const site = computed(() => sites.value.find(s => s.id === props.siteId))
@@ -661,7 +664,10 @@ watch(tree, () => nextTick(() => centerCanvas()))
   <div class="canvas-screen" ref="screenRef">
   <!-- Canvas view (map or theme) -->
   <div v-show="showCanvas" class="canvas-layer">
-  <Toolbar title="Canvas" size="mini">
+  <Toolbar :title="unifiedSidebar ? undefined : 'Canvas'" size="mini">
+    <template v-if="unifiedSidebar" #start>
+      <ScreenSwitcher title="Canvas" />
+    </template>
     <template #center>
       <nav ref="viewTabsRef" class="view-tabs">
         <button ref="mapTabRef" class="view-tab" :class="{ 'is-active': activeView === 'map' }" @click="activeView = 'map'; deselectAll(); nextTick(() => centerCanvas())">Map</button>

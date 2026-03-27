@@ -29,9 +29,12 @@ import { usePreviewSync } from '@/data/usePreviewSync'
 import { useRevisions } from '@/data/useRevisions'
 import { contentKey, useBranches } from '@/data/useBranches'
 import { renderSite } from '@/data/site-renderer'
+import { ROUTE_TO_SCREEN } from '@/data/screenMapping'
+import type { Screen } from '@/data/screenMapping'
 
 defineProps<{
   sidebarHidden?: boolean
+  unifiedSidebar?: boolean
 }>()
 
 const route = useRoute()
@@ -75,18 +78,6 @@ onBeforeUnmount(() => {
 })
 
 // -- Screen state (derived from route) --
-
-type Screen = 'overview' | 'canvas' | 'tasks' | 'sync' | 'sharing' | 'settings'
-
-const ROUTE_TO_SCREEN: Record<string, Screen> = {
-  'site-overview': 'overview',
-  'site-canvas': 'canvas',
-  'site-tasks': 'tasks',
-  'site-task': 'tasks',
-  'site-sync': 'sync',
-  'site-sharing': 'sharing',
-  'site-settings': 'settings',
-}
 
 const currentScreen = computed<Screen>(() =>
   ROUTE_TO_SCREEN[route.name as string] ?? 'overview'
@@ -185,6 +176,15 @@ async function onNewChat() {
   router.push({ name: 'site-task', params: { id: siteId, taskId: task.id } })
   nextTick(() => inputChatRef.value?.focus())
 }
+
+// React to task selection changes from sidebar navigation (unified mode)
+watch(selectedTaskId, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    draft.value = ''
+    previewingRevisionId.value = null
+    nextTick(() => inputChatRef.value?.focus())
+  }
+})
 
 function onSend(text: string, context?: import('@/data/types').TaskContextItem[]) {
   if (!selectedTaskId.value) return
@@ -453,26 +453,28 @@ onBeforeUnmount(() => {
     <!-- Nested route outlet (children render null — SitePage owns the layout) -->
     <router-view />
     <PaneGroup direction="horizontal" :class="{ 'is-resizing': isResizing || isBrowserResizing }">
-      <Pane fit :style="{ width: navWidth + 'px' }">
-        <SiteNavigation
-          v-if="activeSiteId"
-          :site-id="activeSiteId"
-          :selected-id="currentScreen === 'tasks' ? selectedTaskId : null"
-          :active-screen="currentScreen"
-          :site-favicon="isAllSites ? undefined : currentSite?.favicon"
-          :is-all-sites="isAllSites"
-          :sidebar-hidden="sidebarHidden"
-          @select="onSelectChat"
-          @new-task="onNewChat"
-          @navigate="onNavigate"
-          @switch-site="(id) => {
-            const screen = currentScreen === 'tasks' ? 'site-tasks' : `site-${currentScreen}`
-            router.push({ name: screen, params: { id } })
-          }"
-          @navigate-all-sites="router.push({ name: 'all-sites' })"
-        />
-      </Pane>
-      <ResizeHandle :is-dragging="isResizing" @pointerdown="onResizeStart" @dblclick="resetNavWidth" />
+      <template v-if="!unifiedSidebar">
+        <Pane fit :style="{ width: navWidth + 'px' }">
+          <SiteNavigation
+            v-if="activeSiteId"
+            :site-id="activeSiteId"
+            :selected-id="currentScreen === 'tasks' ? selectedTaskId : null"
+            :active-screen="currentScreen"
+            :site-favicon="isAllSites ? undefined : currentSite?.favicon"
+            :is-all-sites="isAllSites"
+            :sidebar-hidden="sidebarHidden"
+            @select="onSelectChat"
+            @new-task="onNewChat"
+            @navigate="onNavigate"
+            @switch-site="(id) => {
+              const screen = currentScreen === 'tasks' ? 'site-tasks' : `site-${currentScreen}`
+              router.push({ name: screen, params: { id } })
+            }"
+            @navigate-all-sites="router.push({ name: 'all-sites' })"
+          />
+        </Pane>
+        <ResizeHandle :is-dragging="isResizing" @pointerdown="onResizeStart" @dblclick="resetNavWidth" />
+      </template>
 
       <!-- Detail area -->
       <PaneGroup>

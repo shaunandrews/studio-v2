@@ -9,8 +9,11 @@ import SiteSettingsDebugging from '@/components/features/site-settings/SiteSetti
 import SiteSettingsImport from '@/components/features/site-settings/SiteSettingsImport.vue'
 import SiteSettingsExport from '@/components/features/site-settings/SiteSettingsExport.vue'
 import SiteSettingsActions from '@/components/features/site-settings/SiteSettingsActions.vue'
+import Toolbar from '@/components/composites/Toolbar.vue'
+import ScreenSwitcher from '@/components/composites/ScreenSwitcher.vue'
 import Button from '@/components/primitives/Button.vue'
 import { useSiteSettings, provideSiteSettings } from '@/data/useSiteSettings'
+import { useUnifiedSidebar } from '@/data/useUnifiedSidebar'
 
 const props = defineProps<{
   siteId: string
@@ -22,6 +25,7 @@ const emit = defineEmits<{
 
 const settings = useSiteSettings(toRef(props, 'siteId'))
 provideSiteSettings(settings)
+const { unifiedSidebar } = useUnifiedSidebar()
 
 // ── Save flow state machine ──
 type SavePhase = 'idle' | 'saving' | 'done'
@@ -146,6 +150,11 @@ function onBarLeave(el: Element, done: () => void) {
 
 <template>
   <PaneGroup>
+    <Toolbar v-if="unifiedSidebar" size="mini">
+      <template #start>
+        <ScreenSwitcher title="Settings" />
+      </template>
+    </Toolbar>
     <Pane scrollable centered>
       <div class="settings-sections">
         <SiteSettingsGeneral :site-id="siteId" />
