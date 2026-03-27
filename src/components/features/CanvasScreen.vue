@@ -112,7 +112,6 @@ const canvasStyle = computed(() => ({
 } as Record<string, string | number>))
 
 const labelScale = computed(() => `scale(${1 / zoom.value})`)
-const badgeTransform = computed(() => `translate(40%, -40%) scale(${1 / zoom.value})`)
 
 /* ── Selection ── */
 
@@ -613,6 +612,8 @@ function attachViewport(el: HTMLElement) {
 function detachViewport() {
   if (prevViewport) {
     prevViewport.removeEventListener('wheel', onWheel)
+    prevViewport.removeEventListener('gesturestart', onGestureStart)
+    prevViewport.removeEventListener('gesturechange', onGestureChange)
     prevViewport = null
   }
   ro?.disconnect()

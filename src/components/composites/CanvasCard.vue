@@ -91,6 +91,7 @@ withDefaults(defineProps<{
   position: absolute;
   inset-block-start: 0;
   inset-inline-end: 0;
+  transform: translate(40%, -40%) scale(calc(1 / var(--zoom, 1)));
   transform-origin: top right;
   z-index: 3;
   min-width: 20px;

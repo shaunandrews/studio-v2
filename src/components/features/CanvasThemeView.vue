@@ -17,7 +17,6 @@ const props = defineProps<{
   mockLayout: MockLayout
   selectedNodeId: string | null
   labelScale: string
-  badgeTransform: string
 }>()
 
 const emit = defineEmits<{
