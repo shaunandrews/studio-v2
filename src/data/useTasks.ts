@@ -441,7 +441,7 @@ export function useTasks() {
         merged: [],
       }
       for (const t of tasks.value) {
-        if (t.siteId === unref(siteId)) {
+        if (t.siteId === unref(siteId) && !t.archived) {
           grouped[t.status].push(t)
         }
       }

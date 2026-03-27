@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRef, onMounted, onBeforeUnmount } from 'vue'
-import { plus, update, customLink, tool, home, chevronDown, chevronRight, check, category, navigation } from '@wordpress/icons'
+import { plus, update, customLink, tool, home, chevronDown, chevronRight, check, category, navigation, archive } from '@wordpress/icons'
 import WPIcon from '@/components/primitives/WPIcon.vue'
 import SiteIcon from '@/components/primitives/SiteIcon.vue'
 import SiteItem from '@/components/composites/SiteItem.vue'
@@ -35,7 +35,7 @@ const emit = defineEmits<{
 const { isMac } = useOperatingSystem()
 const { openAddSite } = useAddSite()
 const { showAllSitesView } = useAllSitesView()
-const { tasks, getTasksByStatus, messages, renameTask, startTask, isBusy, busyTaskIds } = useTasks()
+const { tasks, getTasksByStatus, messages, renameTask, startTask, archiveTask, isBusy, busyTaskIds } = useTasks()
 const tasksByStatus = getTasksByStatus(toRef(props, 'siteId'))
 
 const { sites: allSites } = useSites()
@@ -117,6 +117,11 @@ function getLastTimestamp(taskId: string): string {
 function onStart(e: Event, taskId: string) {
   e.stopPropagation()
   startTask(taskId)
+}
+
+function onArchive(e: Event, taskId: string) {
+  e.stopPropagation()
+  archiveTask(taskId)
 }
 
 // ── Inline rename ──
@@ -336,6 +341,12 @@ onBeforeUnmount(() => stopCarousel())
               <Tooltip v-if="section.key === 'backlog'" text="Start" placement="right" :delay="300" class="site-tasks__action-wrap">
                 <button class="site-tasks__action-btn" @click.stop="onStart($event, task.id)">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="7,4 20,12 7,20" /></svg>
+                </button>
+              </Tooltip>
+              <!-- In Progress / Review: Archive action on hover -->
+              <Tooltip v-else text="Archive" placement="right" :delay="300" class="site-tasks__action-wrap">
+                <button class="site-tasks__action-btn" @click.stop="onArchive($event, task.id)">
+                  <WPIcon :icon="archive" :size="16" />
                 </button>
               </Tooltip>
             </span>
