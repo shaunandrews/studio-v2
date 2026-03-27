@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { chevronLeft } from '@wordpress/icons'
 import InputChatMini from '@/components/composites/InputChatMini.vue'
+import PaneGroup from '@/components/composites/PaneGroup.vue'
+import Pane from '@/components/composites/Pane.vue'
+import Toolbar from '@/components/composites/Toolbar.vue'
+import Button from '@/components/primitives/Button.vue'
+import Text from '@/components/primitives/Text.vue'
 import { useSiteDocument } from '@/data/useSiteDocument'
 import { renderSite } from '@/data/site-renderer'
 import type { SiteContentSection } from '@/data/site-types'
@@ -180,27 +186,23 @@ const SECTION_HIGHLIGHT_SCRIPT = `
 </script>
 
 <template>
-  <div class="section-view">
-    <!-- Back bar -->
-    <div class="section-view-header">
-      <button class="section-view-back" @click="emit('back')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Back to Canvas
-      </button>
-      <span class="section-view-title">{{ pageTitle }}</span>
-    </div>
-
-    <!-- Full-pane iframe -->
-    <div class="section-view-content">
+  <PaneGroup class="section-view">
+    <Pane fit>
+      <Toolbar size="mini">
+        <template #start>
+          <Button variant="tertiary" :icon="chevronLeft" label="Back to Canvas" @click="emit('back')" />
+          <Text variant="body-small" color="muted">{{ pageTitle }}</Text>
+        </template>
+      </Toolbar>
+    </Pane>
+    <Pane>
       <iframe
         ref="iframeRef"
         :srcdoc="pageHtml"
         class="section-view-iframe"
         sandbox="allow-same-origin allow-scripts"
       />
-    </div>
+    </Pane>
 
     <!-- Section info + task input (floats at bottom when section selected) -->
     <Transition name="section-panel">
@@ -218,70 +220,18 @@ const SECTION_HIGHLIGHT_SCRIPT = `
         />
       </div>
     </Transition>
-  </div>
+  </PaneGroup>
 </template>
 
 <style scoped>
 .section-view {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-  background: var(--color-frame-fill);
-}
-
-.section-view-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  padding: var(--space-xs) var(--space-m);
-  border-block-end: 1px solid var(--color-frame-border);
-  background: var(--color-frame-bg);
-  z-index: 5;
-}
-
-.section-view-back {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xxs);
-  padding: var(--space-xxxs) var(--space-xs);
-  border: none;
-  border-radius: var(--radius-s);
-  background: none;
-  color: var(--color-frame-fg-muted);
-  font-size: var(--font-size-s);
-  cursor: pointer;
-  transition: color var(--duration-instant) var(--ease-default),
-    background var(--duration-instant) var(--ease-default);
-}
-
-.section-view-back:hover {
-  color: var(--color-frame-fg);
-  background: var(--color-frame-hover);
-}
-
-.section-view-title {
-  font-size: var(--font-size-s);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-frame-fg);
-}
-
-.section-view-content {
-  flex: 1;
-  overflow: auto;
-  display: flex;
-  justify-content: center;
-  padding: var(--space-l);
+  position: relative;
 }
 
 .section-view-iframe {
+  flex: 1;
   width: 100%;
-  max-width: 960px;
-  height: 100%;
   border: none;
-  border-radius: var(--radius-m);
-  box-shadow: 0 2px 12px var(--color-shadow);
-  background: white;
 }
 
 /* ── Section panel ── */
@@ -336,11 +286,5 @@ const SECTION_HIGHLIGHT_SCRIPT = `
 .section-panel-leave-to {
   opacity: 0;
   transform: translateX(-50%) translateY(var(--space-xs));
-}
-
-@media (prefers-color-scheme: dark) {
-  .section-view-iframe {
-    background: #2c2c2c;
-  }
 }
 </style>
