@@ -23,6 +23,7 @@ import CanvasThemeView from '@/components/features/CanvasThemeView.vue'
 import CanvasSectionView from '@/components/features/CanvasSectionView.vue'
 import DotGrid from '@/components/features/onboarding/DotGrid.vue'
 import type { MockLayout, TaskContextItem } from '@/data/types'
+import { useClampedPosition } from '@/data/useClampedPosition'
 
 const props = defineProps<{
   siteId: string
@@ -159,6 +160,13 @@ const taskInputRef = ref<InstanceType<typeof InputChatMini> | null>(null)
 
 /** Screen-space position of the task input, anchored below the selected node */
 const taskInputPos = ref<{ x: number; y: number } | null>(null)
+const taskInputAnchorHeight = ref(0)
+
+const clampedTaskInput = useClampedPosition({
+  containerRef: viewportRef,
+  rawPos: taskInputPos,
+  anchorHeight: taskInputAnchorHeight,
+})
 
 function updateTaskInputPos() {
   if (!selectedNodeId.value || !viewportRef.value) {
@@ -171,6 +179,7 @@ function updateTaskInputPos() {
   const vpRect = viewportRef.value.getBoundingClientRect()
   const nodeRect = nodeEl.getBoundingClientRect()
 
+  taskInputAnchorHeight.value = nodeRect.height
   taskInputPos.value = {
     x: nodeRect.left + nodeRect.width / 2 - vpRect.left,
     y: nodeRect.bottom - vpRect.top + 8 * zoom.value,
@@ -750,7 +759,7 @@ watch(tree, () => nextTick(() => centerCanvas()))
 
     <!-- Floating task input anchored to selected node -->
     <Transition name="task-input">
-      <div v-if="selectedNode && taskInputPos" class="task-input-float" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
+      <div v-if="selectedNode && clampedTaskInput" class="task-input-float" :style="{ left: clampedTaskInput.left + 'px', top: clampedTaskInput.top + 'px' }" @click.stop>
         <div class="task-input-context">
           <Badge :label="selectedNode.label" />
         </div>
@@ -930,7 +939,6 @@ watch(tree, () => nextTick(() => centerCanvas()))
 .task-input-float {
   position: absolute;
   z-index: 10;
-  transform: translateX(-50%);
   width: 240px;
   display: flex;
   flex-direction: column;
@@ -953,7 +961,7 @@ watch(tree, () => nextTick(() => centerCanvas()))
 .task-input-enter-from,
 .task-input-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(calc(-1 * var(--space-xs)));
+  transform: translateY(calc(-1 * var(--space-xs)));
 }
 
 /* ── Dark mode ── */

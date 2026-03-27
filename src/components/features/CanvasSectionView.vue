@@ -11,6 +11,7 @@ import Text from '@/components/primitives/Text.vue'
 import { useSiteDocument } from '@/data/useSiteDocument'
 import { renderSite } from '@/data/site-renderer'
 import type { SiteContentSection } from '@/data/site-types'
+import { useClampedPosition } from '@/data/useClampedPosition'
 
 const props = defineProps<{
   siteId: string
@@ -33,6 +34,11 @@ const sectionRect = ref<{ top: number; left: number; width: number; height: numb
 const taskMessage = ref('')
 const taskInputRef = ref<InstanceType<typeof InputChatMini> | null>(null)
 
+/** Container element for clamping */
+const sectionViewEl = computed(() =>
+  iframeRef.value?.closest('.section-view') as HTMLElement | null
+)
+
 /** Screen-space position of the task input, anchored below the selected section */
 const taskInputPos = computed(() => {
   if (!sectionRect.value || !iframeRef.value) return null
@@ -47,6 +53,14 @@ const taskInputPos = computed(() => {
   const y = iframeRect.top - parentRect.top + sr.top + sr.height + 8
 
   return { x, y }
+})
+
+const sectionAnchorHeight = computed(() => sectionRect.value?.height ?? 0)
+
+const clampedSectionInput = useClampedPosition({
+  containerRef: sectionViewEl,
+  rawPos: taskInputPos,
+  anchorHeight: sectionAnchorHeight,
 })
 
 /** Render the page with section-highlight script injected */
@@ -245,7 +259,7 @@ const SECTION_HIGHLIGHT_SCRIPT = `
 
     <!-- Floating task input anchored to selected section -->
     <Transition name="section-panel">
-      <div v-if="selectedSection && taskInputPos" class="section-panel" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
+      <div v-if="selectedSection && clampedSectionInput" class="section-panel" :style="{ left: clampedSectionInput.left + 'px', top: clampedSectionInput.top + 'px' }" @click.stop>
         <div class="section-panel-context">
           <Badge :label="selectedSection.id" />
           <Badge v-if="selectedSection.role" :label="selectedSection.role" />
@@ -286,7 +300,6 @@ const SECTION_HIGHLIGHT_SCRIPT = `
 .section-panel {
   position: absolute;
   z-index: 10;
-  transform: translateX(-50%);
   width: 240px;
   display: flex;
   flex-direction: column;
@@ -309,6 +322,6 @@ const SECTION_HIGHLIGHT_SCRIPT = `
 .section-panel-enter-from,
 .section-panel-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(calc(-1 * var(--space-xs)));
+  transform: translateY(calc(-1 * var(--space-xs)));
 }
 </style>
