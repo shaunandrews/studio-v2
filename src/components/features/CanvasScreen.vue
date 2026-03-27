@@ -480,7 +480,14 @@ function animateZoomTo(targetX: number, targetY: number, targetZoom: number) {
   animFrame = requestAnimationFrame(step)
 }
 
-// Scroll always zooms toward pointer; drag to pan
+// Distinguish trackpad pan / pinch from mouse wheel zoom
+function isTrackpadPan(e: WheelEvent): boolean {
+  // ctrlKey is synthesized for trackpad pinch — never treat as pan
+  if (e.ctrlKey) return false
+  // Trackpad produces small or fractional deltas; mouse wheel produces large integer steps (~100px on macOS)
+  return Math.abs(e.deltaY) < 50 || !Number.isInteger(e.deltaY)
+}
+
 function onWheel(e: WheelEvent) {
   e.preventDefault()
 
@@ -489,15 +496,22 @@ function onWheel(e: WheelEvent) {
   const pointerX = e.clientX - rect.left
   const pointerY = e.clientY - rect.top
 
-  // Pinch-to-zoom (ctrlKey) uses finer deltaY; regular scroll is coarser
-  const sensitivity = e.ctrlKey ? 0.005 : 0.005
-  const delta = -e.deltaY * sensitivity
-  const newZoom = Math.min(6, Math.max(0.15, zoom.value * (1 + delta)))
-  const scale = newZoom / zoom.value
+  if (!e.ctrlKey && isTrackpadPan(e)) {
+    // Trackpad two-finger drag → pan
+    panX.value -= e.deltaX
+    panY.value -= e.deltaY
+  } else {
+    // Pinch-to-zoom or mouse wheel → zoom toward pointer
+    const sensitivity = e.ctrlKey ? 0.01 : 0.005
+    const delta = -e.deltaY * sensitivity
+    const newZoom = Math.min(6, Math.max(0.15, zoom.value * (1 + delta)))
+    const scale = newZoom / zoom.value
 
-  panX.value = pointerX - scale * (pointerX - panX.value)
-  panY.value = pointerY - scale * (pointerY - panY.value)
-  zoom.value = newZoom
+    panX.value = pointerX - scale * (pointerX - panX.value)
+    panY.value = pointerY - scale * (pointerY - panY.value)
+    zoom.value = newZoom
+  }
+
   startMoving()
   scheduleSettle()
   updateTaskInputPos()
