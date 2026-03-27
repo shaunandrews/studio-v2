@@ -88,7 +88,7 @@
     --color-frame-hover: rgba(255, 255, 255, 0.05);
 
     --color-frame-danger: #e65054;
-    --color-frame-selected: rgba(255, 255, 255, 0.8);
+    --color-frame-selected: rgba(183, 80, 255, 1);
 
     --color-theme-bg: #3350d0;
     --color-theme-fg: #fff;
@@ -125,7 +125,7 @@
   --color-frame-hover: rgba(255, 255, 255, 0.05);
 
   --color-frame-danger: #e65054;
-  --color-frame-selected: rgba(255, 255, 255, 0.8);
+  --color-frame-selected: rgba(183, 80, 255, 1);
 
   --color-theme-bg: #3350d0;
   --color-theme-fg: #fff;
