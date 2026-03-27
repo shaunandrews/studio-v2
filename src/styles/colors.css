@@ -14,6 +14,7 @@
   --color-frame-fg: #000;
   --color-frame-fg-muted: rgba(0, 0, 0, 0.7);
   --color-frame-border: rgba(0, 0, 0, 0.1);
+  --color-frame-border-solid: #e0e0e0;
   --color-frame-fill: rgba(0, 0, 0, 0.02);
   --color-frame-hover: rgba(0, 0, 0, 0.05);
   --color-frame-danger: #cc1818;
@@ -84,6 +85,7 @@
     --color-frame-fg: #fff;
     --color-frame-fg-muted: rgba(255, 255, 255, 0.7);
     --color-frame-border: rgba(255, 255, 255, 0.1);
+    --color-frame-border-solid: #444;
     --color-frame-fill: rgba(255, 255, 255, 0.02);
     --color-frame-hover: rgba(255, 255, 255, 0.05);
 
@@ -122,6 +124,7 @@
   --color-frame-fg-muted: rgba(255, 255, 255, 0.7);
   --color-frame-fill: rgba(255, 255, 255, 0.02);
   --color-frame-border: rgba(255, 255, 255, 0.1);
+  --color-frame-border-solid: #444;
   --color-frame-hover: rgba(255, 255, 255, 0.05);
 
   --color-frame-danger: #e65054;
