@@ -836,9 +836,15 @@ watch(tree, () => nextTick(() => centerCanvas()))
 
 .canvas-connectors path {
   fill: none;
-  stroke: var(--color-frame-border);
+  stroke: #e0e0e0; /* solid — avoids alpha stacking when connectors overlap */
   stroke-width: calc(3px / var(--zoom, 1));
   stroke-linecap: round;
+}
+
+@media (prefers-color-scheme: dark) {
+  .canvas-connectors path {
+    stroke: #333;
+  }
 }
 
 /* ── Node ── */
