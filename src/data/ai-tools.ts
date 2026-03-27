@@ -156,6 +156,31 @@ export const siteTools = [
   },
 ]
 
+export const taskTools = [
+  {
+    name: 'request_review',
+    description: 'Request the user to review your work. Use when you need feedback, can\'t proceed without clarification, or want the user to visually check something. This ends your turn.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        message: { type: 'string', description: 'Brief explanation of what you need reviewed or why you\'re pausing' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'complete_task',
+    description: 'Mark the task as complete. Use when you believe all requested work is done. This ends your turn.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        summary: { type: 'string', description: 'Brief summary of what was accomplished' },
+      },
+      required: [],
+    },
+  },
+]
+
 // Set of page slugs and section IDs that have full content in the Focus section
 interface FocusSet {
   pageSlugs: Set<string>
@@ -250,5 +275,10 @@ ${pagesDesc}${focusSection}
 - Use the site's theme variables (e.g., var(--bg), var(--accent)) in your CSS.
 - Keep the existing design language unless explicitly asked to change it.
 - Sections marked (shared) appear on every page. Updating one updates all pages. Do not use remove_section on shared sections.
-- Be concise in your text responses. The tools do the work.`
+- Be concise in your text responses. The tools do the work.
+
+## Task Workflow
+- When you need the user to review your work, check something visually, or you can't proceed without their input, call request_review.
+- When you believe all requested work is complete, call complete_task.
+- Both tools end your turn immediately — do not call other tools after them.`
 }

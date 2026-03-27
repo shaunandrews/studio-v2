@@ -1,6 +1,6 @@
 import { ref, computed, type Ref, unref } from 'vue'
 import { streamAI, streamAIWithTools, generateTitle } from './ai-service'
-import { siteTools, buildSystemPrompt } from './ai-tools'
+import { siteTools, taskTools, buildSystemPrompt } from './ai-tools'
 import { executeToolCall } from './ai-tool-executor'
 import { useSiteDocument } from './useSiteDocument'
 import { usePreviewSync } from './usePreviewSync'
@@ -166,7 +166,8 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
       .filter(m => m.taskId === taskId)
       .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
 
-    const validToolNames = new Set(siteTools.map(t => t.name))
+    const allTools = [...siteTools, ...taskTools]
+    const validToolNames = new Set(allTools.map(t => t.name))
 
     for (const m of history) {
       if (m.role === 'user') {
@@ -233,10 +234,11 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
 
     const pendingToolCalls: ToolCall[] = []
     const turnChangeRecords: RevisionChange[] = []
+    let shouldStopLoop = false
 
     let result
     try {
-      result = await streamAIWithTools(apiMessages, siteTools, system, {
+      result = await streamAIWithTools(apiMessages, allTools, system, {
         onText: (text) => {
           const idx = messages.value.findIndex(m => m.id === streamingId)
           if (idx !== -1) messages.value[idx]!.content = text
@@ -255,6 +257,51 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
           }
         },
         onToolUseComplete: (toolUse) => {
+          // Handle task workflow tools (not site-editing tools)
+          if (toolUse.name === 'request_review' || toolUse.name === 'complete_task') {
+            const tc = pendingToolCalls.find(t => t.id === toolUse.id)
+            if (tc) {
+              tc.status = 'done'
+              tc.args = JSON.stringify(toolUse.input, null, 2)
+
+              if (toolUse.name === 'request_review') {
+                tc.label = 'Requesting your review'
+                tc.result = 'Moved task to review'
+                task.status = 'review'
+                task.unread = true
+                task.updatedAt = new Date().toISOString()
+                persistTask(task)
+              } else {
+                // complete_task
+                if (task.skipReview) {
+                  tc.label = 'Task complete — merged'
+                  tc.result = 'Auto-merged to site'
+                  const { mergeTask: branchMerge, applyMerge } = useBranches()
+                  const mergeResult = branchMerge(task.id)
+                  if (mergeResult && mergeResult.conflicts.length === 0) {
+                    applyMerge(task.id, mergeResult)
+                  }
+                  task.status = 'merged'
+                  task.unread = true
+                  task.updatedAt = new Date().toISOString()
+                  persistTask(task)
+                } else {
+                  tc.label = 'Task complete'
+                  tc.result = 'Ready for review'
+                  task.status = 'review'
+                  task.unread = true
+                  task.updatedAt = new Date().toISOString()
+                  persistTask(task)
+                }
+              }
+
+              const idx = messages.value.findIndex(m => m.id === streamingId)
+              if (idx !== -1) messages.value[idx]!.toolCalls = [...pendingToolCalls]
+            }
+            shouldStopLoop = true
+            return
+          }
+
           const execResult = executeToolCall(branchKey, toolUse.name, toolUse.input, toolUse.id, taskId)
 
           // Push to preview
@@ -348,9 +395,7 @@ async function sendToAI(taskId: string, agentId?: AgentId) {
       await createRevision(task.siteId, taskId, finalMsg.id, turnChangeRecords)
     }
 
-    if (result.stopReason === 'tool_use') {
-      continue
-    } else {
+    if (shouldStopLoop || result.stopReason !== 'tool_use') {
       looping = false
     }
   }
