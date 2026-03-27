@@ -412,7 +412,7 @@ onBeforeUnmount(() => stopCarousel())
           <!-- Large illustration -->
           <div class="empty__illo-area">
             <!-- Step 1: Create — todo list -->
-            <svg v-if="carouselStep === 0" class="empty__illo" viewBox="0 0 48 48" fill="none">
+            <svg v-if="carouselStep === 0" class="empty__illo" viewBox="-2 -1 52 52" fill="none">
               <rect x="0" y="4" width="12" height="12" rx="3" fill="currentColor" opacity="0.12" />
               <path d="M3.5 10 L5.5 12.5 L9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.25" />
               <rect x="17" y="8" width="28" height="3" rx="1.5" fill="currentColor" opacity="0.12" />
