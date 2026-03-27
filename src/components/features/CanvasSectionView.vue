@@ -6,6 +6,7 @@ import PaneGroup from '@/components/composites/PaneGroup.vue'
 import Pane from '@/components/composites/Pane.vue'
 import Toolbar from '@/components/composites/Toolbar.vue'
 import Button from '@/components/primitives/Button.vue'
+import Badge from '@/components/primitives/Badge.vue'
 import Text from '@/components/primitives/Text.vue'
 import { useSiteDocument } from '@/data/useSiteDocument'
 import { renderSite } from '@/data/site-renderer'
@@ -245,6 +246,10 @@ const SECTION_HIGHLIGHT_SCRIPT = `
     <!-- Floating task input anchored to selected section -->
     <Transition name="section-panel">
       <div v-if="selectedSection && taskInputPos" class="section-panel" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
+        <div class="section-panel-context">
+          <Badge :label="selectedSection.id" />
+          <Badge v-if="selectedSection.role" :label="selectedSection.role" />
+        </div>
         <InputChatMini
           ref="taskInputRef"
           v-model="taskMessage"
@@ -283,6 +288,14 @@ const SECTION_HIGHLIGHT_SCRIPT = `
   z-index: 10;
   transform: translateX(-50%);
   width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.section-panel-context {
+  display: flex;
+  gap: var(--space-xxxs);
 }
 
 /* ── Transition ── */

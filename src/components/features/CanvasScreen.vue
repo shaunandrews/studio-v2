@@ -2,6 +2,7 @@
 import { computed, ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { plus, fullscreen } from '@wordpress/icons'
 import Button from '@/components/primitives/Button.vue'
+import Badge from '@/components/primitives/Badge.vue'
 import Tooltip from '@/components/primitives/Tooltip.vue'
 import Toolbar from '@/components/composites/Toolbar.vue'
 import InputChatMini from '@/components/composites/InputChatMini.vue'
@@ -725,6 +726,9 @@ watch(tree, () => nextTick(() => centerCanvas()))
     <!-- Floating task input anchored to selected node -->
     <Transition name="task-input">
       <div v-if="selectedNode && taskInputPos" class="task-input-float" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
+        <div class="task-input-context">
+          <Badge :label="selectedNode.label" />
+        </div>
         <InputChatMini
           ref="taskInputRef"
           v-model="taskMessage"
@@ -909,6 +913,14 @@ watch(tree, () => nextTick(() => centerCanvas()))
   z-index: 10;
   transform: translateX(-50%);
   width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.task-input-context {
+  display: flex;
+  gap: var(--space-xxxs);
 }
 
 /* ── Task input transition ── */
