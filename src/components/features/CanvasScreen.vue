@@ -483,41 +483,62 @@ function animateZoomTo(targetX: number, targetY: number, targetZoom: number) {
   animFrame = requestAnimationFrame(step)
 }
 
-// Distinguish trackpad pan / pinch from mouse wheel zoom
-function isTrackpadPan(e: WheelEvent): boolean {
-  // ctrlKey is synthesized for trackpad pinch — never treat as pan
-  if (e.ctrlKey) return false
-  // Trackpad produces small or fractional deltas; mouse wheel produces large integer steps (~100px on macOS)
-  return Math.abs(e.deltaY) < 50 || !Number.isInteger(e.deltaY)
+const MIN_ZOOM = 0.15
+const MAX_ZOOM = 6
+const MAX_ZOOM_STEP = 10
+const ZOOM_SENSITIVITY = 0.01
+
+function notifyCanvasMoved() {
+  startMoving()
+  scheduleSettle()
+  updateTaskInputPos()
+}
+
+function applyZoomAtPoint(px: number, py: number, targetZoom: number) {
+  const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, targetZoom))
+  if (newZoom === zoom.value) return
+  const scale = newZoom / zoom.value
+  panX.value = px - scale * (px - panX.value)
+  panY.value = py - scale * (py - panY.value)
+  zoom.value = newZoom
+  notifyCanvasMoved()
 }
 
 function onWheel(e: WheelEvent) {
   e.preventDefault()
 
-  const viewport = viewportRef.value!
+  const viewport = viewportRef.value
+  if (!viewport) return
   const rect = viewport.getBoundingClientRect()
   const pointerX = e.clientX - rect.left
   const pointerY = e.clientY - rect.top
 
-  if (!e.ctrlKey && isTrackpadPan(e)) {
-    // Trackpad two-finger drag → pan
+  if (e.ctrlKey || e.metaKey) {
+    const clamped = Math.max(-MAX_ZOOM_STEP, Math.min(MAX_ZOOM_STEP, e.deltaY))
+    applyZoomAtPoint(pointerX, pointerY, zoom.value * (1 - clamped * ZOOM_SENSITIVITY))
+  } else {
+    if (e.deltaX === 0 && e.deltaY === 0) return
     panX.value -= e.deltaX
     panY.value -= e.deltaY
-  } else {
-    // Pinch-to-zoom or mouse wheel → zoom toward pointer
-    const sensitivity = e.ctrlKey ? 0.01 : 0.005
-    const delta = -e.deltaY * sensitivity
-    const newZoom = Math.min(6, Math.max(0.15, zoom.value * (1 + delta)))
-    const scale = newZoom / zoom.value
-
-    panX.value = pointerX - scale * (pointerX - panX.value)
-    panY.value = pointerY - scale * (pointerY - panY.value)
-    zoom.value = newZoom
+    notifyCanvasMoved()
   }
+}
 
-  startMoving()
-  scheduleSettle()
-  updateTaskInputPos()
+// Safari fires GestureEvent for trackpad pinch instead of ctrlKey wheel events
+let gestureStartZoom = 1
+
+function onGestureStart(e: Event) {
+  e.preventDefault()
+  gestureStartZoom = zoom.value
+}
+
+function onGestureChange(e: Event) {
+  e.preventDefault()
+  const ge = e as { clientX: number; clientY: number; scale: number } & Event
+  const viewport = viewportRef.value
+  if (!viewport) return
+  const rect = viewport.getBoundingClientRect()
+  applyZoomAtPoint(ge.clientX - rect.left, ge.clientY - rect.top, gestureStartZoom * ge.scale)
 }
 
 // Center the tree on mount
@@ -572,23 +593,20 @@ function zoomBy(delta: number) {
   const rect = viewport.getBoundingClientRect()
   const cx = rect.width / 2
   const cy = rect.height / 2
-  const newZoom = Math.min(6, Math.max(0.15, zoom.value + delta))
+  const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom.value + delta))
+  if (newZoom === zoom.value) return
   const scale = newZoom / zoom.value
   panX.value = cx - scale * (cx - panX.value)
   panY.value = cy - scale * (cy - panY.value)
   zoom.value = newZoom
-  startMoving()
-  scheduleSettle()
-  updateTaskInputPos()
+  notifyCanvasMoved()
 }
 
 function zoomIn() { zoomBy(zoom.value * 0.2) }
 function zoomOut() { zoomBy(zoom.value * -0.2) }
 function zoomFit() {
   centerCanvas()
-  startMoving()
-  scheduleSettle()
-  updateTaskInputPos()
+  notifyCanvasMoved()
 }
 
 
@@ -598,6 +616,8 @@ let lastVisibleSize = { width: 0, height: 0 }
 
 function attachViewport(el: HTMLElement) {
   el.addEventListener('wheel', onWheel, { passive: false })
+  el.addEventListener('gesturestart', onGestureStart, { passive: false } as any)
+  el.addEventListener('gesturechange', onGestureChange, { passive: false } as any)
   ro = new ResizeObserver((entries) => {
     const { width, height } = entries[0].contentRect
     if (width === 0 && height === 0) return // hidden via v-show
@@ -725,7 +745,6 @@ watch(tree, () => nextTick(() => centerCanvas()))
         :mock-layout="layout"
         :selected-node-id="selectedNodeId"
         :label-scale="labelScale"
-        :badge-transform="badgeTransform"
         @select="selectNode"
       />
     </div>
