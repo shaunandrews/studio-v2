@@ -60,6 +60,10 @@ const tabIndicatorStyle = computed(() => {
 
 /* ── Section zoom view ── */
 const sectionViewPage = ref<{ slug: string; title: string } | null>(null)
+const screenRef = ref<HTMLElement | null>(null)
+const sectionCardRect = ref<{ top: number; left: number; width: number; height: number } | null>(null)
+const isTransitioning = ref(false)
+const showCanvas = computed(() => !sectionViewPage.value || isTransitioning.value)
 
 function getPageHtml(slug: string): string {
   if (!siteContent.value) return ''
@@ -297,6 +301,19 @@ function onDoubleClick(e: MouseEvent) {
   }
 
   if (node) {
+    // Capture card rect for scale-up transition
+    if (screenRef.value) {
+      const cardContentEl = nodeEl.querySelector('.canvas-card__content') as HTMLElement || nodeEl
+      const screenRect = screenRef.value.getBoundingClientRect()
+      const cardRect = cardContentEl.getBoundingClientRect()
+      sectionCardRect.value = {
+        top: cardRect.top - screenRect.top,
+        left: cardRect.left - screenRect.left,
+        width: cardRect.width,
+        height: cardRect.height,
+      }
+    }
+    isTransitioning.value = true
     sectionViewPage.value = { slug: node.slug, title: node.label }
     deselectAll()
   }
@@ -304,6 +321,104 @@ function onDoubleClick(e: MouseEvent) {
 
 function exitSectionView() {
   sectionViewPage.value = null
+}
+
+/* ── Section view transition hooks ── */
+
+function onSectionEnter(el: Element, done: () => void) {
+  const htmlEl = el as HTMLElement
+  const rect = sectionCardRect.value
+  const screen = screenRef.value
+
+  if (!rect || !screen) { isTransitioning.value = false; done(); return }
+
+  const sw = screen.offsetWidth
+  const sh = screen.offsetHeight
+  const scaleX = rect.width / sw
+  const scaleY = rect.height / sh
+
+  htmlEl.style.position = 'absolute'
+  htmlEl.style.inset = '0'
+  htmlEl.style.zIndex = '10'
+  htmlEl.style.transformOrigin = '0 0'
+  htmlEl.style.transform = `translate(${rect.left}px, ${rect.top}px) scale(${scaleX}, ${scaleY})`
+  htmlEl.style.borderRadius = 'var(--radius-m)'
+  htmlEl.style.overflow = 'hidden'
+  htmlEl.style.willChange = 'transform'
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      htmlEl.style.transition = 'transform 180ms cubic-bezier(0.4, 0, 0.2, 1), border-radius 180ms cubic-bezier(0.4, 0, 0.2, 1)'
+      htmlEl.style.transform = 'translate(0, 0) scale(1, 1)'
+      htmlEl.style.borderRadius = '0'
+
+      const onEnd = (e: TransitionEvent) => {
+        if (e.propertyName !== 'transform') return
+        htmlEl.removeEventListener('transitionend', onEnd)
+        htmlEl.style.position = ''
+        htmlEl.style.inset = ''
+        htmlEl.style.zIndex = ''
+        htmlEl.style.transformOrigin = ''
+        htmlEl.style.transform = ''
+        htmlEl.style.borderRadius = ''
+        htmlEl.style.overflow = ''
+        htmlEl.style.willChange = ''
+        htmlEl.style.transition = ''
+        done()
+      }
+      htmlEl.addEventListener('transitionend', onEnd)
+    })
+  })
+}
+
+function onSectionAfterEnter() {
+  isTransitioning.value = false
+}
+
+function onSectionLeave(el: Element, done: () => void) {
+  const htmlEl = el as HTMLElement
+  const rect = sectionCardRect.value
+  const screen = screenRef.value
+
+  if (!rect || !screen) { done(); return }
+
+  // Hide toolbar immediately so it doesn't distort during scale-down
+  const toolbarPane = htmlEl.children[0] as HTMLElement
+  if (toolbarPane) {
+    toolbarPane.style.opacity = '0'
+    toolbarPane.style.transition = 'none'
+  }
+
+  const sw = screen.offsetWidth
+  const sh = screen.offsetHeight
+  const scaleX = rect.width / sw
+  const scaleY = rect.height / sh
+
+  htmlEl.style.position = 'absolute'
+  htmlEl.style.inset = '0'
+  htmlEl.style.zIndex = '10'
+  htmlEl.style.transformOrigin = '0 0'
+  htmlEl.style.overflow = 'hidden'
+  htmlEl.style.willChange = 'transform'
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      htmlEl.style.transition = 'transform 150ms cubic-bezier(0.4, 0, 0.2, 1), border-radius 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+      htmlEl.style.transform = `translate(${rect.left}px, ${rect.top}px) scale(${scaleX}, ${scaleY})`
+      htmlEl.style.borderRadius = 'var(--radius-m)'
+
+      const onEnd = (e: TransitionEvent) => {
+        if (e.propertyName !== 'transform') return
+        htmlEl.removeEventListener('transitionend', onEnd)
+        done()
+      }
+      htmlEl.addEventListener('transitionend', onEnd)
+    })
+  })
+}
+
+function onSectionAfterLeave() {
+  sectionCardRect.value = null
 }
 
 async function onSectionTask(ctx: { sectionId: string; role: string; htmlPreview: string; message: string }) {
@@ -417,6 +532,7 @@ function centerCanvas() {
 
   const vw = viewport.clientWidth
   const vh = viewport.clientHeight
+  if (!vw || !vh) return
 
   // Fit tree within viewport with some padding
   const padded = 80
@@ -461,10 +577,15 @@ function zoomFit() {
 
 let ro: ResizeObserver | null = null
 let prevViewport: HTMLElement | null = null
+let lastVisibleSize = { width: 0, height: 0 }
 
 function attachViewport(el: HTMLElement) {
   el.addEventListener('wheel', onWheel, { passive: false })
-  ro = new ResizeObserver(() => {
+  ro = new ResizeObserver((entries) => {
+    const { width, height } = entries[0].contentRect
+    if (width === 0 && height === 0) return // hidden via v-show
+    if (width === lastVisibleSize.width && height === lastVisibleSize.height) return
+    lastVisibleSize = { width, height }
     centerCanvas()
   })
   ro.observe(el)
@@ -506,18 +627,9 @@ watch(tree, () => nextTick(() => centerCanvas()))
 </script>
 
 <template>
-  <!-- Section zoom view (full-pane, replaces canvas) -->
-  <CanvasSectionView
-    v-if="sectionViewPage"
-    :site-id="props.siteId"
-    :page-slug="sectionViewPage.slug"
-    :page-title="sectionViewPage.title"
-    @back="exitSectionView"
-    @create-task="onSectionTask"
-  />
-
+  <div class="canvas-screen" ref="screenRef">
   <!-- Canvas view (map or theme) -->
-  <template v-if="!sectionViewPage">
+  <div v-show="showCanvas" class="canvas-layer">
   <Toolbar title="Canvas" size="mini">
     <template #center>
       <nav ref="viewTabsRef" class="view-tabs">
@@ -594,10 +706,42 @@ watch(tree, () => nextTick(() => centerCanvas()))
     </Transition>
 
   </div>
-  </template>
+  </div>
+
+  <!-- Section zoom view (animates from card) -->
+  <Transition :css="false" @enter="onSectionEnter" @after-enter="onSectionAfterEnter" @leave="onSectionLeave" @after-leave="onSectionAfterLeave">
+    <CanvasSectionView
+      v-if="sectionViewPage"
+      :site-id="props.siteId"
+      :page-slug="sectionViewPage.slug"
+      :page-title="sectionViewPage.title"
+      :animating="isTransitioning"
+      @back="exitSectionView"
+      @create-task="onSectionTask"
+    />
+  </Transition>
+  </div>
 </template>
 
 <style scoped>
+/* ── Screen wrapper ── */
+
+.canvas-screen {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas-layer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 /* ── Infinite canvas viewport ── */
 
 .canvas-viewport {

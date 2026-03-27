@@ -15,6 +15,7 @@ const props = defineProps<{
   siteId: string
   pageSlug: string
   pageTitle: string
+  animating?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -187,7 +188,7 @@ const SECTION_HIGHLIGHT_SCRIPT = `
 
 <template>
   <PaneGroup class="section-view">
-    <Pane fit>
+    <Pane fit class="section-toolbar" :class="{ 'is-animating': animating }">
       <Toolbar size="mini">
         <template #start>
           <Button variant="tertiary" :icon="chevronLeft" label="Back to Canvas" @click="emit('back')" />
@@ -226,6 +227,14 @@ const SECTION_HIGHLIGHT_SCRIPT = `
 <style scoped>
 .section-view {
   position: relative;
+}
+
+.section-toolbar {
+  transition: opacity var(--duration-moderate) var(--ease-out);
+}
+
+.section-toolbar.is-animating {
+  opacity: 0;
 }
 
 .section-view-iframe {
