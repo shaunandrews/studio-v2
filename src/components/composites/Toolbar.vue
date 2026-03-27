@@ -48,6 +48,7 @@ withDefaults(defineProps<{
 
 .toolbar--mini {
   height: 48px;
+  padding-inline-start: var(--space-xs);
 }
 
 .toolbar__title {

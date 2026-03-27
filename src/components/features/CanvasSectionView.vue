@@ -147,30 +147,10 @@ const SECTION_HIGHLIGHT_SCRIPT = `
     z-index: 9999;
   }
   [data-section]:hover::after {
-    border-color: rgba(59, 130, 246, 0.5);
+    border-color: rgba(157, 6, 250, 0.5);
   }
   [data-section].section-selected::after {
-    border-color: rgba(59, 130, 246, 0.8);
-  }
-  .section-label-overlay {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    z-index: 10000;
-    padding: 2px 8px;
-    background: rgba(59, 130, 246, 0.9);
-    color: white;
-    font-size: 11px;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 500;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    border-end-end-radius: 4px;
-  }
-  [data-section]:hover .section-label-overlay,
-  [data-section].section-selected .section-label-overlay {
-    opacity: 1;
+    border-color: rgba(157, 6, 250, 0.8);
   }
 </style>
 <script>
@@ -179,13 +159,6 @@ const SECTION_HIGHLIGHT_SCRIPT = `
   document.querySelectorAll('[data-section]').forEach(function(el) {
     el.style.display = 'block';
     el.style.position = 'relative';
-    // Add label overlay
-    var label = document.createElement('div');
-    label.className = 'section-label-overlay';
-    var sectionId = el.getAttribute('data-section');
-    var role = el.getAttribute('data-role');
-    label.textContent = role ? sectionId + ' [' + role + ']' : sectionId;
-    el.prepend(label);
   });
 
   var selected = null;
@@ -244,8 +217,11 @@ const SECTION_HIGHLIGHT_SCRIPT = `
       <Toolbar size="mini">
         <template #start>
           <Button variant="tertiary" :icon="chevronLeft" label="Back to Canvas" @click="emit('back')" />
-          <Text variant="body-small" color="muted">{{ pageTitle }}</Text>
         </template>
+        <template #center>
+          <Text variant="body" weight="semibold">{{ pageTitle }}</Text>
+        </template>
+        <template #end><span /></template>
       </Toolbar>
     </Pane>
     <Pane>
