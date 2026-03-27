@@ -461,7 +461,7 @@ onBeforeUnmount(() => stopCarousel())
               @click="goToStep(i)"
             />
           </div>
-          <Button label="Create your first task" variant="secondary" size="small" @click="$emit('new-task')" />
+          <Button label="Create your first task" variant="secondary" surface="dark" size="small" @click="$emit('new-task')" />
         </div>
       </div>
     </div>
