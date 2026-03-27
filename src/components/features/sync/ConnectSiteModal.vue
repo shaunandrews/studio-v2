@@ -3,8 +3,10 @@ import { ref, computed, watch } from 'vue'
 import Modal from '@/components/primitives/Modal.vue'
 import Button from '@/components/primitives/Button.vue'
 import Text from '@/components/primitives/Text.vue'
+import TextInput from '@/components/primitives/TextInput.vue'
+import RadioGroup from '@/components/primitives/RadioGroup.vue'
 import WPIcon from '@/components/primitives/WPIcon.vue'
-import { search as searchIcon, external } from '@wordpress/icons'
+import { search as searchIcon } from '@wordpress/icons'
 import { useWpcomSites } from '@/data/useWpcomSites'
 import type { WpcomSite } from '@/data/types'
 
@@ -23,19 +25,33 @@ const emit = defineEmits<{
 
 // ── Wpcom sites from persona ──
 
-const { wpcomSites: allSites } = useWpcomSites()
+const { wpcomSites: allSites, addWpcomSite } = useWpcomSites()
 
 // ── State ──
 
+type ModalMode = 'suggest' | 'browse' | 'create'
+type CreateStep = 'name' | 'provider' | 'creating' | 'done'
+
 const query = ref('')
 const selectedId = ref<string | null>(null)
-const browsing = ref(false)
+const mode = ref<ModalMode>('suggest')
+
+// ── Create flow state ──
+
+const createStep = ref<CreateStep>('name')
+const createName = ref('')
+const createProvider = ref<'wpcom' | 'pressable'>('wpcom')
+const createdSite = ref<WpcomSite | null>(null)
 
 watch(() => props.open, (isOpen) => {
   if (isOpen) {
     query.value = ''
     selectedId.value = null
-    browsing.value = false
+    mode.value = 'suggest'
+    createStep.value = 'name'
+    createName.value = `${props.siteName ?? ''} ${props.stageLabel ?? ''}`.trim()
+    createProvider.value = props.stageEnvironment === 'staging' ? 'pressable' : 'wpcom'
+    createdSite.value = null
   }
 })
 
@@ -142,13 +158,94 @@ function onConnect() {
     emit('select', site)
   }
 }
+
+// ── Create flow ──
+
+const modalTitle = computed(() => {
+  if (mode.value === 'create') return 'Create site'
+  return `Connect ${props.stageLabel ?? 'site'}`
+})
+
+const providerOptions = computed(() => [
+  {
+    value: 'wpcom',
+    label: 'WordPress.com',
+    description: 'Managed WordPress hosting on WordPress.com.',
+  },
+  {
+    value: 'pressable',
+    label: 'Pressable',
+    description: 'High-performance managed WordPress hosting.',
+  },
+])
+
+const canAdvanceCreate = computed(() => {
+  if (createStep.value === 'name') return createName.value.trim().length > 0
+  if (createStep.value === 'provider') return true
+  return false
+})
+
+function enterCreateFlow() {
+  createName.value = `${props.siteName ?? ''} ${props.stageLabel ?? ''}`.trim()
+  createProvider.value = props.stageEnvironment === 'staging' ? 'pressable' : 'wpcom'
+  createStep.value = 'name'
+  createdSite.value = null
+  mode.value = 'create'
+}
+
+function createStepBack() {
+  if (createStep.value === 'name') {
+    mode.value = suggestedSite.value ? 'suggest' : 'browse'
+    return
+  }
+  if (createStep.value === 'provider') {
+    createStep.value = 'name'
+  }
+}
+
+function createStepNext() {
+  if (createStep.value === 'name') {
+    createStep.value = 'provider'
+    return
+  }
+  if (createStep.value === 'provider') {
+    createStep.value = 'creating'
+    simulateCreation()
+  }
+}
+
+function simulateCreation() {
+  const slug = createName.value.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  setTimeout(() => {
+    const envType = (['production', 'staging', 'development'].includes(props.stageEnvironment ?? '')
+      ? props.stageEnvironment
+      : 'production') as WpcomSite['environmentType']
+    const newSite: WpcomSite = {
+      id: `new-${Date.now()}`,
+      name: createName.value.trim(),
+      url: `${slug}.${createProvider.value === 'pressable' ? 'mypressable.com' : 'wpcomstaging.com'}`,
+      provider: createProvider.value,
+      environmentType: envType,
+      status: 'syncable',
+    }
+    createdSite.value = newSite
+    addWpcomSite(newSite)
+    createStep.value = 'done'
+  }, 1500)
+}
+
+function onConnectCreated() {
+  if (createdSite.value) {
+    emit('select', createdSite.value)
+  }
+}
 </script>
 
 <template>
-  <Modal :open="open" width="480px" :title="`Connect ${stageLabel ?? 'site'}`" @close="$emit('close')">
+  <Modal :open="open" width="480px" :title="modalTitle" @close="$emit('close')">
 
     <!-- Suggested match -->
-    <div v-if="suggestedSite && !browsing" class="csm__suggestion">
+    <div v-if="suggestedSite && mode === 'suggest'" class="csm__suggestion">
       <Text variant="body-small" color="muted" tag="p" class="csm__suggestion-label">Best match</Text>
       <div class="csm__suggestion-card">
         <div class="csm__site-info">
@@ -165,12 +262,12 @@ function onConnect() {
       </div>
       <div class="csm__suggestion-actions">
         <Button variant="primary" label="Connect" @click="onConnectSuggested" />
-        <Button variant="tertiary" size="small" label="Don't see your site? Browse all" @click="browsing = true" />
+        <Button variant="tertiary" size="small" label="Don't see your site? Browse all" @click="mode = 'browse'" />
       </div>
     </div>
 
     <!-- Browse / search mode -->
-    <template v-if="!suggestedSite || browsing">
+    <template v-if="mode === 'browse' || (!suggestedSite && mode === 'suggest')">
       <!-- Search -->
       <div class="csm__search">
         <WPIcon :icon="searchIcon" :size="20" class="csm__search-icon" />
@@ -185,7 +282,8 @@ function onConnect() {
       <!-- Site list -->
       <div class="csm__list">
         <div v-if="sites.length === 0" class="csm__empty">
-          No sites match your search.
+          <p class="csm__empty-text">No sites match your search.</p>
+          <Button variant="primary" size="small" label="Create a new site" @click="enterCreateFlow" />
         </div>
         <button
           v-for="site in sites"
@@ -216,20 +314,99 @@ function onConnect() {
       </div>
     </template>
 
-    <template #footer>
-      <a href="https://wordpress.com" target="_blank" rel="noopener" class="csm__create-link">
-        Create a new WordPress.com site
-        <WPIcon :icon="external" :size="16" />
-      </a>
-      <div v-if="!suggestedSite || browsing" class="csm__footer-actions">
-        <Button variant="tertiary" label="Cancel" @click="$emit('close')" />
-        <Button
-          variant="primary"
-          label="Connect"
-          :disabled="!selectedId"
-          @click="onConnect"
+    <!-- Create flow -->
+    <div v-if="mode === 'create'" class="csm__create">
+      <!-- Step 1: Name -->
+      <div v-if="createStep === 'name'" class="csm__create-step">
+        <TextInput
+          v-model="createName"
+          label="Site name"
+          placeholder="My WordPress Site"
+          hint="You can change this later."
         />
       </div>
+
+      <!-- Step 2: Provider -->
+      <div v-if="createStep === 'provider'" class="csm__create-step">
+        <Text variant="body-small" color="muted" tag="p" class="csm__create-step-label">Hosting provider</Text>
+        <RadioGroup
+          v-model="createProvider"
+          :options="providerOptions"
+          name="create-provider"
+        />
+      </div>
+
+      <!-- Step 3: Creating -->
+      <div v-if="createStep === 'creating'" class="csm__create-step csm__create-loading">
+        <div class="csm__spinner" />
+        <Text variant="body-small" color="muted" tag="p">Creating {{ createName }}...</Text>
+      </div>
+
+      <!-- Step 4: Done -->
+      <div v-if="createStep === 'done' && createdSite" class="csm__create-step">
+        <div class="csm__suggestion-card">
+          <div class="csm__site-info">
+            <span class="csm__site-name">{{ createdSite.name }}</span>
+            <span class="csm__site-url">{{ createdSite.url }}</span>
+          </div>
+          <div class="csm__site-meta">
+            <span
+              class="csm__env-badge"
+              :style="{ background: envColor(createdSite.environmentType) }"
+            >{{ envLabel(createdSite.environmentType) }}</span>
+            <span v-if="createdSite.provider === 'pressable'" class="csm__provider">Pressable</span>
+          </div>
+        </div>
+        <Text variant="body-small" color="muted" tag="p" class="csm__create-done-text">
+          Site created. Connect it to this stage?
+        </Text>
+      </div>
+    </div>
+
+    <template #footer>
+      <!-- Browse/suggest modes -->
+      <template v-if="mode !== 'create'">
+        <Button
+          variant="tertiary"
+          size="small"
+          label="Create a new site"
+          class="csm__create-link-btn"
+          @click="enterCreateFlow"
+        />
+        <div v-if="mode === 'browse' || !suggestedSite" class="csm__footer-actions">
+          <Button variant="tertiary" label="Cancel" @click="$emit('close')" />
+          <Button
+            variant="primary"
+            label="Connect"
+            :disabled="!selectedId"
+            @click="onConnect"
+          />
+        </div>
+      </template>
+
+      <!-- Create mode -->
+      <template v-if="mode === 'create'">
+        <Button
+          v-if="createStep === 'name' || createStep === 'provider'"
+          variant="tertiary"
+          label="Back"
+          @click="createStepBack"
+        />
+        <div class="csm__footer-spacer" />
+        <Button
+          v-if="createStep === 'name' || createStep === 'provider'"
+          variant="primary"
+          :label="createStep === 'provider' ? 'Create' : 'Next'"
+          :disabled="!canAdvanceCreate"
+          @click="createStepNext"
+        />
+        <Button
+          v-if="createStep === 'done'"
+          variant="primary"
+          label="Connect"
+          @click="onConnectCreated"
+        />
+      </template>
     </template>
   </Modal>
 </template>
@@ -312,8 +489,16 @@ function onConnect() {
 }
 
 .csm__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-s);
   padding: var(--space-xl) var(--space-m);
   text-align: center;
+}
+
+.csm__empty-text {
+  margin: 0;
   font-size: var(--font-size-m);
   color: var(--color-frame-fg-muted);
 }
@@ -408,20 +593,54 @@ function onConnect() {
   flex-shrink: 0;
 }
 
-/* ── Footer ── */
+/* ── Create flow ── */
 
-.csm__create-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-inline-end: auto;
-  font-size: var(--font-size-s);
-  color: var(--color-frame-theme);
-  text-decoration: none;
+.csm__create {
+  padding-block: var(--space-xs);
 }
 
-.csm__create-link:hover {
-  text-decoration: underline;
+.csm__create-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+}
+
+.csm__create-step-label {
+  margin: 0;
+}
+
+.csm__create-loading {
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) 0;
+  text-align: center;
+}
+
+.csm__create-done-text {
+  margin: 0;
+}
+
+.csm__spinner {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid var(--color-frame-border);
+  border-block-start-color: var(--color-frame-theme);
+  border-radius: 50%;
+  animation: csm-spin 0.8s linear infinite;
+}
+
+@keyframes csm-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Footer ── */
+
+.csm__create-link-btn {
+  margin-inline-end: auto;
+}
+
+.csm__footer-spacer {
+  flex: 1;
 }
 
 .csm__footer-actions {
