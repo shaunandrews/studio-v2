@@ -118,6 +118,18 @@ function deselectAll() {
   selectedNodeId.value = null
 }
 
+/** Walk a CanvasNode tree by ID path (e.g. "0-1-2" → children[0].children[1].children[2]) */
+function resolveNodeByPath(root: CanvasNode, id: string): CanvasNode | null {
+  if (id === 'root') return root
+  const indices = id.split('-').map(Number)
+  let node: CanvasNode | undefined = root
+  for (const idx of indices) {
+    node = node?.children?.[idx]
+    if (!node) return null
+  }
+  return node
+}
+
 /** Resolve selected node ID → CanvasNode (or CanvasPart for template parts) */
 const selectedNode = computed<CanvasNode | null>(() => {
   if (!selectedNodeId.value || !tree.value) return null
@@ -132,12 +144,7 @@ const selectedNode = computed<CanvasNode | null>(() => {
     const slug = tpl.renders[0] ?? `/${tpl.slug}`
     return { label: tpl.label, slug, template: tpl.slug }
   }
-  if (selectedNodeId.value === 'root') return tree.value
-  const indices = selectedNodeId.value.split('-').map(Number)
-  const l1 = tree.value.children?.[indices[0]]
-  if (!l1) return null
-  if (indices.length === 1) return l1
-  return l1.children?.[indices[1]] ?? null
+  return resolveNodeByPath(tree.value, selectedNodeId.value)
 })
 
 const taskMessage = ref('')
@@ -281,17 +288,12 @@ function onDoubleClick(e: MouseEvent) {
 
   // Find the corresponding CanvasNode
   let node: CanvasNode | null = null
-  if (nodeId === 'root') {
-    node = tree.value
-  } else if (nodeId.startsWith('tpl-')) {
+  if (nodeId.startsWith('tpl-')) {
     // Theme view template — resolve via selectedNode logic
     selectNode(nodeId)
     node = selectedNode.value
-  } else {
-    const indices = nodeId.split('-').map(Number)
-    const l1 = tree.value?.children?.[indices[0]]
-    if (l1 && indices.length === 1) node = l1
-    else if (l1) node = l1.children?.[indices[1]] ?? null
+  } else if (tree.value) {
+    node = resolveNodeByPath(tree.value, nodeId)
   }
 
   if (node) {
@@ -548,7 +550,7 @@ watch(tree, () => nextTick(() => centerCanvas()))
     <div ref="canvasRef" class="canvas-canvas" :class="{ 'is-moving': isMoving }" :style="canvasStyle">
       <!-- Connectors (SVG inside transform group — real-time zoom/pan for free) -->
       <svg v-if="activeView === 'map' && canvasLayout.connectors.length" class="canvas-connectors" aria-hidden="true">
-        <path v-for="c in canvasLayout.connectors" :key="c.id" :d="c.path" />
+        <path v-for="c in canvasLayout.connectors" :key="c.id" :d="c.path" :data-source="c.sourceId" :data-target="c.targetId" />
       </svg>
 
       <!-- Map view — flat node list, absolutely positioned -->

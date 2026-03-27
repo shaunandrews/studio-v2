@@ -3,6 +3,11 @@ import type { CanvasNode } from './useSiteTemplates'
 
 // ── Types ──
 
+export interface HandlePoint {
+  x: number
+  y: number
+}
+
 export interface CanvasLayoutNode {
   id: string
   label: string
@@ -11,6 +16,8 @@ export interface CanvasLayoutNode {
   y: number
   width: number
   height: number
+  sourceHandle: HandlePoint
+  targetHandle: HandlePoint
   isCollection?: boolean
   collectionCount?: number
 }
@@ -30,14 +37,69 @@ export interface CanvasLayout {
 }
 
 // ── Constants ──
+// THUMB_HEIGHT derived from NODE_WIDTH and aspect ratio — change ASPECT_RATIO
+// and everything stays consistent. SitePageThumb.vue uses the same 3/2 ratio.
 
+const ASPECT_RATIO = 3 / 2
 const NODE_WIDTH = 160
-const THUMB_HEIGHT = 107  // actual page thumbnail height (160 × 2/3 for 3/2 aspect ratio)
-const NODE_HEIGHT = 144   // total space per node (thumb + label gap)
+const THUMB_HEIGHT = Math.round(NODE_WIDTH / ASPECT_RATIO)
+const LABEL_GAP = 37
+const NODE_HEIGHT = THUMB_HEIGHT + LABEL_GAP
 const GAP_X = 32
 const GAP_Y = 60
+const CORNER_RADIUS = 8
 
-// ── Path computation ──
+// ── Smooth-step path ──
+
+/**
+ * Build an orthogonal path from source handle to target handle with rounded
+ * corners (quadratic bezier). The path goes: down from source → horizontal
+ * rail at midpoint → down to target. Corner radius is clamped so curves
+ * never exceed available space.
+ */
+function smoothStepPath(
+  sx: number, sy: number,
+  tx: number, ty: number,
+): string {
+  // Straight vertical line when horizontally aligned
+  if (Math.abs(tx - sx) < 1) {
+    return `M ${sx},${sy} L ${tx},${ty}`
+  }
+
+  const midY = Math.round((sy + ty) / 2)
+  const dx = tx - sx
+  const halfVert = Math.min(Math.abs(midY - sy), Math.abs(ty - midY))
+  const halfHoriz = Math.abs(dx)
+  const r = Math.min(CORNER_RADIUS, halfVert, halfHoriz / 2)
+
+  const dir = dx > 0 ? 1 : -1
+
+  // Source down to first corner
+  const c1y = midY - r
+  // First corner: turn from vertical to horizontal
+  const c1qx = sx
+  const c1qy = midY
+  const c1ex = sx + r * dir
+  const c1ey = midY
+
+  // Horizontal rail to second corner
+  const c2sx = tx - r * dir
+  const c2sy = midY
+  // Second corner: turn from horizontal to vertical
+  const c2qx = tx
+  const c2qy = midY
+  const c2ex = tx
+  const c2ey = midY + r
+
+  return [
+    `M ${sx},${sy}`,
+    `L ${sx},${c1y}`,
+    `Q ${c1qx},${c1qy} ${c1ex},${c1ey}`,
+    `L ${c2sx},${c2sy}`,
+    `Q ${c2qx},${c2qy} ${c2ex},${c2ey}`,
+    `L ${tx},${ty}`,
+  ].join(' ')
+}
 
 // ── Layout computation ──
 
@@ -103,65 +165,43 @@ export function computeCanvasLayout(tree: CanvasNode): CanvasLayout {
   root.each(d => {
     const cx = d.x! + offsetX
     const y = d.y! + offsetY
+    const nodeX = cx - NODE_WIDTH / 2
 
     nodes.push({
       id: d.data.id,
       label: d.data.label,
       slug: d.data.slug,
-      x: cx - NODE_WIDTH / 2, // top-left x
-      y,                       // top-left y
+      x: nodeX,
+      y,
       width: NODE_WIDTH,
       height: THUMB_HEIGHT,
+      sourceHandle: { x: cx, y: y + THUMB_HEIGHT },
+      targetHandle: { x: cx, y },
       isCollection: d.data.isCollection,
       collectionCount: d.data.collectionCount,
     })
   })
 
-  // Build one combined connector per parent → all its children.
-  // Single path: trunk down, horizontal rail, vertical drops. No overlapping segments.
+  // Build one connector per parent → child pair with smooth-step paths.
+  const nodeMap = new Map(nodes.map(n => [n.id, n]))
+
   root.each(d => {
     if (!d.children) return
-    const parentCx = d.x! + offsetX
-    const parentBottom = d.y! + offsetY + THUMB_HEIGHT
+    const parent = nodeMap.get(d.data.id)!
 
-    const childCoords = d.children.map(child => ({
-      cx: child.x! + offsetX,
-      top: child.y! + offsetY,
-      id: child.data.id,
-    }))
+    for (const child of d.children) {
+      const childNode = nodeMap.get(child.data.id)!
 
-    const railY = Math.round((parentBottom + Math.min(...childCoords.map(c => c.top))) / 2)
-
-    // Single child directly below — one straight vertical line
-    if (childCoords.length === 1 && Math.abs(childCoords[0].cx - parentCx) < 1) {
       connectors.push({
-        id: `${d.data.id}->children`,
+        id: `${d.data.id}->${child.data.id}`,
         sourceId: d.data.id,
-        targetId: childCoords[0].id,
-        path: `M ${parentCx},${parentBottom} L ${parentCx},${childCoords[0].top}`,
+        targetId: child.data.id,
+        path: smoothStepPath(
+          parent.sourceHandle.x, parent.sourceHandle.y,
+          childNode.targetHandle.x, childNode.targetHandle.y,
+        ),
       })
-      return
     }
-
-    // Build a single non-overlapping path:
-    // 1. Trunk: parent center down to rail
-    // 2. Rail: horizontal from leftmost child to rightmost child
-    // 3. Drops: rail down to each child
-    const sorted = [...childCoords].sort((a, b) => a.cx - b.cx)
-    const parts: string[] = [
-      `M ${parentCx},${parentBottom} L ${parentCx},${railY}`,
-      `M ${sorted[0].cx},${railY} L ${sorted[sorted.length - 1].cx},${railY}`,
-    ]
-    for (const c of sorted) {
-      parts.push(`M ${c.cx},${railY} L ${c.cx},${c.top}`)
-    }
-
-    connectors.push({
-      id: `${d.data.id}->children`,
-      sourceId: d.data.id,
-      targetId: sorted.map(c => c.id).join(','),
-      path: parts.join(' '),
-    })
   })
 
   return {
