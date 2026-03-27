@@ -28,8 +28,25 @@ const siteContent = computed(() => getContent(props.siteId).value)
 
 const iframeRef = ref<HTMLIFrameElement | null>(null)
 const selectedSection = ref<{ id: string; role: string; htmlPreview: string } | null>(null)
+const sectionRect = ref<{ top: number; left: number; width: number; height: number } | null>(null)
 const taskMessage = ref('')
 const taskInputRef = ref<InstanceType<typeof InputChatMini> | null>(null)
+
+/** Screen-space position of the task input, anchored below the selected section */
+const taskInputPos = computed(() => {
+  if (!sectionRect.value || !iframeRef.value) return null
+  const iframeEl = iframeRef.value
+  const iframeRect = iframeEl.getBoundingClientRect()
+  const parentRect = iframeEl.closest('.section-view')?.getBoundingClientRect()
+  if (!parentRect) return null
+
+  const sr = sectionRect.value
+  // Section rect is relative to iframe viewport, translate to parent-relative coords
+  const x = iframeRect.left - parentRect.left + sr.left + sr.width / 2
+  const y = iframeRect.top - parentRect.top + sr.top + sr.height + 8
+
+  return { x, y }
+})
 
 /** Render the page with section-highlight script injected */
 const pageHtml = computed(() => {
@@ -47,11 +64,18 @@ function onMessage(e: MessageEvent) {
       role: e.data.role || '',
       htmlPreview: e.data.htmlPreview || '',
     }
+    sectionRect.value = e.data.rect || null
     taskMessage.value = ''
     setTimeout(() => taskInputRef.value?.focus(), 50)
   }
+  if (e.data.type === 'section-rect-update') {
+    if (selectedSection.value && e.data.sectionId === selectedSection.value.id) {
+      sectionRect.value = e.data.rect || null
+    }
+  }
   if (e.data.type === 'section-deselect') {
     selectedSection.value = null
+    sectionRect.value = null
   }
 }
 
@@ -174,11 +198,24 @@ const SECTION_HIGHLIGHT_SCRIPT = `
     var text = sectionEl.textContent || '';
     var preview = text.replace(/\\s+/g, ' ').trim().slice(0, 200);
 
+    var rect = sectionEl.getBoundingClientRect();
     window.parent.postMessage({
       type: 'section-select',
       sectionId: sectionId,
       role: role,
-      htmlPreview: preview
+      htmlPreview: preview,
+      rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
+    }, '*');
+  }, true);
+
+  // Update position on scroll so the floating input follows the section
+  window.addEventListener('scroll', function() {
+    if (!selected) return;
+    var rect = selected.getBoundingClientRect();
+    window.parent.postMessage({
+      type: 'section-rect-update',
+      sectionId: selected.getAttribute('data-section'),
+      rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
     }, '*');
   }, true);
 })();
@@ -205,13 +242,9 @@ const SECTION_HIGHLIGHT_SCRIPT = `
       />
     </Pane>
 
-    <!-- Section info + task input (floats at bottom when section selected) -->
+    <!-- Floating task input anchored to selected section -->
     <Transition name="section-panel">
-      <div v-if="selectedSection" class="section-panel" @click.stop>
-        <div class="section-panel-info">
-          <span class="section-panel-id">{{ selectedSection.id }}</span>
-          <span v-if="selectedSection.role" class="section-panel-role">{{ selectedSection.role }}</span>
-        </div>
+      <div v-if="selectedSection && taskInputPos" class="section-panel" :style="{ left: taskInputPos.x + 'px', top: taskInputPos.y + 'px' }" @click.stop>
         <InputChatMini
           ref="taskInputRef"
           v-model="taskMessage"
@@ -243,44 +276,13 @@ const SECTION_HIGHLIGHT_SCRIPT = `
   border: none;
 }
 
-/* ── Section panel ── */
+/* ── Floating section panel ── */
 
 .section-panel {
   position: absolute;
-  inset-block-end: var(--space-m);
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
   z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  width: 360px;
-  padding: var(--space-s);
-  background: var(--color-frame-bg);
-  border: 1px solid var(--color-frame-border);
-  border-radius: var(--radius-m);
-  box-shadow: 0 4px 16px var(--color-shadow);
-}
-
-.section-panel-info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-}
-
-.section-panel-id {
-  font-size: var(--font-size-s);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-frame-fg);
-  font-family: var(--font-mono);
-}
-
-.section-panel-role {
-  font-size: var(--font-size-xs);
-  color: var(--color-frame-fg-muted);
-  padding: var(--space-xxxs) var(--space-xxs);
-  background: var(--color-frame-hover);
-  border-radius: var(--radius-s);
+  transform: translateX(-50%);
+  width: 240px;
 }
 
 /* ── Transition ── */
@@ -294,6 +296,6 @@ const SECTION_HIGHLIGHT_SCRIPT = `
 .section-panel-enter-from,
 .section-panel-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(var(--space-xs));
+  transform: translateX(-50%) translateY(calc(-1 * var(--space-xs)));
 }
 </style>
