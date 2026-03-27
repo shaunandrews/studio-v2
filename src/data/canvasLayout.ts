@@ -32,8 +32,8 @@ export interface CanvasLayout {
 // ── Constants ──
 
 const NODE_WIDTH = 160
-const THUMB_HEIGHT = 213  // actual page thumbnail height (160 × 3/4)
-const NODE_HEIGHT = 250   // total space per node (thumb + label gap above)
+const THUMB_HEIGHT = 107  // actual page thumbnail height (160 × 2/3 for 3/2 aspect ratio)
+const NODE_HEIGHT = 144   // total space per node (thumb + label gap)
 const GAP_X = 32
 const GAP_Y = 60
 
